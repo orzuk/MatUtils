@@ -1,0 +1,711 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0069)http://www.broadinstitute.org/~orzuk/matlab/matlab_utilities_template.html -->
+<HTML xmlns="http://www.w3.org/1999/xhtml"><HEAD><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<!--<LINK rel="SHORTCUT ICON" href="orzuk.ico">-->
+<LINK rel="stylesheet" href="http://www.broadinstitute.org/~orzuk/orzuk.css" type="text/css"> 
+<TITLE>Matlab pac_perm utilities</TITLE>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7650195-3']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</HEAD><BODY>
+
+
+<DIV class="navbar"> 
+<a href="http://www.broadinstitute.org/~orzuk/matlab/libs/matlab_utils.html">libs</a>  :
+</DIV> 
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <DIV class="main">
+    <H2>Matlab pac_perm utilities</H2>
+
+    <UL>
+
+They were used for the following papers:   <br> Thousands of Samples are Needed to Generate a Robust Gene List for Predicting Outcome in Cancer, L. Ein-Dor, O. Zuk and E. Domany. PNAS 103(15):5923-5928 (2006) <br> Ranking Under Uncertainty, O. Zuk, L. Ein-Dor and E. Domany. UAI 2007: 466-473 </LI>
+
+    </UL>
+
+<!--    <p>Changes are now logged in the <a href="http://home.online.no/%7Epjacklam/matlab/software/util/statutil/ChangeLog">ChangeLog</a> file.</p>--><!-- Begin m-file index -->
+    <!-- This table was automatically generated -->
+    <!-- by updhtml.pl on Sat Feb 21 14:26:51 2004 -->
+
+    <TABLE summary="M-file index" border="0" cellpadding="0" cellspacing="0">
+      <TBODY><TR>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/A.m" name="A" id="A">A.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function A, which is used to compute the std. of f</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/A_1st_deriv.m" name="A_1st_deriv" id="A_1st_deriv">A_1st_deriv.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The partial first derivative of A. One can choose by the flag var_flag</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/A_1st_deriv_for_Newton.m" name="A_1st_deriv_for_Newton" id="A_1st_deriv_for_Newton">A_1st_deriv_for_Newton.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The partial first derivative of A. One can choose by the flag var_flag</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/A_2nd_deriv.m" name="A_2nd_deriv" id="A_2nd_deriv">A_2nd_deriv.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The partial second derivative of A. One can choose by the two flags</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/A_2nd_deriv_for_Newton.m" name="A_2nd_deriv_for_Newton" id="A_2nd_deriv_for_Newton">A_2nd_deriv_for_Newton.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The partial second derivative of A. One can choose by the two flags</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/A_w.m" name="A_w" id="A_w">A_w.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute A_w partial derivative of the saddle point integral</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/A_x.m" name="A_x" id="A_x">A_x.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The partial first derivative of A. One can choose by the flag var_flag</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/A_y.m" name="A_y" id="A_y">A_y.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute A_y partial derivative of the saddle point integral</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CalcFracPermForAllDatasets.m" name="CalcFracPermForAllDatasets" id="CalcFracPermForAllDatasets">CalcFracPermForAllDatasets.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here witergase load a data, computsec the correlations and geOt the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CalcFracPermForAllDatasetsBackup.m" name="CalcFracPermForAllDatasetsBackup" id="CalcFracPermForAllDatasetsBackup">CalcFracPermForAllDatasetsBackup.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here witerse load a data, computec the correlations and geOt the desired</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CalcFracPermForAllDatasetsLiat.m" name="CalcFracPermForAllDatasetsLiat" id="CalcFracPermForAllDatasetsLiat">CalcFracPermForAllDatasetsLiat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we load a data, compute the correlations and get the desired</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CalcFracPermFromData.m" name="CalcFracPermFromData" id="CalcFracPermFromData">CalcFracPermFromData.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we load a data, compute the correlations and get the desired</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CalcTwoVariancesFromDataFunc.m" name="CalcTwoVariancesFromDataFunc" id="CalcTwoVariancesFromDataFunc">CalcTwoVariancesFromDataFunc.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we removed most things from the function. We're only interested in</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CalcZVarianceForCoins.m" name="CalcZVarianceForCoins" id="CalcZVarianceForCoins">CalcZVarianceForCoins.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we load a data, compute the correlations and get the desired</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CalcZVarianceForGaussians.m" name="CalcZVarianceForGaussians" id="CalcZVarianceForGaussians">CalcZVarianceForGaussians.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we load a data, compute the correlations and get the desired</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CalcZVarianceForMixtureOfGaussians.m" name="CalcZVarianceForMixtureOfGaussians" id="CalcZVarianceForMixtureOfGaussians">CalcZVarianceForMixtureOfGaussians.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Note : Here X is binary and Y is gaussian !!!</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CalcZVarianceFromData.m" name="CalcZVarianceFromData" id="CalcZVarianceFromData">CalcZVarianceFromData.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we load a data, compute the correlations and get the desired</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CalcZVarianceFromDataFunc.m" name="CalcZVarianceFromDataFunc" id="CalcZVarianceFromDataFunc">CalcZVarianceFromDataFunc.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function samples from the data by dividing it to two halfs,</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CheckAsymptotics.m" name="CheckAsymptotics" id="CheckAsymptotics">CheckAsymptotics.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we want to find the asymptotics of f in several parameters</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CheckDifferentSamplings.m" name="CheckDifferentSamplings" id="CheckDifferentSamplings">CheckDifferentSamplings.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here witerse load a data, computec the correlations and geOt the desired</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CheckFracPermTopInfiniteN.m" name="CheckFracPermTopInfiniteN" id="CheckFracPermTopInfiniteN">CheckFracPermTopInfiniteN.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Choose the probability distribution of the TRUE corrleations</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CheckFracPermTopInfiniteNUniformCorrDist.m" name="CheckFracPermTopInfiniteNUniformCorrDist" id="CheckFracPermTopInfiniteNUniformCorrDist">CheckFracPermTopInfiniteNUniformCorrDist.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A script for computing overlap distribution when correlations are uniformly distributed</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CheckPermTop.m" name="CheckPermTop" id="CheckPermTop">CheckPermTop.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Test the order of randomly generated samples. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/CheckPermTopFunc.m" name="CheckPermTopFunc" id="CheckPermTopFunc">CheckPermTopFunc.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute the orderering of randomly generated samples </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/DoSimpleStupidCheck.m" name="DoSimpleStupidCheck" id="DoSimpleStupidCheck">DoSimpleStupidCheck.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Do a strupid check to see if the very very first integral is correct !</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/FInExponent.m" name="FInExponent" id="FInExponent">FInExponent.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This gives the function which appears in the exponent of the saddle point integral. The represantation here is </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/FInExponentTwoSampled.m" name="FInExponentTwoSampled" id="FInExponentTwoSampled">FInExponentTwoSampled.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This gives the function which appears in the exponent of the saddle point integral. The represantation here is </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/FindCorrelationsInZNoise.m" name="FindCorrelationsInZNoise" id="FindCorrelationsInZNoise">FindCorrelationsInZNoise.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we check the noise of Z over a finite sample for different genes,</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/Func_for_x_only.m" name="Func_for_x_only" id="Func_for_x_only">Func_for_x_only.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute saddle point when changing only x</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/GaryDFT.m" name="GaryDFT" id="GaryDFT">GaryDFT.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Perofrm de-convolution of functions using the Discrete-Fourier-Transform</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/Jfun.m" name="Jfun" id="Jfun">Jfun.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This is just some vector function whose zeroes we want to find</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/JfunTwoSampled.m" name="JfunTwoSampled" id="JfunTwoSampled">JfunTwoSampled.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This is just some vector function whose zeroes we want to find</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/JointDensAlphaFracUniformDist.m" name="JointDensAlphaFracUniformDist" id="JointDensAlphaFracUniformDist">JointDensAlphaFracUniformDist.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute overlap joint alpha distribution for uniform correlations distribution </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/JointDensFrac.m" name="JointDensFrac" id="JointDensFrac">JointDensFrac.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This shows the joint probability distribution. It depends on the original</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/JointDensFracLinearDist.m" name="JointDensFracLinearDist" id="JointDensFracLinearDist">JointDensFracLinearDist.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute overlap joint distribution for linear correlations distribution </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/JointDensFracUniformDist.m" name="JointDensFracUniformDist" id="JointDensFracUniformDist">JointDensFracUniformDist.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute overlap joint distribution for uniform correlations distribution </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/MOG_non_overlap.m" name="MOG_non_overlap" id="MOG_non_overlap">MOG_non_overlap.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Test mixture-of-gaussians without overlsp</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/MixJointDensFrac.m" name="MixJointDensFrac" id="MixJointDensFrac">MixJointDensFrac.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This shows the joint probability distribution. It depends on the original</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/Old_CalcFracPermForAllDatasets.m" name="Old_CalcFracPermForAllDatasets" id="Old_CalcFracPermForAllDatasets">Old_CalcFracPermForAllDatasets.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here witergase load a data, computsec the correlations and geOt the desired</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/Old_CalcTwoZVariancesFromDataFunc.m" name="Old_CalcTwoZVariancesFromDataFunc" id="Old_CalcTwoZVariancesFromDataFunc">Old_CalcTwoZVariancesFromDataFunc.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we removed most things from the function. We're only interested in</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/PInt.m" name="PInt" id="PInt">PInt.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This shows the joint probability distribution. It depends on the original</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/PInt_To_Delete.m" name="PInt_To_Delete" id="PInt_To_Delete">PInt_To_Delete.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This shows the joint probability distribution. It depends on the original</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/P_f0_integrand.m" name="P_f0_integrand" id="P_f0_integrand">P_f0_integrand.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The integrand of f0 in the saddle point</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/P_f1_integrand.m" name="P_f1_integrand" id="P_f1_integrand">P_f1_integrand.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The integrand of f1 in the saddle point</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/PlotFracPermWholeDist.m" name="PlotFracPermWholeDist" id="PlotFracPermWholeDist">PlotFracPermWholeDist.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A script plotting the overlap distribution </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/Px.m" name="Px" id="Px">Px.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This shows the joint probability distribution. It depends on the original</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/Pxx.m" name="Pxx" id="Pxx">Pxx.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This shows the joint probability distribution. It depends on the original</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/SaddleHelperGaussian.m" name="SaddleHelperGaussian" id="SaddleHelperGaussian">SaddleHelperGaussian.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This shows the weird function that we should integrate in the saddle point equations. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/SaddleHelperGaussianManyVars.m" name="SaddleHelperGaussianManyVars" id="SaddleHelperGaussianManyVars">SaddleHelperGaussianManyVars.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This shows the weird function that we should integrate in the saddle point equations. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/SaddleHelperGaussianQuadl.m" name="SaddleHelperGaussianQuadl" id="SaddleHelperGaussianQuadl">SaddleHelperGaussianQuadl.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Perform an integral by deviding into small areas to increase accuracy</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/SaddleHelperGaussianQuadlManyVars.m" name="SaddleHelperGaussianQuadlManyVars" id="SaddleHelperGaussianQuadlManyVars">SaddleHelperGaussianQuadlManyVars.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Perform an integral by deviding into small areas to increase accuracy</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/SaddleHelperGaussian_two.m" name="SaddleHelperGaussian_two" id="SaddleHelperGaussian_two">SaddleHelperGaussian_two.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This shows the weird function that we should integrate in the saddle point equations. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/SaddleHelperIntGaussian.m" name="SaddleHelperIntGaussian" id="SaddleHelperIntGaussian">SaddleHelperIntGaussian.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This shows the joint probability distribution. It depends on the original</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/SimulateThreeGaussians.m" name="SimulateThreeGaussians" id="SimulateThreeGaussians">SimulateThreeGaussians.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A script for computing overlaps for three gaussians </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/TestGaussianCorrelations.m" name="TestGaussianCorrelations" id="TestGaussianCorrelations">TestGaussianCorrelations.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Remind what is every variable</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/check_ranking_stability.m" name="check_ranking_stability" id="check_ranking_stability">check_ranking_stability.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Generate a graph according to some model.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/compute_confidence_delta.m" name="compute_confidence_delta" id="compute_confidence_delta">compute_confidence_delta.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A lot of calculations, to compute the confidence level delta we have for</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/compute_error_epsilon.m" name="compute_error_epsilon" id="compute_error_epsilon">compute_error_epsilon.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A lot of calculations, to compute the confidence level delta we have for</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/compute_inf_limit_fraction.m" name="compute_inf_limit_fraction" id="compute_inf_limit_fraction">compute_inf_limit_fraction.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute the peak of the delta distribution for the fraction when Ngenes goes to infinity.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/compute_inf_limit_fraction_type2.m" name="compute_inf_limit_fraction_type2" id="compute_inf_limit_fraction_type2">compute_inf_limit_fraction_type2.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute the peak of the delta distribution for the fraction when Ngenes goes to infinity.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/compute_inf_limit_std.m" name="compute_inf_limit_std" id="compute_inf_limit_std">compute_inf_limit_std.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A lot of calculations for computing the std, in the gaussian case for now ..</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/compute_num_samples_needed.m" name="compute_num_samples_needed" id="compute_num_samples_needed">compute_num_samples_needed.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A lot of calculations, to compute the numbers of samples one needs in order to get</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/compute_saddle_point_first_order_estimation.m" name="compute_saddle_point_first_order_estimation" id="compute_saddle_point_first_order_estimation">compute_saddle_point_first_order_estimation.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute first order saddle point approximation of the delta distribution for the overlap f</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/corr_var_vs_N_Liat.m" name="corr_var_vs_N_Liat" id="corr_var_vs_N_Liat">corr_var_vs_N_Liat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A short script testing variance vs. correlation </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/count_flipped_pairs.m" name="count_flipped_pairs" id="count_flipped_pairs">count_flipped_pairs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Count how many pairs have switched </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/dna_N_new.m" name="dna_N_new" id="dna_N_new">dna_N_new.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Normalize genes in an array </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/f_int.m" name="f_int" id="f_int">f_int.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Perform an integral by deviding into small areas to increase accuracy</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/f_star_vs_n_with_reshape.m" name="f_star_vs_n_with_reshape" id="f_star_vs_n_with_reshape">f_star_vs_n_with_reshape.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>data=gene_expression_log2;</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/find_c_alpha.m" name="find_c_alpha" id="find_c_alpha">find_c_alpha.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction A=find_c_alpha(miu,sigma,prior,alpha,one_side_flag,c_a)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/find_x_alpha.m" name="find_x_alpha" id="find_x_alpha">find_x_alpha.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction A=find_x_alpha(miu,sigma,prior,alpha,one_side_flag,c_a)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/flipped_pairs.m" name="flipped_pairs" id="flipped_pairs">flipped_pairs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Count how many pairs have switched </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/gauss_twosampled_normcdf.m" name="gauss_twosampled_normcdf" id="gauss_twosampled_normcdf">gauss_twosampled_normcdf.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute overlap for two samples from gaussian distribution </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/generate_eps_delta_table.m" name="generate_eps_delta_table" id="generate_eps_delta_table">generate_eps_delta_table.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Calculate the values of epsilon and delta and number samples we want for </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/generate_gaussians_plot.m" name="generate_gaussians_plot" id="generate_gaussians_plot">generate_gaussians_plot.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot nicely all the gaussians</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/generate_q_fit_plot.m" name="generate_q_fit_plot" id="generate_q_fit_plot">generate_q_fit_plot.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot nicely all the gaussians q fits</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/heike.m" name="heike" id="heike">heike.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A  script for computing overlap for Heike's data </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/lin_normcdf.m" name="lin_normcdf" id="lin_normcdf">lin_normcdf.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute multiplication of linear and normal cdf </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/lin_twosampled_normcdf.m" name="lin_twosampled_normcdf" id="lin_twosampled_normcdf">lin_twosampled_normcdf.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute multiplication of linear and normal cdf for two sampled distributions</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/mixture_of_Gaussians.m" name="mixture_of_Gaussians" id="mixture_of_Gaussians">mixture_of_Gaussians.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Temp MoG function (not needed anymore since we have a package) </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/myfsolve.m" name="myfsolve" id="myfsolve">myfsolve.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Solve a non-linear equation for the special saddle point case </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/new_f_star_vs_n_with_reshape.m" name="new_f_star_vs_n_with_reshape" id="new_f_star_vs_n_with_reshape">new_f_star_vs_n_with_reshape.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute overlap f_star vs. n curve</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/plot_results.m" name="plot_results" id="plot_results">plot_results.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A script for plotting the overlap results of the data </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/prepare_data_2_calc_f_star.m" name="prepare_data_2_calc_f_star" id="prepare_data_2_calc_f_star">prepare_data_2_calc_f_star.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A temp script preparing gene-expression data for plotting</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/prepare_fit_for_plot.m" name="prepare_fit_for_plot" id="prepare_fit_for_plot">prepare_fit_for_plot.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A temp script fitting correlations to plot </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/sample_correlation.m" name="sample_correlation" id="sample_correlation">sample_correlation.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Take the original (true) corrleations, and add to them random gaussian/binomial noise.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/sample_kept_fraction_data_distribution.m" name="sample_kept_fraction_data_distribution" id="sample_kept_fraction_data_distribution">sample_kept_fraction_data_distribution.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Generate a sampling of the distribution for a given set of parameters</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/sample_kept_fraction_distribution.m" name="sample_kept_fraction_distribution" id="sample_kept_fraction_distribution">sample_kept_fraction_distribution.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Generate a sampling of the distribution for a given set of parameters</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/sample_noisy_correlations.m" name="sample_noisy_correlations" id="sample_noisy_correlations">sample_noisy_correlations.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Now function sample_correlation</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/sample_true_correlations.m" name="sample_true_correlations" id="sample_true_correlations">sample_true_correlations.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Now function sample_true_correlations</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/test_mixture_of_Gaussians.m" name="test_mixture_of_Gaussians" id="test_mixture_of_Gaussians">test_mixture_of_Gaussians.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Test the mixture_of_Gaussians function</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/tob_removed_with_bootsrapping.m" name="tob_removed_with_bootsrapping" id="tob_removed_with_bootsrapping">tob_removed_with_bootsrapping.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute bootstrap of samples </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/uni_twosampled_normcdf.m" name="uni_twosampled_normcdf" id="uni_twosampled_normcdf">uni_twosampled_normcdf.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compare two sampled correlation with uniform distribution </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/pac_perm/pac_perm.tgz" name="pac_perm" id="pac_perm"><STRONG><i>pac_perm.tgz</i></STRONG></a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td><b><i>Download the whole package. (92 .m files) </i></b></td>
+</tr>
+      <TR>
+    </TR></TBODY></TABLE><!-- End m-file index -->
+  </DIV>
+
+
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <ADDRESS>
+
+Contact: <BR> 
+&nbsp; &nbsp; O. Zuk (<A href="mailto:orzuk@broadinstitute.org">orzuk@broadinstitute.org</A>) <!-- hhmts end -->
+<br> Last Modified: <!--#echo var="LAST_MODIFIED"-->  
+  </ADDRESS>
+</BODY></HTML>

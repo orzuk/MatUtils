@@ -1,0 +1,621 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0069)http://www.broadinstitute.org/~orzuk/matlab/matlab_utilities_template.html -->
+<HTML xmlns="http://www.w3.org/1999/xhtml"><HEAD><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<!--<LINK rel="SHORTCUT ICON" href="orzuk.ico">-->
+<LINK rel="stylesheet" href="http://www.broadinstitute.org/~orzuk/orzuk.css" type="text/css"> 
+<TITLE>Matlab hmp utilities</TITLE>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7650195-3']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</HEAD><BODY>
+
+
+<DIV class="navbar"> 
+<a href="http://www.broadinstitute.org/~orzuk/matlab/libs/matlab_utils.html">libs</a>  :
+<a href="http://www.broadinstitute.org/~orzuk/matlab/libs/hmp/matlab_hmp_utils.html">hmp</a>  :
+</DIV> 
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <DIV class="main">
+    <H2>Matlab hmp utilities</H2>
+
+    <UL>
+
+      <LI> Matlab hmp utilities (see documentation and examples within the functions)</LI>
+
+    </UL>
+
+<!--    <p>Changes are now logged in the <a href="http://home.online.no/%7Epjacklam/matlab/software/util/statutil/ChangeLog">ChangeLog</a> file.</p>--><!-- Begin m-file index -->
+    <!-- This table was automatically generated -->
+    <!-- by updhtml.pl on Sat Feb 21 14:26:51 2004 -->
+
+    <TABLE summary="M-file index" border="0" cellpadding="0" cellspacing="0">
+      <TBODY><TR>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/HMPInferenceFunction.m" name="HMPInferenceFunction" id="HMPInferenceFunction">HMPInferenceFunction.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute all inference functions obtained by a finite-length binary HMM  </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/HMP_ProbX_given_Y.m" name="HMP_ProbX_given_Y" id="HMP_ProbX_given_Y">HMP_ProbX_given_Y.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Computes  P_X|Y, the prob. of hidden state X given observation Y. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/HMP_ProbX_given_Y_marginal.m" name="HMP_ProbX_given_Y_marginal" id="HMP_ProbX_given_Y_marginal">HMP_ProbX_given_Y_marginal.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute P_X_i|Y, the prob. of hidden state X given observation Y </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/HMP_ProbY.m" name="HMP_ProbY" id="HMP_ProbY">HMP_ProbY.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Computes P_Y, the prob. of observation Y. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/NewtownPolytope.m" name="NewtownPolytope" id="NewtownPolytope">NewtownPolytope.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute  Newton Polytope of inf. func. given an observation Y.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/P_to_half_PredictConvergenceRadiusBestFit.m" name="P_to_half_PredictConvergenceRadiusBestFit" id="P_to_half_PredictConvergenceRadiusBestFit">P_to_half_PredictConvergenceRadiusBestFit.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute convergance radius for binary HMP when p->1/2.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/PlotComplexProbY.m" name="PlotComplexProbY" id="PlotComplexProbY">PlotComplexProbY.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute all the probabilities for all Y's for complex epsilon parameters</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/PredictConvergenceRadiusBestFit.m" name="PredictConvergenceRadiusBestFit" id="PredictConvergenceRadiusBestFit">PredictConvergenceRadiusBestFit.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Predict entropy convergance radius when eps->0 by fitting on finite chains</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/RadiusPredictionFromBounds.m" name="RadiusPredictionFromBounds" id="RadiusPredictionFromBounds">RadiusPredictionFromBounds.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Predict entropy convergence radius from upper and lower bounds. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/Refinement.m" name="Refinement" id="Refinement">Refinement.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Perform refinement of the maximal sequences</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/RunFindAllMaximalYSeqs.m" name="RunFindAllMaximalYSeqs" id="RunFindAllMaximalYSeqs">RunFindAllMaximalYSeqs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Run the max-min program and count extremal sequences </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/Try_Ido_Matrix.m" name="Try_Ido_Matrix" id="Try_Ido_Matrix">Try_Ido_Matrix.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Try Ido's idea with transfer-matrix for HMM </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/Try_Ido_Matrix_Many_Chains.m" name="Try_Ido_Matrix_Many_Chains" id="Try_Ido_Matrix_Many_Chains">Try_Ido_Matrix_Many_Chains.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Try Ido's idea for transfer matrix with many HMM chains </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/TypesEnumerate.m" name="TypesEnumerate" id="TypesEnumerate">TypesEnumerate.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Computes all types of a given length </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/check_general_matrix_first_orders.m" name="check_general_matrix_first_orders" id="check_general_matrix_first_orders">check_general_matrix_first_orders.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Test first order of entropy for HMM for general alphabet</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/check_orders_bsc.m" name="check_orders_bsc" id="check_orders_bsc">check_orders_bsc.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we check that in the BSC everything is ok : </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/comp_prob_x_equal_given_y_equal.m" name="comp_prob_x_equal_given_y_equal" id="comp_prob_x_equal_given_y_equal">comp_prob_x_equal_given_y_equal.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute the intersection state (X) probability given observation (Y)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compare_upper_lower_hmm_entropy.m" name="compare_upper_lower_hmm_entropy" id="compare_upper_lower_hmm_entropy">compare_upper_lower_hmm_entropy.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compare lower and upper bounds on HMM entropy </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compare_upper_lower_hmm_kl.m" name="compare_upper_lower_hmm_kl" id="compare_upper_lower_hmm_kl">compare_upper_lower_hmm_kl.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute finite size relative entropy for hmm;</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compute_hmm_condprob.m" name="compute_hmm_condprob" id="compute_hmm_condprob">compute_hmm_condprob.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute the probability of Y according to an HMM</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compute_hmm_condprob_vec.m" name="compute_hmm_condprob_vec" id="compute_hmm_condprob_vec">compute_hmm_condprob_vec.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute conditional probability Pr(X|Y) for HMM </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compute_hmm_entropy_empirically.m" name="compute_hmm_entropy_empirically" id="compute_hmm_entropy_empirically">compute_hmm_entropy_empirically.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute HMP entropy by sampling and computing the empirical entropy</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compute_hmm_entropy_empirically_and_high_orders.m" name="compute_hmm_entropy_empirically_and_high_orders" id="compute_hmm_entropy_empirically_and_high_orders">compute_hmm_entropy_empirically_and_high_orders.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute empirical entropy and compare to high-order approximation </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compute_hmm_entropy_empirically_change_p.m" name="compute_hmm_entropy_empirically_change_p" id="compute_hmm_entropy_empirically_change_p">compute_hmm_entropy_empirically_change_p.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute HMP entropy empirically for different p's.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compute_hmm_prob.m" name="compute_hmm_prob" id="compute_hmm_prob">compute_hmm_prob.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute prob. of observation Y for an HMP </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compute_hmp_entropy_eps_const_empirically_and_high_orders.m" name="compute_hmp_entropy_eps_const_empirically_and_high_orders" id="compute_hmp_entropy_eps_const_empirically_and_high_orders">compute_hmp_entropy_eps_const_empirically_and_high_orders.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute HMP entropy empirically and high-order approx. for fixed eps.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compute_hmp_entropy_p_const_empirically_and_high_orders.m" name="compute_hmp_entropy_p_const_empirically_and_high_orders" id="compute_hmp_entropy_p_const_empirically_and_high_orders">compute_hmp_entropy_p_const_empirically_and_high_orders.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute HMP entropy empirically and high-order approx. for fixed p.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compute_hmp_kl_empirically.m" name="compute_hmp_kl_empirically" id="compute_hmp_kl_empirically">compute_hmp_kl_empirically.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute twp HMP's KL distance empirically</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compute_iid_eq_prob_given_eq_obser.m" name="compute_iid_eq_prob_given_eq_obser" id="compute_iid_eq_prob_given_eq_obser">compute_iid_eq_prob_given_eq_obser.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute prob. of i.i.d. state to be equal given dirty observation</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/compute_matrix_many_chains_intersection.m" name="compute_matrix_many_chains_intersection" id="compute_matrix_many_chains_intersection">compute_matrix_many_chains_intersection.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute prob. of intersection for different HMP realizations </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/draw_analyticity_region_fig.m" name="draw_analyticity_region_fig" id="draw_analyticity_region_fig">draw_analyticity_region_fig.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot the predicted analyticity region of HMP entropy </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/draw_hmm_entropy_entire_domain.m" name="draw_hmm_entropy_entire_domain" id="draw_hmm_entropy_entire_domain">draw_hmm_entropy_entire_domain.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot the entropy of HMP for various parameters in domain</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/exactrationalpredictconvergenceradiusbestfit.m" name="exactrationalpredictconvergenceradiusbestfit" id="exactrationalpredictconvergenceradiusbestfit">exactrationalpredictconvergenceradiusbestfit.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Predict convergance radius using fitting</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/find_best_two_bits.m" name="find_best_two_bits" id="find_best_two_bits">find_best_two_bits.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Choose p which determines the entropy</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/findallmaximalyseqs.m" name="findallmaximalyseqs" id="findallmaximalyseqs">findallmaximalyseqs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute all the possible maximal sequences</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/findminp_y.m" name="findminp_y" id="findminp_y">findminp_y.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Find p minimizing Y probability according to HMP</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/forfig_compute_hmp_entropy_eps.m" name="forfig_compute_hmp_entropy_eps" id="forfig_compute_hmp_entropy_eps">forfig_compute_hmp_entropy_eps.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Generate HMP entropy plots for paper's figs </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/forfig_compute_hmp_entropy_eps_const_empirically_and_high_orders.m" name="forfig_compute_hmp_entropy_eps_const_empirically_and_high_orders" id="forfig_compute_hmp_entropy_eps_const_empirically_and_high_orders">forfig_compute_hmp_entropy_eps_const_empirically_and_high_orders.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Generate HMP entropy plots for paper's figs (empirical and high-order) </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/forfig_compute_hmp_entropy_p.m" name="forfig_compute_hmp_entropy_p" id="forfig_compute_hmp_entropy_p">forfig_compute_hmp_entropy_p.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Generate HMP entropy plots for paper's fig for p constant</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/forfig_opposite_compute_hmp_entropy_eps.m" name="forfig_opposite_compute_hmp_entropy_eps" id="forfig_opposite_compute_hmp_entropy_eps">forfig_opposite_compute_hmp_entropy_eps.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Generate HMP entropy plots for paper's fig for eps constant (opposite)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/forfig_opposite_compute_hmp_entropy_p.m" name="forfig_opposite_compute_hmp_entropy_p" id="forfig_opposite_compute_hmp_entropy_p">forfig_opposite_compute_hmp_entropy_p.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Generate HMP entropy plots for paper's fig for p constant (opposite)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmm_entropy.m" name="hmm_entropy" id="hmm_entropy">hmm_entropy.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute HMM entropy</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmm_entropy_for_x_equal.m" name="hmm_entropy_for_x_equal" id="hmm_entropy_for_x_equal">hmm_entropy_for_x_equal.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute HMM entropy when x is fixed </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmm_entropy_general_m_1st_order.m" name="hmm_entropy_general_m_1st_order" id="hmm_entropy_general_m_1st_order">hmm_entropy_general_m_1st_order.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute HMM entropy for general alphabet</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmm_nonoise_places_model.m" name="hmm_nonoise_places_model" id="hmm_nonoise_places_model">hmm_nonoise_places_model.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot the entropy of processes with different noises.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmp_entropy_finite.m" name="hmp_entropy_finite" id="hmp_entropy_finite">hmp_entropy_finite.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute finite HMP entropy H_N for a given N, epsilon and p. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmp_entropy_finite_x1.m" name="hmp_entropy_finite_x1" id="hmp_entropy_finite_x1">hmp_entropy_finite_x1.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute finite HMP entropy H_N for a given N, epsilon and p and X1.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmp_kl_finite.m" name="hmp_kl_finite" id="hmp_kl_finite">hmp_kl_finite.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute Exactly KL_N for a given N, epsilon and p (first model), and</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmp_kl_finite_x1.m" name="hmp_kl_finite_x1" id="hmp_kl_finite_x1">hmp_kl_finite_x1.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute KL(X1_N) for a given N, conditioned on X1.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmp_proby_finite.m" name="hmp_proby_finite" id="hmp_proby_finite">hmp_proby_finite.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Computes P_Y, the probability of the observation Y. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/sample_HMM.m" name="sample_HMM" id="sample_HMM">sample_HMM.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Sample an observation from a given HMM </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/sample_HMM_vec.m" name="sample_HMM_vec" id="sample_HMM_vec">sample_HMM_vec.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Sample a vector of observation from a given HMM </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/ComputeHMMKLDistance.cpp" name="ComputeHMMKLDistance.c" id="ComputeHMMKLDistance.c"><font color="003300">ComputeHMMKLDistance.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/ComputeHMMLogLikelihood.cpp" name="ComputeHMMLogLikelihood.c" id="ComputeHMMLogLikelihood.c"><font color="003300">ComputeHMMLogLikelihood.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/FindBestPathViterbi.cpp" name="FindBestPathViterbi.c" id="FindBestPathViterbi.c"><font color="003300">FindBestPathViterbi.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/FindBestPathViterbyOld.cpp" name="FindBestPathViterbyOld.c" id="FindBestPathViterbyOld.c"><font color="003300">FindBestPathViterbyOld.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/ReadGenotypeFile.cpp" name="ReadGenotypeFile.c" id="ReadGenotypeFile.c"><font color="003300">ReadGenotypeFile.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/SimulateSequenceFromModel.cpp" name="SimulateSequenceFromModel.c" id="SimulateSequenceFromModel.c"><font color="003300">SimulateSequenceFromModel.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/TrainHMMFromDataEM.cpp" name="TrainHMMFromDataEM.c" id="TrainHMMFromDataEM.c"><font color="003300">TrainHMMFromDataEM.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/computehmmkldistance.cpp" name="computehmmkldistance.c" id="computehmmkldistance.c"><font color="003300">computehmmkldistance.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/findbestpathviterbi.cpp" name="findbestpathviterbi.c" id="findbestpathviterbi.c"><font color="003300">findbestpathviterbi.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/findbestpathviterbyold.cpp" name="findbestpathviterbyold.c" id="findbestpathviterbyold.c"><font color="003300">findbestpathviterbyold.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hapmap_funcs.cpp" name="hapmap_funcs.c" id="hapmap_funcs.c"><font color="003300">hapmap_funcs.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmm_chrom_funcs.cpp" name="hmm_chrom_funcs.c" id="hmm_chrom_funcs.c"><font color="003300">hmm_chrom_funcs.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmm_chrom_main.cpp" name="hmm_chrom_main.c" id="hmm_chrom_main.c"><font color="003300">hmm_chrom_main.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/simulatesequencefrommodel.cpp" name="simulatesequencefrommodel.c" id="simulatesequencefrommodel.c"><font color="003300">simulatesequencefrommodel.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/trainhmmfromdataem.cpp" name="trainhmmfromdataem.c" id="trainhmmfromdataem.c"><font color="003300">trainhmmfromdataem.cpp</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nclude <stdlib.h></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/ComputeHMMKLDistance.mexa64" name="ComputeHMMKLDistance.mexa" id="ComputeHMMKLDistance.mexa"><font color="003300">ComputeHMMKLDistance.mexa64</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>LF
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/ComputeHMMKLDistance.mexw32" name="ComputeHMMKLDistance.mexw" id="ComputeHMMKLDistance.mexw"><font color="003300">ComputeHMMKLDistance.mexw32</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>�
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/ComputeHMMLogLikelihood.mexa64" name="ComputeHMMLogLikelihood.mexa" id="ComputeHMMLogLikelihood.mexa"><font color="003300">ComputeHMMLogLikelihood.mexa64</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>LF
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/ComputeHMMLogLikelihood.mexw32" name="ComputeHMMLogLikelihood.mexw" id="ComputeHMMLogLikelihood.mexw"><font color="003300">ComputeHMMLogLikelihood.mexw32</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>�
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/FindBestPathViterbi.mexa64" name="FindBestPathViterbi.mexa" id="FindBestPathViterbi.mexa"><font color="003300">FindBestPathViterbi.mexa64</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>LF
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/FindBestPathViterbi.mexw32" name="FindBestPathViterbi.mexw" id="FindBestPathViterbi.mexw"><font color="003300">FindBestPathViterbi.mexw32</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>�
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/ReadGenotypeFile.mexa64" name="ReadGenotypeFile.mexa" id="ReadGenotypeFile.mexa"><font color="003300">ReadGenotypeFile.mexa64</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/ReadGenotypeFile.mexw32" name="ReadGenotypeFile.mexw" id="ReadGenotypeFile.mexw"><font color="003300">ReadGenotypeFile.mexw32</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>�
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/SimulateSequenceFromModel.mexa64" name="SimulateSequenceFromModel.mexa" id="SimulateSequenceFromModel.mexa"><font color="003300">SimulateSequenceFromModel.mexa64</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/SimulateSequenceFromModel.mexw32" name="SimulateSequenceFromModel.mexw" id="SimulateSequenceFromModel.mexw"><font color="003300">SimulateSequenceFromModel.mexw32</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>�
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/TrainHMMFromDataEM.mexa64" name="TrainHMMFromDataEM.mexa" id="TrainHMMFromDataEM.mexa"><font color="003300">TrainHMMFromDataEM.mexa64</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>LF
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/TrainHMMFromDataEM.mexw32" name="TrainHMMFromDataEM.mexw" id="TrainHMMFromDataEM.mexw"><font color="003300">TrainHMMFromDataEM.mexw32</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>�
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/hmp/hmp.tgz" name="hmp" id="hmp"><STRONG><i>hmp.tgz</i></STRONG></a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td><b><i>Download the whole package. (52 .m files) </i></b></td>
+</tr>
+      <TR>
+    </TR></TBODY></TABLE><!-- End m-file index -->
+  </DIV>
+
+
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <ADDRESS>
+
+Contact: <BR> 
+&nbsp; &nbsp; O. Zuk (<A href="mailto:orzuk@broadinstitute.org">orzuk@broadinstitute.org</A>) <!-- hhmts end -->
+<br> Last Modified: <!--#echo var="LAST_MODIFIED"-->  
+  </ADDRESS>
+</BODY></HTML>
