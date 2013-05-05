@@ -104,13 +104,13 @@ if(~is_sorted)
     intersect_inds1 = merge_inds1(intersect_inds1); intersect_inds2 = merge_inds2(intersect_inds2);
 end
 
-if(isrowvector(start_pos1) && isrowvector(start_pos2))
+if(isrow(start_pos1) && isrow(start_pos2))
     intersect_start_pos = vec2row(intersect_start_pos);
     intersect_end_pos = vec2row(intersect_end_pos);
     intersect_inds1 = vec2row(intersect_inds1);
     intersect_inds2 = vec2row(intersect_inds2);
 end
-if(iscolvector(start_pos1) && iscolvector(start_pos2))
+if(iscolumn(start_pos1) && iscolumn(start_pos2))
     intersect_start_pos = vec2column(intersect_start_pos);
     intersect_end_pos = vec2column(intersect_end_pos);
     intersect_inds1 = vec2column(intersect_inds1);

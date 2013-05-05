@@ -2,6 +2,13 @@
 % variables, with probabilities f_vec(i) of being one. 
 % The complexity depends on the number of different probabilities. If
 % they're all different the complexity is exponential in N 
+% 
+% Input: 
+% f_vec - probability of success for each variable 
+%
+% Output: 
+% bernoulli_sum_probs - sum of probabilities
+%
 function bernoulli_sum_probs  = bernoulli_sum_prob(f_vec)
 
 N = length(f_vec); % get number of variables 
@@ -16,7 +23,7 @@ else % here we've got multiple probabilities
         bernoulli_sum_probs = conv(bernoulli_sum_probs, tmp_bernoulli_sum_probs); 
         bernoulli_sum_probs = bernoulli_sum_probs(1:N+1); % cut tails 
     end
-    if(isrowvector(f_vec))
+    if(isrow(f_vec))
         bernoulli_sum_probs = vec2row(bernoulli_sum_probs);
     else
         bernoulli_sum_probs = vec2column(bernoulli_sum_probs);

@@ -201,7 +201,13 @@ SS = S; % save for later
 
 cur_dir = pwd; % zip all files of all libraries, including docomuntation into one file
 eval(['cd ' matlab_libs_dir]);
-zip_str = ['tar cvzf '  'or_zuk_matlab_utils.tgz ' cell2vec(remove_dir_from_file_name(lib_dirs(1:end-1)), ' ') ]; % Zip all directories %  fullfile(sub_dirs{i},'*.m')]
+
+tar_dirs = remove_dir_from_file_name(lib_dirs(1:end-1)) % don't unzip data big data dirs 
+data_dirs = tar_dirs(strfind_cell(tar_dirs, 'data'))
+tar_dirs = setdiff(tar_dirs, data_dirs)
+
+% return; % TEMP FOR DEBUG
+zip_str = ['tar cvzf '  'or_zuk_matlab_utils.tgz --exclude "*/data/*" ' cell2vec(tar_dirs, ' ') ]; % Zip all directories %  fullfile(sub_dirs{i},'*.m')]
 system(zip_str); % need to check that it works
 eval(['cd ' cur_dir]);
 
@@ -358,7 +364,7 @@ for i=1:num_dirs % loop on libraries
     cur_dir = pwd; % zip the files into one file
     cd_to_dir = sub_dirs{i}
     eval(['cd ''' sub_dirs{i} '''']);
-    zip_str = ['tar cvzf ' remove_dir_from_file_name( sub_dirs{i} ) '.tgz' ' *.m'] %  fullfile(sub_dirs{i},'*.m')]
+    zip_str = ['tar cvzf ' remove_dir_from_file_name( sub_dirs{i} ) '.tgz' ' *.m *.cpp *.h *.mex*'] %  fullfile(sub_dirs{i},'*.m')]
     system(zip_str); % need to check that it works
     eval(['cd ' cur_dir]);
 end % loop on sub-directories
@@ -366,7 +372,7 @@ end % loop on sub-directories
 
 % Update number of files (not working for now)
 ctr = strfind_cell(SS, 'Download the entire library');
-SS{ctr} = ['<td><b><i>Download the entire library. (' num2str(num_dirs) ...
+SS{ctr} = ['<td><b><i>Download the entire library. (excluding big data files. ' num2str(num_dirs) ...
     ' libs, ' num2str(sum(num_mat_files_vec)) ' files) </i></b></td>'];
 %savecellfile(vec2column(SS), matlab_master_html_libs_file); % save master html file
 

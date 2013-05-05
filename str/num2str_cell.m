@@ -34,7 +34,7 @@ else % input is vector
     else
         s = strtrim(mat2cell(num2str(vec2column(nc), precision), ones(1, length(nc))));
     end
-    if(isrowvector(nc))
+    if(isrow(nc))
         s=s';
     end
 end

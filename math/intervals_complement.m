@@ -16,7 +16,7 @@ end
 comp_start_pos = end_pos(1:end-1);
 comp_end_pos = start_pos(2:end);
 if(start_pos(1) > min_val)
-    is_row_flag = isrowvector(comp_start_pos); 
+    is_row_flag = isrow(comp_start_pos); % use matlab's isrow (no need for isrowvector) 
     comp_start_pos = [vec2row(min_val) vec2row(comp_start_pos)];
     comp_end_pos = [start_pos(1) vec2row(comp_end_pos)];
     if(~is_row_flag)
