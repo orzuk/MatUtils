@@ -4,7 +4,7 @@
 
 
 // New types defined 
-typedef unsigned long int word;   // machine word (32 bit on windows - pc)
+// typedef unsigned long int word;   // machine word (32 bit on windows - pc). Already defined in 'general.h'
 
 typedef unsigned char byte;       // a byte
 

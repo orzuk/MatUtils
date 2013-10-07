@@ -142,7 +142,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	if(debug_prints)
 	{	
 		printf("Allocate seqs lengths  %ld\n", num_seqs);
+		printf("Half-Word-Size=%ld\n", half_word_size); 
 		fflush(stdout);
+
 	}
 
 
@@ -353,8 +355,8 @@ long extract_sub_kmers(long L, word *seqs[MAX_NUM_SEQS], long *seqs_lens, long n
 	long i, j, k;
 	long i_seq, j_position; 
 	long num_kmers_enum;
-	long half_word_size = 4*sizeof(word);
-	long word_size = 2*half_word_size;
+	long half_word_size = 4*sizeof(word); // number of nucleotides per half word
+	long word_size = 2*half_word_size; // number of nucleotides per word 
 
 	long num_words_in_kmer = ceil(double(L) / double(half_word_size)); 
 	long num_bytes_in_kmer = ceil(double(L) / 4.0); // temp - a bit wasteful but easier to make sure it's correct 
@@ -378,6 +380,10 @@ long extract_sub_kmers(long L, word *seqs[MAX_NUM_SEQS], long *seqs_lens, long n
 
 	if(debug_prints)
 	{
+		printf("num_words_in_kmer=%ld\n", num_words_in_kmer); 
+		printf("WORD-SIZE-INSIDE-FUNC=%ld\n", word_size); 
+		printf("HALF-WORD-SIZE-INSIDE-FUNC=%ld\n", half_word_size); 
+		printf("LAST-WORD-IN-KMER=%ld\n", last_word_in_kmer); 
 		printf("ONES_MASK=%lx\n", ones_mask); 
 		printf("ONES_MASK_DEC=%lu\n", ones_mask); 
 		printf("SIZEOFLONG=%ld (bits)\n", 8*sizeof(long)); 
@@ -454,9 +460,19 @@ long extract_sub_kmers(long L, word *seqs[MAX_NUM_SEQS], long *seqs_lens, long n
 				//				printf("LAST WORD LEN = %ld\n", last_word_in_kmer); 
 				if((k == num_words_in_kmer-1) && (last_word_in_kmer < half_word_size)) 
 				{
-					current_kmer[k] = current_kmer[k]&((1UL << (2*last_word_in_kmer))-1); // take only L nucleotides from last word 
-					//				printf(" Last Word!!!\n"); 
-					//				fflush(stdout);
+					if(debug_prints)
+					{
+						printf(" Last Word!!! %ld \n", current_kmer[k]); 	
+						print_packed_dna(current_kmer+k, last_word_in_kmer, 1);
+						printf("MASK IS: 1UL << %ld = %ld\n", 2*last_word_in_kmer, (1ULL << (2*last_word_in_kmer))-1); 
+					}
+					current_kmer[k] = current_kmer[k]&((1ULL << (2*last_word_in_kmer))-1); // take only L nucleotides from last word 
+					if(debug_prints)
+					{
+						printf(" Last Word Truncated!!! %ld\n", current_kmer[k]); 
+						print_packed_dna(current_kmer+k, last_word_in_kmer, 1);
+						fflush(stdout);
+					}
 				}
 
 				//				kmers[kmer_ctr][k] = kmers[kmer_ctr][k]&((1UL << (2*last_word_in_kmer))-1); // take only L nucleotides

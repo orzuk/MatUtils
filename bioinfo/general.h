@@ -4,7 +4,7 @@
 
 
 // New types defined 
-typedef unsigned long int word;   // machine word (32 bit on windows - pc)
+typedef unsigned long long word;   // machine word (32 bit on windows - pc) changed from long int to long long 
 
 typedef unsigned char byte;       // a byte
 
@@ -12,7 +12,7 @@ typedef unsigned char byte;       // a byte
 #define BIT(block, num)  ( ((block) >> (num)) & (1UL) )  // get the i-th bit from a word
 #define BITS(block, num1, num2)  ( ((block) >> (num1)) & ((1UL << (num2+1-num1))-1) )  // get the i-th to j-th bits from a word
 
-// inverse the order of the bits in a word
+// inverse the order of the bits in a word (32 bit) 
 #define INVERSE(block) \
 	(block) = (((block)&0x0000FFFF) << 16 ) ^ (((block) >> 16)&0x0000FFFF); \
 	(block) = (((block)&0x00FF00FF) << 8 ) ^ (((block) >> 8)&0x00FF00FF); \
