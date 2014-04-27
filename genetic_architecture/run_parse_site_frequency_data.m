@@ -1,6 +1,7 @@
 % Parse data for site-frequency spectrum from 3 papers and plot allele-frequencies
 Assign24MammalsGlobalConstants;
 AssignGeneralConstants;
+AssignStatsConstants; 
 num_bins = 0:0.01:1;
 
 parse_site_frequency_flag = 0; read_vcf=0; unite_chr=0; % parse ESP data

@@ -24,7 +24,7 @@
 % max_alpha - value of alpha attaining maximum
 % max_beta - value of beta attaining maximum
 % max_s - value of s attaining maximum
-% NEW! should add also confidence intervals (not implemented yet) 
+% NEW! should add also confidence intervals (not implemented yet) (Use Fisher's information matrix)  
 %
 function [max_LL max_s max_alpha max_beta] = ...
     maximize_two_class_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...

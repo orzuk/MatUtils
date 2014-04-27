@@ -196,13 +196,13 @@ for i=1:length(allele_amino_acid_change_vec) % Parse amino-acid change
 end
 
 
-switch alpha_s_fit % Temp: Fit alpha crudely
+switch alpha_s_fit % Temp: Fit alpha crudely for each gene 
     case 'crude'        
         x_0 = R{ctr+8+2*length(SiteFreqSpecStruct{1}.upper_freq_vec),2};
         x_stop = R{ctr+8+2*length(SiteFreqSpecStruct{1}.upper_freq_vec),4};
         y = R{ctr+8+2*length(SiteFreqSpecStruct{1}.upper_freq_vec),3}; % Set alpha (temp.)
         fitted_alpha = (y-x_0) / (x_stop-x_0); 
-        fitted_s = 0; % no fit for s for now .. 
+        fitted_s = 0; % no fit for s for now .. (why? can use crude fit from stop codons)  
     case 'MLE' % here perform maximum-likelihood reconstruction of alpha and s. Also compute confidence intervals 
         
         beta_vec = []; prevalence = []; trait_type = []; y=[]; full_flag = 0;% no phenotypes 
@@ -269,6 +269,6 @@ else
 end
 
 R = strrep_cell(R, 'NaN', '-'); % for values we don't have yet
-savecellfile(R, fullfile(gene_dir, [gene_name '_Info.txt'])); % save 'report card'
+savecellfile(R, fullfile(gene_dir, [gene_name '_Info.txt'])); % save 'report card' for each gene 
 
 

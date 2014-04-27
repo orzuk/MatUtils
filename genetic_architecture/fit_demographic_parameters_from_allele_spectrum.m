@@ -7,7 +7,7 @@
 % 
 % Output: 
 % D - demographic model (expansion, population size etc.) 
-% max_LL - loglikelihood of data for 
+% max_LL - loglikelihood of data for spectrum 
 % 
 function [D max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec)
 

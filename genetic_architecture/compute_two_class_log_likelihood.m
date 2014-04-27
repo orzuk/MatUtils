@@ -28,7 +28,7 @@
 % D - demographic parameters (NEW! optional! (currently only constant pop. size supported)
 %
 % Output:
-% log_like_mat - Tensor (3-d 'matrix') of log-likelihood of data for each parameter choice (s, alpha and beta)
+% log_like_mat - Matrix (3-d) of log-likelihood of data for each parameter choice (s, alpha and beta)
 %
 function [log_like_mat, P_poly] = ...
     compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
@@ -174,7 +174,8 @@ if(poisson_model_flag)
     tmp_z_vec = sparse(length(unique_num_carriers), length(x_vec)); % creat sparse matrix
     pos_tmp_z_inds = cell(length(unique_num_carriers), 1);
     %%    t2 = cputime; % tmp_ind_vec = []; tmp_val_vec = [];
-    for j=1:length(unique_num_carriers)
+    for j=1:length(unique_num_carriers) % loop on unique 
+        run_j = j 
         tmp_vec = ...
             exp( log_binom(num_individuals_vec(I(j)), num_carriers_vec(I(j))) + ...
             num_carriers_vec(I(j)) .* log_x_vec + ...
