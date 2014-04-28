@@ -77,6 +77,8 @@ switch implementation_str  % choose how to maximize likelihood
         if(~maximize_parameters(3)) % don't loop over beta
             beta_vec = 0; % meaningless
         end
+        % PROBLEM: HERE LOG-LIKELIHOOD IS MONOTONICALLY DECREASING WITH
+        % ALPHA - WHY? 
         log_like_mat = ... % compute likelihood (currently vary only alpha)
             compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
             X, y, trait_type, prevalence, null_w_vec, include_phenotype, full_flag, num_individuals);        
