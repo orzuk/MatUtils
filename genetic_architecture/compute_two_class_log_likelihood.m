@@ -248,7 +248,7 @@ for i_s = 1:num_s % loop on parameters
                     (target_size_missense_alleles - num_polymorphic_missense_alleles_observed) .* ...
                     log(1-prob_missense_allele_polymorphic_in_sample(i_s, i_alpha));
                 
-                log_like_mat(i_s,i_alpha,:) = log_like_mat(i_s,i_alpha,:) + ...
+                log_like_mat(i_s,i_alpha,:) = log_like_mat(i_s,i_alpha,:) + ... % add log-likelihood for observed alleles 
                     num_polymorphic_null_alleles_observed .* ...
                     log(prob_null_allele_polymorphic_in_sample(i_s)) + ...
                     num_polymorphic_neutral_alleles_observed .* ...
@@ -284,7 +284,7 @@ for i_s = 1:num_s % loop on parameters
             end % if use allele freq flag
 
             
-        end
+        end % if poisson model flag 
         for i_beta = 1:num_beta % loop on effect size
             tmp_likelihood_one_allele(:) = BIG_NUM; % repmat(BIG_NUM, max(num_individuals_vec), 3);
             %            time_before_looping_on_alleles = cputime-ttt
