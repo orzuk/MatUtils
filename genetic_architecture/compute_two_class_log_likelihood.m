@@ -282,7 +282,6 @@ for i_s = 1:num_s % loop on parameters
                     log(prob_missense_allele_polymorphic_in_sample(i_s, i_alpha));            % all probs here should be in POPULATION!!! (if we include all parts of likelihood!)
 %                                 log_like_mat(i_s,i_alpha,:) = 0;
             end % if use allele freq flag
-
             
         end % if poisson model flag 
         for i_beta = 1:num_beta % loop on effect size
@@ -359,7 +358,7 @@ for i_s = 1:num_s % loop on parameters
                 end
             end % loop on loci
             %            ttt_loop_on_loci = cputime - ttt
-            if(include_genotype)
+            if(include_genotype) % here add genotype part of log-likelihood 
                 log_like_mat(i_s,i_alpha,i_beta) = log_like_mat(i_s,i_alpha,i_beta) + 0 * sum(log_like_correction); % add correction. Just a constant (who cares)
                 
                 if(poisson_model_flag) % here include all alleles classes
@@ -371,8 +370,10 @@ for i_s = 1:num_s % loop on parameters
                         L * log( alpha_vec(i_alpha) * T_s(i_s) + (1-alpha_vec(i_alpha)) * T_0 );
                 end
                 
-            end
+            end % if include genotypes 
             
+            % Skip this for now (we just use genotypes)
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%% End if include phenotypes %%%%%%%%%%%%
             if(include_phenotype) % compute phenotypes contribution to likelihood
                 switch trait_type
                     case {'binary', 'disease'}
@@ -434,6 +435,7 @@ for i_s = 1:num_s % loop on parameters
                     end
                 end % switch if we have mixture or not
             end % if to include phenotypes
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%% End if include phenotypes %%%%%%%%%%%%
             
             if( (mod(i_alpha, 50) == 0) || mod(i_s, 50) == 0)
                 run_index_s_alpha_beta = [i_s i_alpha i_beta]
