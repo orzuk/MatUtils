@@ -7,10 +7,10 @@
 % M - maximum value in each cell
 % I - index of maximum value in each cell
 % 
-function [M I] = max_cell(c)
+function [M, I] = max_cell(c)
 
 n = length(c);
 M = zeros(n,1); I=M;
 for i=1:n
-    [M(i) I(i)] = max(c{i}(:));
+    [M(i), I(i)] = max(c{i}(:));
 end

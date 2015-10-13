@@ -10,15 +10,15 @@
 % u_inds - indices: u = x(u_inds)
 % v_inds - indices other-way: x = u(v_inds)
 %
-function [u u_inds v_inds] = unique_with_tol(x, TOL)
+function [u, u_inds, v_inds] = unique_with_tol(x, TOL)
 
 if(isvector(x))
     x = vec2row(x);
 end
 % First do a 'standard' unique
-[x u_inds v_inds] = unique(x', 'rows');
+[x, u_inds, v_inds] = unique(x', 'rows');
 
-[x sort_perm] = sortrows(x); x=x';
+[x, sort_perm] = sortrows(x); x=x';
 
 iter=0; cont_flag = 1;
 while(cont_flag == 1)
@@ -32,7 +32,7 @@ while(cont_flag == 1)
             j=j+1;
         end
     end
-    [u u_inds2 v_inds2] = unique(x', 'rows'); u=u';
+    [u, u_inds2, v_inds2] = unique(x', 'rows'); u=u';
     u_inds = u_inds(u_inds2); v_inds = v_inds2(v_inds);
     if(size(u,2) == size(x,2)) % stop! no new reduction
         cont_flag = 0;
