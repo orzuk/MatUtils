@@ -10,7 +10,7 @@
 % J - 
 % K - the place in each word where the string was (first) found
 %
-function [I J K] = strfind_cell(c, s)
+function [I, J, K] = strfind_cell(c, s)
 
 I = []; J = []; K = [];
 if(iscell(c)) % c is cell array. Can be two dimensional

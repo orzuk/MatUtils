@@ -17,12 +17,20 @@ if(~exist('delimiter', 'var') || isempty(delimiter))
 end
 if(iscell(nc)) % input is cell
     s = nc;
-    for i=1:size(nc,1)
-        for j=1:size(nc,2)
-            if(isnumeric(nc{i,j}))
-                if(~exist('precision', 'var') || isempty(precision))
+    if(~exist('precision', 'var') || isempty(precision))
+        for i=1:size(nc,1)
+            for j=1:size(nc,2)
+                if(isnumeric(nc{i,j}))
                     s{i,j} = num2str_delim(nc{i,j}, delimiter);
-                else
+                end
+            end
+        end
+    else
+        for i=1:size(nc,1)
+%            i_is = i 
+%            size_is = size(nc,1)
+            for j=1:size(nc,2)
+                if(isnumeric(nc{i,j}))
                     s{i,j} = num2str_delim(nc{i,j}, delimiter, precision);
                 end
             end
