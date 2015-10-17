@@ -12,7 +12,7 @@
 function r = weighted_rand(weights, n)
 
 if(issparse(weights)) % a faster version for sparse weights vectors 
-    [I J S] = find(weights);
+    [~, J, S] = find(weights);
     r = J(weighted_rand(S, n)); 
     return;
 end
