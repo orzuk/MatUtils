@@ -1,5 +1,5 @@
 %function table=loadcellfile(infile)
-% Faster version. From Eran
+% Faster version
 function table=loadcellfile(infile, to_mat, delimiter, num_lines)
 
 if(~exist('to_mat', 'var') || isempty(to_mat))
