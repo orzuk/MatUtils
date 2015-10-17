@@ -1,10 +1,10 @@
-% Read and process the data file containing sfs
+% Read and process the data file containing site-frequency-spectrum
 %
 % Input:
 % site_frequency_file_name - file with information on each allele
 % gene_list - list of possible gene names
-% read_to_mat_flag - initial parsing. Read tab-delimited file
-% extract_fields_flag - second parsing. Fill in field with new field names 
+% read_to_mat_flag - initial parsing. Read tab-delimited file with ... (to fill!)
+% extract_fields_flag - second parsing. Fill in field with new field names ... (to fill!) 
 % compute_gene_matrices_flag - third parsing. Collect set of variants for each gene 
 %
 % Output:
@@ -14,7 +14,7 @@
 % f_vec - allele frequency of alternative variants in each class
 % allele_types - names of different classes (removed!!!)
 %
-function [S n_vec count_vec f_vec] = parse_site_frequency_data(site_frequency_file_name, gene_list, ...
+function [S, n_vec, count_vec, f_vec] = parse_site_frequency_data(site_frequency_file_name, gene_list, ...
     read_to_mat_flag, extract_fields_flag, compute_gene_matrices_flag) 
 
 
@@ -35,8 +35,8 @@ end
 %%%%%%%%%%%%%  Stage 1: Convert to .mat file.           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 return_flag=0
-if(read_to_mat_flag)
-    if(~exist(file_name_to_mat(site_frequency_file_name), 'file')) % read input .vcf file
+if(read_to_mat_flag) % convert vcf to mat files 
+    if(~exist(file_name_to_mat(site_frequency_file_name), 'file')) % read input .vcf file and convert to .mat 
         reading_vcf_file=1
         %    populations_vec = {'_European', '_African'};
         if(strfind(lower(site_frequency_file_name), 'vcf'))
@@ -74,7 +74,7 @@ end % if read_to_mat_flag
 compute_snp_info=1
 if( strcmp(suffix_from_file_name(site_frequency_file_name), 'mat') )
     %    populations_vec = {''};
-    populations_vec = {'_European', '_African'};
+    populations_vec = {'_European', '_African'}; % special for ESP populations 
 else
     populations_vec = {'_European', '_African'};
     return_flag = 1
@@ -144,7 +144,7 @@ if(extract_fields_flag)
     % % % %         end
     % % % %     end % loop on population
     %end % if .mat file exists
-    if(return_flag)
+    if(return_flag) % leave function 
         return;
     end
 end % if extract_fields_flag
@@ -272,7 +272,7 @@ end % if compute_gene_matrices_flag
 
 
 
-% Internal function: Get cumulative freq. of all alleles below threshold
+% Internal function: Get cumulative freq. of all alleles below a certain threshold
 %
 % Input:
 % S - structure with all alleles
@@ -280,16 +280,15 @@ end % if compute_gene_matrices_flag
 %
 % Output:
 % num_alleles_per_gene_mat - table with total number of distinct alleles below threshold for each gene
-% total_freq_per_gene_mat  - table with cumulative frequency alleles below threshold for each gene
+% total_freq_per_gene_mat - table with cumulative frequency alleles below threshold for each gene
 % total_heterozygosity_per_gene_mat - table with total heterozygosity of alleles below threshold for each gene
 %
-function [num_alleles_per_gene_mat total_freq_per_gene_mat ...
-    total_heterozygosity_per_gene_mat] = ...
+function [num_alleles_per_gene_mat, total_freq_per_gene_mat, total_heterozygosity_per_gene_mat] = ...
     get_cumulative_freq_internal(S, freq_threshold)
+
 num_alleles_per_gene_mat = zeros(S.num_allele_types, S.num_genes);
 total_freq_per_gene_mat =  zeros(S.num_allele_types, S.num_genes);
 total_heterozygosity_per_gene_mat =  zeros(S.num_allele_types, S.num_genes);
-
 
 for i=1:S.num_allele_types
     for j=1:S.num_genes

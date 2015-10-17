@@ -11,7 +11,9 @@
 % h_shared_env - shared envirounment for sibs/MZ on each liability ! 
 % compute_mode - how to compute: 'simulations' or 'semi-analyitc'/'numeric'
 % iters - number of iterations when computing using simulations
-%
+% epi_str - what epidemiological model to use to estimate heritability
+%           (default: 'MZ'. Can also be 'ACE', 'ADE', ..)
+% 
 % Output:
 % h_pop - estimation of heritability (from r_MZ^2)
 % qtl_R - table of familial trait correlations

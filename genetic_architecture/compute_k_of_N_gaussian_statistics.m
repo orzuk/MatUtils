@@ -111,7 +111,7 @@ else
 end
 
 block_size = 50000; % don't allow more simulations at once
-num_blocks = iters / block_size; % assumed integer
+num_blocks = iters / min(iters, block_size); % assumed integer
 
 same_inds_prob = zeros(max_family_degree,length(N_vec));
 corr_vec = zeros(N,length(N_vec)); % compute correlation of each gaussian to phenotype (QTL)
