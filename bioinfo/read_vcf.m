@@ -2,7 +2,7 @@
 %
 % Input:
 % vcf_file_name - input file name
-% output_file - where to put
+% output_file - where to save .mat version
 %
 % Output:
 % VCF - structure with all relevant data
@@ -10,7 +10,7 @@
 function VCF = read_vcf(vcf_file_name, output_file)
 
 skip_lines = '##'; % 10
-[VCF R R_skipped] = ReadDataFile(vcf_file_name, output_file, -1, skip_lines); % skip first 10 lines
+[VCF, R, R_skipped] = ReadDataFile(vcf_file_name, output_file, -1, skip_lines); % skip first 10 lines
 
 ctr=1;
 for i=1:size(R_skipped, 1)
