@@ -6,9 +6,9 @@ num_bins = 0:0.01:1;
 
 parse_site_frequency_flag = 1; % parse XXX????? 
 read_vcf_flag=1; % read vcf files for exome data 
-unite_chr=0; % parse ESP data
-read_to_mat_flag=0; % convert vcf (?) or other files to .mat format 
-extract_fields_flag=0; 
+unite_chr=0; % parse ESP data - unite all data to one chromosome 
+read_to_mat_flag=1; % convert vcf (?) or other files to .mat format 
+extract_fields_flag=1; % extract ??? fields 
 compute_gene_matrices_flag=0; % flags for parsing
 
 exome_data = 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!! 
@@ -84,12 +84,12 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
                 %                     parse_site_frequency_data(fullfile(spectrum_data_dir, spectrum_data_files{i})); % , gene_list);
                 
                 if(unite_chr)
-%                     if(chr == min_chr)
-%                         A = load(fullfile(spectrum_data_dir, sub_dir_str, ...
-%                             ['all_chr_ESP6500.' chr_file_str '_'  population{1} '_up_to_chr' num2str(chr) '.mat'])); % load union
-%                     else
+                     if(chr == min_chr)
+                         A = load(fullfile(spectrum_data_dir, sub_dir_str, ...
+                             ['all_chr_ESP6500.' chr_file_str '_'  population{1} '_up_to_chr' num2str(chr) '.mat'])); % load union
+                     else
                         A = load([remove_suffix_from_file_name(fullfile(spectrum_data_dir, spectrum_data_files{i}))  '_' population{1} '.mat']);
-%                     end
+                     end
                     
                     in_matlab_flag=1;
                 else % don't unite chroms

@@ -2,7 +2,7 @@
 %
 % Input:
 % x - point in which to evaluate integral
-% S - selection coefficient (in units of S=4Ns. Assume it is negative!!!)
+% S - selection coefficient (in units of S=4Ns. Assume it is NEGATIVE!!!)
 % phi_order - power of x
 % grr_minus_one - additional parameter (optional) for disease
 %

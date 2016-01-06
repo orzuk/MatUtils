@@ -91,16 +91,19 @@ for figure_type = 1:4 % New: plot median values just from the data
         switch figure_type
             case 1
                 save_freq = mean_vec(model_inds);
-                loglog(cur_s_vec, smooth(mean_vec(model_inds(sort_perm)), w_smooth), 'color', population_color_vec{pop_ctr}, 'linewidth', 2); hold on;
+                loglog(cur_s_vec, smooth(mean_vec(model_inds(sort_perm)), w_smooth), ...
+                    'color', population_color_vec{pop_ctr}, 'linewidth', 2); hold on;
             case 2
-                loglog(cur_s_vec, smooth(median_cell(median_vec(model_inds(sort_perm))), w_smooth), 'color', population_color_vec{pop_ctr}, 'linewidth', 2); hold on;
+                loglog(cur_s_vec, smooth(median_cell(median_vec(model_inds(sort_perm))), w_smooth), ...
+                    'color', population_color_vec{pop_ctr}, 'linewidth', 2); hold on;
             case 3
-                loglog(cur_s_vec, smooth(mean_cell(median_vec(model_inds(sort_perm))), w_smooth), 'color', population_color_vec{pop_ctr}, 'linewidth', 2); hold on;
+                loglog(cur_s_vec, smooth(mean_cell(median_vec(model_inds(sort_perm))), w_smooth), ...
+                    'color', population_color_vec{pop_ctr}, 'linewidth', 2); hold on;
                 save_freq = median_vec_non_zero(model_inds);
             case 4 % NEW! Take median IAF conditional on being > 0 (i.e. only for polymorphic!)
                 save_freq = median_vec_non_zero(model_inds);
-                loglog(cur_s_vec, smooth(median_vec_non_zero(model_inds(sort_perm)), w_smooth), 'color', population_color_vec{pop_ctr}, 'linewidth', 2); hold on;
-                
+                loglog(cur_s_vec, smooth(median_vec_non_zero(model_inds(sort_perm)), w_smooth), ...
+                    'color', population_color_vec{pop_ctr}, 'linewidth', 2); hold on;                
         end % switch figure type
         for j=1:length(show_s_vals)
             R_freq{j+1, pop_ctr+1} = num2str(save_freq(s_J(j)), 3);
@@ -115,24 +118,18 @@ for figure_type = 1:4 % New: plot median values just from the data
         case 1 % CAF
             ylabel('Combined allele frequency f_s', 'fontsize', 14);
             save_file = 'CAF_different_populations';
-            h_leg = legend(pop_legend_vec, 3); % 'eastoutside'); % legend('boxoff'); % just legend
-            set(h_leg,'Xcolor',[0.8 0.8 0.8],'Ycolor',[0.8 0.8 0.8]);
         case 2 % median of median allele frequency
             ylabel('Median allele frequency', 'fontsize', 14);
             save_file = 'Median_IAF_different_populations';
-            h_leg = legend(pop_legend_vec, 3); % 'eastoutside'); % legend('boxoff'); % just legend
-            set(h_leg,'Xcolor',[0.8 0.8 0.8],'Ycolor',[0.8 0.8 0.8]);
         case 3 % mean of median allele frequency
             ylabel('Mean of median allele frequency f_s', 'fontsize', 14);
             save_file = 'MeanMedian_IAF_different_populations';
-            h_leg = legend(pop_legend_vec, 3); % 'eastoutside'); % legend('boxoff'); % just legend
-            set(h_leg,'Xcolor',[0.8 0.8 0.8],'Ycolor',[0.8 0.8 0.8]);
         case 4
             ylabel('Median allele frequency f_s', 'fontsize', 14);
             save_file = 'Median_nonzero_IAF_different_populations';
-            h_leg = legend(pop_legend_vec, 3); % 'eastoutside'); % legend('boxoff'); % just legend
-            set(h_leg,'Xcolor',[0.8 0.8 0.8],'Ycolor',[0.8 0.8 0.8]);
     end % switch figure type
+    h_leg = legend(pop_legend_vec, 3); % 'eastoutside'); % legend('boxoff'); % just legend
+    set(h_leg,'Xcolor',[0.8 0.8 0.8],'Ycolor',[0.8 0.8 0.8]);
     ylim([10^(-6) 1]);
     add_faint_grid(0.5);
     my_saveas(gcf, fullfile(figs_dir, save_file), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
@@ -141,13 +138,10 @@ for figure_type = 1:4 % New: plot median values just from the data
     R_freq_latex = mat2cell(R_freq_latex, ones(size(R_freq_latex,1),1));
     R_freq_latex{1} = strrep(R_freq_latex{1},  '|c', '|r'); % align to right
     R_freq_latex{1} = strrep(R_freq_latex{1},  '{|r', '{|l'); % align to left
-    
-    
+        
     savecellfile(R_freq', [fullfile(figs_dir, save_file) '.txt'], [], 1);
     savecellfile(R_freq_latex, [fullfile(figs_dir, save_file) '_latex.txt'], [], 1);
 end % loop on figure type
-
-
 
 
 % Get rid of variable selection models
@@ -163,8 +157,6 @@ for i=find(s_vec == 0)
     s_vec_str{i} = '0';
 end
 s_vec_str = strrep_cell(s_vec_str, ' ', '');
-
-
 
 for i=1:num_files
     legend_vec{i} = [get_nice_population_names(pop_vec{i})]; legend_vec{i} = [legend_vec{i} repmat(' ', 1, 6-length(legend_vec{i})) ' s=' s_vec_str{i}];
@@ -267,7 +259,7 @@ for i_d = 1:num_models % Loop on models and plot separately for each population
                 for j=[1 length(model_inds):-1:2]
                     coefficient_of_variation(j) = std(n_vec{model_inds(j)}) / mean(n_vec{model_inds(j)});
                 end
-                [cur_s_vec sort_perm] = sort(s_vec(model_inds));
+                [cur_s_vec, sort_perm] = sort(s_vec(model_inds));
                 semilogx(max(10^(-6), cur_s_vec), coefficient_of_variation(sort_perm), 'color', population_color_vec{i_d}, ...
                     'linewidth', 2); hold on;
                 
@@ -496,8 +488,7 @@ for i_s = 1:length(unique_s_vec) % Loop on s and plot separately for each s and 
                     plot_p_vec = (num_iters(i):-1:1) ./ num_iters(i);  cum_str = ' (inverse cumulative)'; % get cumulatives normalized
                     plot(plot_x_vec, plot_p_vec,  cur_symbol_vec, ...
                         'color', population_color_vec{plot_model_ctr}, 'linewidth', 2); hold on;
-                    xlabel('f_{null} / E[f_{null}]', 'fontsize', 14, 'fontweight', 'bold');
-                    
+                    xlabel('f_{null} / E[f_{null}]', 'fontsize', 14, 'fontweight', 'bold');                    
             end
             model_ctr = model_ctr+1;
         end

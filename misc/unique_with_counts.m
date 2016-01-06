@@ -8,12 +8,14 @@
 % U - unique vector
 % h - histogram of counts
 % 
-function [U h] = unique_with_counts(x, flag, varargin)
+function [U, h] = unique_with_counts(x, flag, varargin)
 
 if(exist('flag', 'var'))
-    [U I J] = unique(x, flag); 
+    [U, ~, J] = unique(x, flag); 
 else
-    [U I J] = unique(x); 
+    [U, ~, J] = unique(x); 
 end
 h = hist(J, 1:length(U)); 
-
+if(iscolumn(U)) % set same dimension
+    h = vec2column(h);
+end

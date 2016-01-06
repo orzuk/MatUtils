@@ -4,7 +4,7 @@
 % The formula is: g(f) =  (1 - e^(s(1-q))) / [f(1-f)(1-e^(-S))]
 %
 % Input:
-% s - selection coefficient (this is little s). Should be NEGATIVE for delterious alleles (so fitness is 1+s)
+% s - selection coefficient (this is little s). Should be NEGATIVE for deleterious alleles (so fitness is 1+s)
 % N - population size
 % two_side_flag - return Derived (0) between 0 and 1 or Minor Allele Freq. (1) between 0 and 0.5
 % M - num. alleles to sample

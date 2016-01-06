@@ -14,7 +14,7 @@ figure_inds = [1 2 3 4 5]; % which figures do we want to display
 supp_figure_inds = []; % [1 2 3 4 5]; % which supp. figs. we want to display
 table_inds = [1 2 3]; % which tables to save
 
-figs_for_paper_flag = 1;
+figs_for_paper_flag = 0; % 1;
 
 
 
@@ -104,7 +104,6 @@ for i=figure_inds % create main figures
     switch i        
         case 1 % Figure 1: distribution of rare alleles.
             plot_bayes_factor = 0; % display plots independently of mixture coefficients
-            
             
             title_str = ['Detect. power rare. \alpha=' num2str(alpha_vec*100,3) '%' ...
                 ' functional, f^*=' num2str(f_rare*100,2) '%, c=' ...
