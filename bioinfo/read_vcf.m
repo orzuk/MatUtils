@@ -36,7 +36,7 @@ for i=1:num_people
 end
 for i=1:num_snps
     if(mod(i,100) == 0)
-        do_snp = i
+        read_snp_in_VCF = i
     end
     for j=1:num_people
         %        j_is = j

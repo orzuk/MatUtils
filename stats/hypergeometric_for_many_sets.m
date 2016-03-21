@@ -21,7 +21,7 @@
 % mu_s - mean of s score
 % sigma_s - st.d. of s score 
 %
-function [over_pval under_pval z_score mu_s sigma_s] = ...
+function [over_pval, under_pval, z_score, mu_s, sigma_s] = ...
     hypergeometric_for_many_sets(N, sets_size_vec, sets_intersection_mat)
 
 K = length(sets_size_vec); % number of different sets

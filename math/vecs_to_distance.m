@@ -10,5 +10,5 @@ function D = vecs_to_distance(V)
 
 D = repmat(sum(V.^2,2), 1, size(V, 1));
 D = sqrt( max(0, D + D' - 2 .* V * V') ); % rounding errors might give negatives, for singles 
-
+D=D-diag(diag(D)); % make sure diagonal is zero (to overcome rounding errors) 
 

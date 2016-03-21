@@ -7,7 +7,7 @@
 %
 % Output:
 % I - the indices in the cell array where we find the string s
-% J - 
+% J - second indices in the cell array where we find the string s (for 2dim cells)
 % K - the place in each word where the string was (first) found
 %
 function [I, J, K] = strfind_cell(c, s)
