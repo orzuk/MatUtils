@@ -4,29 +4,30 @@
 % s_null_vec - vector of possible selection coefficients for the null alleles. Should be NEGATIVE for delterious alleles (so fitness is 1+s)
 % alpha_vec - vector of possible fraction of null alleles at birth
 % beta_vec - vector of possible effect size of null alleles
-% rare_cumulative_per_gene - total expected number of rare alleles in gene (related to theta)
-% target_size_by_class_vec - NEW! target size for each allele type (used in poisson model). This is like the above but counts expected number of different alleles, not their frequencies !  %%% NEW! alleles class type vector. This states for each allele if it is neutral, harmfull, or in a mixture (missense) 
+% rare_cumulative_per_gene - total expected number of rare alleles in gene (related to theta via the following formula: XXX TO COMPLETE !!!)
+% target_size_by_class_vec - NEW! target size for each allele type (used in Poisson model). This is like the above but counts expected number of different alleles, not their frequencies !  %%% NEW! alleles class type vector. This states for each allele if it is neutral, harmfull, or in a mixture (missense) 
 % N - effective population size
-% X - genotype data matrix
-% y - phenotype data vector
+% X - genotype data matrix. THIS IS THE EXOME DATA 
+% y - phenotype data vector.  THIS IS THE EXOME DATA 
 % trait_type - disease or quantitative
-% prevalence - frequency of disease for disease trait
+% prevalence - population frequency of disease for disease trait
 % null_w_vec - (optional) this is the assignment of which alleles are null
-%            and which not. This simplifies the likelihood computation alot when it is known
+%            and which not. This simplifies the likelihood computation a lot when it is known
 % maximize_parameters - on which parameters to do the maximization. Default is all (s, alpha, beta). Format is [S alpha beta]  (all binary variables)
-% full_flag - how is input data (X and y) given 
-% D - demographic model which controls the allele frequncy distribution (NEW! Default is constant population size)
-% num_individuals - 
-% implementation_str how to find minimum 
+% full_flag - how is input data (X and y) given. Default is: full_flag = 1.  
+% D - demographic model which controls the allele frequncy distribution
+%       (NEW! Default is constant population size) - need to add parameters to it as well!
+% num_individuals - total number of individuals in sample 
+% implementation_str - how to find minimum (brute-force / Newton's method?)
 % 
 % Output:
 % max_LL - maximum of log-likelihood of data
 % max_alpha - value of alpha attaining maximum
-% max_beta - value of beta attaining maximum
+% max_beta - value of beta attaining maximum (what is this parameter?)
 % max_s - value of s attaining maximum
 % NEW! should add also confidence intervals (not implemented yet) (Use Fisher's information matrix)  
 %
-function [max_LL max_s max_alpha max_beta] = ...
+function [max_LL, max_s, max_alpha, max_beta] = ...
     maximize_two_class_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
     X, y, trait_type, prevalence, null_w_vec, maximize_parameters, full_flag, D, num_individuals, implementation_str)
 
@@ -34,7 +35,6 @@ function [max_LL max_s max_alpha max_beta] = ...
 if(~exist('implementation_str', 'var') || isempty(implementation_str))
     implementation_str = 'minsearch'; % 'brute-force'; % how to find optimum 
 end
-    
 if(~exist('trait_type', 'var') || isempty(trait_type))
     trait_type = [];
 end
@@ -48,21 +48,20 @@ if(~exist('maximize_parameters', 'var') || isempty(maximize_parameters))
     maximize_parameters = [1 1 1]; % maximize over all parameters
 end
 if(~exist('target_size_by_class_vec', 'var') || isempty(target_size_by_class_vec))   
-    poisson_model_flag = 0;  expand_format_flag = 'individual'; 
+    poisson_model_flag = 0; expand_format_flag = 'individual'; % Don't use Poisson model: Use XXX instead. 
 else
-    poisson_model_flag = 1; expand_format_flag = 'summary'; % use poisson model for each class 
+    poisson_model_flag = 1; expand_format_flag = 'summary'; % use Poisson model for each class 
 end
 if(~exist('include_phenotype', 'var') || isempty(include_phenotype)) % default: don't include phenotypes 
-    % include_phenotype = 0; 
-    include_phenotype = maximize_parameters(3); % include phenotypes if and only if we optimze over beta 
+    include_phenotype = maximize_parameters(3);     % include_phenotype = 0; % include phenotypes if and only if we optimize over beta 
 end
 
 if(~exist('full_flag', 'var') || isempty(full_flag))
     full_flag = 1; 
 end
-if(full_flag)
-    [num_individuals L] = size(X); % set number of individuals and number of SNPs
-else
+if(full_flag) % We get a MATRIX of genotype values 
+    [num_individuals, L] = size(X); % set number of individuals and number of SNPs
+else  % We get a vector of genotype values 
     if(~isempty(y)) % when phenotype is given
         num_individuals = length(y);
         [~, ~, ~, ~, L] = ... % get numbers from compact representation

@@ -1,20 +1,18 @@
-% Parse data for site-frequency spectrum from 3 papers and plot allele-frequencies
-Assign24MammalsGlobalConstants;
-AssignGeneralConstants;
-AssignStatsConstants; 
-num_bins = 0:0.01:1;
+% Script for parsing data for site-frequency spectrum from 3 papers and plot allele-frequencies
+Assign24MammalsGlobalConstants; AssignGeneralConstants; AssignStatsConstants;
+num_bins = 0:0.01:1; % bins for what?
 
-parse_site_frequency_flag = 1; % parse XXX????? 
-read_vcf_flag=1; % read vcf files for exome data 
-unite_chr=0; % parse ESP data - unite all data to one chromosome 
-read_to_mat_flag=1; % convert vcf (?) or other files to .mat format 
-extract_fields_flag=1; % extract ??? fields 
-compute_gene_matrices_flag=0; % flags for parsing
+parse_site_frequency_flag = 1; % parse XXX?????
+read_vcf_flag=1; % read vcf files for exome data
+unite_chr=0; % 0: parse ESP data. 1: unite all data to one chromosome
+read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
+extract_fields_flag=0; % extract ??? fields
+compute_gene_matrices_flag=0; % 1. Compute for each gene ?? flag for parsing ???
 
-exome_data = 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!! 
+exome_data = 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!!
 
-plot_site_frequency_flag = 0; % plot ESP data (this is also part of pre-processing)
-estimate_gene_by_gene = 0; % analyze each gene seperately - estimate target size for each gene 
+plot_site_frequency_flag = 0; % 1: plot ESP data (this is also part of pre-processing)
+estimate_gene_by_gene = 1; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 
 queue_str = 'priority'; % for submitting jobs at broad farm
 
@@ -28,7 +26,7 @@ switch machine % Get directory
             mem_flag = 8; % allow large memory
         end
     case PC
-%        spectrum_data_dir = 'C:\\research\common_disease_model\data\SiteFrequencySpectra'; % OLD PC
+        %        spectrum_data_dir = 'C:\\research\common_disease_model\data\SiteFrequencySpectra'; % OLD PC
         spectrum_data_dir = 'D:\research\RVAS\Data\SiteFrequencySpectra'; % NEW PC
         %        spectrum_data_dir = 'T:\\common_disease_model\data\SiteFrequencySpectra';
         in_matlab_flag = 1;
@@ -37,7 +35,7 @@ spectrum_data_files = {'/Nelson_Science_2012/Nelson_Science_data_table_S2.txt', 
     '/Tennessen_Science_2012/all_chr_ESP6500.snps.vcf', ...
     '/Tennessen_Science_2012/all_chr_ESP6500.snps.small_gene_list.vcf', ...
     '/ESP/ESP6500SI*.snps_indels.vcf', ...
-    '/ExAC/exome_aggregation.vcf', ... % NEW! exome aggregation data (much richer!!!) 
+    '/ExAC/exome_aggregation.vcf', ... % NEW! exome aggregation data (much richer!!!)
     []}; % Data file with exome sequencing results %  '/Tennessen_Science_2012/ESP6500.chr19.snps.vcf', []}; % S3
 spectrum_labels = {'Nelson et al.', 'Tennessen et al.', 'Tennessen et al. few genes', 'Keinan et al.', 'Exome Aggregation'};
 target_length_vec = [ 50*10^6/100,  50*10^6, 50*10^6/100, 50*10^6, 50*10^6]; % estimated # of nucleotides in target
@@ -50,7 +48,7 @@ mutation_rates_file = 'human_genes_mutation_rates_hg18.mat'; % output file with 
 
 spectrum_data_files_str = '{';
 for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
-    for population = {'European'} % , 'African'} % European'} % , 
+    for population = {'European'} % , 'African'} % European'} % ,
         if(read_vcf_flag)
             max_chr=23; min_chr=1;
         else
@@ -59,13 +57,13 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
         sub_dir_str = dir_from_file_name(spectrum_data_files{i});
         chr_file_str = suffix_from_file_name(remove_suffix_from_file_name(spectrum_data_files{i}));
         
-        for chr = min_chr:max_chr % 1:23
+        for chr = 21:21 % take short chrom for debugging min_chr:max_chr % 1:23
             do_chr = chr
             if(read_vcf_flag) % One file per chromosome. (includes ALL populations)
                 tmp_file_name = GetFileNames(fullfile(spectrum_data_dir, sub_dir_str, ['ESP6500*.chr' chr_num2str(chr) '.' chr_file_str '.vcf' ]));
                 spectrum_data_files{i} = fullfile(sub_dir_str, tmp_file_name{1});
-%                 spectrum_data_files{i} = fullfile(sub_dir_str, ...
-%                     ['ESP6500.chr' chr_num2str(chr) '.' chr_file_str '.vcf' ]); % '_' population{1} '.vcf']; %    .vcf'];
+                %                 spectrum_data_files{i} = fullfile(sub_dir_str, ...
+                %                     ['ESP6500.chr' chr_num2str(chr) '.' chr_file_str '.vcf' ]); % '_' population{1} '.vcf']; %    .vcf'];
             else % One file. Already includes population string
                 %                spectrum_data_files{i} = ['/Tennessen_Science_2012/all_chr_ESP6500.snps' '_' population{1} '.mat']; %    .vcf'];
                 spectrum_data_files{i} = fullfile(dir_from_file_name(spectrum_data_files{i}), ...
@@ -84,12 +82,12 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
                 %                     parse_site_frequency_data(fullfile(spectrum_data_dir, spectrum_data_files{i})); % , gene_list);
                 
                 if(unite_chr)
-                     if(chr == min_chr)
-                         A = load(fullfile(spectrum_data_dir, sub_dir_str, ...
-                             ['all_chr_ESP6500.' chr_file_str '_'  population{1} '_up_to_chr' num2str(chr) '.mat'])); % load union
-                     else
+                    if(chr == min_chr)
+                        A = load(fullfile(spectrum_data_dir, sub_dir_str, ...
+                            ['all_chr_ESP6500.' chr_file_str '_'  population{1} '_up_to_chr' num2str(chr) '.mat'])); % load union
+                    else
                         A = load([remove_suffix_from_file_name(fullfile(spectrum_data_dir, spectrum_data_files{i}))  '_' population{1} '.mat']);
-                     end
+                    end
                     
                     in_matlab_flag=1;
                 else % don't unite chroms
@@ -109,14 +107,14 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
                         all_A = A;
                     else
                         field_names = fieldnames(A);
-                        for j=1:length(field_names)  % concatenate all chromosomes to one file
+                        for j=1:length(field_names)  % concatenate all chromosomes to one file (is this for population file? or one file for all populations?)
                             eval_str = ['all_A.' field_names{j} ' = [all_A.' field_names{j} ''' A.' field_names{j} ''']'';'];
                             eval(eval_str)
                         end
                     end
                     close all;
                 end % if read vcf
-                if(unite_chr)
+                if(unite_chr)  % Here unite - why only first population? (Europeans?)
                     save(fullfile(spectrum_data_dir, sub_dir_str, ...
                         ['all_chr_ESP6500.' chr_file_str '_'  population{1} '_up_to_chr' num2str(chr) '.mat']), '-struct', 'all_A'); % Save union
                 end
@@ -144,7 +142,7 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
             save(fullfile(mammals_data_dir, genome_version, exons_file), '-struct', 'GeneStruct');
         else
             GeneStruct = load(fullfile(mammals_data_dir, genome_version, exons_file), ...
-                'chr_vec', 'pos_start_vec', 'pos_end_vec', 'seqs', 'strand', 'gene_names', 'sort_perm'); % don't load sequences? 
+                'chr_vec', 'pos_start_vec', 'pos_end_vec', 'seqs', 'strand', 'gene_names', 'sort_perm'); % don't load sequences?
         end
         
         

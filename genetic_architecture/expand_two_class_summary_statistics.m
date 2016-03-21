@@ -15,7 +15,7 @@
 % L - total number of distinct alleles (includes all: null, missense, ..) 
 % iters - number of different replications (simulations) 
 %
-function [num_alleles_vec num_null_alleles_vec num_carriers_vec num_total_individuals_vec L iters] = ...
+function [num_alleles_vec, num_null_alleles_vec, num_carriers_vec, num_total_individuals_vec, L, iters] = ...
     expand_two_class_summary_statistics(X, num_individuals, format_flag)
 
 iters = size(X, 2); % Input is an array of size [2*L+n] x [iters], or [2*L] x [iters]

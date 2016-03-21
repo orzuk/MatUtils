@@ -1,14 +1,16 @@
-% Plot site-freq. specturm for a specific gene (This is temporariliy in it's own function)
+% Plot site-freq. specturm for a specific gene (This is temporariliy located in in it's own function)
 %
 % Input:
 % gene_header - header representing master directory for dir
 % gene_ind - index of gene in GeneStruct
-% GeneStruct - Structure with basic genomic information on gene
+% GeneStruct - Structure with basic genomic information on eacg gene
 % SiteFreqSpecStruct - Structure with variants from sequencing information for gene
-% MutationRateTable - tabel of genomic mutation rates for each gene and each mutation class
+% MutationRateTable - table of genomic mutation rates for each gene and each mutation class
 % MutationTypes - indices of mutation classes
 % gene_dir - where to save output for gene
 %
+% Output: None. Information on gene is saved in file: [gene_dir]/[gene_name]'_Info.txt'
+% 
 function internal_plot_gene_stats(gene_header, gene_ind, GeneStruct, ExonsGeneStruct, SiteFreqSpecStruct, ...
     MutationRateTable, MutationTypes, gene_dir)
 
@@ -88,20 +90,16 @@ for figure_type = {'num_variants_cum_log', 'heterozygosity_cum_log', 'num_varian
         save_flag = 1;
         try
             my_saveas(gcf, fullfile(gene_dir, [gene_name '_' figure_type{1}]), 'pdf');
-        catch exception % some problem with
+        catch exception % some problem with saving to pdf 
             save_flag = 0;
         end
     end
 end % loop on figure type
 
 
-
-
 % Save Gene's summary statistics in a text file 
 num_allele_types = length(MutationTypes);
 R = cell(10,num_allele_types+2); % New: Also save a 'card' with information for each gene
-
-
 
 R{1,1} = ['Summary Statistics for Gene: ' gene_name]; % Save mutation target size
 R{2,1} = '--------------------------------------------';

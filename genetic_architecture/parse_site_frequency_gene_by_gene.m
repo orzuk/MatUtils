@@ -1,10 +1,10 @@
-% Fit selection and frequency for each gene
+% Fit selection and frequency for each gene using exome data 
 %
 % Input:
-% spectrum_data_dir - input directory with freq specturm data
+% spectrum_data_dir - input directory with frequency specturm data
 % spectrum_data_file - file with sequencing data (changed to cell array for multiple populations!!)
 % output_data_dir - where to save output files and figures
-% GeneStruct - file with genomic infomraiton on each gene
+% GeneStruct - file/structure with genomic information on each gene
 % MutationRateTable - total mutation rate per-gene for different mutation types
 % MutationTypes - strings of each mutation type
 % gene_prefix - run only on genes matching this prefix (used to divide labor)
@@ -31,7 +31,7 @@ end
 num_mutation_types = length(MutationTypes);
 TotalExonicMutationRateVec = sum(MutationRateTable); % Compute total mutation rate for each mutation to get target size
 
-if(~exist([remove_suffix_from_file_name(gene_struct_input_file) '_unique.mat'], 'file')); % Save unique
+if(~exist([remove_suffix_from_file_name(gene_struct_input_file) '_unique.mat'], 'file')); % Save unique genes
     [UniqueGeneStruct.gene_names, I, J] = unique(GeneStruct.gene_names);  % Unite exons into genes
     num_genes = length(I); % Get only unique genes
     UniqueMutationRateTable = zeros(num_genes, num_mutation_types);
@@ -52,7 +52,7 @@ if(~exist([remove_suffix_from_file_name(gene_struct_input_file) '_unique.mat'], 
     UniqueGeneStruct.strand = GeneStruct.strand(I);
     GeneStruct = UniqueGeneStruct; GeneStruct.gene_names = upper(GeneStruct.gene_names); % copy unique
     save([remove_suffix_from_file_name(gene_struct_input_file) '_unique.mat'], 'GeneStruct'); % Save unique
-else % load unique
+else % load unique genes 
     load([remove_suffix_from_file_name(gene_struct_input_file) '_unique.mat']); % , ...
 %        'chr_vec', 'pos_start_vec', 'pos_end_vec', 'seqs', 'strand', 'gene_names', 'sort_perm');
 end
@@ -68,9 +68,9 @@ for k=1:num_populations % load data from all populations
         'num_allele_types', 'num_alleles_per_gene_mat', 'total_freq_per_gene_mat', 'total_heterozygosity_per_gene_mat', ...
         'gene_by_allele_type_freq_list', 'gene_by_allele_type_n_list', ...
         'gene_by_allele_type_het_list', ...
-        'good_allele_inds', 'upper_freq_vec'}
-    if(k == 1)
-        load_fields = [load_fields {'REF', 'ALT', 'aminoAcidChange', 'gene_by_allele_type_pos_list', 'gene_by_allele_type_inds_list'}]
+        'good_allele_inds', 'upper_freq_vec'};
+    if(k == 1)  % first population 
+        load_fields = [load_fields {'REF', 'ALT', 'aminoAcidChange', 'gene_by_allele_type_pos_list', 'gene_by_allele_type_inds_list'}];
     end
     load_fields_str = cell2vec(load_fields, ''', ''');
     load_str = ['SiteFreqSpecStruct{' num2str(k) '} = load(''' fullfile(spectrum_data_dir, spectrum_data_file{k}) ...
@@ -101,8 +101,6 @@ for k=1:num_populations % load data from all populations
 %        clear gene_by_allele_type_freq_list;
     end
     
-    
-    
     SiteFreqSpecStruct{k}.good_allele_inds = sort(SiteFreqSpecStruct{k}.good_allele_inds); % sort to fix mutation types ordering
     SiteFreqSpecStruct{k}.unique_genes = upper(SiteFreqSpecStruct{k}.unique_genes);
     SiteFreqSpecStruct{k}.allele_types_ind = zeros(size(SiteFreqSpecStruct{k}.allele_types));
@@ -126,17 +124,14 @@ end % loop on populations
 %for c = 'A':'Z'  % Make directories
 %    my_mkdir(gene_dir);
 %end
-ExonsGeneStruct = load(gene_struct_input_file, 'chr_vec', 'pos_start_vec', 'pos_end_vec', 'strand', 'gene_names', 'sort_perm');
+ExonsGeneStruct = load(gene_struct_input_file, 'chr_vec', 'pos_start_vec', 'pos_end_vec', 'strand', 'gene_names', 'sort_perm'); % load information on genes. 
 
 for i=1:num_genes % loop on genes
-    
     run_gene = i
     if(strmatch(upper(gene_prefix), upper(GeneStruct.gene_names{i})))
-        gene_header = upper(GeneStruct.gene_names{i}) % (1:2));
+        gene_header = upper(GeneStruct.gene_names{i}) % (1:2));  % Print gene name 
         gene_dir = fullfile(output_data_dir, gene_header(1), GeneStruct.gene_names{i}); % here save all information on gene
         my_mkdir(gene_dir);
-        
-        
         internal_plot_gene_stats(gene_header, i, GeneStruct, ExonsGeneStruct, ...
             SiteFreqSpecStruct, MutationRateTable, MutationTypes, gene_dir);
     end
