@@ -15,7 +15,7 @@
 % h - frequency in each bin
 % bin_locs - bins centers 
 % 
-function [h bins_loc] = ...
+function [h, bins_loc] = ...
     hist_density(x_vec, bins, color_vec, plot_flag, scaling, do_smooth, style_vec, varargin)
 
 if(~exist('plot_flag', 'var') || isempty(plot_flag))
@@ -58,14 +58,14 @@ for i=1:m
     x_vec{i} = x_vec{i}(abs(x_vec{i}) < Inf); % remove infs
     if(exist('bins', 'var'))
         if(is_row(bins))  % set of bins
-            [h{i} bins_loc{i}] = hist(x_vec{i}, bins);
+            [h{i}, bins_loc{i}] = hist(x_vec{i}, bins);
         else % number of bins
-            [h{i} bins_loc{i}] = hist(x_vec{i}, bins(i));
+            [h{i}, bins_loc{i}] = hist(x_vec{i}, bins(i));
         end
     else
-        [h{i} bins_loc{i}] = hist(x_vec{i});
+        [h{i}, bins_loc{i}] = hist(x_vec{i});
     end
-    bin_size = bins_loc{i}(2)-bins_loc{i}(1); % size of bins
+    % bin_size = bins_loc{i}(2)-bins_loc{i}(1); % size of bins
     if(do_smooth) % smooth histograms
         h{i} =  gauss_smooth(h{i}, do_smooth, 1); % assume bins_loc are equally spaced !!!
     end

@@ -11,8 +11,8 @@ compute_gene_matrices_flag=0; % 1. Compute for each gene ?? flag for parsing ???
 
 exome_data = 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!!
 
-plot_site_frequency_flag = 0; % 1: plot ESP data (this is also part of pre-processing)
-estimate_gene_by_gene = 1; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
+plot_site_frequency_flag = 1; % 1: plot ESP data (this is also part of pre-processing)
+estimate_gene_by_gene = 0; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 
 queue_str = 'priority'; % for submitting jobs at broad farm
 
@@ -57,7 +57,8 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
         sub_dir_str = dir_from_file_name(spectrum_data_files{i});
         chr_file_str = suffix_from_file_name(remove_suffix_from_file_name(spectrum_data_files{i}));
         
-        for chr = 21:21 % take short chrom for debugging min_chr:max_chr % 1:23
+        min_chr=21; max_chr=21; % TEMP FOR DEBUG! TAKE SHORT CHROMOSOME
+        for chr = min_chr:max_chr % take short chrom for debugging min_chr:max_chr % 1:23
             do_chr = chr
             if(read_vcf_flag) % One file per chromosome. (includes ALL populations)
                 tmp_file_name = GetFileNames(fullfile(spectrum_data_dir, sub_dir_str, ['ESP6500*.chr' chr_num2str(chr) '.' chr_file_str '.vcf' ]));
@@ -99,7 +100,7 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
                             [], [], mem_flag); % allow specifying memory allocation
                     end
                 end % if unite chroms
-                if(read_vcf_flag && in_matlab_flag) % unite different files
+                if(read_vcf_flag && in_matlab_flag) % unite different files (even without 'unite chr')
                     if(isfield(A, 'GENE'))
                         A.GENE = vec2column(A.GENE);
                     end

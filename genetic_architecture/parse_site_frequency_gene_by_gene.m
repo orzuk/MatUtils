@@ -101,23 +101,22 @@ for k=1:num_populations % load data from all populations
 %        clear gene_by_allele_type_freq_list;
     end
     
-    SiteFreqSpecStruct{k}.good_allele_inds = sort(SiteFreqSpecStruct{k}.good_allele_inds); % sort to fix mutation types ordering
-    SiteFreqSpecStruct{k}.unique_genes = upper(SiteFreqSpecStruct{k}.unique_genes);
-    SiteFreqSpecStruct{k}.allele_types_ind = zeros(size(SiteFreqSpecStruct{k}.allele_types));
-    [~, I, J] = my_intersect(genome_types, vec2row(lower(strrep_cell(SiteFreqSpecStruct{k}.allele_types, '-', '_'))));
-    setdiff( lower(strrep_cell(SiteFreqSpecStruct{k}.allele_types, '-', '_')), lower(empty_cell_to_empty_str(genome_types)) )
-    for i=1:length(genome_types_synonyms)
-        [~, tmp_I, tmp_J] = intersect(genome_types_synonyms{i}, lower(strrep_cell(SiteFreqSpecStruct{k}.allele_types, '-', '_')));
-        if(~isempty(tmp_I))
-            J = [J tmp_J];
-            I = [I repmat(i, length(tmp_J), 1)];
-        end
-    end
-    [J, UJ] = unique(J); I = I(UJ); % get rid of multiplicities
-    SiteFreqSpecStruct{k}.allele_types_ind(J) = I;
-    
-    allele_types_ind = SiteFreqSpecStruct{k}.allele_types_ind;     
-    save(fullfile(spectrum_data_dir, spectrum_data_file{k}), '-append', 'allele_types_ind'); % Save new values into file 
+%    SiteFreqSpecStruct{k}.good_allele_inds = sort(SiteFreqSpecStruct{k}.good_allele_inds); % sort to fix mutation types ordering
+%    SiteFreqSpecStruct{k}.unique_genes = upper(SiteFreqSpecStruct{k}.unique_genes);
+%     SiteFreqSpecStruct{k}.allele_types_ind = zeros(size(SiteFreqSpecStruct{k}.allele_types));
+%     [~, I, J] = my_intersect(genome_types, vec2row(lower(strrep_cell(SiteFreqSpecStruct{k}.allele_types, '-', '_'))));
+%     setdiff( lower(strrep_cell(SiteFreqSpecStruct{k}.allele_types, '-', '_')), lower(empty_cell_to_empty_str(genome_types)) )
+%     for i=1:length(genome_types_synonyms)
+%         [~, tmp_I, tmp_J] = intersect(genome_types_synonyms{i}, lower(strrep_cell(SiteFreqSpecStruct{k}.allele_types, '-', '_')));
+%         if(~isempty(tmp_I))
+%             J = [J tmp_J];
+%             I = [I repmat(i, length(tmp_J), 1)];
+%         end
+%     end
+%     [J, UJ] = unique(J); I = I(UJ); % get rid of multiplicities
+%     SiteFreqSpecStruct{k}.allele_types_ind(J) = I;
+%    allele_types_ind = SiteFreqSpecStruct{k}.allele_types_ind;     
+%    save(fullfile(spectrum_data_dir, spectrum_data_file{k}), '-append', 'allele_types_ind'); % Save new values into file 
     
 end % loop on populations
 

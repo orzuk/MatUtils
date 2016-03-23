@@ -192,10 +192,29 @@ if(compute_gene_matrices_flag)
         
         % allele_types = {'Synonymous', 'NonSynonymous', 'intron', 'utr'};
         S.ALLELE_FREQ = S.XXX_VARIANT_COUNT_ ./ (S.XXX_VARIANT_COUNT_ + S.XXX_REF_ALLELE_COUNT_);
-        [S.unique_genes, unique_gene_inds, S.GENE_INDS] = unique(S.GENE); S.num_genes = length(S.unique_genes);
+        [S.unique_genes, unique_gene_inds, S.GENE_INDS] = unique(upper(S.GENE)); S.num_genes = length(S.unique_genes);
         S.unique_chr = S.XXX_CHROM(unique_gene_inds);
         S.allele_types = unique(S.XXX_FEATURE_);
         S.num_allele_types = length(S.allele_types);
+        S.good_allele_inds = union(strfind_cell(lower(S.allele_types), 'syno'), strfind_cell(lower(S.allele_types), 'missen'));
+        S.good_allele_inds = union(S.good_allele_inds, strfind_cell(lower(S.allele_types), 'stop-gained'));
+        % S.good_allele_inds = union(good_allele_inds, strfind_cell(lower(allele_types), 'coding-notmod3')); % NEW! Add frameshifts!!!
+        S.good_allele_inds = sort(setdiff(S.good_allele_inds, strfind_cell(lower(S.allele_types), 'splice'))); % set which types of alleles to plot
+
+        S.allele_types_ind = zeros(size(S.allele_types));
+        [~, I, J] = my_intersect(genome_types, vec2row(lower(strrep_cell(S.allele_types, '-', '_'))));
+        setdiff( lower(strrep_cell(S.allele_types, '-', '_')), lower(empty_cell_to_empty_str(genome_types)) )
+        for i=1:length(genome_types_synonyms)
+            [~, tmp_I, tmp_J] = intersect(genome_types_synonyms{i}, lower(strrep_cell(S.allele_types, '-', '_')));
+            if(~isempty(tmp_I))
+                J = [J tmp_J];
+                I = [I repmat(i, length(tmp_J), 1)];
+            end
+        end
+        [J, UJ] = unique(J); I = I(UJ); % get rid of multiplicities
+        S.allele_types_ind(J) = I;
+        
+        
         n_vec = cell(1, S.num_allele_types); count_vec = cell(1, S.num_allele_types);
         f_vec = cell(1, S.num_allele_types); gene_inds = cell(1, S.num_allele_types);
         upper_freq_vec = [0.001 0.005 0.01 0.05 0.1 1]; % maximum allele freqeuncy
@@ -224,7 +243,7 @@ if(compute_gene_matrices_flag)
             count_vec{i} =   S.XXX_VARIANT_COUNT_(allele_type_inds);
             f_vec{i} = S.XXX_VARIANT_COUNT_(allele_type_inds) ./ n_vec{i};
             
-            [tmp_genes, ~, tmp_J] = unique(S.GENE(allele_type_inds) ); % get gene indices
+            [tmp_genes, ~, tmp_J] = unique(upper(S.GENE(allele_type_inds)) ); % get gene indices
             [~, ~, gene_inds{i}] = intersect(tmp_genes, S.unique_genes); % S.GENE(allele_type_inds), S.unique_genes);
             S.num_alleles_per_gene_mat(i,gene_inds{i}) = accumarray(tmp_J, ones(length(allele_type_inds), 1)); % get allele counts
             S.total_heterozygosity_per_gene_mat(i,gene_inds{i}) = accumarray(tmp_J, ...
