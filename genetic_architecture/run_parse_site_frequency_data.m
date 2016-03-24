@@ -5,13 +5,13 @@ num_bins = 0:0.01:1; % bins for what?
 parse_site_frequency_flag = 1; % parse XXX?????
 read_vcf_flag=1; % read vcf files for exome data
 unite_chr=0; % 0: parse ESP data. 1: unite all data to one chromosome
-read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
-extract_fields_flag=0; % extract ??? fields
+read_to_mat_flag=1; % convert vcf (?) or other files to .mat format
+extract_fields_flag=1; % extract ??? fields
 compute_gene_matrices_flag=0; % 1. Compute for each gene ?? flag for parsing ???
 
 exome_data = 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!!
 
-plot_site_frequency_flag = 1; % 1: plot ESP data (this is also part of pre-processing)
+plot_site_frequency_flag = 0; % 1: plot ESP data (this is also part of pre-processing)
 estimate_gene_by_gene = 0; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 
 queue_str = 'priority'; % for submitting jobs at broad farm
@@ -158,7 +158,7 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
         
         %            for gene_prefix = {'APOA5'} % mat2cell(['A':'Z' '0':'9']', ones(36,1), 1) % enable also weird genes starting with a number
         
-        for gene_prefix = {'ANGPTL'} %%%% (num2cell(['A':'Z' '0':'9']'))'  %% {'ANKRD20A3'} %%  %% {'ANGP'} %% (mat2cell(['A':'Z' '0':'9']', ones(36,1), 1))' % enable also weird genes starting with a number
+        for gene_prefix = {'ABCG1'} % for chrom 21 {'ANGPTL'} % for chrom 1 %%%% (num2cell(['A':'Z' '0':'9']'))'  %% {'ANKRD20A3'} %%  %% {'ANGP'} %% (mat2cell(['A':'Z' '0':'9']', ones(36,1), 1))' % enable also weird genes starting with a number
             job_str = ['parse_site_frequency_gene_by_gene(''' spectrum_data_dir ''', ' spectrum_data_files_str ', ' ... % spectrum_data_files{i}
                 '''' fullfile(spectrum_data_dir, 'Tennessen_Science_2012', 'GeneByGene') ''', ' ...
                 '''' fullfile(mammals_data_dir, genome_version, exons_file) ''' , ' ... % GeneStruct

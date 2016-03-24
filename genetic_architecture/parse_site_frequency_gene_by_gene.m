@@ -7,7 +7,8 @@
 % GeneStruct - file/structure with genomic information on each gene
 % MutationRateTable - total mutation rate per-gene for different mutation types
 % MutationTypes - strings of each mutation type
-% gene_prefix - run only on genes matching this prefix (used to divide labor)
+% gene_prefix - run only on genes matching this prefix (used to divide
+% labor, run parallel ..)
 %
 function parse_site_frequency_gene_by_gene(spectrum_data_dir, spectrum_data_file, output_data_dir, ...
     GeneStruct, MutationRateTable, MutationTypes, gene_prefix) % Estimate s and alpha for each gene in the genome - how???
@@ -70,7 +71,7 @@ for k=1:num_populations % load data from all populations
         'gene_by_allele_type_het_list', ...
         'good_allele_inds', 'upper_freq_vec'};
     if(k == 1)  % first population 
-        load_fields = [load_fields {'REF', 'ALT', 'aminoAcidChange', 'gene_by_allele_type_pos_list', 'gene_by_allele_type_inds_list'}];
+        load_fields = [load_fields {'REF', 'ALT', 'aminoAcidChange', 'gene_by_allele_type_pos_list', 'gene_by_allele_type_inds_list', 'allele_types_ind'}];
     end
     load_fields_str = cell2vec(load_fields, ''', ''');
     load_str = ['SiteFreqSpecStruct{' num2str(k) '} = load(''' fullfile(spectrum_data_dir, spectrum_data_file{k}) ...
@@ -125,8 +126,8 @@ end % loop on populations
 %end
 ExonsGeneStruct = load(gene_struct_input_file, 'chr_vec', 'pos_start_vec', 'pos_end_vec', 'strand', 'gene_names', 'sort_perm'); % load information on genes. 
 
-for i=1:num_genes % loop on genes
-    run_gene = i
+for i=1:num_genes % loop on genes and plot
+    sprintf(['Run gene = %d out of %d, ' upper(GeneStruct.gene_names{i})], i, num_genes)
     if(strmatch(upper(gene_prefix), upper(GeneStruct.gene_names{i})))
         gene_header = upper(GeneStruct.gene_names{i}) % (1:2));  % Print gene name 
         gene_dir = fullfile(output_data_dir, gene_header(1), GeneStruct.gene_names{i}); % here save all information on gene

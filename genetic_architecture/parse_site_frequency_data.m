@@ -93,12 +93,13 @@ if(extract_fields_flag)
         end
         
         % Further parsing of vcf file
-        num_snps = length(S.INFO);
+        num_snps = length(S.POS);
         num_fields = length(S.field_names);
         S.XXX_VARIANT_COUNT_= zeros(num_snps,1);
         S.XXX_REF_ALLELE_COUNT_= zeros(num_snps,1);
         S.XXX_FEATURE_ = cell(num_snps,1);
         S.GENE = cell(num_snps,1);
+        S.aminoAcidChange = cell(num_snps,1);
         S.INFO_ARR = cell(num_snps, num_fields); % create big array of all fields !!
         %%%%        for j=1:length(S.field_names) % loop on all fields - this may be unnecessary
         %%%%            prepare_field=j
@@ -123,6 +124,7 @@ if(extract_fields_flag)
                     field_ind_vec(j) = strmatch([S.field_names{j} '='], tmp_str); % here we assume this never changes !!!!
                 end
                 gene_ind = field_ind_vec( strmatch('GL', S.field_names, 'exact') );
+                amino_acid_change_ind = field_ind_vec( strmatch('HGVS_PROTEIN_VAR', S.field_names, 'exact') );
                 feature_ind = field_ind_vec( strmatch('FG', S.field_names, 'exact') );
                 
             end % if i == 1
@@ -133,6 +135,7 @@ if(extract_fields_flag)
                 S.XXX_FEATURE_{i} = str2word(':', S.XXX_FEATURE_{i}, 2); 
             end
             S.GENE{i} = tmp_str{gene_ind}(4:end); % get gene name
+            S.aminoAcidChange{i} =  str2word(')', str2word('(', tmp_str{amino_acid_change_ind}, 2), 1); % get amino-acid change 
             for j=1:length(S.field_names) % loop on all fields - this is quite slow !! ('eval' inside a loop over all SNPs and all fields
                 %%%%                field_ind = strmatch([S.field_names{j} '='], tmp_str);
                 %%%%                eval_str = ['S.' S.field_descriptions{j} '{' num2str(i) '} = ''' ...
@@ -142,6 +145,7 @@ if(extract_fields_flag)
                 %%%%                    tmp_str{field_ind_vec(j)}(equal_sign_ind_vec(j):end) ''';'];
                 %%%%                eval(eval_str);
             end
+            
         end % loop on SNPs
         S = my_rmfield(S, {'European', 'African', 'dbSNP', 'Total', 'Minor', ...
             'Observed', 'Average', 'geneList', 'Whether', 'PubMed', 'GenotypeMat', 'INFO'});  % why are these fields removed? save space!!!! (don't keep info field!!!)
