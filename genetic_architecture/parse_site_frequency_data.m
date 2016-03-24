@@ -191,6 +191,7 @@ if(compute_gene_matrices_flag)
             'XXX_CHROM', 'POS'); % enable unique identifier for each allele
         
         % allele_types = {'Synonymous', 'NonSynonymous', 'intron', 'utr'};
+        S.population = strrep(strrep(population{1}, '_', ''), '-', ''); 
         S.ALLELE_FREQ = S.XXX_VARIANT_COUNT_ ./ (S.XXX_VARIANT_COUNT_ + S.XXX_REF_ALLELE_COUNT_);
         [S.unique_genes, unique_gene_inds, S.GENE_INDS] = unique(upper(S.GENE)); S.num_genes = length(S.unique_genes);
         S.unique_chr = S.XXX_CHROM(unique_gene_inds);

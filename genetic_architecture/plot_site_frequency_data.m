@@ -45,12 +45,12 @@ if(ischar(A)) % load input data from file
         A{i} = load(spectrum_population_data_file{i}, 'XXX_REF_ALLELE_COUNT_', 'XXX_VARIANT_COUNT_', 'num_genes', 'unique_genes', ... % 'GENE', ...
             'num_allele_types', 'num_alleles_per_gene_mat', 'total_heterozygosity_per_gene_mat', ...
             'upper_freq_vec', 'total_freq_per_gene_mat', 'num_genes', ...
-            'allele_types', 'allele_types_ind', 'all_allele_types', 'num_all_allele_types', 'good_allele_inds');
+            'allele_types', 'allele_types_ind', 'all_allele_types', 'num_all_allele_types', 'good_allele_inds', 'population');
     end
 else
     population_str = '';     num_populations = 1;
 end
-if(num_populations>1)
+if(num_populations>1) % got populations here !!! 
     population_str = cell2vec(population_str, '-');
 end
 
@@ -157,7 +157,7 @@ figure_type_vec = ...
 
 bin_size = min(diff(num_bins));
 for figure_type = { ... % 'enrichment_missense_hist', ...
-        'num_variants_cum_log_x_normalized', ... % 'num_variants_cum',
+        'num_variants_cum_log_x_normalized', 'num_variants_cum', ...
         'num_carriers_cum_normalized', ... % 'num_carriers_cum', 'heterozygosity_cum',
         'heterozygosity_cum_normalized'} % , 'fraction_of_null_alleles'} %   [0 1 1.5 1.8] %  3 7 9 10 11 12 13] % [2 3 7 8] % try different ways of plotting
     log_x_flag = strfind(figure_type{1}, 'log_x');
@@ -167,11 +167,12 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
     clean_figure_type = strdiff(strdiff(strdiff( figure_type{1}, '_log_x'), '_log_y'), '_normalized');
     my_x_lim = []; my_y_lim = [];
     
-    figure; ctr=1; plot_x_vec = cell(num_populations*length(A{1}.good_allele_inds), 1); plot_y_vec = plot_x_vec;
+    figure; ctr=1; plot_x_vec = cell(num_populations*length(A{1}.good_allele_inds), 1); plot_y_vec = plot_x_vec; legend_vec = plot_x_vec; 
     for i=A{1}.good_allele_inds % loop on different allele types 1:min(6, A.num_allele_types)
         for j=1:num_populations % loop on different populations
             cur_allele_type = A{j}.allele_types{i};  % good_allele_inds(i)); % get string of allele type. Mis-match!!!
             [sorted_f_vec, sort_perm] = sort(f_vec{i,j});
+            sorted_het_vec = het_vec{i,j}(sort_perm);
             if(strncmp('stop', cur_allele_type, 4))  %        if(i == good_allele_inds(1)) % stop codons
                 [stop_f_vec, I] = unique(sorted_f_vec);
             end
@@ -196,7 +197,6 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
                     plot_x_vec{ctr} = sorted_f_vec;
                     plot_y_vec{ctr} = (1-new_A{j}.variants.per_site(i)) + ...
                         new_A{j}.variants.per_site(i) .* (1:length(f_vec{i})) ./ length(f_vec{i});
-                    %                color_vec(ctr), 'linewidth', 2);
                     if(strncmp('stop', cur_allele_type, 4)) %% if(i == good_allele_inds(1)) % stop codons
                         stop_hist = (1-new_A{j}.variants.per_site(i)) + ...
                             new_A{j}.variants.per_site(i) .* (1:length(f_vec{i})) ./ length(f_vec{i});
@@ -228,7 +228,6 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
                     x_str = 'Derived Allele Freq.'; y_str = 'Num. Alleles Per-Site (Cumulative)';
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 case 'heterozygosity_cum' % 2 % plot cumulative heterozygosity per-site (un-normalized)
-                    sorted_het_vec = het_vec{i,j}(sort_perm);
                     plot_x_vec{ctr} = sorted_f_vec;
                     plot_y_vec{ctr} = new_A{j}.heterozygosity.per_site(i) .* cumsum(sorted_het_vec) ./ sum(sorted_het_vec);
                     switch cur_allele_type              %   if(i == good_allele_inds(1)) % stop codons
@@ -250,6 +249,7 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
                     x_str = '# Carriers'; y_str = 'Frac. of # Alleles'; % title(allele_types{i});
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 case 'singletons_heterozygosity_hist' % 5 % plot histogram at singletons but with var. explained
+                    h_tail_het = zeros(length(tail_bins), 1); 
                     for k=1:length(tail_bins)
                         if(k < length(tail_bins))
                             cur_inds = find(count_vec{i} == tail_bins(k));
@@ -273,7 +273,7 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
                     %
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 case 'heterozygosity_hist' % 7 % plot histogram of heterozygosity
-                    [h_het, bin_het] = weighted_hist(f_vec{i}, het_vec{i}, num_bins); %  min(count_vec{i}));
+                    [h_het, bin_het] = weighted_hist(f_vec{i, j}, het_vec{i, j}, num_bins); %  min(count_vec{i}));
                     h_het = normalize_hist(bin_het, h_het) .* new_A{j}.heterozygosity.per_site(i); % normalize and multiply by total area
                     save_total_het = sum(h_het);                 save_total_het = 1;
                     [h_freq, bin_freq] = hist(f_vec{i}, num_bins); % count # of alleles in each bin
@@ -284,7 +284,7 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
                     % h(ctr) = bar(bin_het+0.4*(ctr-1)*bin_size, h_het ./ save_total_het, 0.2, color_vec(ctr)); hold on; %                   h(ctr) = plot(bin_het, h_het ./ save_total_het, color_vec(ctr), 'linewidth', 2);
                     h2 = plot(bin_het, 2 .* new_A{j}.heterozygosity.per_site(i) .* (1-bin_het), [color_vec(ctr) '--'], 'linewidth', 2); % plot fitted line
                     if(i==A{j}.good_allele_inds(1)) % plot once, at the first allele
-                        h2 =  plot(bin_het, 2 .* theta .* (1-bin_het), 'k--', 'linewidth', 2); %
+                        h2 = plot(bin_het, 2 .* theta .* (1-bin_het), 'k--', 'linewidth', 2); %
                     end
                     x_str = 'Derived Allele Freq.'; y_str =  'Heterozygosity per site';
                     legend_loc = 'northeast';
@@ -292,12 +292,12 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 case 'heterozygosity_hist_zoom' % 8 % plot histogram of heterozygosity bins at the very low end
                     eps = 0.1;  % contraction factor (we look at DAF < eps)
-                    rare_inds = find(f_vec{i} < max(num_bins .* eps));
-                    frac_rare = sum(het_vec{i}(rare_inds)) / sum(het_vec{i});
-                    [h_het bin_het] = weighted_hist(min(f_vec{i}, max(num_bins .* eps)), het_vec{i}, num_bins .* eps); %  min(count_vec{i}));
+%                    rare_inds = find(f_vec{i} < max(num_bins .* eps));
+                    frac_rare = sum(het_vec{i}(f_vec{i} < max(num_bins .* eps))) / sum(het_vec{i});
+                    [h_het, bin_het] = weighted_hist(min(f_vec{i}, max(num_bins .* eps)), het_vec{i}, num_bins .* eps); %  min(count_vec{i}));
                     h_het = h_het(1:end-1); bin_het = bin_het(1:end-1);
                     h_het = normalize_hist(bin_het, h_het) .* new_A{j}.heterozygosity.per_site(i) .* frac_rare; % normalize and multiply by total area
-                    [h_freq bin_freq] = hist(f_vec{i}, num_bins .* num_bins); % count # of alleles in each bin
+                    [h_freq, bin_freq] = hist(f_vec{i}, num_bins .* num_bins); % count # of alleles in each bin
                     h_het_std = h_het ./ ( save_total_het .* sqrt(h_freq(1:length(h_het))) ); % take coefficient of variation ..
                     save_total_het = 1;
                     %              h2 = errorbar(bin_het+0.4*(ctr-1)*bin_size.*eps, h_het ./ save_total_het, h_het_std, color_vec(ctr), 'linestyle', 'none'); hold on;
@@ -306,7 +306,7 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
                     if(i==A{j}.good_allele_inds(1)) % plot once
                         N=10000; mu = 2*10^(-8);
                         theta = 4*N*mu;
-                        h2 =  plot(bin_het, 2 .* theta .* (1-bin_het), 'k--', 'linewidth', 2); %
+                        h2 = plot(bin_het, 2 .* theta .* (1-bin_het), 'k--', 'linewidth', 2); %
                     end
                     x_str = 'Derived Allele Freq.'; y_str =  'Heterozygosity per site';
                     legend_loc = 'northeast';
@@ -326,7 +326,6 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
             fig_str = figure_type{1};
-            ctr=ctr+1;
             switch clean_figure_type
                 case {'num_variants_cum', 'heterozygosity_cum'} % {0,2}
                     switch cur_allele_type
@@ -346,12 +345,15 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
                         stop_hist_interp = stop_hist_interp(fit_inds); synonymous_hist_interp = synonymous_hist_interp(fit_inds);
                     end % if last allele type
             end % switch figure type again ..
+            legend_vec{ctr} = [strdiff(allele_types{i}, 'coding-') ', ' A{j}.population ...
+                ', het.=' num2str(new_A{j}.heterozygosity.per_gene(i),2)];        
+            ctr=ctr+1;
         end % loop on different populations
     end % loop on different allele types
-    legend_vec = vec2row(allele_types(A{j}.good_allele_inds));
-    for i=1:length(A{j}.good_allele_inds)       % add total heterozygosity
-        legend_vec{i} = [legend_vec{i} ', het.=' num2str(new_A{j}.heterozygosity.per_gene(A{j}.good_allele_inds(i)),2)];
-    end
+%    legend_vec = vec2row(allele_types(A{j}.good_allele_inds)); % why only last population ?? 
+%    for i=1:length(A{j}.good_allele_inds)       % add total heterozygosity
+%        legend_vec{i} = [legend_vec{i} ', het.=' num2str(new_A{j}.heterozygosity.per_gene(A{j}.good_allele_inds(i)),2)];
+%    end
     
     %stop_ind = find(A{1}.allele_types_ind == STOP); %target_stop_ind = find(MutationTypes == STOP);
     missense_ind = find(A{1}.allele_types_ind == MISSENSE); %target_missense_ind = (MutationTypes == MISSENSE);
@@ -395,7 +397,7 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
         case 'num_variants_cum' % 0 % plot cumulative of fitted distribution for missense
             additional_plot_x_vec = {x_vec}; % missense_fit_bins,
             additional_plot_y_vec = {constant_size_cum_phi_zero_vec ./ constant_size_cum_phi_zero_vec(end)}; % missense_fit_hist,
-            legend_vec = [legend_vec 'neutral, const. N']; %  'missense-fit',
+            legend_vec{end+1} = 'neutral, const. N'; %  'missense-fit',
             if(normalized_flag)
                 my_y_lim = [0.98 1];
             end
@@ -423,12 +425,12 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
             additional_plot_x_vec{1} = x_vec;
             additional_plot_y_vec{1} = theta.*constant_size_cum_phi_one_vec ./ constant_size_cum_phi_one_vec(end);
             %            plot(x_vec, theta.*constant_size_cum_phi_one_vec ./ constant_size_cum_phi_one_vec(end), 'k--', 'linewidth', 2); % plot the theoretical constant population size distribution
-            legend_vec = [legend_vec  'neutral, const. N'];
+            legend_vec{end+1} = 'neutral, const. N';
             my_x_lim = [10^(-5) 1];
         case 'heterozygosity_cum' % 2 % plot cumulative of fitted distribution
             additional_plot_x_vec = {x_vec}; % missense_fit_bins,
             additional_plot_y_vec = {constant_size_cum_het_vec ./ constant_size_cum_het_vec(end)}; % missense_fit_hist,
-            legend_vec = [legend_vec {'neutral, const. N'}]; % 'missense-fit',
+            legend_vec{end+1} = 'neutral, const. N'; % 'missense-fit',
         case 'singletons_per_gene' % 11 % ??? Plot # singletons per gene
             ratio_vec = singletons.per_gene ./ singletons.per_gene(13);
             normalized_ratio_vec = ratio_vec ./ sum(ratio_vec(A{j}.good_allele_inds));
@@ -481,7 +483,7 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
     if(exist('plot_x_vec', 'var') && (~isempty(plot_x_vec)))
         ctr=1;
         for i=1:length(A{j}.good_allele_inds)
-            for j=1:num_populations
+            for j=1:num_populations % here plotting is done !! 
                 eval(['h(' num2str(ctr) ') = ' plot_str '(plot_x_vec{' num2str(ctr) '}, plot_y_vec{' num2str(ctr) ...
                     '}, ''linewidth'', 2, ''color'', ''' color_vec(i) ''', ''linestyle'', ''', symbol_vec{j} ''');']); hold on; ctr=ctr+1;
             end
@@ -505,25 +507,26 @@ for figure_type = { ... % 'enrichment_missense_hist', ...
     if(ismember(figure_type, 'heterozygosity_hist_zoom')) % [7])) % something weird is wrong with legend for 8 (zoom-in)
         legend(h, legend_vec, 'location', legend_loc);
     else        
-        legend(h([1:num_populations:num_populations*length(A{j}.good_allele_inds)  ctr-1]), legend_vec, ...
-            'location', legend_loc, 'fontsize', 14, 'fontweight', 'bold');
+%        legend(h([1:num_populations:num_populations*length(A{j}.good_allele_inds)  ctr-1]), legend_vec, ...
+        legend(h, legend_vec, 'location', legend_loc, 'fontsize', 14, 'fontweight', 'bold');
     end
     legend boxoff;
     if( (iscell(legend_vec)) && (~isempty(strfind(lower(legend_vec{1}), 'nons'))) )
-        tmp_str = {'NS', 'S'};
+        tmp_str = {'NS', 'S', 'STOP'};
     else
-        tmp_str = {'S', 'NS'};
+        tmp_str = {'S', 'NS', 'STOP'};
     end
     
-    title(str2title([str2word('_', remove_dir_from_file_name(output_file_name), 'end') ...
-        ' ' fig_str ', 2N=' num2str(num_chr)  ', #GENES=' num2str(A{1}.num_genes) ', #SNPs=(' tmp_str{1} ' ' ...
-        num2str(num_snps(A{j}.good_allele_inds(1))) ', ' tmp_str{2} ' ' num2str(num_snps(A{j}.good_allele_inds(2))) ')'] ), 'fontsize', 8);
+    title(str2title([str2word('.', remove_dir_from_file_name(output_file_name), 'end') ...
+        ' ' fig_str ', 2n\_s=' num2str(num_chr)  ', #GENES=' num2str(A{1}.num_genes) ', #SNPs=(' tmp_str{1} ' ' ...
+        num2str(num_snps(A{j}.good_allele_inds(1))) ', ' tmp_str{2} ' ' num2str(num_snps(A{j}.good_allele_inds(2))) ...
+        ', ' tmp_str{3} ' ' num2str(num_snps(A{j}.good_allele_inds(3))) ')'] ), 'fontsize', 8);
     % ...
     %    '), het. per gene=(' tmp_str{1} ' ' num2str(heterozygosity.per_gene(A{j}.good_allele_inds(1)),2) ', ' tmp_str{2} ' ' ...
     %    num2str(heterozygosity.per_gene(A{j}.good_allele_inds(2)),2) ') ' ...
     %    ' het. per site=(' tmp_str{1} ' ' num2str(heterozygosity.per_site(A{j}.good_allele_inds(1)),2) ', ' tmp_str{2} ' ' ...
     %    num2str(heterozygosity.per_site(A{j}.good_allele_inds(2)),2) ')']), 'fontsize', 8);
-    my_saveas(gcf, [output_file_name '_' population_str '_all_' fig_str], {'fig', 'pdf', 'epsc'}); % {'epsc', 'pdf', 'jpg', 'fig'});
+    my_saveas(gcf, [output_file_name '_' population_str '_all_' fig_str], {'fig', 'pdf', 'epsc', 'jpg'}); % {'epsc', 'pdf', 'jpg', 'fig'});
 end % loop on figure types
 
 
