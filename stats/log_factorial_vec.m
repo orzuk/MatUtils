@@ -12,7 +12,7 @@ function[real_res_vec]= log_factorial_vec(N)
 
 global cumsum_log_vec; % why global? 
 
-[unisorted_N ind rev_ind] = unique(N); % Take all input numbers
+[unisorted_N, ~, rev_ind] = unique(N); % Take all input numbers
 
 arr = zeros(1,length(unisorted_N)); % Array with the results
 % arr(1) = log(factorial(unisorted_N(1)))  - overflow problems !!!

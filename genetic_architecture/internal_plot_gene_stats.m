@@ -16,7 +16,7 @@ function internal_plot_gene_stats(gene_header, gene_ind, GeneStruct, ExonsGeneSt
 
 Assign24MammalsGlobalConstants;
 alpha_s_fit = 'MLE'; % MLE (how to fit alpha and s) 
-legend_vec = vec2row(SiteFreqSpecStruct{1}.allele_types(SiteFreqSpecStruct{1}.good_allele_inds));
+%legend_vec = vec2row(SiteFreqSpecStruct{1}.allele_types(SiteFreqSpecStruct{1}.good_allele_inds));
 num_populations = length(SiteFreqSpecStruct);
 
 I = gene_ind; gene_name = GeneStruct.gene_names{gene_ind}; % strfind_cell(GeneStruct.gene_names, gene_header); % get gene's index in genes struct
@@ -31,20 +31,20 @@ end
 for figure_type = {'num_variants_cum_log', 'heterozygosity_cum_log', 'num_variants_cum_log_normalized', 'heterozygosity_cum_log_normalized'}
     figure; ctr=1; % plot cumulative allele frequency for each mutation type
     [~, allele_types_I, allele_types_J] = intersect(MutationTypes, SiteFreqSpecStruct{1}.allele_types_ind);
-    legend_vec = SiteFreqSpecStruct{1}.allele_types(SiteFreqSpecStruct{1}.good_allele_inds);
+    legend_vec = strdiff_cell(SiteFreqSpecStruct{1}.allele_types(SiteFreqSpecStruct{1}.good_allele_inds), 'coding');
     %    for i=1:length(MutationTypes)
     %        cur_mutation_type_ind = allele_types_J(i); %    find(SiteFreqSpecStruct{1}.allele_types_ind == MutationTypes(i));
-    for i=1:length(SiteFreqSpecStruct{1}.good_allele_inds) % take only
+    for i=1:length(SiteFreqSpecStruct{1}.good_allele_inds) % take only synonymous, missense and stop codons 
         cur_mutation_type_ind = SiteFreqSpecStruct{1}.good_allele_inds(i); % index in list of alleles from ESP
         cur_mutation_type_rate_ind = ... % index in list of genomic mutation types
             find(SiteFreqSpecStruct{1}.allele_types_ind(cur_mutation_type_ind) == MutationTypes); % find index representing mutation
         switch figure_type{1} % Determine x-vec
             case {'num_variants_cum', 'heterozygosity_cum', 'num_variants_cum_log', 'heterozygosity_cum_log', ...
                     'num_variants_cum_log_normalized', 'heterozygosity_cum_log_normalized'}
-                [x_vec freq_sort_perm] = sort( SiteFreqSpecStruct{1}.gene_by_allele_type_freq_list{cur_mutation_type_ind, J} );
+                [x_vec, freq_sort_perm] = sort( SiteFreqSpecStruct{1}.gene_by_allele_type_freq_list{cur_mutation_type_ind, J} );
                 x_label = 'Derived Allele Freq.';
         end
-        legend_loc=4; % default legend (for cumulative distributions)
+        legend_loc='southeast'; % default legend (for cumulative distributions)
         switch figure_type{1} % determine y_vec
             case {'num_variants_cum', 'num_variants_cum_log'}
                 y_vec = (1:length(x_vec)) ./ length(x_vec);
@@ -83,7 +83,7 @@ for figure_type = {'num_variants_cum_log', 'heterozygosity_cum_log', 'num_varian
         hold on; ctr=ctr+1;
     end % loop on mutations type
     
-    legend(legend_vec, legend_loc);
+    legend(legend_vec, 'location', legend_loc); legend('boxoff'); 
     xlabel(x_label); ylabel(y_label);
     save_flag = 0;
     while(save_flag == 0)
@@ -219,10 +219,11 @@ switch alpha_s_fit % Temp: Fit alpha crudely for each gene
         
         
         % get rid of alleles appearing zero times (they're here since they appear in another population)
-        
-        [fitted_LL fitted_s fitted_alpha fitted_beta] = ...
+        t_max_like = cputime; 
+        [fitted_LL, fitted_s, fitted_alpha, fitted_beta] = ...
             maximize_two_class_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
-            X, y, trait_type, prevalence, null_w_vec, maximize_parameters, full_flag, D, num_individuals, 'brute-force'); % get MLE estimator
+            X, y, trait_type, prevalence, null_w_vec, maximize_parameters, full_flag, D, num_individuals, 'brute-force'); % get MLE estimator !!! 
+        t_max_like = cputime - t_max_like 
 end
 R{ctr+8+2*length(SiteFreqSpecStruct{1}.upper_freq_vec),2+num_populations} = fitted_alpha;
 R{ctr+8+2*length(SiteFreqSpecStruct{1}.upper_freq_vec),2+num_populations} = 0; % neutral alleles

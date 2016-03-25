@@ -147,6 +147,7 @@ if(extract_fields_flag)
             end
             
         end % loop on SNPs
+        tmp_INFO = S.INFO; 
         S = my_rmfield(S, {'European', 'African', 'dbSNP', 'Total', 'Minor', ...
             'Observed', 'Average', 'geneList', 'Whether', 'PubMed', 'GenotypeMat', 'INFO'});  % why are these fields removed? save space!!!! (don't keep info field!!!)
         rm_field_names = {'EXOME_CHIP', 'GWAS_PUBMED'}; % in the future use this to remove unnecessary fields  
@@ -160,6 +161,7 @@ if(extract_fields_flag)
             S.clinicalAssociation = strrep_cell(S.clinicalAssociation, 'unknown', '');
         end
         save([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], '-struct', 'S'); % add new fields% remove fields to reduce memory
+        S.INFO = tmp_INFO; clear tmp_INFO; 
         return_flag=1 % only convert to .mat
     end % loop on population
     % % % % else % here .mat file already exists

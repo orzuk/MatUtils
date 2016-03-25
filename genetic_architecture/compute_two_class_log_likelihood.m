@@ -1,4 +1,5 @@
 % Compute log-likelihood for data using the two-class model
+% Formula is taken from eq. (XXX) from document : 
 %
 % Input:
 % s_null_vec - vector of possible selection coefficients for the null alleles. Should be NEGATIVE for delterious alleles (so fitness is 1+s)
@@ -23,7 +24,7 @@
 %                     -1: only phenotype part of LL
 % full_flag - input format:
 %                      1: X is genotype matrix (default)
-%                      0: X contains sufficient statistics (sums and rows and columns)
+%                      0: X contains sufficient statistics (sums of rows and columns)
 % num_individuals - input number of individuals (when not given in input vectors)
 % D - demographic parameters (NEW! optional! (currently only constant pop. size supported)
 %
@@ -32,7 +33,7 @@
 %
 function [log_like_mat, P_poly] = ...
     compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
-    X, y, trait_type, prevalence, null_w_vec, include_phenotype, full_flag, num_individuals, D)
+    X, y, trait_type, prevalence, null_w_vec, include_phenotype, full_flag, num_individuals, D, print_flag)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%% Set Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
@@ -76,6 +77,9 @@ if(size(null_w_vec, 2) == 2) % get also true null state (for each missense allel
     true_null_w_vec = null_w_vec(:,2); 
     null_w_vec = null_w_vec(:,1); 
 end
+if(~exist('print_flag') || uisempty(print_flag)) % default: don't print 
+    print_flag = 0; 
+end
 %%%%%%%%%%%%%%%%%%%%%%%% End Set Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
 
@@ -107,7 +111,7 @@ end
 theta = rare_cumulative_per_gene; % total rate of polymorphic alleles
 sigma_e = 1; % environmental noise level
 if(full_flag)
-    [num_individuals L] = size(X); % set number of individuals and number of SNPs
+    [num_individuals, L] = size(X); % set number of individuals and number of SNPs
 else
     if(~isempty(y)) % when phenotype is given
         num_individuals = length(y);
@@ -118,7 +122,6 @@ end
 
 log_like_mat = zeros(num_s, num_alpha, num_beta);
 x_vec = (1:2*N-1) ./ (2*N); % vector of allele frequencies
-
 if(full_flag)
     x_inds = cell(num_individuals,1);
     for i=1:num_individuals % record alternative alleles
@@ -136,7 +139,7 @@ else % here we only have summary statistics (sum of rows and columns)
 end
 allele_freq_vec = num_carriers_vec ./ num_individuals; % get observed allele frequency of each derived allele
 
-[unique_num_alleles_vec I_num_alleles J_num_alleles] = unique(num_alleles_vec);
+[unique_num_alleles_vec, I_num_alleles, J_num_alleles] = unique(num_alleles_vec);
 
 neutral_allele_freq_hist = exp(allele_freq_spectrum(x_vec, 0, N, 0, 'log')); % allele freq. distribution for neutral alleles. NOT Normalized!
 sum_neutral_allele_freq_hist = sum(neutral_allele_freq_hist);
@@ -147,15 +150,13 @@ prob_null_given_x = zeros(L,1); % conditional probability of allele being null w
 %T_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot!
 T_0 = sum(neutral_allele_freq_hist) * (x_vec(2)-x_vec(1)); 
 
-
 log_x_vec = log(x_vec); log_one_minus_x_vec = log(1-x_vec);
 underflow_correction_p = min(num_individuals-1, max(1, num_carriers_vec)) ./ num_individuals;
 underflow_correction_q = 1-underflow_correction_p;
 log_like_correction = num_carriers_vec .* log(underflow_correction_p) + (num_individuals-num_carriers_vec) .* log(underflow_correction_q); % update log-likelihood: correction for multinomial/binomial sampling?
-
 tmp_likelihood_one_allele = repmat(BIG_NUM, max(num_individuals_vec), 3);
 
-if(optimize_alpha)
+if(optimize_alpha) % Here what ?? 
     cond_y_tab = zeros(num_individuals, max(num_alleles_vec)+1); % table. entry (i,j) is Prob. (y(i) | beta*(j-1) nulls)
     if(include_phenotype) % prepare binomial tables
         binom_vec = zeros(length(unique_num_alleles_vec), max(unique_num_alleles_vec)+1); % save binomial coefficients in table
@@ -170,7 +171,7 @@ if(poisson_model_flag)
         (1 - sum( neutral_allele_freq_hist .* (1-x_vec) .^ num_individuals_vec(1) ) / sum(neutral_allele_freq_hist));
     % (1 - integral_hist(x_vec,  neutral_allele_freq_hist .* tmp_z0_vec ) ./ integral_hist(x_vec, neutral_allele_freq_hist) ); % This gives wrong results!!
     
-    [unique_num_carriers I J] = unique(num_carriers_vec);
+    [unique_num_carriers, I, J] = unique(num_carriers_vec);
     tmp_z_vec = sparse(length(unique_num_carriers), length(x_vec)); % creat sparse matrix
     pos_tmp_z_inds = cell(length(unique_num_carriers), 1);
     %%    t2 = cputime; % tmp_ind_vec = []; tmp_val_vec = [];
@@ -436,10 +437,11 @@ for i_s = 1:num_s % loop on parameters
                 end % switch if we have mixture or not
             end % if to include phenotypes
         %%%%%%%%%%%%%%%%%%%%%%%%%%%% End if include phenotypes %%%%%%%%%%%%
-            
-            if( (mod(i_alpha, 50) == 0) || mod(i_s, 50) == 0)
-                run_index_s_alpha_beta = [i_s i_alpha i_beta]
-                time_one_likelihood = cputime-ttt
+            if(print_flag)
+                if( (mod(i_alpha, 50) == 0) || mod(i_s, 50) == 0)
+                    run_index_s_alpha_beta = [i_s i_alpha i_beta]
+                    time_one_likelihood = cputime-ttt
+                end
             end
         end % loop on effect size beta
         
