@@ -5,22 +5,16 @@ num_bins = 0:0.01:1; % bins for what?
 parse_site_frequency_flag = 1; % parse XXX?????
 read_vcf_flag=1; % read vcf files for exome data
 unite_chr=0; % 0: parse ESP data. 1: unite all data to one chromosome
-read_to_mat_flag=1; % convert vcf (?) or other files to .mat format
-extract_fields_flag=1; % extract ??? fields
-compute_gene_matrices_flag=1; % 1. Compute for each gene ?? flag for parsing ???
+read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
+extract_fields_flag=0; % extract ??? fields
+compute_gene_matrices_flag=0; % 1. Compute for each gene ?? flag for parsing ???
 
 exome_data = 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!!
 
 plot_site_frequency_flag = 0; % 1: plot ESP data (this is also part of pre-processing)
-estimate_gene_by_gene = 0; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
-plot_gene_by_gene = 0; % make figures for individual genes 
+estimate_gene_by_gene = 1; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 
 queue_str = 'priority'; % for submitting jobs at broad farm
-
-global cumsum_log_vec;
-cumsum_log_vec = cumsum([0 log(1:2*10000)]); % compute log-binomial coefficients to save time 
-
-
 
 switch machine % Get directory
     case UNIX
@@ -63,8 +57,7 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
         sub_dir_str = dir_from_file_name(spectrum_data_files{i});
         chr_file_str = suffix_from_file_name(remove_suffix_from_file_name(spectrum_data_files{i}));
         
-%        min_chr=21; max_chr=21; % TEMP FOR DEBUG! TAKE SHORT CHROMOSOME
-        for chr = min_chr:max_chr % take short chrom for debugging min_chr:max_chr % 1:23
+        for chr = 21:21 % take short chrom for debugging min_chr:max_chr % 1:23
             do_chr = chr
             if(read_vcf_flag) % One file per chromosome. (includes ALL populations)
                 tmp_file_name = GetFileNames(fullfile(spectrum_data_dir, sub_dir_str, ['ESP6500*.chr' chr_num2str(chr) '.' chr_file_str '.vcf' ]));
@@ -106,7 +99,7 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
                             [], [], mem_flag); % allow specifying memory allocation
                     end
                 end % if unite chroms
-                if(read_vcf_flag && in_matlab_flag) % unite different files (even without 'unite chr')
+                if(read_vcf_flag && in_matlab_flag) % unite different files
                     if(isfield(A, 'GENE'))
                         A.GENE = vec2column(A.GENE);
                     end
@@ -114,14 +107,14 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
                         all_A = A;
                     else
                         field_names = fieldnames(A);
-                        for j=1:length(field_names)  % concatenate all chromosomes to one file (is this for population file? or one file for all populations?)
+                        for j=1:length(field_names)  % concatenate all chromosomes to one file (is this for population file? or one file for 
                             eval_str = ['all_A.' field_names{j} ' = [all_A.' field_names{j} ''' A.' field_names{j} ''']'';'];
                             eval(eval_str)
                         end
                     end
                     close all;
                 end % if read vcf
-                if(unite_chr)  % Here unite - why only first population? (Europeans?)
+                if(unite_chr)
                     save(fullfile(spectrum_data_dir, sub_dir_str, ...
                         ['all_chr_ESP6500.' chr_file_str '_'  population{1} '_up_to_chr' num2str(chr) '.mat']), '-struct', 'all_A'); % Save union
                 end
@@ -164,12 +157,11 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
         
         %            for gene_prefix = {'APOA5'} % mat2cell(['A':'Z' '0':'9']', ones(36,1), 1) % enable also weird genes starting with a number
         
-        for gene_prefix = {''} % {'ABCG1'} % for chrom 21 {'ANGPTL'} % for chrom 1 %%%% (num2cell(['A':'Z' '0':'9']'))'  %% {'ANKRD20A3'} %%  %% {'ANGP'} %% (mat2cell(['A':'Z' '0':'9']', ones(36,1), 1))' % enable also weird genes starting with a number
+        for gene_prefix = {'ANGPTL'} %%%% (num2cell(['A':'Z' '0':'9']'))'  %% {'ANKRD20A3'} %%  %% {'ANGP'} %% (mat2cell(['A':'Z' '0':'9']', ones(36,1), 1))' % enable also weird genes starting with a number
             job_str = ['parse_site_frequency_gene_by_gene(''' spectrum_data_dir ''', ' spectrum_data_files_str ', ' ... % spectrum_data_files{i}
-                '''' fullfile(spectrum_data_dir, exome_data, 'GeneByGene') ''', ' ... % 'Tennessen_Science_2012'
+                '''' fullfile(spectrum_data_dir, 'Tennessen_Science_2012', 'GeneByGene') ''', ' ...
                 '''' fullfile(mammals_data_dir, genome_version, exons_file) ''' , ' ... % GeneStruct
                 '''' fullfile(spectrum_data_dir, mutation_rates_file) ''', ' ...
-                num2str(plot_gene_by_gene) ', ' ...
                 '[], ''' gene_prefix{1} ''');'];
             
             %                 parse_site_frequency_gene_by_gene(spectrum_data_dir, spectrum_data_files{i}, ...

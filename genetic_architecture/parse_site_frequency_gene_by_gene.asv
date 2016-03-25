@@ -7,15 +7,11 @@
 % GeneStruct - file/structure with genomic information on each gene
 % MutationRateTable - total mutation rate per-gene for different mutation types
 % MutationTypes - strings of each mutation type
-% plot_flag - 1 (default): make plots, 0 - don't plot just save files 
 % gene_prefix - run only on genes matching this prefix (used to divide
 % labor, run parallel ..)
 %
-% Output: None. Figures are saved in: 
-% There is also a file for each gene saved at: 
-% 
 function parse_site_frequency_gene_by_gene(spectrum_data_dir, spectrum_data_file, output_data_dir, ...
-    GeneStruct, MutationRateTable, MutationTypes, plot_flag, gene_prefix) % Estimate s and alpha for each gene in the genome - how???
+    GeneStruct, MutationRateTable, MutationTypes, gene_prefix) % Estimate s and alpha for each gene in the genome - how???
 
 Assign24MammalsGlobalConstants;
 if(ischar(GeneStruct))
@@ -133,11 +129,11 @@ ExonsGeneStruct = load(gene_struct_input_file, 'chr_vec', 'pos_start_vec', 'pos_
 for i=1:num_genes % loop on genes and plot
     sprintf(['Run gene = %d out of %d, ' upper(GeneStruct.gene_names{i})], i, num_genes)
     if(strmatch(upper(gene_prefix), upper(GeneStruct.gene_names{i})))
-        gene_header = upper(GeneStruct.gene_names{i}); % (1:2));  % Print gene name 
+        gene_header = upper(GeneStruct.gene_names{i}) % (1:2));  % Print gene name 
         gene_dir = fullfile(output_data_dir, gene_header(1), GeneStruct.gene_names{i}); % here save all information on gene
         my_mkdir(gene_dir);
         internal_plot_gene_stats(gene_header, i, GeneStruct, ExonsGeneStruct, ...
-            SiteFreqSpecStruct, MutationRateTable, MutationTypes, gene_dir, plot_flag);
+            SiteFreqSpecStruct, MutationRateTable, MutationTypes, gene_dir);
     end
     if(mod(i, 10) == 0) % avoid having too many figures open
         close all;
