@@ -5,20 +5,20 @@ num_bins = 0:0.01:1; % bins for what?
 parse_site_frequency_flag = 1; % parse XXX?????
 read_vcf_flag=1; % read vcf files for exome data
 unite_chr=0; % 0: parse ESP data. 1: unite all data to one chromosome
-read_to_mat_flag=1; % convert vcf (?) or other files to .mat format
-extract_fields_flag=1; % extract ??? fields
+read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
+extract_fields_flag=0; % extract ??? fields
 compute_gene_matrices_flag=1; % 1. Compute for each gene ?? flag for parsing ???
 
 exome_data = 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!!
 
 plot_site_frequency_flag = 0; % 1: plot ESP data (this is also part of pre-processing)
 estimate_gene_by_gene = 0; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
-plot_gene_by_gene = 0; % make figures for individual genes 
+plot_gene_by_gene = 0; % make figures for individual genes
 
 queue_str = 'priority'; % for submitting jobs at broad farm
 
 global cumsum_log_vec;
-cumsum_log_vec = cumsum([0 log(1:2*10000)]); % compute log-binomial coefficients to save time 
+cumsum_log_vec = cumsum([0 log(1:2*10000)]); % compute log-binomial coefficients to save time
 
 
 
@@ -63,7 +63,7 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
         sub_dir_str = dir_from_file_name(spectrum_data_files{i});
         chr_file_str = suffix_from_file_name(remove_suffix_from_file_name(spectrum_data_files{i}));
         
-%        min_chr=21; max_chr=21; % TEMP FOR DEBUG! TAKE SHORT CHROMOSOME
+        %        min_chr=21; max_chr=21; % TEMP FOR DEBUG! TAKE SHORT CHROMOSOME
         for chr = min_chr:max_chr % take short chrom for debugging min_chr:max_chr % 1:23
             do_chr = chr
             if(read_vcf_flag) % One file per chromosome. (includes ALL populations)
@@ -92,7 +92,7 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
                     if(chr == min_chr)
                         A = load(fullfile(spectrum_data_dir, sub_dir_str, ...
                             ['all_chr_ESP6500.' chr_file_str '_'  population{1} '_up_to_chr' num2str(chr) '.mat'])); % load union
-                    else
+                    else % load current
                         A = load([remove_suffix_from_file_name(fullfile(spectrum_data_dir, spectrum_data_files{i}))  '_' population{1} '.mat']);
                     end
                     
@@ -110,15 +110,23 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
                     if(isfield(A, 'GENE'))
                         A.GENE = vec2column(A.GENE);
                     end
-                    if(chr == min_chr) % 1)
-                        all_A = A;
-                    else
-                        field_names = fieldnames(A);
-                        for j=1:length(field_names)  % concatenate all chromosomes to one file (is this for population file? or one file for all populations?)
-                            eval_str = ['all_A.' field_names{j} ' = [all_A.' field_names{j} ''' A.' field_names{j} ''']'';'];
-                            eval(eval_str)
+                    if(unite_chr)
+                        if(chr == min_chr) % 1)
+                            all_A = A;
+                        else
+                            field_names = fieldnames(A);
+                            unite_field_names = intersect(fieldnames(A), {'XXX_VARIANT_COUNT_', 'XXX_REF_ALLELE_COUNT_', 'XXX_FEATURE_', 'GENE', 'XXX_CHROM', ...
+                                'POS',  'ALLELE_FREQ',   'GENE_INDS'});
+                            for j=1:length(unite_field_names)  % concatenate all chromosomes to one file (is this for population file? or one file for all populations?)
+                                unite_str = ['all_A.' unite_field_names{j} ' = [all_A.' unite_field_names{j} ''' A.' unite_field_names{j} ''']'';'];
+                                eval(unite_str)
+                            end
+                            % Here unite cell-array. Problem! for different chromosomes might have different #allele_types and their encoding
+                            for j=1:20
+                                all_A.n_vec{j} = [all_A.n_vec{j} A.n_vec{tmp_allele_type_ind_vec(j)}];
+                            end
                         end
-                    end
+                    end % unite chr
                     close all;
                 end % if read vcf
                 if(unite_chr)  % Here unite - why only first population? (Europeans?)
