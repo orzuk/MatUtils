@@ -2,16 +2,16 @@
 Assign24MammalsGlobalConstants; AssignGeneralConstants; AssignStatsConstants;
 num_bins = 0:0.01:1; % bins for what?
 
-parse_site_frequency_flag = 1; % parse XXX?????
+parse_site_frequency_flag = 0; % parse XXX?????
 read_vcf_flag=1; % read vcf files for exome data
 unite_chr=0; % 0: parse ESP data. 1: unite all data to one chromosome
 read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
 extract_fields_flag=0; % extract ??? fields
-compute_gene_matrices_flag=1; % 1. Compute for each gene ?? flag for parsing ???
+compute_gene_matrices_flag=0; % 1. Compute for each gene ?? flag for parsing ???
 
 exome_data = 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!!
 
-plot_site_frequency_flag = 0; % 1: plot ESP data (this is also part of pre-processing)
+plot_site_frequency_flag = 1; % 1: plot ESP data (this is also part of pre-processing)
 estimate_gene_by_gene = 0; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 plot_gene_by_gene = 0; % make figures for individual genes
 
@@ -54,7 +54,7 @@ mutation_rates_file = 'human_genes_mutation_rates_hg18.mat'; % output file with 
 
 spectrum_data_files_str = '{';
 for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
-    for population = {'European'} % , 'African'} % European'} % ,
+    for population = {'African'} % , 'African'} % European'} % ,
         if(read_vcf_flag)
             max_chr=23; min_chr=1;
         else
@@ -63,7 +63,7 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
         sub_dir_str = dir_from_file_name(spectrum_data_files{i});
         chr_file_str = suffix_from_file_name(remove_suffix_from_file_name(spectrum_data_files{i}));
         
-        %        min_chr=21; max_chr=21; % TEMP FOR DEBUG! TAKE SHORT CHROMOSOME
+%                min_chr=22; max_chr=23; % TEMP FOR DEBUG! TAKE SHORT CHROMOSOME
         for chr = min_chr:max_chr % take short chrom for debugging min_chr:max_chr % 1:23
             do_chr = chr
             if(read_vcf_flag) % One file per chromosome. (includes ALL populations)
@@ -89,12 +89,13 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
                 %                     parse_site_frequency_data(fullfile(spectrum_data_dir, spectrum_data_files{i})); % , gene_list);
                 
                 if(unite_chr)
-                    if(chr == min_chr)
-                        A = load(fullfile(spectrum_data_dir, sub_dir_str, ...
-                            ['all_chr_ESP6500.' chr_file_str '_'  population{1} '_up_to_chr' num2str(chr) '.mat'])); % load union
-                    else % load current
-                        A = load([remove_suffix_from_file_name(fullfile(spectrum_data_dir, spectrum_data_files{i}))  '_' population{1} '.mat']);
-                    end
+%                    if(chr == min_chr)
+%                        A = load(fullfile(spectrum_data_dir, sub_dir_str, ...
+%                            ['all_chr_ESP6500.' chr_file_str '_'  population{1} '_up_to_chr' num2str(chr) '.mat'])); % load union
+%                    else % load current
+                     A = load([remove_suffix_from_file_name(fullfile(spectrum_data_dir, spectrum_data_files{i}))  '_' population{1} '.mat']);
+                     A = my_rmfield(A, 'INFO_ARR'); 
+                        %                    end
                     
                     in_matlab_flag=1;
                 else % don't unite chroms
@@ -121,10 +122,20 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
                                 unite_str = ['all_A.' unite_field_names{j} ' = [all_A.' unite_field_names{j} ''' A.' unite_field_names{j} ''']'';'];
                                 eval(unite_str)
                             end
-                            % Here unite cell-array. Problem! for different chromosomes might have different #allele_types and their encoding
-                            for j=1:20
-                                all_A.n_vec{j} = [all_A.n_vec{j} A.n_vec{tmp_allele_type_ind_vec(j)}];
+                            [intercet_allele_types, I_types, J_types] = intersect(all_A.allele_types, A.allele_types); % Here unite cell-array. Problem! for different chromosomes might have different #allele_types and their encoding
+                            for j=1:length(I_types)
+                                all_A.n_vec{I_types(j)} = [all_A.n_vec{I_types(j)}' A.n_vec{J_types(j)}']';
+                                all_A.f_vec{I_types(j)} = [all_A.f_vec{I_types(j)}' A.f_vec{J_types(j)}']';
+                                all_A.count_vec{I_types(j)} = [all_A.count_vec{I_types(j)}' A.count_vec{J_types(j)}']';
                             end
+                            [diff_allele_types, I_diff_types] = setdiff(A.allele_types, all_A.allele_types); % Here get different #allele_types and their encoding
+                            for j=1:length(I_diff_types)% New alleles
+                                all_A.n_vec{all_A.num_allele_types+j} = A.n_vec{I_diff_types(j)};
+                                all_A.f_vec{all_A.num_allele_types+j} = A.f_vec{I_diff_types(j)};
+                                all_A.count_vec{all_A.num_allele_types+j} = A.count_vec{I_diff_types(j)};
+                                all_A.allele_types{all_A.num_allele_types+j} = A.allele_types{I_diff_types(j)}; % add allele types 
+                            end
+                            all_A.num_allele_types = length(all_A.allele_types); % update # of allele types 
                         end
                     end % unite chr
                     close all;
