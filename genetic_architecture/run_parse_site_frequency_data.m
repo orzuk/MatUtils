@@ -3,7 +3,7 @@ Assign24MammalsGlobalConstants; AssignGeneralConstants; AssignStatsConstants;
 num_bins = 0:0.01:1; % bins for what?
 
 parse_site_frequency_flag = 0; % parse XXX?????
-read_vcf_flag=1; % read vcf files for exome data
+read_vcf_flag=0; % read vcf files for exome data
 unite_chr=0; % 0: parse ESP data. 1: unite all data to one chromosome
 read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
 extract_fields_flag=0; % extract ??? fields
@@ -117,7 +117,7 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
                         else
                             field_names = fieldnames(A);
                             unite_field_names = intersect(fieldnames(A), {'XXX_VARIANT_COUNT_', 'XXX_REF_ALLELE_COUNT_', 'XXX_FEATURE_', 'GENE', 'XXX_CHROM', ...
-                                'POS',  'ALLELE_FREQ',   'GENE_INDS'});
+                                'POS',  'ALLELE_FREQ',   'GENE_INDS', 'unique_genes'});
                             for j=1:length(unite_field_names)  % concatenate all chromosomes to one file (is this for population file? or one file for all populations?)
                                 unite_str = ['all_A.' unite_field_names{j} ' = [all_A.' unite_field_names{j} ''' A.' unite_field_names{j} ''']'';'];
                                 eval(unite_str)

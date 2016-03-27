@@ -241,15 +241,13 @@ simulation_time = cputime - simulation_time
 % H_old -
 % H_new -
 %
-function [H_old H_new] = het_expan(N, mu, s, num_generations, expansion_factor)
+function [H_old, H_new] = het_expan(N, mu, s, num_generations, expansion_factor)
 
 N_vec = N .* expansion_factor.^(0:num_generations);
 
 prod_vec = cumprod( 1 - 1 ./ (2.*N_vec) );
 H_old = prod_vec(end); % prod ( 1 - 1 ./ (2.*N_vec) ); % assuming total heterozgosity is 1
-
 % H_new_per_gen = mu;
-
 H_new = mu .* sum(prod_vec);
 
 
@@ -406,8 +404,8 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
     num_alleles_simulated = num_alleles_simulated + cur_num_alleles_survived
     
     j=num_generations; % compute again for last generation
-    [U C] = unique_with_counts(vec2row(q(:,j))); % Compute histogram of counts
-    [x_vec{j} p_vec{j}] = union_with_counts(x_vec{j}, p_vec{j}, [0 U 2*N_vec(j)], [num_losses C num_fixations]);
+    [U, C] = unique_with_counts(vec2row(q(:,j))); % Compute histogram of counts
+    [x_vec{j}, p_vec{j}] = union_with_counts(x_vec{j}, p_vec{j}, [0 U 2*N_vec(j)], [num_losses C num_fixations]);
     % total_het_at_each_generation_vec(j) = 2 .* sum(q(:,j) ./ (2.*N_vec(j)) .* (1-  q(:,j) ./ (2.*N_vec(j)) ) ); % this indicates how much heterozygosity was absorbed at each time
     %     if(~isempty(absorption_inds))
     %         total_het_at_each_generation_vec(j) = total_het_at_each_generation_vec(j) - ...
@@ -424,10 +422,9 @@ num_fixations = sum(num_fixations_by_generation_vec);
 num_losses = sum(num_losses_by_generation_vec);
 
 for j=1:num_generations % sort distributions
-    [x_vec{j} sort_perm] = sort(x_vec{j});
+    [x_vec{j}, sort_perm] = sort(x_vec{j});
     p_vec{j} = p_vec{j}(sort_perm) ./ num_simulated_polymorphic_alleles_vec(1); % normalize to incorporate prob. of alleles which started as polymorphic
 end
-
 
 q=final_q; % Copy results
 
@@ -445,8 +442,8 @@ end
 % Compute allele frequency distribution numerically.
 % Method: each generation propagate the markov chain
 % NOTE: Selection s should be NEGATIVE for deletirious alleles 
-function [x_vec p_vec total_het_at_each_generation_vec num_absorptions num_fixations num_absorptions_by_generation_vec count_vec ...
-    absorption_time_given_init_freq_vec fixation_time_given_init_freq_vec num_losses loss_time_given_init_freq_vec frac_polymorphic_vec] = ...
+function [x_vec, p_vec, total_het_at_each_generation_vec, num_absorptions, num_fixations, num_absorptions_by_generation_vec, count_vec, ...
+    absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, num_losses, loss_time_given_init_freq_vec, frac_polymorphic_vec] = ...
     compute_numeric_expansion_internal( ...
     N, s, mu, two_side_flag, num_generations, N_vec, max_N, init_str, compute_matrix)
 
@@ -462,7 +459,6 @@ if(new_sim)
 else
     x_vec{1} = (1:2*N-1) ./ (2*N); % vector of allele frequencies (exclude monomorphic alleles)
 end
-
 
 init_p_vec = exp( allele_freq_spectrum(x_vec{1}, s, N, two_side_flag, 'log') ); % get stationary distrubution (initial condition)
 if(new_sim)
@@ -665,7 +661,7 @@ absorption_time_given_init_freq_vec = [];
 % s - selection coefficient
 % q - individual allele-frequency simulations
 % p_vec - probability at each allele frequency
-% p_vec_equlibrium_analytic -
+% p_vec_equlibrium_analytic - theoretical solution for population at equilibrium
 %
 function plot_expansion_internal(N, mu, s, q, x_vec, p_vec, p_vec_equlibrium_analytic)
 
