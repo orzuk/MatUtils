@@ -12,7 +12,7 @@
 % R - 'raw' data (sometimes needed too)
 % R_skipped - 'raw' data skipped
 %
-function [S R R_skipped] = ReadDataFile(data_file, output_file, cell_to_mat, skip_lines, delimiter, varargin)
+function [S, R, R_skipped] = ReadDataFile(data_file, output_file, cell_to_mat, skip_lines, delimiter, varargin)
 
 %loading_file = data_file
 if(~exist('cell_to_mat', 'var') || isempty(cell_to_mat)) % default is converting to .mat 

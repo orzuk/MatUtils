@@ -33,7 +33,7 @@ for i=1:length(s_vec_str)
 end
 
 sfs_sims_dir = '../../common_disease_model/data/schaffner_simulations/EuropeFixed/files_europe_fixed/files_var_eric'; % New Version !! Europe fixed
-sfs_figs_dir = 'C:\Users\user\Dropbox\rare_alleles_paper\JamesZou\figs';
+sfs_figs_dir = ['C:\Users\' user_str '\Dropbox\rare_alleles_paper\JamesZou\figs'];
 
 % set demoraphic model: convention:
 iters = 1000; % number of iterations

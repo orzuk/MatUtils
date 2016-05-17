@@ -33,7 +33,9 @@ switch machine % Get directory
         end
     case PC
         %        spectrum_data_dir = 'C:\\research\common_disease_model\data\SiteFrequencySpectra'; % OLD PC
-        spectrum_data_dir = 'D:\research\RVAS\Data\SiteFrequencySpectra'; % NEW PC
+        %%%        spectrum_data_dir = 'D:\research\RVAS\Data\SiteFrequencySpectra'; % NEW PC DELL
+        spectrum_data_dir = 'C:\research\RVAS\Data\SiteFrequencySpectra'; % NEW SURFACE
+        
         %        spectrum_data_dir = 'T:\\common_disease_model\data\SiteFrequencySpectra';
         in_matlab_flag = 1;
 end
