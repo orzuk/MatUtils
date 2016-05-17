@@ -7,7 +7,7 @@
 % 
 % Output: 
 % D - demographic model (expansion, population size etc.) 
-% max_LL - loglikelihood of data for spectrum 
+% max_LL - log-likelihood of data for spectrum 
 % 
 function [D, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec)
 
@@ -15,7 +15,7 @@ function [D, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_
 % alleles are neutral
 s = 0; % Assume no selection
 alpha=0; % no mixture. Everything is neutral 
-beta=[];
+beta=[];  % effect size on phenotype irrelevant (we use only genpotypes) 
 
 X = [k_vec n_vec]; % Represent counts in a packed form 
 
@@ -25,7 +25,7 @@ D.bottleneck_generations = logspace(1, 5, 50); % number of generations since bot
 D.init_pop_size = 2*10000; % ancestral population 
 D.expansion_rate = logspace(0.001, 0.1, 50); % expansion rate per generation
 
-
+log_like_mat = zeros(size(D)); 
 for i=1:length(D) % Loop on D
     demographic_f_vec = compute_allele_freq_spectrum_from_demographic_model(D{i}); % Try a grid of different values
     
@@ -43,10 +43,14 @@ D = D{max_J};
 
 
 % Compute allele frequency distribution using Fisher-Wright model with changing population size. 
-% Not sure if we need this here !!! 
+% (Not sure if we need this here !!! )
 % Input: 
 % D - structure with demographic models
 % s - selection coefficient 
+% 
+% Output: 
+% x_vec - vector of x values (allele frequencies) 
+% f_vec - vector of their frequencies 
 % 
 function [x_vec, f_vec] = compute_allele_freq_spectrum_from_demographic_model(D, s)
 

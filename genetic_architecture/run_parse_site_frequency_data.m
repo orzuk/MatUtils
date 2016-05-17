@@ -1,5 +1,5 @@
 % Script for parsing data for site-frequency spectrum from 3 papers and plot allele-frequencies
-Assign24MammalsGlobalConstants; AssignGeneralConstants; AssignStatsConstants;
+Assign24MammalsGlobalConstants; AssignGeneralConstants; AssignStatsConstants; AssignRVASConstants;
 num_bins = 0:0.01:1; % bins for what?
 
 parse_site_frequency_flag = 0; % parse XXX?????
@@ -14,31 +14,13 @@ exome_data = 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!!
 plot_site_frequency_flag = 1; % 1: plot ESP data (this is also part of pre-processing)
 estimate_gene_by_gene = 0; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 plot_gene_by_gene = 0; % make figures for individual genes
+fit_demography = 1;  % NEW! here fit a demographic model using only synonymous SNPs  
 
 queue_str = 'priority'; % for submitting jobs at broad farm
 
 global cumsum_log_vec;
 cumsum_log_vec = cumsum([0 log(1:2*10000)]); % compute log-binomial coefficients to save time
 
-
-
-switch machine % Get directory
-    case UNIX
-        spectrum_data_dir = '/seq/orzuk/common_disease_model/data/SiteFrequencySpectra/';
-        if(~exist('in_matlab_flag', 'var'))
-            in_matlab_flag = 0;
-        end
-        if(~exist('mem_flag', 'var')) % || isempty(mem_flag))
-            mem_flag = 8; % allow large memory
-        end
-    case PC
-        %        spectrum_data_dir = 'C:\\research\common_disease_model\data\SiteFrequencySpectra'; % OLD PC
-        %%%        spectrum_data_dir = 'D:\research\RVAS\Data\SiteFrequencySpectra'; % NEW PC DELL
-        spectrum_data_dir = 'C:\research\RVAS\Data\SiteFrequencySpectra'; % NEW SURFACE
-        
-        %        spectrum_data_dir = 'T:\\common_disease_model\data\SiteFrequencySpectra';
-        in_matlab_flag = 1;
-end
 spectrum_data_files = {'/Nelson_Science_2012/Nelson_Science_data_table_S2.txt', ...
     '/Tennessen_Science_2012/all_chr_ESP6500.snps.vcf', ...
     '/Tennessen_Science_2012/all_chr_ESP6500.snps.small_gene_list.vcf', ...
@@ -56,6 +38,7 @@ mutation_rates_file = 'human_genes_mutation_rates_hg18.mat'; % output file with 
 
 spectrum_data_files_str = '{';
 for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
+    i_pop=1;
     for population = {'African'} % , 'African'} % European'} % ,
         if(read_vcf_flag)
             max_chr=23; min_chr=1;
@@ -160,8 +143,17 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
             % %         plot_site_frequency_data(A, n_vec, count_vec, f_vec, allele_types, target_length_vec(i), num_bins, ...
             % %             fullfile(spectrum_data_dir, 'out', remove_suffix_from_file_name(spectrum_data_files{i})));
         end
-        
+        i_pop=i_pop+1; 
     end % loop on population (temp.)
+
+    
+    if(fit_demography) % here use Synonymous SNPs to fit demographic model 
+        spectrum_population_data_file{i_pop} = [remove_suffix_from_file_name(spectrum_data_files{i}) '_' population{1} '.mat'];
+        all_A = load(fullfile(spectrum_data_dir, spectrum_population_data_file{i_pop}), 'count_vec', 'f_vec', 'n_vec', 'allele_types'); 
+        synonymous_ind = find(strcmp( 'coding-synonymous', all_A.allele_types))
+        [Demographic_model, max_LL_demographic_model] = fit_demographic_parameters_from_allele_spectrum(all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}); 
+    end
+    
     
     spectrum_data_files_str = [spectrum_data_files_str(1:end-1) '}'];
     if(estimate_gene_by_gene) % estimate potential target size for each gene in the genome
