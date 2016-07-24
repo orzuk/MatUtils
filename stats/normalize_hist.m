@@ -12,7 +12,7 @@
 % sigma - std of standardized distribution
 % normalization_factor - by how much did we divide to normalize (need to add)
 % 
-function [p_norm x_norm mu sigma] = normalize_hist(x, p, standardize_flag)
+function [p_norm, x_norm, mu, sigma] = normalize_hist(x, p, standardize_flag)
 
 if(max(p) == 0) % avoid zeros (assume only positive probs.)
     p(:) = 1/bitmax; 

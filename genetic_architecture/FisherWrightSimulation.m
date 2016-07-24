@@ -2,7 +2,7 @@
 % We allow expansion, so need to keep track of both old and new distribution
 %
 % Input:
-% N - effective population size
+% N - effective population size (either initial number or vector of population size at each generation) 
 % mu - mutation rate
 % s - selection coefficient (positive or negative???)
 % num_generations - how many generations to run after we establish equilibrium
@@ -50,8 +50,7 @@ end
 two_side_flag = 0; % use derived allele frequency
 plot_flag = 0; % currently don't plot anything
 
-% New! allow one to give N_vec as input vector in N
-if(~isscalar(N))
+if(~isscalar(N)) % New! allow one to give N_vec as input vector in N
     N_vec = vec2column(N); N=N(1);
 else % here use expansion_factor
     if(isscalar(expansion_factor)) % Here we give as input the entire vector of expansion (depends on generation)
@@ -89,40 +88,7 @@ switch compute_mode
         q = q ./ repmat(2.*N_vec(1:end-1)', iters, 1); % transfer from counts to frequencies
         frac_polymorphic_vec = 1-num_absorptions_by_generation_vec ./ iters;
         num_effective_iters = sum(p_vec{end}(2:end-1))
-        
-        %        absorption_time_given_init_freq_vec(:) = num_generations * iters / num_absorptions; % compute time to absorption from 1/2N
-        % % % % %         x_vec = (1:2*N_vec(num_generations)-1) ./ (2*N_vec(num_generations)); % set new coordinates
-        
-        % %         if(N_vec(end) == N) % all generations are at equilibrium
-        % %             p_vec{1} = hist(q(:), [0 x_vec 1]);
-        % %         else % each generation has different population size and distribution (last generation is representative)
-        
-        % % % % % % % % % % % % %         cur_x_vec = cell(1, num_generations);
-        % % % % % % % % % % % % %         for j=1:num_generations
-        % % % % % % % % % % % % %             cur_num_bins = min(num_bins,  2*N_vec(j)-1);
-        % % % % % % % % % % % % %             cur_x_vec{j} = (1:cur_num_bins-1) ./ (cur_num_bins); % vector of allele frequencies (should be 2N?)
-        % % % % % % % % % % % % %             cur_offset = 0.5 / (cur_num_bins+1);
-        % % % % % % % % % % % % %
-        % % % % % % % % % % % % %             % % % % %                 p_vec{j} = vec2row(hist(q(:,j), ...
-        % % % % % % % % % % % % %             % % % % %                     [cur_x_vec{j}])); % assign more weights to later generations
-        % % % % % % % % % % % % %             % % % % %                 het_vec{j} = p_vec{j} .* vec2row(cur_x_vec{j} .* (1-cur_x_vec{j}));
-        % % % % % % % % % % % % %             % % % % %                 p_vec{j} = prob_site_polymorphic_at_equilibrium .* frac_old_alleles_survived_vec(j) .* ...
-        % % % % % % % % % % % % %             % % % % %                     normalize_hist(cur_x_vec{j}, p_vec{j}); % why normalize here? we want actual value
-        % % % % % % % % % % % % %             % % % % %                 het_vec{j} = total_het_at_each_generation_vec(j) .* normalize_hist(vec2row(cur_x_vec{j}), het_vec{j}); % Do NOT normalize !!!!
-        % % % % % % % % % % % % %             % % % % %                 p_vec{j} = [0 p_vec{j} 0]; het_vec{j} = [0 het_vec{j} 0];                 % temp correction: add frequencies 0 and 1
-        % % % % % % % % % % % % %             cur_x_vec{j} = [0 cur_x_vec{j} 1];
-        % % % % % % % % % % % % %         end
-        % %         end % if all generations are at equilirium
-        %        absorption_time_given_init_freq_vec = absorption_time_given_init_freq_vec ./ vec2column(p_vec(2:end-1)); % normalize by total number of occurances
-        %        absorption_time_given_init_freq_vec = absorption_time_given_init_freq_vec ./ count_vec; % normalize by total number of occurances
-        
-        % % %       No need to rewrite these!  (??)
-        % % %         fixation_time_given_init_freq_vec(:) = num_generations * iters / num_fixations; % get rough estimates
-        % % %         loss_time_given_init_freq_vec(:) = num_generations * iters / num_losses;
-        % % %         absorption_time_given_init_freq_vec(:) = num_generations * iters / (num_losses + num_fixations); % get both types of absorptions (what's here???)
-        
-        % % % % %        x_vec = cur_x_vec; % copy cell array to output
-        
+
     case 'numeric' % here compute everything by matrix multiplications
         [x_vec, p_vec, total_het_at_each_generation_vec, num_absorptions, num_fixations, ...
             num_absorptions_by_generation_vec, count_vec, ...
@@ -130,6 +96,7 @@ switch compute_mode
             loss_time_given_init_freq_vec, frac_polymorphic_vec] = ...
             compute_numeric_expansion_internal( ...
             N, s, mu, two_side_flag, num_generations, N_vec, max_N, init_str, compute_matrix);
+        
     case 'analytic' % compute solution based on Jacobi polynomials (See e.g. Kryukov et al. PNAS 2009).
         [x_vec, p_vec, total_het_at_each_generation_vec, num_absorptions ,num_fixations, ...
             num_absorptions_by_generation_vec, count_vec ...
@@ -261,7 +228,7 @@ H_new = mu .* sum(prod_vec);
 %
 % Input:
 % N - initial population size
-% s - selection coefficient. Should be NEGATIVE for detelirious alleles 
+% s - selection coefficient. Should be NEGATIVE for detelitirious alleles 
 % mu - mutation rate
 % two_side_flag - derived/minor allele frequency
 % iters - how many alleles to output
@@ -315,7 +282,7 @@ total_het_at_each_generation_vec = zeros(num_generations, 1, 'single');
 while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec(1) < 20000) ) % simulate blocks. Problem: No new alleles born here! (these can be simulated separatey?)
     
     q = zeros(block_size, num_generations, 'single');  % matrix of derived allele frequencies at each generation
-    weights = ones(block_size, num_generations, 'single');  % weigh later generations with higher weights (why?)
+    weights = ones(block_size, num_generations, 'single');  % give later generations higher weights (why?)
     switch init_str % determine starting allele frequencies
         case 'equilibrium'
             q(:,1) = round(2*N.* allele_freq_spectrum_rnd(s, N, two_side_flag, block_size)); % sample allele frequency from equilibrium distribution
@@ -331,7 +298,7 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         %         end
         cur_mu = mu .* N_vec(j+1) / N; % determine how many new mutations arise at each generation
         [U, C] = unique_with_counts(vec2row(q(:,j))); % Compute histogram of counts
-        [x_vec{j} p_vec{j}] = union_with_counts(x_vec{j}, p_vec{j}, [0 U 2*N_vec(j)], [num_losses C num_fixations]);
+        [x_vec{j}, p_vec{j}] = union_with_counts(x_vec{j}, p_vec{j}, [0 U 2*N_vec(j)], [num_losses C num_fixations]);
         
         %        new_q = q(:,j) .* (1+s) ./  (2*N_vec(j)); %% (q(:,j) .* (1+s) + mu.*(1-q(:,j))) ./ (1+q(:,j).*s); % new allele freq. of the deleterious alleles
         new_q = q(:,j) .* ((1+s)./(1+s.*q(:,j)./(2*N_vec(j)))) ./ (2*N_vec(j));  % new allele freq. of the deleterious alleles
@@ -353,7 +320,7 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
                 end
                 q(:,j+1) = min(q(:,j+1), 2*N_vec(j+1));
                 if(mod(j,100)==0)
-                    if(length(big_inds) > 0)
+                    if(~isempty(big_inds))
                         frac_full_binomial_simulation = length(big_inds) / iters
                     end
                 end
@@ -377,7 +344,7 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
                 % %                         count_vec(q(k,first_time_vec(k):last_time_vec(k)))+1; % count how much time was spent at each allele frequency
                 % %                 end
                 for k=1:j % Alternative: loop on generations (not on indices of iterations)
-                    [unique_inds unique_counts] = unique_with_counts(  q(absorption_inds, k) );
+                    [unique_inds, unique_counts] = unique_with_counts(  q(absorption_inds, k) );
                     absorption_time_given_init_freq_vec(unique_inds) = ...
                         absorption_time_given_init_freq_vec(unique_inds) + (j-k+1) .* unique_counts;
                     count_vec(unique_inds) = ...
@@ -413,8 +380,6 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
     %     end
     ctr_alleles_blocks_simulated = ctr_alleles_blocks_simulated + block_size
 end % while num_alleles <= iters
-
-
 
 total_het_at_each_generation_vec = total_het_at_each_generation_vec ./ num_simulated_polymorphic_alleles_vec(1); % normalize by number of iterations
 num_absorptions = sum(num_absorptions_by_generation_vec) % count absorptions

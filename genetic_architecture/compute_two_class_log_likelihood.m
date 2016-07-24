@@ -6,7 +6,9 @@
 % alpha_vec - vector of fraction of null alleles at birth
 % beta_vec - vector of effect size of null alleles
 % rare_cumulative_per_gene - total expected number of rare alleles in gene (related to theta)
-% target_size_by_class_vec - NEW! target size for each allele type (used in poisson model). This is like the above but counts expected number of different alleles, not their frequencies !  %%% NEW! alleles class type vector. This states for each allele if it is neutral, harmfull, or in a mixture (missense)
+% target_size_by_class_vec - NEW! target size for each allele type (used in poisson model). 
+%                            This is like the above but counts expected number of different alleles, 
+%                            not their frequencies !  %%% NEW! alleles class type vector. This states for each allele if it is neutral, harmfull, or in a mixture (missense)
 % N - effective population size
 % X - genotype data matrix - for some models we actually need it. For others, just the allele frequencies.
 % y - phenotype data vector
@@ -30,7 +32,8 @@
 %
 % Output:
 % log_like_mat - Matrix (3-d) of log-likelihood of data for each parameter choice (s, alpha and beta)
-%
+% P_poly - ??? Probability of polymorphic alleles? 
+% 
 function [log_like_mat, P_poly] = ...
     compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
     X, y, trait_type, prevalence, null_w_vec, include_phenotype, full_flag, num_individuals, D, print_flag)
@@ -108,7 +111,7 @@ if(poisson_model_flag) % Compute counts
     prob_missense_allele_polymorphic_in_sample = zeros(num_s, num_alpha);
 end
 
-theta = rare_cumulative_per_gene; % total rate of polymorphic alleles
+% theta = rare_cumulative_per_gene; % total rate of polymorphic alleles. So far not used !!! 
 sigma_e = 1; % environmental noise level
 if(full_flag)
     [num_individuals, L] = size(X); % set number of individuals and number of SNPs
@@ -449,11 +452,9 @@ for i_s = 1:num_s % loop on parameters
     end % loop on mixture coefficient alpha
 end % loop on selection coefficients
 
-
 P_poly = var2struct(prob_neutral_allele_polymorphic_in_population, prob_neutral_allele_polymorphic_in_sample, ...
     prob_null_allele_polymorphic_in_population, prob_null_allele_polymorphic_in_sample, ...
     prob_missense_allele_polymorphic_in_population, prob_missense_allele_polymorphic_in_sample);
-ZZZ=[];
 
 
 

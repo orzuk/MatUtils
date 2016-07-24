@@ -151,7 +151,9 @@ for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
         spectrum_population_data_file{i_pop} = [remove_suffix_from_file_name(spectrum_data_files{i}) '_' population{1} '.mat'];
         all_A = load(fullfile(spectrum_data_dir, spectrum_population_data_file{i_pop}), 'count_vec', 'f_vec', 'n_vec', 'allele_types'); 
         synonymous_ind = find(strcmp( 'coding-synonymous', all_A.allele_types))
-        [Demographic_model, max_LL_demographic_model] = fit_demographic_parameters_from_allele_spectrum(all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}); 
+        [Demographic_model, max_LL_demographic_model] = ...
+            fit_demographic_parameters_from_allele_spectrum( ...
+            all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}); 
     end
     
     
