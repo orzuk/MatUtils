@@ -89,7 +89,7 @@ if(isvector(beta))
 end
 
 S = 4.*N.*s; % compute big S from little s 
-[unique_s I J] = unique(s); % reduce number of computations
+[unique_s, I, J] = unique(s); % reduce number of computations
 switch moment_str
     case 'mean_phenotype'  % K(s, \beta) = beta * (3e^(-S) + 2S - 3) / (1-e^(-S))
                            % New: should be: K(s, \beta) = beta * S / (1-e^(-S))

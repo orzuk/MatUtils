@@ -68,7 +68,7 @@ switch scale_mode
             if(~var_explained_flag)
                 g = g - log(x) - log(1-x);
             end
-            if(-S > 300) % assume s is a scalar
+            if(isscalar(S) && (-S > 300)) % assume s is a scalar
                 g = g + S;
             else
                 g = g - log(exp(-S)-1);
