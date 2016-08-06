@@ -36,7 +36,6 @@ Z_s_norm = sqrt(sum(Z_s.^2, 2));
 
 W_s = Z_s ./ repmat(Z_s_norm, 1, 2); 
 
-
 cov(W_s)
 Theta_W_s = atan(W_s(:,2) ./  W_s(:,1)); figure; hist(Theta_W_s, 500); xlabel('Theta_W'); 
 

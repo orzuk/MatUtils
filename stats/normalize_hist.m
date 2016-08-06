@@ -15,7 +15,7 @@
 function [p_norm, x_norm, mu, sigma] = normalize_hist(x, p, standardize_flag)
 
 if(max(p) == 0) % avoid zeros (assume only positive probs.)
-    p(:) = 1/bitmax; 
+    p(:) = 1/flintmax; 
 end
 if(length(p) > 1)
     p_norm = p ./ integral_hist(x, p); % max(integral_hist(x, p), 1/bitmax); 

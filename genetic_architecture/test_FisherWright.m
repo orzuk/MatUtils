@@ -114,16 +114,12 @@ for s = s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end-1) % 
                         if( (s == s_vec(end)) && (~mathematica_flag) ) % plot different s values together
                             my_mkdir( dir_from_file_name(all_s_output_file, 1));
                             if(exist(all_s_output_file, 'file'))
-                                save( [all_s_output_file], 'het_struct', '-append');
+                                save(all_s_output_file, 'het_struct', '-append');
                             else
-                                save( [all_s_output_file], 'het_struct');
+                                save(all_s_output_file, 'het_struct');
                             end
                             plot_inds = [3 4 5];
-                            
-                            
                             FisherWrightPlotResults2(het_struct, s_vec, fisher_wright_output_dir, tmp_dir)
-                            
-                            
                         end
                 end
             end % one plot flag
@@ -150,8 +146,9 @@ if(test_absorption_time || test_moments) % Test simulation/numerics only for CON
     mu = 2*10^(-8) * (10000 / N); % mutation rate (per nucleotide per generation)
     s=0; % -0.0001;
     expansion_factor = 1; % No EXPANSION! Constant population size
+    model_name = 'equilibrium'; % 'expansion 1.01'
     init_str{1} = 'newly_born';
-    num_generations = 800; % number of generations to carry with simulations
+    num_generations = 100; % number of generations to carry with simulations
     iters = 30; % how many alleles to keep at the end
     compute_mode = 'simulation';
     num_bins = 2*N+1;
@@ -162,13 +159,16 @@ if(test_absorption_time || test_moments) % Test simulation/numerics only for CON
     D.generations = num_generations;
     D.expan_rate = expansion_factor;
     D.index = 1; % only one demography
+    D.add_new_alleles = 0; % use old simulation (track only alleles at start) - to be changed !! 
 end
 
 if(test_absorption_time) % Test simulation/numerics only for CONSTANT population size where we have also analytic solution
     [freq_struct_simulation, absorption_struct, simulation_struct, N_vec, simulation_time] = ...
         FisherWrightSimulation([], D, mu, s, init_str{1}, iters, 'simulation', num_bins); % run simulation
-    [freq_struct_numeric, absorption_struct_numeric, simulation_struct_numeric, N_vec, numeric_time] = ...
+    [freq_struct_numeric, absorption_struct_numeric, ~, ~, numeric_time] = ...
         FisherWrightSimulation([], D, mu, s, init_str{1}, iters, 'numeric', num_bins); % run numeric computation
+    [freq_struct_moments, absorption_struct_moments, ~, ~, moments_time] = ...
+        FisherWrightSimulation([], D, mu, s, init_str{1}, iters, 'moment', num_bins); % run analytic computation using moments 
     
     all_p_vec_simulation = accumarray( cell2vec(freq_struct_simulation.x_vec)'+1, cell2vec(freq_struct_simulation.p_vec)'); % average contribution from all generations (why? get the time spent at each allele frequency)
     all_p_vec_numeric = accumarray( cell2vec(freq_struct_numeric.x_vec)'+1, cell2vec(freq_struct_numeric.p_vec)');
@@ -197,8 +197,8 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         xlabel('Derived Allele Frequency'); ylabel(['Num. Generations Spent ' density_str]);
         title_str = ['N=' num2str(N*1) ...
             ', s=' num2str(s,3)  ...
-            ', iters ' num2str(simulation_struct.num_simulated_polymorphic_alleles_vec(1)) '->' num2str(iters(1))];
-        title(str2title([' Mean # Generations ' density_str ' newly born allele spent at each allele freq. ' title_str]));
+            ', iters ' num2str(simulation_struct.num_simulated_polymorphic_alleles_vec(1)) '->' num2str(iters(1)) ', ' model_name];
+        title(str2title([' Mean # Generations ' density_str ' newly born allele at each allele freq. ' title_str]));
         my_saveas(gcf, ['mean_time_at_each_allele_freq_simulation_vs_diffusion_approx_' density_str(2:end-1)], 'pdf');
     end
     
@@ -213,23 +213,24 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
 end
 
 if(test_moments)
-    max_k = 10; % how many moments to compute 
-    D.expan_rate = 1.00;
+    max_k = 5; % how many moments to compute 
+    D.expan_rate = 1.1;
     D.index = 1; 
+    D.generations = 100;
     N_vec = demographic_parameters_to_n_vec(D, 1);
     [mu_vec_expansion_analytic, mu_vec_equilibrium] = FisherWright_Compute_SFS_Moments(N_vec, 0, max_k); % compute moments with Formulas from Ewens
     
     
     % Estimate density using the max-entropy method:
     x_vec = (1:(2*N-1)) ./ (2*N);
-    [lambda_max_ent, p_max_ent, entr_max_ent] = ...  % Fit density using moments % , lambda0) 
-        me_dens2(mu_vec_equilibrium(2:end) ./ mu_vec_equilibrium(1), x_vec); % normalize by 0th moment
+    [lambda_max_ent, g_het_max_ent, entr_max_ent] = ...  % Fit density using moments % , lambda0) 
+        me_dens2(mu_vec_expansion_analytic(2:end) ./ mu_vec_expansion_analytic(1), x_vec); % normalize by 0th moment
     
     f_max_ent = zeros(1, 2*N-1); 
     for k=1:(max_k)
         f_max_ent = f_max_ent + lambda_max_ent(k) .* x_vec .^ (k-1);
     end
-    f_max_ent = exp(-f_max_ent) ./ (x_vec .* (1-x_vec)); 
+    f_max_ent = exp(-f_max_ent) ./ (x_vec .* (1-x_vec)); % Compute f. How to normalize? 
     figure; plot(x_vec, f_max_ent);
     
     
