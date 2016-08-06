@@ -3,6 +3,8 @@
 p = 6; % dimension (divide into two blocks)
 n = 1; % samples
 iters = 400;
+epsilon = 0.001; % tolerance 
+options.regularized = 1; 
 
 kron_flag = 1; % 1 - run a Kronecker model !!!
 
@@ -15,7 +17,7 @@ P0((p/2)+1:end, 1:(p/2)) = 0;
 P0(1:(p/2), (p/2)+1:end) = 0;
 
 if(kron_flag)
-    q = 50; % set q
+    q = 15; % set q
     Q = eye(q) + 2.*ones(q); % set second part of sigma
     Sigma = kron(P, Q); % take Kronecker product
     Sigma0 = kron(P0, Q); % Take Kronecker product for null model
@@ -41,6 +43,9 @@ power_vec_known_Q = zeros(size(lambda_vec));
 
 
 for i_lambda =1:length(lambda_vec) % loop on lamda !!!
+    lambda = lambda_vec(i_lambda); 
+    options.lambda = lambda; 
+
     LRT = zeros(iters, 2);
     PLRT_Ridge = zeros(iters, 2);
     LRT_known_Q = zeros(iters, 2);
@@ -133,6 +138,8 @@ for i_lambda =1:length(lambda_vec) % loop on lamda !!!
                     
                     if(j == 2)
                         S_Ridge0 = kron(P_Ridge0, Q_Ridge0);
+%                        [P_Ridge_iter, Q_Ridge_iter] = ...
+%                            KroneckerFlipFlop(Z_mat, P_Ridge0, Q_Ridge0, epsilon, options)
                         S_known_Q0 = kron(P_known_Q0, Q); 
                     end
                     if(j == 3)
@@ -142,20 +149,22 @@ for i_lambda =1:length(lambda_vec) % loop on lamda !!!
                 end % loop on which model to estimate
                 
             end
-            PLRT_Ridge(i,H+1) = (n/2) * ( logdet(P_Ridge) - logdet(P_Ridge0) ) + ... % should be 0 or not??
-                (n/2) * ( logdet(Q_Ridge) - logdet(Q_Ridge0) ) + ...
-                (n/2) * ( trace(S/S_Ridge) - trace(S/S_Ridge0) ) + ... % new ! Add differences in penalties
-                lambda * ( norm(inv(P_Ridge), 'fro') - norm(inv(P_Ridge0), 'fro') + norm(inv(Q_Ridge), 'fro') - norm(inv(Q_Ridge0), 'fro') ); 
+%             PLRT_Ridge(i,H+1) = (n/2) * ( logdet(P_Ridge) - logdet(P_Ridge0) ) + ... % should be 0 or not??
+%                 (n/2) * ( logdet(Q_Ridge) - logdet(Q_Ridge0) ) + ...
+%                 (n/2) * ( trace(S/S_Ridge) - trace(S/S_Ridge0) ) + ... % new ! Add differences in penalties
+%                 lambda * ( norm(inv(P_Ridge), 'fro') - norm(inv(P_Ridge0), 'fro') + norm(inv(Q_Ridge), 'fro') - norm(inv(Q_Ridge0), 'fro') ); 
             
-            LRT_known_Q(i,H+1) = (n/2) * ( sum(log(eig(P_known_Q))) - sum(log(eig(P_known_Q0))) ) + (n/2) * ( trace(S/S_known_Q) - trace(S/S_known_Q0) );  % Should always be positive ?? 
+            PLRT_Ridge(i,H+1) = KroneckerLogLike(Z, P_Ridge, Q_Ridge, lambda) - KroneckerLogLike(Z, P_Ridge0, Q_Ridge0, lambda);
+%            LRT_known_Q(i,H+1) = (n/2) * ( sum(log(eig(P_known_Q))) - sum(log(eig(P_known_Q0))) ) + (n/2) * ( trace(S/S_known_Q) - trace(S/S_known_Q0) );  % Should always be positive ?? 
+            LRT_known_Q(i,H+1) = KroneckerLogLike(Z, P_known_Q, Q, 0) - KroneckerLogLike(Z, P_known_Q0, Q, 0);
         end % loop on hypothesis
     end
     
     % Compute threshold and power 
-    T_alpha = my_quantile(-2*PLRT_Ridge(:,1), 1-alpha); 
-    power_vec(i_lambda) = mean(-2*PLRT_Ridge(:,2) > T_alpha);
-    T_alpha = my_quantile(-2*LRT_known_Q(:,1), 1-alpha); 
-    power_vec_known_Q(i_lambda) = mean(-2*LRT_known_Q(:,2) > T_alpha);
+    T_alpha = my_quantile(2*PLRT_Ridge(:,1), 1-alpha); 
+    power_vec(i_lambda) = mean(2*PLRT_Ridge(:,2) > T_alpha);
+    T_alpha = my_quantile(2*LRT_known_Q(:,1), 1-alpha); 
+    power_vec_known_Q(i_lambda) = mean(2*LRT_known_Q(:,2) > T_alpha);
 end % loop on lambda
 
 figure; semilogx(lambda_vec, power_vec); hold on; 
@@ -172,18 +181,18 @@ for cum_flag = 0:1
     
     if(cum_flag)
         plot(x_vec, chi2cdf(x_vec, df), 'r', 'linewidth', 2);
-        plot(sort(-2*PLRT_Ridge(:,1)), (1:iters) ./ iters, 'g');
-        plot(sort(-2*PLRT_Ridge(:,2)), (1:iters) ./ iters, 'c');
-        plot(sort(-2*LRT_known_Q(:,1)), (1:iters) ./ iters, 'g--');
-        plot(sort(-2*LRT_known_Q(:,2)), (1:iters) ./ iters, 'c--');
+        plot(sort(2*PLRT_Ridge(:,1)), (1:iters) ./ iters, 'g');
+        plot(sort(2*PLRT_Ridge(:,2)), (1:iters) ./ iters, 'c');
+        plot(sort(2*LRT_known_Q(:,1)), (1:iters) ./ iters, 'g--');
+        plot(sort(2*LRT_known_Q(:,2)), (1:iters) ./ iters, 'c--');
 
         ylabel('Cumulative');
     else
         plot(x_vec, chi2pdf(x_vec, df), 'r', 'linewidth', 2);
-        hist_density(-2*PLRT_Ridge(:,1), num_bins, 'g');
-        hist_density(-2*PLRT_Ridge(:,2), num_bins, 'c');
-        hist_density(-2*LRT_known_Q(:,1), num_bins, 'k');
-        hist_density(-2*LRT_known_Q(:,2), num_bins, 'y');
+        hist_density(2*PLRT_Ridge(:,1), num_bins, 'g');
+        hist_density(2*PLRT_Ridge(:,2), num_bins, 'c');
+        hist_density(2*LRT_known_Q(:,1), num_bins, 'k');
+        hist_density(2*LRT_known_Q(:,2), num_bins, 'y');
         ylabel('Density');
     end
     
@@ -193,8 +202,8 @@ for cum_flag = 0:1
         ['H0-Ridge($\lambda=' num2str(round(lambda,2)) '$)'], 'H1-LRT-Ridge'};
     if(~kron_flag)
         legend_vec = [legend_vec {'H0-LRT', 'H1-LRT'}];
-        hist_density(-2*LRT(:,1), num_bins);
-        hist_density(-2*LRT(:,2), num_bins, 'm');
+        hist_density(2*LRT(:,1), num_bins);
+        hist_density(2*LRT(:,2), num_bins, 'm');
     end
     legend(legend_vec, 'interpreter', 'latex'); legend('boxoff');
     xlim([0 max(5*df, 0.1+max(-2*PLRT_Ridge(:)))]);

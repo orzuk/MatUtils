@@ -23,8 +23,9 @@ while(diff_mat > epsilon)
     
     if(isfeild('regularized', options))
        diff_mat_P = 10 * epsilon;
+       P2 = Z*inv(prev_Q + options.lambda.*eye(q))*Z ./ q;
        while (diff_mat_P > epsilon)
-          P =  Z*inv(prev_Q)*Z ./ q - ((4*options.lambda)/q)*inv(P); 
+          P =  Z*inv(prev_Q)*Z ./ q - ((4*options.lambda)/q)*inv(P2); 
           diff_mat_P = norm(P - P2, 2) / norm(P2, 2); P2=P; 
           
        end
@@ -32,9 +33,6 @@ while(diff_mat > epsilon)
     
     Q = Z'*inv(prev_P)*Z ./ p;
 
-    
-    
-    
     diff_mat = norm(P - prev_P, 2) / norm(prev_P, 2) + ...
         norm(Q - prev_Q, 2) / norm(prev_Q, 2);
     prev_P = P; prev_Q = Q; 
