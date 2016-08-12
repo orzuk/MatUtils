@@ -4,7 +4,7 @@ function new_P = KroneckerFlop(Z, Q, options)
 [q, p] = size(Z); r = rank(Q); 
 p1 = options.p1; % p2 = options.p2; 
 
-% compute under H0
+% compute under H0. Here P has two blocks 
 if(ismember(options.h , {'0', 'h0'})) % under H0 we fit both parts seperately
     options.h = 'h1';
     new_P = zeros(p); 
@@ -18,7 +18,7 @@ else    % use standard fitting under H1
         ZZ = Z'*inv(Q)*Z; ZZ = 0.5*(ZZ+ZZ'); 
         [W, Gamma] = eig(ZZ); % perform eigendecomposition
         gamma = abs(diag(Gamma));  gamma(1:(q-r) ) = 0; % take eigenvalues
-        delta = (gamma + sqrt( gamma.^2 +4*p*options.lambda)) ./ q;    
+        delta = (gamma + sqrt( gamma.^2 +16*q*options.lambda)) ./ (2*q);    
 %        delta = (diag(Gamma) + sqrt( diag(Gamma).^2 +4*q*options.lambda)) ./ q;
         new_P = W*diag(delta)*W'; % get new Q
     end
