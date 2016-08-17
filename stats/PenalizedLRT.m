@@ -1,12 +1,12 @@
 % Test Penalized Likelihood Ratio Test when Covariance matrix is estimated using Ridge regression
 
 p_vec = 2:2:12;
-lambda_vec = 10.5345; % logspace(-1, 3, 10);
+lambda_vec = logspace(-4, 3, 1); % 10.5345; % logspace(-1, 3, 10);
 lambda = 50; % regularization parameter !!!
 alpha = 0.05; % set significance level
+tolerance = 10^(-6)
 
-equal_parts_flag = 1; % here p equals q
-
+equal_parts_flag = 0; % here p equals q
 
 p = 6; % dimension (divide into two blocks)
 n = 1; % samples
@@ -18,7 +18,6 @@ kron_flag = 1; % 1 - run a Kronecker model !!!
 power_vec = zeros(length(lambda_vec), length(p_vec));
 power_vec_known_Q = zeros(length(lambda_vec), length(p_vec));
 power_vec_known_Q_Ridge = zeros(length(lambda_vec), length(p_vec));
-
 
 for i_p = 1:length(p_vec)
     p = p_vec(i_p)
@@ -42,7 +41,7 @@ for i_p = 1:length(p_vec)
     P0(1:p1, (p1+1):end) = 0;
     
     if(kron_flag)
-        q = p+2; % set q
+        q = 40; % +2; % set q. Singularity problems when p=q 
         Q = eye(q) + 2.*ones(q); % set second part of sigma
         Q = posdefrnd(q);
         Sigma = kron(P, Q); % take Kronecker product
@@ -64,7 +63,7 @@ for i_p = 1:length(p_vec)
     
     All_Z_mat = zeros(q, iters);
     
-    for i_lambda =1:length(lambda_vec) % loop on lamda !!!
+    for i_lambda =1:length(lambda_vec) % loop on lambda !!! (why not inside the loop generating data? 
         lambda = lambda_vec(i_lambda);
         options.lambda = lambda; options.p1 = p1;
         
@@ -131,19 +130,24 @@ for i_p = 1:length(p_vec)
                     P_known_Q0 = zeros(p);
                     for j=3:-1:1 % estimate two parts using Ridge
                         if(j < 3)
-                            [U, D, V] = svd(Z_mat(:, (1:(p1*(2-j)+p2*(j-1))) + p1*(j-1)));
-                            r = rank(Z_mat(:, (1:(p1*(2-j)+p2*(j-1))) + p1*(j-1)));
-                            %                         if(j == 1)
-                            %                             pp = p1;
-                            %                         else
-                            %                             pp = p2;
-                            %                         end
+%                            [U, D, V] = svd(Z_mat(:, (1:(p1*(2-j)+p2*(j-1))) + p1*(j-1)));
+%                            r = rank(Z_mat(:, (1:(p1*(2-j)+p2*(j-1))) + p1*(j-1)));
                             options.h = 'h0'; % fit seperately
                             
                             if(j==1)
                                 P_known_Q0(1:p1, 1:p1) = Z_mat(:, 1:p1)'*inv(Q)*Z_mat(:, 1:p1) ./ q;
                             else
                                 P_known_Q0((p1+1):end, (p1+1):end) = Z_mat(:, (p1+1):end)'*inv(Q)*Z_mat(:, (p1+1):end) ./ q;
+                                    % get good initial conditions 
+%                                  [P_Ridge1, Q_Ridge_init1] = KroneckerRidge( Z_mat(:, 1:p1), options);
+%                                  [P_Ridge2, Q_Ridge_init2] = KroneckerRidge( Z_mat(:, (p1+1):end), options);                                 
+%                                  Q_Ridge_init = 0.5*(Q_Ridge_init1+Q_Ridge_init2);
+%                                  P_Ridge_init = zeros(p); 
+%                                  P_Ridge_init(1:p1, 1:p1) = P_Ridge1;
+%                                  P_Ridge_init((p1+1):end, (p1+1):end) = P_Ridge2;
+%                                  
+%                                 [P_Ridge0, Q_Ridge0] = ...
+%                                     KroneckerFlipFlop(Z_mat, P_Ridge_init, Q_Ridge_init, epsilon, options);
                                 [P_Ridge0, Q_Ridge0] = ...
                                     KroneckerFlipFlop(Z_mat, P_Ridge, Q_Ridge, epsilon, options);
                                 P_known_Q_Ridge0 = KroneckerFlop(Z_mat, Q, options); % just fit
@@ -151,27 +155,8 @@ for i_p = 1:length(p_vec)
                             
                         else % j==3. Fit under H1
                             P_known_Q = Z_mat'*inv(Q)*Z_mat ./ q; % Fit for known Q ('tree')
-
-                            [U, D, V] = svd(Z_mat);
-                            r = rank(Z_mat); pp = p;
-                            eig_vals = diag(D); % closed-form solution from Tibshirani's paper
+                            [P_Ridge, Q_Ridge] = KroneckerRidge(Z_mat, options);
                             
-                            % Compute beta, theta with penalties
-                            c1 = -4*lambda*pp^2;
-                            c2 = 32*lambda^2*pp + eig_vals.^4 .* (q-pp);
-                            c3 = 4*lambda* (eig_vals.^4 - 16*lambda^2);
-                            
-                            beta = repmat(2*sqrt(lambda/pp), q, 1);
-                            beta(1:r) = real(sqrt( (-c2(1:r) - sqrt(c2(1:r).^2 - 4.*c1.*c3(1:r)))  ./ (2.*c1) ));
-                            theta = repmat(2*sqrt(lambda/q), pp, 1);
-                            theta(1:r) = eig_vals(1:r).^2 .* beta(1:r) ./ (pp .* beta(1:r).^2 - 4*lambda);
-                            theta(pp .* beta(1:r).^2 - 4*lambda == 0) = 2*sqrt(lambda/q); % fix eigenvalues near zero
-                            theta = max(theta(1:r), 2*sqrt(lambda/q)); 
-                            P_Ridge = V*diag(theta)*V';
-                            Q_Ridge = U*diag(beta)*U';
-                        
-                            %                        grad_P = q*P_Ridge - Z_mat' * inv(Q_Ridge) * Z_mat - 4*lambda * inv(P_Ridge) % New! COmpute Gradient !!
-                            %                        grad_Q = p*Q_Ridge - Z_mat * inv(P_Ridge) * Z_mat' - 4*lambda * inv(Q_Ridge)
                             options.h = 'h1'; % fit jointly
                             P_known_Q_Ridge = KroneckerFlop(Z_mat, Q, options); % just fit 
                             
@@ -200,10 +185,10 @@ for i_p = 1:length(p_vec)
                 PLRT_Ridge(i,H+1) = KroneckerLogLike(Z, P_Ridge, Q_Ridge, lambda) - ...
                     KroneckerLogLike(Z, P_Ridge0, Q_Ridge0, lambda);
                 if(~isreal(PLRT_Ridge(i,H+1)))
-                    xxxx = 124
+                    problem_not_real_LRT = 124
                 end
-                if(PLRT_Ridge(i,H+1)<0)
-                    xxxx = 1241234214
+                if(PLRT_Ridge(i,H+1)<-tolerance)
+                    problem_negative_LRT = 1241234214
                 end
                 
                     
@@ -229,15 +214,18 @@ for i_p = 1:length(p_vec)
         power_vec_known_Q_Ridge(i_lambda, i_p) = mean(2*PLRT_known_Q_Ridge(:,2) > T_alpha);
         
         num_bins = min(1000, iters/20);
-        for cum_flag = 2:0 % 1:1 % 0
+        for cum_flag = 1:1 % 0:0 %  1:1 % 0
             figure; x_vec = 0:0.001:(5*df);
             
             if(cum_flag)
                 semilogx(x_vec, chi2cdf(x_vec, df), 'r', 'linewidth', 2);  hold on; % plot on log-scale
-                semilogx(sort(2*PLRT_Ridge(:,1)), (1:iters) ./ iters, 'g');
-                semilogx(sort(2*PLRT_Ridge(:,2)), (1:iters) ./ iters, 'c');
-                semilogx(sort(2*LRT_known_Q(:,1)), (1:iters) ./ iters, 'g--');
-                semilogx(sort(2*LRT_known_Q(:,2)), (1:iters) ./ iters, 'c--');
+                semilogx(sort(2*PLRT_Ridge(:,1)), (1:iters) ./ iters, 'g'); % H0
+                semilogx(sort(2*PLRT_Ridge(:,2)), (1:iters) ./ iters, 'c'); % H1
+                semilogx(sort(2*LRT_known_Q(:,1)), (1:iters) ./ iters, 'g--'); % H0
+                semilogx(sort(2*LRT_known_Q(:,2)), (1:iters) ./ iters, 'c--'); % H1
+                LRT_estimated_mean = (-q)*(Porteous_cov_correction(q,p) - ...
+                    Porteous_cov_correction(q,p-1) - Porteous_cov_correction(q,1)); 
+                semilogx(sort(2*LRT_known_Q(:,1)).*df./LRT_estimated_mean, (1:iters) ./ iters, 'm--'); % H0 corrected LRT (Bartlett&Porteous)
                 
                 ylabel('Cumulative');
             else
@@ -271,11 +259,36 @@ for i_p = 1:length(p_vec)
     
 end % loop on p
 
-figure; semilogx(lambda_vec, power_vec); hold on;
-semilogx(lambda_vec, power_vec_known_Q);
-title(['Test Covariance, Power as function of \lambda n=' num2str(n) ', p=' num2str(p) ', q=' num2str(q)]);
-legend({'Unknown', 'Known-Q'}); legend('boxoff');
-xlabel('\lambda'); ylabel('Power');
+num_plots = ceil(sqrt(length(p_vec)))
+figure;
+for i_p = 1:length(p_vec)
+    subplot(num_plots, num_plots, i_p);
+    semilogx(lambda_vec, power_vec(:,i_p)', 'linewidth', 2); hold on;
+    semilogx(lambda_vec, power_vec_known_Q(:,i_p), 'r', 'linewidth', 2);
+    semilogx(lambda_vec, power_vec_known_Q_Ridge(:,i_p), 'g', 'linewidth', 2);
+    title(['Test Covariance, Power as function of \lambda n=' num2str(n) ', p=' num2str(p_vec(i_p)) ', q=' num2str(q)]);
+    legend({'Unknown-Ridge', 'Known-Q',  'Known-Q-Ridge'}); legend('boxoff');
+    xlabel('\lambda'); ylabel('Power');
+end
+
+figure; 
+for i_method  = 1:3
+    subplot(3, 1, i_method);
+    for i_p = 1:length(p_vec)
+        switch i_method
+            case 1
+                y_power_vec = power_vec(:,i_p); method_str = 'Unknown-Ridge'; 
+            case 2
+                y_power_vec = power_vec_known_Q(:,i_p); method_str = 'known-Q'; 
+            case 3
+                y_power_vec = power_vec_known_Q_Ridge(:,i_p); method_str = 'known-Q-Ridge'; 
+        end
+        semilogx(lambda_vec, y_power_vec, 'linewidth', 2, 'color', color_vec(i_p)); hold on;
+    end
+        title(['Test Covariance, Power as function of \lambda n=' num2str(n) ', method=' method_str]);
+        legend(num2str(p_vec')); legend('boxoff');
+        xlabel('\lambda'); ylabel('Power');
+end % loop on method
 
 
 figure; plot(p_vec, power_vec); hold on;

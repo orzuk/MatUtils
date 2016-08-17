@@ -45,6 +45,6 @@ while(diff_mat > epsilon)
     prev_P = P; prev_Q = Q; iters = iters+1;
 end
 
-run_iters = iters 
+run_iters = iters;
 
 
