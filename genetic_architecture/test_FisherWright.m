@@ -222,7 +222,7 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     % % %     my_saveas(gcf, 'mean_time_at_each_allele_freq_simulation_vs_diffusion_approx', 'pdf');
     bar_mat = [freq_struct_simulation.prob_site_polymorphic_at_end*freq_struct_simulation.p_vec{end-1}(2:(end-1))' ...
         freq_struct_numeric.p_vec{end-1}(2:(end-1))']
-    figure; hold on; bar(bar_mat); legend('simulation', 'nume
+    figure; hold on; bar(bar_mat); legend('simulation', 'numeric'); 
 
 end
 
