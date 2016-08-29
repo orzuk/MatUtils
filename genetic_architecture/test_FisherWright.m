@@ -142,13 +142,13 @@ end % loop on selection coefficients
 
 
 if(test_absorption_time || test_moments) % Test simulation/numerics only for CONSTANT population size where we have also analytic solution
-    N = 10; % take moderate value to let all alleles die
+    N = 500; % take moderate value to let all alleles die
     mu = 2*10^(-8) * (10000 / N); % mutation rate (per nucleotide per generation)
     s=0; % -0.0001;
     expansion_factor = 1; % No EXPANSION! Constant population size
     model_name = 'equilibrium'; % 'expansion 1.01'
     init_str{1} = 'equilibrium'; % CHAGE !!! 'newly_born';
-    num_generations = 1000; % number of generations to carry with simulations
+    num_generations = 100; % number of generations to carry with simulations
     iters = 6000; % how many alleles to keep at the end
     compute_mode = 'simulation';
     num_bins = 2*N+1;
@@ -198,8 +198,8 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         % Plot PROBABILITY at each allele frequency !!! 
         figure; loglog( x_vec, all_p_vec_simulation(2:end-1) ./ bin_size, 'linewidth', 2 ); hold on;
         loglog(x_vec, all_p_vec_numeric(2:end-1) ./ bin_size, 'm', 'linewidth', 2 ); % Why divide by # simulations here?? problem with Normalization here!!!
-        loglog( x_vec, 2.*all_p_vec_analytic(2:end-1) ./ bin_size, 'r' , 'linewidth', 2); % HERE WE MULTIPLY BY FACTOR 2 !!!
-        loglog( x_vec, all_p_vec_analytic(2:end-1) ./ bin_size, 'r--' , 'linewidth', 2 );
+        loglog( x_vec, all_p_vec_analytic(2:end-1) ./ bin_size, 'r' , 'linewidth', 2); % HERE WE MULTIPLY BY FACTOR 2 !!!
+        loglog( x_vec, 0.5*all_p_vec_analytic(2:end-1) ./ bin_size, 'r--' , 'linewidth', 2 );
         loglog( x_vec, all_p_vec_moments(2:end-1) ./ bin_size, 'c' , 'linewidth', 2 );        % New! add moments based calculations        
 
         legend({'simulation', 'numeric', 'diffusion-approximation', '(1/2)-diffusion-approximation', 'Moments'}, ...
@@ -221,8 +221,9 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     % % %     title(str2title([' Mean # Generations (density) spent at each allele freq. ' title_str]));
     % % %     my_saveas(gcf, 'mean_time_at_each_allele_freq_simulation_vs_diffusion_approx', 'pdf');
     bar_mat = [freq_struct_simulation.prob_site_polymorphic_at_end*freq_struct_simulation.p_vec{end-1}(2:(end-1))' ...
-        freq_struct_numeric.p_vec{end-1}(2:(end-1))']
+    bar_mat = [all_p_vec_simulation(2:end-1) freq_struct_numeric.p_vec{end-1}(2:(end-1))']
     figure; hold on; bar(bar_mat); legend('simulation', 'numeric'); 
+    figure; hold on; plot(all_p_vec_simulation(2:end-1), freq_struct_numeric.p_vec{end-1}(2:(end-1)), '*'); legend('simulation', 'numeric'); 
 
 end
 

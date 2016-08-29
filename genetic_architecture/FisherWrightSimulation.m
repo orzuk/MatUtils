@@ -102,12 +102,13 @@ switch compute_mode
             s, mu, two_side_flag, N_vec, init_str, compute_matrix);
         
     case {'analytic', 'moment', 'moments'} % compute solution based on Jacobi polynomials (See e.g. Kryukov et al. PNAS 2009).
+        num_moments = min(floor(N_vec(1)/3), 5);
         [x_vec, p_vec, total_het_at_each_generation_vec, num_absorptions ,num_fixations, ...
             num_absorptions_by_generation_vec, count_vec ...
             absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, num_losses, ...
             loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end] = ...
             compute_analytic_expansion_internal( ...
-            N, s, mu, two_side_flag, num_generations, N_vec, max_N, init_str);
+            s, mu, two_side_flag, num_generations, N_vec, init_str, num_moments);
         
 end % switch compute mode
 
@@ -448,7 +449,7 @@ switch init_str
         init_p_vec(:) = 0; init_p_vec(1) = 1; % Set allele freq. at 0. Contribution will come from 1/2N
     case 'equilibrium'
         init_p_vec(end) = 0; % 1 allele frequency
-        init_p_vec = init_p_vec .* 4.* max(10^(-10), mu);  % multiply by theta. (If mu=0: no mutations, then we've got a problem ... set some mu>0)
+        init_p_vec = init_p_vec .* 2.* max(10^(-10), mu);  % multiply by theta. (If mu=0: no mutations, then we've got a problem ... set some mu>0)
         init_p_vec(1) = 1 - sum(init_p_vec(2:end-1)); % set first value to complete distribution to sum to one
 end % switch init_str
 
@@ -622,10 +623,11 @@ function  [x_vec, p_vec, total_het_at_each_generation_vec, num_absorptions ,num_
     absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, num_losses, ...
     loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end] = ...
     compute_analytic_expansion_internal( ...
-    N, s, mu, two_side_flag, num_generations, N_vec, max_N, init_str)
+    s, mu, two_side_flag, num_generations, N_vec, init_str, num_moments)
 
 use_moments = 1;
 use_gegenbauer = 0;
+N = N_vec(1); max_N = max(N_vec); 
 
 [total_het_at_each_generation_vec, num_absorptions ,num_fixations, ...
     num_absorptions_by_generation_vec, count_vec ...
@@ -652,12 +654,14 @@ end % use gegenbauer
 
 if(use_moments) % this works only for s=0 !!!!
     prob_site_polymorphic_at_end = prob_site_polymorphic_at_equilibrium; % initialize
-    max_k = 5; % how many moments to compute
+    if(~exist('num_moments', 'var') || isempty(num_moments))
+        num_moments = 5; % how many moments to compute
+    end
     for j=1:num_generations
         run_j = j
         x_vec{j} = (1:(2*N_vec(j)-1)) ./ (2*N_vec(j));
         [mu_vec_expansion_analytic, mu_vec_equilibrium] = ...
-            FisherWright_Compute_SFS_Moments(N_vec(1:j), 0, max_k); % compute moments with Formulas from Ewens
+            FisherWright_Compute_SFS_Moments(N_vec(1:j), 0, num_moments); % compute moments with Formulas from Ewens
         % Estimate density using the max-entropy method:
         if(j==1)
             lambda0 = [];
@@ -669,7 +673,7 @@ if(use_moments) % this works only for s=0 !!!!
             x_vec{j}, lambda0, 0); % normalize by 0th moment. Don't plot anything
         
         f_max_ent = zeros(1, 2*N_vec(j)-1);
-        for k=1:(max_k)
+        for k=1:num_moments
             f_max_ent = f_max_ent + lambda_max_ent(k) .* x_vec{j} .^ (k-1);
         end
         f_max_ent = exp(-f_max_ent) ./ (x_vec{j} .* (1-x_vec{j})); % Compute f. How to normalize?
