@@ -53,7 +53,7 @@ function [freq_struct, absorption_struct, simulation_struct, N_vec, simulation_t
 absorption_time_given_init_freq_vec = []; q = []; % count_vec = [];
 
 simulation_time =  cputime;
-compute_matrix = 1; % compute transition matrix, absorption time etc.
+compute_matrix = 0; % compute transition matrix, absorption time etc.
 if(~exist('region_flag', 'var') || isempty(region_flag))
     region_flag = 0; % % default: simulated a predefined number of alleles
 end
@@ -251,7 +251,7 @@ end
 
 p_vec = cell(num_generations+1, 1); x_vec = p_vec; % het_vec = p_vec; % initilize distributions
 
-rand_str = 'binomial'; % 'poisson'; % 'binomial'; % How to simulate each generation: poisson is much faster (approximation)
+rand_str = 'poisson'; % 'binomial'; % 'poisson'; % 'binomial'; % How to simulate each generation: poisson is much faster (approximation)
 block_size = min(1000, iters); % number of simulations to perform simultaniously
 final_q = zeros(iters, num_generations, 'single'); % fill this with alleles not absorbed
 num_simulated_polymorphic_alleles_vec = zeros(num_generations, 1); % count how many iterations are left at each generation
@@ -503,7 +503,7 @@ for j=1:num_generations % loop on # of generations
     
     skip_running_fraction_of_inds = (2*N_vec(j)+1-length(non_negligile_x_inds)) / (2*N_vec(j)+1) % see how much time we've saved 
     max_range = max(right_range_vec - left_range_vec)
-    prob_compute_method = 'exact'; % s'exact'; % 'approximate'; % 'exact'; 
+    prob_compute_method = 'approximate'; %'exact'; % s'exact'; % ''; % 'exact'; 
     for k=vec2row(non_negligile_x_inds) % 1:2*N_vec(j)+1 % -1 % loop on current allele frequency. This is the heaviest part
         %        k_is = k
         cur_range_vec = left_range_vec(k):right_range_vec(k);
@@ -514,7 +514,7 @@ for j=1:num_generations % loop on # of generations
                 p_vec{j+1}(cur_range_vec) = ...
                     p_vec{j+1}(cur_range_vec) + p_vec{j}(k)  .* ...
                     binopdf(cur_range_vec-1, 2*N_vec(j+1), new_x_mean_vec(k));
-            case 'approx'
+            case {'approx', 'approximate'}
                 if(new_x_mean_vec(k) * 2*N_vec(j+1) < 50)  % use poisson approximation  to binomial on left tail
                     p_vec{j+1}(cur_range_vec) = ...
                         p_vec{j+1}(cur_range_vec) + p_vec{j}(k)  .* ...

@@ -28,7 +28,7 @@ else
     mathematica_str = '_mathematica';
     mathematica_flag = 1;
 end
-fisher_wright_output_dir = '../../common_disease_model/docs/pnas/power_paper/figs/SFS';
+fisher_wright_output_dir = '../../common_disease_model/figs/RVAS_gene_specific/FisherWright/'
 
 s_ctr = 1; % counter of selection coefficient
 het_struct = cell(length(s_vec), 1);
@@ -209,7 +209,8 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
             ', s=' num2str(s,3)  ...
             ', iters ' num2str(simulation_struct.num_simulated_polymorphic_alleles_vec(1)) '->' num2str(iters(1)) ', ' model_name];
         title(str2title([' Prob. ' density_str ' at each allele freq. ' title_str]));
-        my_saveas(gcf, ['mean_time_at_each_allele_freq_simulation_vs_diffusion_approx_' density_str(2:end-1)], 'pdf');
+        my_saveas(gcf, fullfile(fisher_wright_output_dir, ...
+            ['mean_time_at_each_allele_freq_simulation_vs_diffusion_approx_' density_str(2:end-1)]), 'pdf');
     end
     
     % % %     % Move to continuous limit - plot densities:
@@ -220,10 +221,10 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     % % %         ', iters ' num2str(simulation_struct.num_simulated_polymorphic_alleles_vec(1)) '->' num2str(iters(1))];
     % % %     title(str2title([' Mean # Generations (density) spent at each allele freq. ' title_str]));
     % % %     my_saveas(gcf, 'mean_time_at_each_allele_freq_simulation_vs_diffusion_approx', 'pdf');
-    bar_mat = [freq_struct_simulation.prob_site_polymorphic_at_end*freq_struct_simulation.p_vec{end-1}(2:(end-1))' ...
-    bar_mat = [all_p_vec_simulation(2:end-1) freq_struct_numeric.p_vec{end-1}(2:(end-1))']
-    figure; hold on; bar(bar_mat); legend('simulation', 'numeric'); 
-    figure; hold on; plot(all_p_vec_simulation(2:end-1), freq_struct_numeric.p_vec{end-1}(2:(end-1)), '*'); legend('simulation', 'numeric'); 
+
+%    bar_mat = [all_p_vec_simulation(2:end-1) freq_struct_numeric.p_vec{end-1}(2:(end-1))']
+%    figure; hold on; bar(bar_mat); legend('simulation', 'numeric'); 
+%    figure; hold on; plot(all_p_vec_simulation(2:end-1), freq_struct_numeric.p_vec{end-1}(2:(end-1)), '*'); xlabel('simulation'); ylabel('numeric'); 
 
 end
 
