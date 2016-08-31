@@ -3,7 +3,7 @@
 % 
 % Input: 
 % N_vec - vector of population sizes 
-% s - selection coefficients (currently works only for s=0). s shoudl be NEGATIVE for deletirious alleles
+% s - selection coefficients (currently works only for s=0). s should be NEGATIVE for deleterious alleles
 % max_k - maximum moment to compute 
 % 
 % Output: 
@@ -13,10 +13,8 @@
 function [mu_vec, mu_vec_equilibrium] = FisherWright_Compute_SFS_Moments(N_vec, s, max_k)
 
 mu_vec = zeros(max_k, 1); 
-
 N = N_vec(1); 
 rho_vec = N_vec ./ N; 
-
 if(~exist('s', 'var') || isempty(s)) % Assume s=0
     s = 0;
 end

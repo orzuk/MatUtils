@@ -145,7 +145,7 @@ if(test_absorption_time || test_moments) % Test simulation/numerics only for CON
     N = 500; % take moderate value to let all alleles die
     mu = 2*10^(-8) * (10000 / N); % mutation rate (per nucleotide per generation)
     s=0; % -0.0001;
-    expansion_factor = 1; % No EXPANSION! Constant population size
+    expansion_factor = 1.00; % No EXPANSION! Constant population size
     model_name = 'equilibrium'; % 'expansion 1.01'
     init_str{1} = 'equilibrium'; % CHAGE !!! 'newly_born';
     num_generations = 100; % number of generations to carry with simulations
@@ -160,6 +160,8 @@ if(test_absorption_time || test_moments) % Test simulation/numerics only for CON
     D.expan_rate = expansion_factor;
     D.index = 1; % only one demography
     D.add_new_alleles = 0; % use old simulation (track only alleles at start) - to be changed !! 
+    
+    N_vec = demographic_parameters_to_n_vec(D, 1);
 end
 
 if(test_absorption_time) % Test simulation/numerics only for CONSTANT population size where we have also analytic solution
@@ -176,17 +178,24 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         all_p_vec_numeric = accumarray( cell2vec(freq_struct_numeric.x_vec)'+1, cell2vec(freq_struct_numeric.p_vec)');
         all_p_vec_moments = accumarray( cell2vec(freq_struct_moments.x_vec)'+1, cell2vec(freq_struct_moments.p_vec)'); % NEW! compute #generations from moments! need to debug here!
     else % take last generation
-        all_p_vec_simulation = accumarray(freq_struct_simulation.x_vec{end-1}'+1, ...
+        all_p_vec_simulation = zeros(2*N_vec(end)+1,1); 
+        all_p_vec_simulation(1:max(freq_struct_simulation.x_vec{end-1})+1) = ...
+            accumarray(freq_struct_simulation.x_vec{end-1}'+1, ...
             freq_struct_simulation.p_vec{end-1}') * ...
             freq_struct_simulation.prob_site_polymorphic_at_end; 
-        all_p_vec_numeric = freq_struct_numeric.p_vec{end-1}; % This includes the monomorphic state!!! 
-        all_p_vec_moments = accumarray(freq_struct_moments.x_vec{end-1}'+1, ...
+        all_p_vec_numeric = zeros(2*N_vec(end)+1,1); 
+        all_p_vec_numeric(1:max(freq_struct_numeric.x_vec{end-1})+1) = ...
+            freq_struct_numeric.p_vec{end-1}; % This includes the monomorphic state!!! 
+        all_p_vec_moments = zeros(2*N_vec(end)+1,1); 
+        all_p_vec_moments(1:max(freq_struct_moments.x_vec{end-1})+1) = ...
+            accumarray(freq_struct_moments.x_vec{end-1}'+1, ...
             freq_struct_moments.p_vec{end-1}') * ...
             freq_struct_moments.prob_site_polymorphic_at_end; % NEW! compute #generations from moments! need to debug here!
         all_p_vec_analytic = 2.*mu.*exp( allele_freq_spectrum((0:2*N) ./ (2*N), s, N, two_side_flag, 'log') ); % compute analytic approxiamtion (valid only for constant population size)
     end
     
     x_vec = (1:(2*N-1)) ./ (2*N); % take only polymorphic frequencies !! 
+    x_vec_final = (1:(2*N_vec(end)-1)) ./ (2*N_vec(end));
     for plot_flag = 2:2
         if(plot_flag == 2) % normalize
             bin_size = x_vec(2)-x_vec(1);
@@ -196,11 +205,11 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
             density_str = '';
         end
         % Plot PROBABILITY at each allele frequency !!! 
-        figure; loglog( x_vec, all_p_vec_simulation(2:end-1) ./ bin_size, 'linewidth', 2 ); hold on;
-        loglog(x_vec, all_p_vec_numeric(2:end-1) ./ bin_size, 'm', 'linewidth', 2 ); % Why divide by # simulations here?? problem with Normalization here!!!
+        figure; loglog( x_vec_final, all_p_vec_simulation(2:end-1) ./ bin_size, 'linewidth', 2 ); hold on;
+        loglog( x_vec_final, all_p_vec_numeric(2:end-1) ./ bin_size, 'm', 'linewidth', 2 ); % Why divide by # simulations here?? problem with Normalization here!!!
         loglog( x_vec, all_p_vec_analytic(2:end-1) ./ bin_size, 'r' , 'linewidth', 2); % HERE WE MULTIPLY BY FACTOR 2 !!!
         loglog( x_vec, 0.5*all_p_vec_analytic(2:end-1) ./ bin_size, 'r--' , 'linewidth', 2 );
-        loglog( x_vec, all_p_vec_moments(2:end-1) ./ bin_size, 'c' , 'linewidth', 2 );        % New! add moments based calculations        
+        loglog( x_vec_final, all_p_vec_moments(2:end-1) ./ bin_size, 'c' , 'linewidth', 2 );        % New! add moments based calculations        
 
         legend({'simulation', 'numeric', 'diffusion-approximation', '(1/2)-diffusion-approximation', 'Moments'}, ...
             'location', 'southwest', 'fontsize', 14); legend('boxoff'); 
@@ -212,6 +221,18 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         my_saveas(gcf, fullfile(fisher_wright_output_dir, ...
             ['mean_time_at_each_allele_freq_simulation_vs_diffusion_approx_' density_str(2:end-1)]), 'pdf');
     end
+
+    num_moments = 5; % NEW! plot moments
+    analytic_moment_mat = zeros(num_moments, 1); 
+    for k=1:num_moments 
+        analytic_moment_mat(k) = absorption_time_by_selection(-abs(s), 1, N, 0, 1, -k-1);
+    end
+    combined_moment_mat = [freq_struct_simulation.moments_mat(end-1,:); ...
+        freq_struct_numeric.moments_mat(end-1,:); ...
+        freq_struct_moments.moments_mat(end-1,:); ...
+        analytic_moment_mat'];
+    figure; bar(combined_moment_mat'); 
+    legend({'simulation', 'numeric', 'diffusion-approximation', 'Moments'});   %  plot(freq_struct_simulation.moments_mat(end-1,:)
     
     % % %     % Move to continuous limit - plot densities:
     % % %     legend('simulation', 'diffusion-approximation', 'half-diffusion-approximation');

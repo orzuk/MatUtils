@@ -80,6 +80,7 @@ prob_site_polymorphic_at_equilibrium = (2*N*mu) * 2 * absorption_time_by_selecti
 %x_vec = (0:2*N) ./ (2*N); % vector of allele frequencies (include monomorphic alleles) at start
 %heterozygosity_per_site = 4*N*mu * absorption_time_by_selection(abs(s), 1, N, 0, 1, 'var');  % heterozygosity per site
 %p_vec = cell(num_generations+1, 1); %total_het_at_each_generation_vec = zeros(num_generations,1);
+num_moments = min(floor(N_vec(1)/3), 5);
 switch compute_mode
     case 'simulation' % should be a sub-routine
         [q, weights, x_vec, p_vec, total_het_at_each_generation_vec, ...
@@ -88,8 +89,7 @@ switch compute_mode
             absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, loss_time_given_init_freq_vec, ...
             num_simulated_polymorphic_alleles_vec, count_vec, prob_site_polymorphic_at_end] = ...
             simulate_expansion_internal( ...
-            N, s, mu, two_side_flag, iters, num_generations, N_vec, max_N, init_str, D.add_new_alleles);
-        q = q ./ repmat(2.*N_vec(1:(end-1))', iters, 1); % transfer from counts to frequencies
+            N_vec, s, mu, two_side_flag, iters, num_generations, init_str, D.add_new_alleles);
         frac_polymorphic_vec = 1-num_absorptions_by_generation_vec ./ iters;
         num_effective_iters = sum(p_vec{end}(2:end-1)) % total number of single-generation single-allele steps performed (?)
         
@@ -102,20 +102,27 @@ switch compute_mode
             s, mu, two_side_flag, N_vec, init_str, compute_matrix);
         
     case {'analytic', 'moment', 'moments'} % compute solution based on Jacobi polynomials (See e.g. Kryukov et al. PNAS 2009).
-        num_moments = min(floor(N_vec(1)/3), 5);
         [x_vec, p_vec, total_het_at_each_generation_vec, num_absorptions ,num_fixations, ...
             num_absorptions_by_generation_vec, count_vec ...
             absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, num_losses, ...
-            loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end] = ...
+            loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end, ...
+            mu_vec_expansion_analytic, mu_vec_equilibrium] = ...
             compute_analytic_expansion_internal( ...
-            s, mu, two_side_flag, num_generations, N_vec, init_str, num_moments);
-        
+            s, mu, two_side_flag, num_generations, N_vec, init_str, num_moments);        
 end % switch compute mode
 
 % Fill additional statistics
-het_vec = p_vec; % initilize distirbutions
+het_vec = p_vec; % initilize distributions
+moments_mat = zeros(num_generations, num_moments); 
 for j=1:num_generations % heterozygosity vector
     het_vec{j} = 2 .* p_vec{j} .* vec2row(x_vec{j}./(2*N_vec(j)) .* (1-x_vec{j}./(2*N_vec(j))));
+    
+    % NEW! compute moments!!!! 
+    central_flag = 0; % take non-central moments 
+    for k=1:num_moments        
+        moments_mat(j,k) = moment_hist(x_vec{j}, p_vec{j}, k, central_flag); 
+    end
+    
 end
 final_x_vec = (1:2*N_vec(num_generations)-1) ./ (2*N_vec(num_generations)); % set new coordinates
 p_vec_equlibrium_analytic = exp( allele_freq_spectrum([0 final_x_vec 1], s, N, two_side_flag, 'log') ); % compute analytic approxiamtion (valid only for constant population size)
@@ -152,7 +159,7 @@ end % if plot
 freq_struct = var2struct(x_vec, p_vec, p_vec_equlibrium_analytic, ...
     final_x_vec, het_vec, total_het_at_each_generation_vec, ...
     all_new_x_vec, all_new_p_vec, all_new_het_vec, compute_mode, ...
-    prob_site_polymorphic_at_equilibrium, prob_site_polymorphic_at_end);
+    prob_site_polymorphic_at_equilibrium, prob_site_polymorphic_at_end, moments_mat);
 absorption_struct = var2struct(absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, loss_time_given_init_freq_vec, ...
     frac_polymorphic_vec, prob_fixation, frac_old_alleles_survived_vec, frac_het_kept_vec);
 switch compute_mode % add simulations details
@@ -210,14 +217,12 @@ H_new = mu .* sum(prod_vec); % H_new_per_gen = mu;
 % Simulate until we've got enough 'good alleles'
 %
 % Input:
-% N - initial population size (number of INDIVIDUALS!)
+% N_vec - population size at each generation (number of INDIVIDUALS!)
 % s - selection coefficient. Should be NEGATIVE for detelitirious alleles
 % mu - mutation rate: per REGION per individual per generation
 % two_side_flag - derived/minor allele frequency
 % iters - how many alleles to output
 % num_generations - total number of generations to simulate
-% N_vec - population size at each generation
-% max_N - maximal population size (?)
 % init_str - how to start (equilibrium or new allele)
 %
 % Output:
@@ -242,9 +247,9 @@ function [q, weights, x_vec, p_vec, total_het_at_each_generation_vec, ...
     absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, loss_time_given_init_freq_vec, ...
     num_simulated_polymorphic_alleles_vec, count_vec, prob_site_polymorphic_at_end] = ...
     simulate_expansion_internal( ...
-    N, s, mu, two_side_flag, iters, num_generations, N_vec, max_N, init_str, add_new_alleles)
+    N_vec, s, mu, two_side_flag, iters, num_generations, init_str, add_new_alleles)
 
-
+N = N_vec(1); max_N = max(N_vec); 
 if(~exist('add_new_alleles', 'var') || isempty(add_new_alleles)) % default: add newly born alleles at each generation
     add_new_alleles = 1;
 end
@@ -394,6 +399,7 @@ end
 prob_site_polymorphic_at_end = prob_site_polymorphic_at_equilibrium * ... esitmate Prob. poly
     num_simulated_polymorphic_alleles_vec(end) / num_simulated_polymorphic_alleles_vec(end);
 absorption_time_given_init_freq_vec = absorption_time_given_init_freq_vec ./ count_vec; % normalize to get estimated absorption times
+q = q ./ repmat(2.*N_vec(1:(end-1))', iters, 1); % transfer from counts to frequencies
 
 
 % Compute allele frequency distribution numerically.
@@ -604,24 +610,15 @@ prob_site_polymorphic_at_end = []; % NEED TO FILL !!!
 %
 % Output:
 % lots of things
+% 
+% mu_vec_expansion_analytic - moments 
+% mu_vec_equilibrium - moments for equilibrium
 %
-% % % % function [total_het_at_each_generation_vec, num_absorptions, num_fixations, ...
-% % % %     num_absorptions_by_generation_vec, count_vec, ...
-% % % %     absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, num_losses, ...
-% % % %     loss_time_given_init_freq_vec, num_simulated_polymorphic_alleles_vec] = ...
-
-
-
-
-% function  [q, weights, x_vec, p_vec, total_het_at_each_generation_vec, ...
-%     num_absorptions, num_fixations, num_losses, ...
-%     num_absorptions_by_generation_vec, num_fixations_by_generation_vec, num_losses_by_generation_vec, ...
-%     absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, loss_time_given_init_freq_vec, ...
-%     num_simulated_polymorphic_alleles_vec, count_vec] = ...
 function  [x_vec, p_vec, total_het_at_each_generation_vec, num_absorptions ,num_fixations, ...
     num_absorptions_by_generation_vec, count_vec ...
     absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, num_losses, ...
-    loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end] = ...
+    loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end, ...
+    mu_vec_expansion_analytic, mu_vec_equilibrium] = ...
     compute_analytic_expansion_internal( ...
     s, mu, two_side_flag, num_generations, N_vec, init_str, num_moments)
 
@@ -682,7 +679,7 @@ if(use_moments) % this works only for s=0 !!!!
         prob_site_polymorphic_at_end = prob_site_polymorphic_at_end * (1-p_absorb) + ... 
             (1-prob_site_polymorphic_at_end) * 2*N_vec(j)*mu; % XXX UPDATE PROB.        
         p_vec{j} = [0 f_max_ent 0]; % get p. Normalize and add zeros at boundaries 
-        x_vec{j} = [0 round(x_vec{j}*2*N) 2*N]; % get x in integers        
+        x_vec{j} = [0 round(x_vec{j}*2*N_vec(j)) 2*N_vec(j)]; % get x in integers        
 
     end % loop on number of generations
 end % use moments. Function doesn't use mutation rate mu !! 
