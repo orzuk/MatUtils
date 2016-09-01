@@ -231,7 +231,7 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         freq_struct_numeric.moments_mat(end-1,:); ...
         freq_struct_moments.moments_mat(end-1,:); ...
         analytic_moment_mat'];
-    figure; bar(combined_moment_mat'); 
+    figure; bar(combined_moment_mat'); xlabel('Moment order'); ylabel('Moment value'); 
     legend({'simulation', 'numeric', 'diffusion-approximation', 'Moments'});   %  plot(freq_struct_simulation.moments_mat(end-1,:)
     
     % % %     % Move to continuous limit - plot densities:

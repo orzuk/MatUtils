@@ -120,7 +120,7 @@ for j=1:num_generations % heterozygosity vector
     % NEW! compute moments!!!! 
     central_flag = 0; % take non-central moments 
     for k=1:num_moments        
-        moments_mat(j,k) = moment_hist(x_vec{j}, p_vec{j}, k, central_flag); 
+        moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), p_vec{j}, k, central_flag); 
     end
     
 end
