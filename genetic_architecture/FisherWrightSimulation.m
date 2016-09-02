@@ -116,13 +116,11 @@ het_vec = p_vec; % initilize distributions
 moments_mat = zeros(num_generations, num_moments); 
 for j=1:num_generations % heterozygosity vector
     het_vec{j} = 2 .* p_vec{j} .* vec2row(x_vec{j}./(2*N_vec(j)) .* (1-x_vec{j}./(2*N_vec(j))));
-    
     % NEW! compute moments!!!! 
     central_flag = 0; % take non-central moments 
     for k=1:num_moments        
         moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), p_vec{j}, k, central_flag); 
     end
-    
 end
 final_x_vec = (1:2*N_vec(num_generations)-1) ./ (2*N_vec(num_generations)); % set new coordinates
 p_vec_equlibrium_analytic = exp( allele_freq_spectrum([0 final_x_vec 1], s, N, two_side_flag, 'log') ); % compute analytic approxiamtion (valid only for constant population size)
@@ -562,7 +560,10 @@ for j=1:num_generations % loop on # of generations
     p_vec{j+1} = p_vec{j+1} ./ sum(p_vec{j+1});
     
     het_vec{j+1} = 2.* p_vec{j+1} .* vec2column(x_vec{j+1} .* (1-x_vec{j+1})); % update heterozygosity     
-%    total_het_at_each_generation_vec(j) = sum(het_vec{j}); % 2 .* sum(q(:,j) ./ (2.*N_vec(j)) .* (1-  q(:,j) ./ (2.*N_vec(j)) ) ); % this indicates how much heterozygosity was absorbed at each time
+
+    
+    
+    %    total_het_at_each_generation_vec(j) = sum(het_vec{j}); % 2 .* sum(q(:,j) ./ (2.*N_vec(j)) .* (1-  q(:,j) ./ (2.*N_vec(j)) ) ); % this indicates how much heterozygosity was absorbed at each time
     generation_time = cputime - t_gen
 end % loop on generations
 
@@ -573,7 +574,9 @@ total_het_at_each_generation_vec  = sum_cell(het_vec); % total_het_at_each_gener
 
 frac_polymorphic_vec = zeros(num_generations,1);
 for j=1:num_generations
-    frac_polymorphic_vec(j) = sum(p_vec{j});
+    frac_polymorphic_vec(j) = sum(p_vec{j}(2:end));
+    p_vec{j}(2:end) = p_vec{j}(2:end) ./ frac_polymorphic_vec(j); 
+    p_vec{j}(1) = 0; % set to zero 
 end
 if(compute_matrix)
     M2 = M; M2([1 end],:) = 0; ones_vec = ones(2*N,1); ones_vec(1) = 0; ones_vec(end) = 0;
@@ -590,7 +593,7 @@ for j=1:num_generations+1  %change output format (convention)
     p_vec{j} = vec2row(p_vec{j});
     x_vec{j} = round(x_vec{j} .* (2*N_vec(j))); % get number of individual alleles (not fracion)
 end
-prob_site_polymorphic_at_end = []; % NEED TO FILL !!! 
+prob_site_polymorphic_at_end = frac_polymorphic_vec(end-1); % NEED TO FILL !!! 
 
 
 

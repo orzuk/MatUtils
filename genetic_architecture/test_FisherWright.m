@@ -181,11 +181,12 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         all_p_vec_simulation = zeros(2*N_vec(end)+1,1); 
         all_p_vec_simulation(1:max(freq_struct_simulation.x_vec{end-1})+1) = ...
             accumarray(freq_struct_simulation.x_vec{end-1}'+1, ...
-            freq_struct_simulation.p_vec{end-1}') * ...
+            freq_struct_simulation.p_vec{end-1}') .* ...
             freq_struct_simulation.prob_site_polymorphic_at_end; 
         all_p_vec_numeric = zeros(2*N_vec(end)+1,1); 
         all_p_vec_numeric(1:max(freq_struct_numeric.x_vec{end-1})+1) = ...
-            freq_struct_numeric.p_vec{end-1}; % This includes the monomorphic state!!! 
+            freq_struct_numeric.p_vec{end-1} .* ...
+            freq_struct_numeric.prob_site_polymorphic_at_end; % This includes the monomorphic state!!! 
         all_p_vec_moments = zeros(2*N_vec(end)+1,1); 
         all_p_vec_moments(1:max(freq_struct_moments.x_vec{end-1})+1) = ...
             accumarray(freq_struct_moments.x_vec{end-1}'+1, ...
@@ -195,7 +196,7 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     end
     
     x_vec = (1:(2*N-1)) ./ (2*N); % take only polymorphic frequencies !! 
-    x_vec_final = (1:(2*N_vec(end)-1)) ./ (2*N_vec(end));
+    x_vec_final = (1:(2*N_vec(end)-1)) ./ (2*N_vec(end)); % change to end-1? 
     for plot_flag = 2:2
         if(plot_flag == 2) % normalize
             bin_size = x_vec(2)-x_vec(1);
@@ -225,14 +226,14 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     num_moments = 5; % NEW! plot moments
     analytic_moment_mat = zeros(num_moments, 1); 
     for k=1:num_moments 
-        analytic_moment_mat(k) = absorption_time_by_selection(-abs(s), 1, N, 0, 1, -k-1);
+        analytic_moment_mat(k) = absorption_time_by_selection(abs(s), 1, N, 0, 1, k); % -k-1);
     end
     combined_moment_mat = [freq_struct_simulation.moments_mat(end-1,:); ...
         freq_struct_numeric.moments_mat(end-1,:); ...
         freq_struct_moments.moments_mat(end-1,:); ...
         analytic_moment_mat'];
     figure; bar(combined_moment_mat'); xlabel('Moment order'); ylabel('Moment value'); 
-    legend({'simulation', 'numeric', 'diffusion-approximation', 'Moments'});   %  plot(freq_struct_simulation.moments_mat(end-1,:)
+    legend({'simulation', 'numeric', 'Moments', 'diffusion-approximation'});   %  plot(freq_struct_simulation.moments_mat(end-1,:)
     
     % % %     % Move to continuous limit - plot densities:
     % % %     legend('simulation', 'diffusion-approximation', 'half-diffusion-approximation');
