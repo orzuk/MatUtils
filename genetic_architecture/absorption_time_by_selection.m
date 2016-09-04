@@ -53,13 +53,16 @@ else % here we don't have integral, just density
 end
 
 
-% Should have an internal function for computing indefinite integral !!!! 
+% Internal function for computing indefinite integral !!!! 
 % Input: 
-% S
-% theta
-% x
-% weight_flag
-% 
+% S - effective selection coefficient (S=4*N*s. should be POSITIVE for deleterious alleles)
+% theta - effective mutation rate (=4*N*mu)
+% x - allele frequency
+% weight_flag - how do we weight different allele frequencies.
+%
+% Output: 
+% T - Indefinite integral: int_x t_s(x) * x^{weight_flag} dx 
+%
 function T = absorption_time_by_selection_indefinite_integral(S, theta, x, weight_flag)
 
 num_s = length(S); num_x = length(x); 
@@ -92,7 +95,7 @@ for i=1:num_s
             null_inds = find(isnan(T(i,:))); % here S is too big - use asymptotics.
             T(i,null_inds) = -exp(-S(null_inds) .* x(null_inds)) ./ S(null_inds).^2;
 
-        case {-2, 'var', 'het'} % average variance explained. Compute \int x(1-x) T_s(x) dx. We also have an analytic solution here. (Do not multiply by theta!)
+        case {-2, 'var', 'het'} % average variance explained. Compute \int x(1-x) T_s(x) dx. (DO NOT! multiply by 2). We also have an analytic solution here. (Do not multiply by theta!)
             if(S(i) > 300) % take limiting formula as -S->infinity. Why one??? should be ... 
                 T(i,:) = -exp(-x.*S(i)) ./ S(i); % 0 <= f < 1 
                 T(i,x==1) = -exp(-S(i)); % f=1 
@@ -108,7 +111,7 @@ for i=1:num_s
         otherwise % here take a power > 2 
             if(weight_flag > 0) % Compute indefinite integral:  \int_x x^{weight_flag} * t_s(x) dx
                 if(S(i) ~= 0) 
-%                    T(i,:) = 444444; % USE INTEGRATION BY PARTS !!!                    (We don't have an answer here!) 
+%                    T(i,:) = 444444; % USE INTEGRATION BY PARTS !!!                    (We don't have an answer here! need a recursive formula) 
                 else % S = 0
                     T(i,:) = (x.^weight_flag) ./ weight_flag; % compute integral of f^{k-1}
                 end

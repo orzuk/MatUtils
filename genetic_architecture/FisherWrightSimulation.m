@@ -119,8 +119,8 @@ for j=1:num_generations % heterozygosity vector
     % NEW! compute moments!!!! 
     central_flag = 0; % take non-central moments 
     for k=1:num_moments        
-        moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), p_vec{j}, k, central_flag); 
-        het_moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), het_vec{j}, k, central_flag); % compute moments of heterozygosity distribution
+        moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), p_vec{j}, k, central_flag); % compute moments of SFS distribution 
+        het_moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), het_vec{j}, k, central_flag, 0); % compute (UN-Normalized!!!) moments of heterozygosity distribution
     end
 end
 final_x_vec = (1:2*N_vec(num_generations)-1) ./ (2*N_vec(num_generations)); % set new coordinates

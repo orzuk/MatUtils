@@ -215,7 +215,7 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         legend({'simulation', 'numeric', 'diffusion-approximation', '(1/2)-diffusion-approximation', 'Moments'}, ...
             'location', 'southwest', 'fontsize', 14); legend('boxoff'); 
         xlabel('Derived Allele Frequency'); ylabel(['Prob. ' density_str]);
-        title_str = ['N=' num2str(N*1) ...
+        title_str = ['N=' num2str(N*1) '->' num2str(N_vec(end-1)) ...
             ', s=' num2str(s,3)  ...
             ', iters ' num2str(simulation_struct.num_simulated_polymorphic_alleles_vec(1)) '->' num2str(iters(1)) ', ' model_name];
         title(str2title([' Prob. ' density_str ' at each allele freq. ' title_str]));
@@ -224,22 +224,24 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     end
 
     num_moments = 5; % NEW! plot moments
-    analytic_moment_mat = zeros(num_moments, 1); analytic_hat_moment_mat = analytic_moment_mat;
+    analytic_moment_mat = zeros(num_moments, 1); analytic_het_moment_mat = analytic_moment_mat;
     for k=1:num_moments 
         analytic_moment_mat(k) = absorption_time_by_selection(abs(s), 1, N, 0, 1, k); % -k-1);
-        analytic_moment_mat(k) = absorption_time_by_selection(abs(s), 1, N, 0, 1, -k-1); % compute k-th moment of heterozygosity function 
+        analytic_het_moment_mat(k) = absorption_time_by_selection(abs(s), 1, N, 0, 1, -k-1); % compute k-th moment of heterozygosity function 
     end
+    TotalPolymorphicTime = absorption_time_by_selection(abs(s), 1, N, 1/(2*N), 1, 0);
+    analytic_moment_mat = analytic_moment_mat ./ TotalPolymorphicTime;
+    analytic_het_moment_mat = analytic_het_moment_mat ./ TotalPolymorphicTime;
     combined_moment_mat = [freq_struct_simulation.moments_mat(end-1,:); ...
         freq_struct_numeric.moments_mat(end-1,:); ...
         freq_struct_moments.moments_mat(end-1,:); ...
         analytic_moment_mat'];
     figure; bar(combined_moment_mat'); xlabel('Moment order'); ylabel('Moment value'); title(['Moments of SFS ' title_str]); 
     legend({'simulation', 'numeric', 'Moments', 'diffusion-approximation'});   %  plot(freq_struct_simulation.moments_mat(end-1,:)
-
     combined_het_moment_mat = [freq_struct_simulation.het_moments_mat(end-1,:); ...
         freq_struct_numeric.het_moments_mat(end-1,:); ...
         freq_struct_moments.het_moments_mat(end-1,:); ...
-        analytic_moment_mat'];
+        1*analytic_het_moment_mat'];  % add factor 2 here for: 2x(1-x) vs. just x(1-x) 
     figure; bar(combined_het_moment_mat'); xlabel('Het. Moment order'); ylabel('Het. Moment value'); title(['Moments of Het. SFS ' title_str]); 
     legend({'simulation', 'numeric', 'Moments', 'diffusion-approximation'});   %  plot(freq_struct_simulation.moments_mat(end-1,:)
     
