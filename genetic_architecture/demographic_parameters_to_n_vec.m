@@ -27,12 +27,12 @@ num_generations = sum(D.generations);
 N_vec = zeros(num_generations, 1); 
 
 ctr=0;
-for i=1:length(D.generations) % loop on #generation
-   if(D.init_pop_size(i) == -1)
+for j=1:length(D.generations) % loop on #generation
+   if(D.init_pop_size(j) == -1)
        init_size = N_vec(ctr); 
    else
-       init_size = D.init_pop_size(i); 
+       init_size = D.init_pop_size(j); 
    end
-   N_vec((ctr+1):(ctr+D.generations(i))) = ceil(init_size * D.expan_rate(i) .^ (1:D.generations(i))); % get (rounded) population size 
-   ctr = ctr + D.generations(i); 
+   N_vec((ctr+1):(ctr+D.generations(j))) = ceil(init_size * D.expan_rate(j) .^ (1:D.generations(j))); % get (rounded) population size 
+   ctr = ctr + D.generations(j); 
 end

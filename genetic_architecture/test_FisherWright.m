@@ -34,7 +34,7 @@ s_ctr = 1; % counter of selection coefficient
 het_struct = cell(length(s_vec), 1);
 
 total_time = cputime;
-for s = s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end-1) % s_vec % loop on different selection coefficients
+for s = [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end-1) % s_vec % loop on different selection coefficients
     close all; run_s = s
     frac_polymorphic = 2*N*mu * absorption_time_by_selection(s, 1, N, 1/(2*N), 0.999999999, 0);
     for expansion_model = 0:0 % run_two_expansions_flag % allow one rate and two-rate exponential expansions
@@ -147,7 +147,7 @@ if(test_absorption_time || test_moments) % Test simulation/numerics only for CON
     s=0; % -0.0001;
     expansion_factor = 1.00; % No EXPANSION! Constant population size
     model_name = 'equilibrium'; % 'expansion 1.01'
-    init_str{1} = 'equilibrium'; % CHAGE !!! 'newly_born';
+    init_str = []; init_str{1} = 'equilibrium'; % CHAGE !!! 'newly_born';
     num_generations = 100; % number of generations to carry with simulations
     iters = 6000; % how many alleles to keep at the end
     compute_mode = 'simulation';
@@ -224,15 +224,23 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     end
 
     num_moments = 5; % NEW! plot moments
-    analytic_moment_mat = zeros(num_moments, 1); 
+    analytic_moment_mat = zeros(num_moments, 1); analytic_hat_moment_mat = analytic_moment_mat;
     for k=1:num_moments 
         analytic_moment_mat(k) = absorption_time_by_selection(abs(s), 1, N, 0, 1, k); % -k-1);
+        analytic_moment_mat(k) = absorption_time_by_selection(abs(s), 1, N, 0, 1, -k-1); % compute k-th moment of heterozygosity function 
     end
     combined_moment_mat = [freq_struct_simulation.moments_mat(end-1,:); ...
         freq_struct_numeric.moments_mat(end-1,:); ...
         freq_struct_moments.moments_mat(end-1,:); ...
         analytic_moment_mat'];
-    figure; bar(combined_moment_mat'); xlabel('Moment order'); ylabel('Moment value'); 
+    figure; bar(combined_moment_mat'); xlabel('Moment order'); ylabel('Moment value'); title(['Moments of SFS ' title_str]); 
+    legend({'simulation', 'numeric', 'Moments', 'diffusion-approximation'});   %  plot(freq_struct_simulation.moments_mat(end-1,:)
+
+    combined_het_moment_mat = [freq_struct_simulation.het_moments_mat(end-1,:); ...
+        freq_struct_numeric.het_moments_mat(end-1,:); ...
+        freq_struct_moments.het_moments_mat(end-1,:); ...
+        analytic_moment_mat'];
+    figure; bar(combined_het_moment_mat'); xlabel('Het. Moment order'); ylabel('Het. Moment value'); title(['Moments of Het. SFS ' title_str]); 
     legend({'simulation', 'numeric', 'Moments', 'diffusion-approximation'});   %  plot(freq_struct_simulation.moments_mat(end-1,:)
     
     % % %     % Move to continuous limit - plot densities:

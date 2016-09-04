@@ -113,13 +113,14 @@ end % switch compute mode
 
 % Fill additional statistics
 het_vec = p_vec; % initilize distributions
-moments_mat = zeros(num_generations, num_moments); 
+moments_mat = zeros(num_generations, num_moments); het_moments_mat = moments_mat; 
 for j=1:num_generations % heterozygosity vector
     het_vec{j} = 2 .* p_vec{j} .* vec2row(x_vec{j}./(2*N_vec(j)) .* (1-x_vec{j}./(2*N_vec(j))));
     % NEW! compute moments!!!! 
     central_flag = 0; % take non-central moments 
     for k=1:num_moments        
         moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), p_vec{j}, k, central_flag); 
+        het_moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), het_vec{j}, k, central_flag); % compute moments of heterozygosity distribution
     end
 end
 final_x_vec = (1:2*N_vec(num_generations)-1) ./ (2*N_vec(num_generations)); % set new coordinates
@@ -157,7 +158,7 @@ end % if plot
 freq_struct = var2struct(x_vec, p_vec, p_vec_equlibrium_analytic, ...
     final_x_vec, het_vec, total_het_at_each_generation_vec, ...
     all_new_x_vec, all_new_p_vec, all_new_het_vec, compute_mode, ...
-    prob_site_polymorphic_at_equilibrium, prob_site_polymorphic_at_end, moments_mat);
+    prob_site_polymorphic_at_equilibrium, prob_site_polymorphic_at_end, moments_mat, het_moments_mat);
 absorption_struct = var2struct(absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, loss_time_given_init_freq_vec, ...
     frac_polymorphic_vec, prob_fixation, frac_old_alleles_survived_vec, frac_het_kept_vec);
 switch compute_mode % add simulations details

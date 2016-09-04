@@ -28,7 +28,7 @@ int_one_over_rho_cum_vec = cumsum( 1./rho_vec) ./ (2*N); % take integral of 1/rh
 
 theta = 1; 
 for k=1:max_k
-    mu_vec_equilibrium(k) = absorption_time_by_selection(-abs(s), theta, N, 0, 1, -k-1);
+    mu_vec_equilibrium(k) = absorption_time_by_selection(-abs(s), theta, N, 0, 1, -k-1);  % at equilibrium compute: int_{f=0}^1   f(1-f) \psi_0(f) df 
 end
 
 % Compute non-equilibrium vec (for s=0)
