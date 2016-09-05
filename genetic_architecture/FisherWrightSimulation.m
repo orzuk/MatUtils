@@ -80,7 +80,7 @@ prob_site_polymorphic_at_equilibrium = (2*N*mu) * 2 * absorption_time_by_selecti
 %x_vec = (0:2*N) ./ (2*N); % vector of allele frequencies (include monomorphic alleles) at start
 %heterozygosity_per_site = 4*N*mu * absorption_time_by_selection(abs(s), 1, N, 0, 1, 'var');  % heterozygosity per site
 %p_vec = cell(num_generations+1, 1); %total_het_at_each_generation_vec = zeros(num_generations,1);
-num_moments = min(floor(N_vec(1)/3), 5);
+num_moments = min(floor(N_vec(1)/3), 6);
 switch compute_mode
     case 'simulation' % should be a sub-routine
         [q, weights, x_vec, p_vec, total_het_at_each_generation_vec, ...
@@ -119,8 +119,8 @@ for j=1:num_generations % heterozygosity vector
     % NEW! compute moments!!!! 
     central_flag = 0; % take non-central moments 
     for k=1:num_moments        
-        moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), p_vec{j}, k, central_flag); % compute moments of SFS distribution 
-        het_moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), het_vec{j}, k, central_flag, 0); % compute (UN-Normalized!!!) moments of heterozygosity distribution
+        moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), p_vec{j}, k, central_flag); % compute moments of SFS distribution. Start from 1st moment!! 
+        het_moments_mat(j,k) = moment_hist(x_vec{j} ./ (2*N_vec(j)), het_vec{j}, k-1, central_flag, 0); % compute (k-1)-th (UN-Normalized!!!) moments of heterozygosity distribution. Start from zero-th moment!!
     end
 end
 final_x_vec = (1:2*N_vec(num_generations)-1) ./ (2*N_vec(num_generations)); % set new coordinates
@@ -384,7 +384,7 @@ num_losses = sum(num_losses_by_generation_vec);
 
 for j=1:num_generations % sort and normalize distributions
     [x_vec{j}, sort_perm] = sort(x_vec{j});
-    p_vec{j} = p_vec{j}(sort_perm) ./ num_simulated_polymorphic_alleles_vec(1); % normalize to incorporate prob. of alleles which started as polymorphic
+    p_vec{j} = p_vec{j}(sort_perm) ./ num_simulated_polymorphic_alleles_vec(j); % new! normalize to sum to 1!!. (Before: (1) instead of (j):  normalize to incorporate prob. of alleles which started as polymorphic
 end
 q=final_q; % Copy results
 
@@ -395,8 +395,8 @@ switch init_str % Normalize
         total_het_at_each_generation_vec = total_het_at_each_generation_vec .* 2*N*mu; % normalize to include fraction of polymorphic sites born at each generation
         total_het_at_each_generation_vec = cumsum(total_het_at_each_generation_vec); % unite the contribution from each generation
 end
-prob_site_polymorphic_at_end = prob_site_polymorphic_at_equilibrium * ... esitmate Prob. poly
-    num_simulated_polymorphic_alleles_vec(end) / num_simulated_polymorphic_alleles_vec(end);
+prob_site_polymorphic_at_end = prob_site_polymorphic_at_equilibrium * ... esitmate Prob. poly, by ratio of # alleles at start and at end (noisy!)
+    num_simulated_polymorphic_alleles_vec(end) / num_simulated_polymorphic_alleles_vec(1);
 absorption_time_given_init_freq_vec = absorption_time_given_init_freq_vec ./ count_vec; % normalize to get estimated absorption times
 q = q ./ repmat(2.*N_vec(1:(end-1))', iters, 1); % transfer from counts to frequencies
 
@@ -558,7 +558,7 @@ for j=1:num_generations % loop on # of generations
     p_vec{j+1} = vec2column(p_vec{j+1});
     p_vec{j+1}(1) = p_vec{j+1}(1) + ... % normalization
         (N_vec(j+1)/N) * (2*N*mu); % add mass at 1/2N frequency. New! add mass to get total frequency above 1
-    p_vec{j+1} = p_vec{j+1} ./ sum(p_vec{j+1});
+    p_vec{j+1} = p_vec{j+1} ./ sum(p_vec{j+1}); % normalize to sum to one 
     
     het_vec{j+1} = 2.* p_vec{j+1} .* vec2column(x_vec{j+1} .* (1-x_vec{j+1})); % update heterozygosity     
 

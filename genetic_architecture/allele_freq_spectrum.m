@@ -1,7 +1,8 @@
 % Compute allele frequency distribution in a population
 % Formula from Sawyer&Hartl paper. We use S=4*N*s (not 2*N*s) since N
 % is the number of individuals (not chromosomes)
-% The formula is: g(f) = t_s(f) =  [1 - e^(-S(1-f))] / [f(1-f)(1-e^(-S))]
+% The formula is: g(f) = t_s(f) =  [1 - e^(-S(1-f))] / [f(1-f)(1-e^(-S))].
+% Note: This is HALF (1/2) of the corret value !! (a factor 2 is missing here!)
 %
 % Input:
 % x - allele frequency
