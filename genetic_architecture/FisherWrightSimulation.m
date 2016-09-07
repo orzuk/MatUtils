@@ -76,6 +76,7 @@ end
 N_vec = demographic_parameters_to_n_vec(D, D.index);  % compute population size at each generation
 N = N_vec(1); num_generations = length(N_vec)-1; max_N = max(N_vec);
 prob_site_polymorphic_at_equilibrium = (2*N*mu) * 2 * absorption_time_by_selection(abs(s), 1, N, 1/(2*N), 0.999999999, 0);  % NEW! Factor of two here! fraction of poylmporphic sites at start
+mu_vec_analytic = [];  mu_vec_equilibrium = []; 
 
 %x_vec = (0:2*N) ./ (2*N); % vector of allele frequencies (include monomorphic alleles) at start
 %heterozygosity_per_site = 4*N*mu * absorption_time_by_selection(abs(s), 1, N, 0, 1, 'var');  % heterozygosity per site
@@ -106,7 +107,7 @@ switch compute_mode
             num_absorptions_by_generation_vec, count_vec ...
             absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, num_losses, ...
             loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end, ...
-            mu_vec_expansion_analytic, mu_vec_equilibrium] = ...
+            mu_vec_analytic, mu_vec_equilibrium] = ...
             compute_analytic_expansion_internal( ...
             s, mu, two_side_flag, num_generations, N_vec, init_str, num_moments);        
 end % switch compute mode
@@ -158,7 +159,8 @@ end % if plot
 freq_struct = var2struct(x_vec, p_vec, p_vec_equlibrium_analytic, ...
     final_x_vec, het_vec, total_het_at_each_generation_vec, ...
     all_new_x_vec, all_new_p_vec, all_new_het_vec, compute_mode, ...
-    prob_site_polymorphic_at_equilibrium, prob_site_polymorphic_at_end, moments_mat, het_moments_mat);
+    prob_site_polymorphic_at_equilibrium, prob_site_polymorphic_at_end, ...
+    mu_vec_analytic, mu_vec_equilibrium, moments_mat, het_moments_mat);
 absorption_struct = var2struct(absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, loss_time_given_init_freq_vec, ...
     frac_polymorphic_vec, prob_fixation, frac_old_alleles_survived_vec, frac_het_kept_vec);
 switch compute_mode % add simulations details
@@ -486,6 +488,10 @@ if(~exist('mu', 'var') || isempty(mu))
     mu =  sum(vec2row(init_p_vec) .* binopdf(0, 2*N, x_vec) ./ (2*N)); % compute mutation rate per site (assuming T=1 target size)
 end
 p_vec{1} = vec2column(init_p_vec); het_vec{1} = 2.* p_vec{1} .* vec2column(x_vec{1} .* (1-x_vec{1}));
+
+if(compute_matrix)
+    p_vec_M = p_vec; p_vec_M{1} = p_vec_M{1}(1:end-1); % don't include alternative (fixed) allele
+end
 normpdf_vec = normpdf(-6:10^(-5):6); % Prepare in advance Gaussian density to save time. Current resolution: 1 million
 for j=1:num_generations % loop on # of generations
     t_gen = cputime;
@@ -501,10 +507,10 @@ for j=1:num_generations % loop on # of generations
     left_range_vec = max(1, round(new_x_mean_vec.*2*N_vec(j+1) - num_sigmas .* std_vec)); % calculate range to compute binomial distribution 
     right_range_vec = 1+min(2*N_vec(j+1), round(new_x_mean_vec.*2*N_vec(j+1) + num_sigmas .* std_vec)); 
     if(compute_matrix)
-        M = zeros(2*N_vec(j+1)+1, 2*N_vec(j)+1);
+        M = zeros(2*N_vec(j)+1, 2*N_vec(j+1)+1);
     end
     
-    non_negligile_x_inds = find(p_vec{j} > 10^(-9));
+    non_negligile_x_inds = find(p_vec{j} > 10^(-9)); % take only states with non-negligible probability
     
     skip_running_fraction_of_inds = (2*N_vec(j)+1-length(non_negligile_x_inds)) / (2*N_vec(j)+1) % see how much time we've saved 
     max_range = max(right_range_vec - left_range_vec)
@@ -519,46 +525,61 @@ for j=1:num_generations % loop on # of generations
                 p_vec{j+1}(cur_range_vec) = ...
                     p_vec{j+1}(cur_range_vec) + p_vec{j}(k)  .* ...
                     binopdf(cur_range_vec-1, 2*N_vec(j+1), new_x_mean_vec(k));
+                if(compute_matrix)
+                    M(k,:) = binopdf(0:2*N_vec(j+1), 2*N_vec(j+1), new_x_mean_vec(k)); % Why column here? % -1
+                end
             case {'approx', 'approximate'}
                 if(new_x_mean_vec(k) * 2*N_vec(j+1) < 50)  % use poisson approximation  to binomial on left tail
                     p_vec{j+1}(cur_range_vec) = ...
                         p_vec{j+1}(cur_range_vec) + p_vec{j}(k)  .* ...
-                        poisspdf(cur_range_vec-1, 2*N_vec(j+1) * new_x_mean_vec(k));  % This part is slowest (binomial). We replace with poisson approximation for larger values!!!
+                        poisspdf(cur_range_vec-1, 2*N_vec(j+1) * new_x_mean_vec(k));  % Replace with poisson approximation for larger values!!!
+                    if(compute_matrix)
+                        M(k,:) = poisspdf(0:2*N_vec(j+1), 2*N_vec(j+1) * new_x_mean_vec(k)); % Poisson approximation
+                    end
                 else % for larger values use poisson or Gaussian approximations
                     if((1-new_x_mean_vec(k)) .* 2*N_vec(j+1) < 50) %  use poisson approximation to binomial on right tail,
                         p_vec{j+1}(cur_range_vec) = ...
                             p_vec{j+1}(cur_range_vec) + p_vec{j}(k)  .* ...
                             poisspdf(2*N_vec(j+1) - (cur_range_vec-1), 2*N_vec(j+1) * (1-new_x_mean_vec(k)));  % This part is slowest. We replaced with poisson !!!
+                        if(compute_matrix)
+                            M(k,:) = poisspdf(2*N_vec(j+1):-1:0, 2*N_vec(j+1) * (1-new_x_mean_vec(k))); % Poisson approximation
+                        end
                     else % use Gaussian approximation to binomial in the middle of distribution
                         p_vec{j+1}(cur_range_vec) = ...
                             p_vec{j+1}(cur_range_vec) + p_vec{j}(k)  .* ...
                             normpdf_vec( round(( 6+(cur_range_vec-1 - 2*N_vec(j+1) * new_x_mean_vec(k)) ./ std_vec(k) ) .* 10^5) ) ./ std_vec(k);
                         %                 normpdf(cur_range_vec-1, 2*N_vec(j+1) * new_x_mean_vec(k), ...
                         %                 sqrt(2*N_vec(j+1) * new_x_mean_vec(k) * (1-new_x_mean_vec(k))) );  % This part is slowest. We replace with poisson !!!
+                        if(compute_matrix)
+                            M(k,:) = normpdf(0:2*N_vec(j+1), 2*N_vec(j+1)*new_x_mean_vec(k), ...
+                                sqrt(2*N_vec(j+1)*new_x_mean_vec(k)* (1-new_x_mean_vec(k))) ); % Why column here? % -1
+                        end
                     end
                 end % if: what probability propagating approximation to use
         end % switch approximate
         
-        if(compute_matrix)
-            M(k,:) = binopdf(0:2*N_vec(j+1), 2*N_vec(j+1), new_x_mean_vec(k)); % Why column here? % -1
-        end
     end % loop on k
     p_vec{j+1}(1) = p_vec{j+1}(1) + p_vec{j+1}(end); p_vec{j+1}(end) = 0; % combine zero and one frequencies        
     p_vec{j+1}(2) = p_vec{j+1}(2) + p_vec{j+1}(1) .* 2*N_vec(j+1)*mu; % add mutations
-    p_vec{j+1}(1) = p_vec{j+1}(1) .* (1-2*N_vec(j+1)*mu);
+    p_vec{j+1}(1) = p_vec{j+1}(1) .* (1-2*N_vec(j+1)*mu); % reduce monomorphic zero alleles due to mutations 
+    %p_vec{j+1} = vec2column(p_vec{j+1});
+    %p_vec{j+1}(1) = p_vec{j+1}(1) + ... % normalization
+    %    (N_vec(j+1)/N) * (2*N*mu); % add mass at 1/2N frequency. New! add mass to get total frequency above 1
+    p_vec{j+1} = vec2column(p_vec{j+1} ./ sum(p_vec{j+1})); % normalize to sum to one 
     if(compute_matrix)
         M(:,1) = M(:,1) + M(:, 2*N_vec(j+1)+1);
-        M = M(1:(2*N_vec(j+1)), 1:(2*N_vec(j+1))); % identify ancestral and derived !!! 
+        M = M(1:(2*N_vec(j)), 1:(2*N_vec(j+1))); % identify ancestral and derived !!! 
         M(:,2) = M(:,2) + M(:,1) .* 2*N_vec(j+1)*mu; % correct for mutation
         M(:,1) = M(:,1) .* (1-2*N_vec(j+1)*mu);
-        T_mean = inv(eye(2*N_vec(j+1)-1)-M(2:end,2:end)) * ones(2*N_vec(j+1)-1,1); % caclulate mean absorption time for each frequency
-        [V, LAMBDA] = eig(M');  V = V(:,1) ./ sum(V(:,1)); P_POLY = 1-V(1)
-        FRAC_LOST = M(2:end,1)'*V(2:end) ./ sum(V(2:end))
+        p_vec_M{j+1} = M' * p_vec_M{j}; % compute using M. See how different? 
+%        p_vec_M{j+1}(1) = p_vec_M{j+1}(1) + p_vec_M{j+1}(end); p_vec_M{j+1}(end) = 0; % combine zero and one frequencies        
+        
+        if(N_vec(j) == N_vec(j+1))
+            T_mean = inv(eye(2*N_vec(j+1)-1)-M(2:end,2:end)) * ones(2*N_vec(j+1)-1,1); % caclulate mean absorption time for each frequency (only possible for constant population !!!
+            [V, LAMBDA] = eigs(M',1);  V = V(:,1) ./ sum(V(:,1)); P_POLY = 1-V(1)
+            FRAC_LOST = M(2:end,1)'*V(2:end) ./ sum(V(2:end))
+        end
     end
-    p_vec{j+1} = vec2column(p_vec{j+1});
-    p_vec{j+1}(1) = p_vec{j+1}(1) + ... % normalization
-        (N_vec(j+1)/N) * (2*N*mu); % add mass at 1/2N frequency. New! add mass to get total frequency above 1
-    p_vec{j+1} = p_vec{j+1} ./ sum(p_vec{j+1}); % normalize to sum to one 
     
     het_vec{j+1} = 2.* p_vec{j+1} .* vec2column(x_vec{j+1} .* (1-x_vec{j+1})); % update heterozygosity     
 
@@ -615,14 +636,14 @@ prob_site_polymorphic_at_end = frac_polymorphic_vec(end-1); % NEED TO FILL !!!
 % Output:
 % lots of things
 % 
-% mu_vec_expansion_analytic - moments 
+% mu_vec_analytic - moments 
 % mu_vec_equilibrium - moments for equilibrium
 %
 function  [x_vec, p_vec, total_het_at_each_generation_vec, num_absorptions ,num_fixations, ...
     num_absorptions_by_generation_vec, count_vec ...
     absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, num_losses, ...
     loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end, ...
-    mu_vec_expansion_analytic, mu_vec_equilibrium] = ...
+    mu_vec_analytic, mu_vec_equilibrium] = ...
     compute_analytic_expansion_internal( ...
     s, mu, two_side_flag, num_generations, N_vec, init_str, num_moments)
 
@@ -661,7 +682,7 @@ if(use_moments) % this works only for s=0 !!!!
     for j=1:num_generations
         run_j = j
         x_vec{j} = (1:(2*N_vec(j)-1)) ./ (2*N_vec(j));
-        [mu_vec_expansion_analytic, mu_vec_equilibrium] = ...
+        [mu_vec_analytic, mu_vec_equilibrium] = ...
             FisherWright_Compute_SFS_Moments(N_vec(1:j), 0, num_moments); % compute moments with Formulas from Ewens
         % Estimate density using the max-entropy method:
         if(j==1)
@@ -670,7 +691,7 @@ if(use_moments) % this works only for s=0 !!!!
             lambda0 = lambda_max_ent;
         end
         [lambda_max_ent, g_het_max_ent, entr_max_ent] = ...  % Fit density using moments % , lambda0)
-            me_dens2(mu_vec_expansion_analytic(2:end) ./ mu_vec_expansion_analytic(1), ...
+            me_dens2(mu_vec_analytic(2:end) ./ mu_vec_analytic(1), ...
             x_vec{j}, lambda0, 0); % normalize by 0th moment. Don't plot anything
         
         f_max_ent = zeros(1, 2*N_vec(j)-1);
