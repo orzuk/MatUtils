@@ -2,14 +2,14 @@
 % 
 % Input: 
 % x - values
-% p - their density
+% p - their density. This is treated as (continuous) density function - not discrete probability funnction
 % cumulative_flag - (NEW!) if this is 'on', we return the cumulative function 
 % 
 % Output: 
 % s - the integral  \sum_i p(i) * \delta_x
 % p_cum - the cumulative distribution function 
 % 
-function [s p_cum] = integral_hist(x, p, cumulative_flag)
+function [s, p_cum] = integral_hist(x, p, cumulative_flag)
 
 s = 0.5 .* sum(diff(x) .* (p(1:end-1) +  p(2:end))); 
 

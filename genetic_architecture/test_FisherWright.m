@@ -175,6 +175,7 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     
     if(debug_figures)
         D_equil = D; D_equil.init_pop_size = D.init_pop_size(1); D_equil.generations = 1000; D_equil.expan_rate = 1;
+        N_vec_equil = demographic_parameters_to_n_vec(D_equil, 1);
         [freq_struct_simulation_equil, absorption_struct_equil, simulation_struct_equil] = ...
             FisherWrightSimulation([], D_equil, mu, s, init_str{1}, iters, 'simulation', num_bins); % run simulation
         [freq_struct_numeric_equil, absorption_struct_numeric_equil] = ...
@@ -209,16 +210,16 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         all_p_vec_simulation(1:max(freq_struct_simulation.x_vec{end-1})+1) = ...
             accumarray(freq_struct_simulation.x_vec{end-1}'+1, ...
             freq_struct_simulation.p_vec{end-1}') .* ...
-            freq_struct_simulation.prob_site_polymorphic_at_end;
+            freq_struct_simulation.prob_site_polymorphic_at_end(end);
         all_p_vec_numeric = zeros(2*N_vec(end)+1,1);
         all_p_vec_numeric(1:max(freq_struct_numeric.x_vec{end-1})+1) = ...
             freq_struct_numeric.p_vec{end-1} .* ...
-            freq_struct_numeric.prob_site_polymorphic_at_end; % This includes the monomorphic state!!!
+            freq_struct_numeric.prob_site_polymorphic_at_end(end); % This includes the monomorphic state!!!
         all_p_vec_moments = zeros(2*N_vec(end)+1,1);
         all_p_vec_moments(1:max(freq_struct_moments.x_vec{end-1})+1) = ...
             accumarray(freq_struct_moments.x_vec{end-1}'+1, ...
             freq_struct_moments.p_vec{end-1}') * ...
-            freq_struct_moments.prob_site_polymorphic_at_end; % NEW! compute #generations from moments! need to debug here!
+            freq_struct_moments.prob_site_polymorphic_at_end(end); % NEW! compute #generations from moments! need to debug here!
         all_p_vec_analytic = 2.*mu.*exp( allele_freq_spectrum((0:2*N) ./ (2*N), s, N, two_side_flag, 'log') ); % compute analytic approxiamtion (valid only for constant population size)
         all_p_vec_analytic_end = 2.*mu.*exp( allele_freq_spectrum((0:2*N_vec(end)) ./ (2*N_vec(end)), s, N_vec(end), two_side_flag, 'log') ); % compute analytic approxiamtion (valid only for constant population size)
         
@@ -316,6 +317,34 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         plot(absorption_struct_numeric_equil_2000.frac_polymorphic_vec, 'g', 'linewidth', 2); % run at constant size: old equilibrium
         title('N=2000')
         xlabel('Generation'); ylabel('P_{poly}'); legend('simulation', 'numeric', 'new-equilibrium');
+        
+        
+        figure; hold on; plot(freq_struct_simulation_equil.prob_site_polymorphic_at_end); 
+        plot(freq_struct_numeric_equil.prob_site_polymorphic_at_end, 'r'); 
+        plot(freq_struct_moments_equil.prob_site_polymorphic_at_end, 'g'); 
+        xlabel('Generation'); ylabel('P_{poly}'); legend('simulation', 'numeric', 'new-equilibrium'); title('equilibrium'); 
+
+        % Plot Prob. (polymorphic) for expansion
+        figure; hold on; plot(freq_struct_simulation.prob_site_polymorphic_at_end); 
+        plot(freq_struct_numeric.prob_site_polymorphic_at_end, 'r'); 
+        plot(freq_struct_moments.prob_site_polymorphic_at_end, 'g'); 
+        xlabel('Generation'); ylabel('P_{poly}'); legend('simulation', 'numeric', 'moments'); title('expansion'); 
+        
+        figure; hold on; % plot zero'th moment 
+        plot(freq_struct_simulation_equil.het_moments_mat(:,1), 'b');
+        plot(freq_struct_numeric_equil.het_moments_mat(:,1), 'r');
+        plot(freq_struct_moments_equil.het_moments_mat(:,1), 'g');
+        plot(freq_struct_moments_equil.mu_vec_analytic(1,1:end-1)' ./ (freq_struct_moments_equil.prob_site_polymorphic_at_end.*N_vec_equil(1:end-1)), 'g--'); 
+        xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted', 'moments');title('equilibrium');
+
+    
+        figure; hold on; % plot zero'th moment 
+        plot(freq_struct_simulation.het_moments_mat(:,1), 'b');
+        plot(freq_struct_numeric.het_moments_mat(:,1), 'r');
+        plot(freq_struct_moments.het_moments_mat(:,1), 'g');
+        plot(freq_struct_moments.mu_vec_analytic(1,1:end-1)' ./ (freq_struct_moments.prob_site_polymorphic_at_end.*N_vec(1:end-1)), 'g--'); 
+        xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted', 'moments'); title('expansion');
+    
     end
     
     % % %     % Move to continuous limit - plot densities:

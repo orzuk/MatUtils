@@ -397,8 +397,8 @@ switch init_str % Normalize
         total_het_at_each_generation_vec = total_het_at_each_generation_vec .* 2*N*mu; % normalize to include fraction of polymorphic sites born at each generation
         total_het_at_each_generation_vec = cumsum(total_het_at_each_generation_vec); % unite the contribution from each generation
 end
-prob_site_polymorphic_at_end = prob_site_polymorphic_at_equilibrium * ... esitmate Prob. poly, by ratio of # alleles at start and at end (noisy!)
-    num_simulated_polymorphic_alleles_vec(end) / num_simulated_polymorphic_alleles_vec(1);
+prob_site_polymorphic_at_end = prob_site_polymorphic_at_equilibrium .* ... % esitmate Prob. poly, by ratio of # alleles at start and at end (noisy!)
+    num_simulated_polymorphic_alleles_vec ./ num_simulated_polymorphic_alleles_vec(1);
 absorption_time_given_init_freq_vec = absorption_time_given_init_freq_vec ./ count_vec; % normalize to get estimated absorption times
 q = q ./ repmat(2.*N_vec(1:(end-1))', iters, 1); % transfer from counts to frequencies
 
@@ -456,9 +456,9 @@ switch init_str
         init_p_vec(:) = 0; init_p_vec(1) = 1; % Set allele freq. at 0. Contribution will come from 1/2N
     case 'equilibrium'
         init_p_vec(end) = 0; % 1 allele frequency
-        init_p_vec = init_p_vec .* 2.* max(10^(-10), mu);  % multiply by theta. (If mu=0: no mutations, then we've got a problem ... set some mu>0)
-        init_p_vec(1) = 1 - sum(init_p_vec(2:end-1)); % set first value to complete distribution to sum to one
 end % switch init_str
+init_p_vec = init_p_vec .* 2.* max(10^(-10), mu);  % multiply by theta. (If mu=0: no mutations, then we've got a problem ... set some mu>0)
+init_p_vec(1) = 1 - sum(init_p_vec(2:end-1)); % set first value to complete distribution to sum to one. Also when using init? 
 
 new_x_mean_vec = x_vec{1} .* (1+s); % first get the mean vector of new #offspring 
 num_sigmas = 5; % keep only these many st.d. (to speed-up computation)
@@ -495,7 +495,7 @@ end
 normpdf_vec = normpdf(-6:10^(-5):6); % Prepare in advance Gaussian density to save time. Current resolution: 1 million
 for j=1:num_generations % loop on # of generations
     t_gen = cputime;
-    p_vec{j} = p_vec{j} ./ sum(p_vec{j}); % normalize to sum to one. Why?
+%    p_vec{j} = p_vec{j} ./ sum(p_vec{j}); % normalize to sum to one. Why?
     if(mod(j, ceil(500/N)) == 0)
         run_generation = j
     end
@@ -560,12 +560,9 @@ for j=1:num_generations % loop on # of generations
         
     end % loop on k
     p_vec{j+1}(1) = p_vec{j+1}(1) + p_vec{j+1}(end); p_vec{j+1}(end) = 0; % combine zero and one frequencies        
-    p_vec{j+1}(2) = p_vec{j+1}(2) + p_vec{j+1}(1) .* 2*N_vec(j+1)*mu; % add mutations
+    p_vec{j+1}(2) = p_vec{j+1}(2) + (1*p_vec{j+1}(1)+0) .* 2*N_vec(j+1)*mu; % add mutations
     p_vec{j+1}(1) = p_vec{j+1}(1) .* (1-2*N_vec(j+1)*mu); % reduce monomorphic zero alleles due to mutations 
-    %p_vec{j+1} = vec2column(p_vec{j+1});
-    %p_vec{j+1}(1) = p_vec{j+1}(1) + ... % normalization
-    %    (N_vec(j+1)/N) * (2*N*mu); % add mass at 1/2N frequency. New! add mass to get total frequency above 1
-    p_vec{j+1} = vec2column(p_vec{j+1} ./ sum(p_vec{j+1})); % normalize to sum to one 
+    p_vec{j+1} = vec2column(p_vec{j+1}); %    p_vec{j+1} = vec2column(p_vec{j+1} ./ sum(p_vec{j+1})); % normalize to sum to one. Why not normalize at end???  
     if(compute_matrix)
         M(:,1) = M(:,1) + M(:, 2*N_vec(j+1)+1);
         M = M(1:(2*N_vec(j)), 1:(2*N_vec(j+1))); % identify ancestral and derived !!! 
@@ -596,7 +593,7 @@ total_het_at_each_generation_vec  = sum_cell(het_vec); % total_het_at_each_gener
 
 frac_polymorphic_vec = zeros(num_generations,1);
 for j=1:num_generations
-    frac_polymorphic_vec(j) = sum(p_vec{j}(2:end));
+    frac_polymorphic_vec(j) = sum(p_vec{j}(2:end)); % This should change if p_vec isn't normalized !! 
     p_vec{j}(2:end) = p_vec{j}(2:end) ./ frac_polymorphic_vec(j); 
     p_vec{j}(1) = 0; % set to zero 
 end
@@ -615,13 +612,13 @@ for j=1:num_generations+1  %change output format (convention)
     p_vec{j} = vec2row(p_vec{j});
     x_vec{j} = round(x_vec{j} .* (2*N_vec(j))); % get number of individual alleles (not fracion)
 end
-prob_site_polymorphic_at_end = frac_polymorphic_vec(end-1); % NEED TO FILL !!! 
+prob_site_polymorphic_at_end = frac_polymorphic_vec; % (end-1); % NEED TO FILL !!! 
 
 
 
 
 % Compute everything analytically (how? look at formulas from Shamil for moments)
-% NOT WORKING YET !!!
+% NOT WORKING YET FOR NON-EQUILIBRIUM !!!
 %
 % Input:
 % N - population size
@@ -675,15 +672,16 @@ end % use gegenbauer
 
 
 if(use_moments) % this works only for s=0 !!!!
-    prob_site_polymorphic_at_end = prob_site_polymorphic_at_equilibrium; % initialize
+    prob_site_polymorphic_at_end = zeros(num_generations, 1); 
+    prob_site_polymorphic_at_end(1) = prob_site_polymorphic_at_equilibrium; % initialize
     if(~exist('num_moments', 'var') || isempty(num_moments))
         num_moments = 5; % how many moments to compute
     end
+        [mu_vec_analytic, mu_vec_equilibrium] = ...
+            FisherWright_Compute_SFS_Moments(N_vec, 0, num_moments); % compute moments with Formulas from Ewens
     for j=1:num_generations
         run_j = j
         x_vec{j} = (1:(2*N_vec(j)-1)) ./ (2*N_vec(j));
-        [mu_vec_analytic, mu_vec_equilibrium] = ...
-            FisherWright_Compute_SFS_Moments(N_vec(1:j), 0, num_moments); % compute moments with Formulas from Ewens
         % Estimate density using the max-entropy method:
         if(j==1)
             lambda0 = [];
@@ -691,7 +689,7 @@ if(use_moments) % this works only for s=0 !!!!
             lambda0 = lambda_max_ent;
         end
         [lambda_max_ent, g_het_max_ent, entr_max_ent] = ...  % Fit density using moments % , lambda0)
-            me_dens2(mu_vec_analytic(2:end) ./ mu_vec_analytic(1), ...
+            me_dens2(mu_vec_analytic(2:end,j) ./ mu_vec_analytic(1,j), ...
             x_vec{j}, lambda0, 0); % normalize by 0th moment. Don't plot anything
         
         f_max_ent = zeros(1, 2*N_vec(j)-1);
@@ -701,8 +699,10 @@ if(use_moments) % this works only for s=0 !!!!
         f_max_ent = exp(-f_max_ent) ./ (x_vec{j} .* (1-x_vec{j})); % Compute f. How to normalize?
         f_max_ent = f_max_ent ./ sum(f_max_ent);         
         p_absorb = sum ( f_max_ent .* (x_vec{j}.^(2*N_vec(j)) + (1-x_vec{j}).^(2*N_vec(j))) );
-        prob_site_polymorphic_at_end = prob_site_polymorphic_at_end * (1-p_absorb) + ... 
-            (1-prob_site_polymorphic_at_end) * 2*N_vec(j)*mu; % XXX UPDATE PROB.        
+        if(j < num_generations)
+            prob_site_polymorphic_at_end(j+1) = prob_site_polymorphic_at_end(j) * (1-p_absorb) + ... 
+                (1-prob_site_polymorphic_at_end(j)) * 2*N_vec(j)*mu; % XXX UPDATE PROB.        
+        end
         p_vec{j} = [0 f_max_ent 0]; % get p. Normalize and add zeros at boundaries 
         x_vec{j} = [0 round(x_vec{j}*2*N_vec(j)) 2*N_vec(j)]; % get x in integers        
 
