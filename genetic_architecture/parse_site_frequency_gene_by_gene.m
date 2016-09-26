@@ -11,8 +11,8 @@
 % gene_prefix - run only on genes matching this prefix (used to divide
 % labor, run parallel ..)
 %
-% Output: None. Figures are saved in: 
-% There is also a file for each gene saved at: 
+% Output: None. Figures are saved in directory: output_data_dir
+% There is also a file for each gene saved at: spectrum_data_dir
 % 
 function parse_site_frequency_gene_by_gene(spectrum_data_dir, spectrum_data_file, output_data_dir, ...
     GeneStruct, MutationRateTable, MutationTypes, plot_flag, gene_prefix) % Estimate s and alpha for each gene in the genome - how???

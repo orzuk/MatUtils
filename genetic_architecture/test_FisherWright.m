@@ -146,7 +146,7 @@ if(test_absorption_time || test_moments) % Test simulation/numerics only for CON
     N = 500; % take moderate value to let all alleles die
     mu = 2*10^(-8) * (10000 / N); % mutation rate (per nucleotide per generation)
     s=0; % -0.0001;
-    expansion_factor = 1.03; % No EXPANSION! Constant population size
+    expansion_factor = 1.0263; % 1.01; % No EXPANSION! Constant population size
     model_name = 'equilibrium'; % 'expansion 1.01'
     init_str = []; init_str{1} = 'equilibrium'; % CHAGE !!! 'newly_born';
     num_generations = 100; % number of generations to carry with simulations
@@ -156,9 +156,9 @@ if(test_absorption_time || test_moments) % Test simulation/numerics only for CON
     two_side_flag = 0; % Derived allele frequency
     
     % New! create Demography structure
-    D.init_pop_size = N; % [N -1];
-    D.generations = num_generations; % [num_generations 10*num_generations];
-    D.expan_rate = expansion_factor; % [expansion_factor 1.0];
+    D.init_pop_size = [N -1]; %   N*2];
+    D.generations = [num_generations 1*num_generations]; %  num_generations]; % [num_generations 10*num_generations];
+    D.expan_rate = [expansion_factor 1]; %  0.99]; % [expansion_factor 1.0];
     D.index = 1; % only one demography
     D.add_new_alleles = 0; % use old simulation (track only alleles at start) - to be changed !!
     
@@ -330,7 +330,7 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         plot(freq_struct_moments.prob_site_polymorphic_at_end, 'g'); 
         xlabel('Generation'); ylabel('P_{poly}'); legend('simulation', 'numeric', 'moments'); title('expansion'); 
         
-        figure; hold on; % plot zero'th moment 
+        figure; hold on; % plot zero'th moment for equilibrium 
         plot(freq_struct_simulation_equil.het_moments_mat(:,1), 'b');
         plot(freq_struct_numeric_equil.het_moments_mat(:,1), 'r');
         plot(freq_struct_moments_equil.het_moments_mat(:,1), 'g');
@@ -338,13 +338,40 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted', 'moments');title('equilibrium');
 
     
-        figure; hold on; % plot zero'th moment 
-        plot(freq_struct_simulation.het_moments_mat(:,1), 'b');
-        plot(freq_struct_numeric.het_moments_mat(:,1), 'r');
-        plot(freq_struct_moments.het_moments_mat(:,1), 'g');
-        plot(freq_struct_moments.mu_vec_analytic(1,1:end-1)' ./ (freq_struct_moments.prob_site_polymorphic_at_end.*N_vec(1:end-1)), 'g--'); 
+        figure; hold on; % plot zero'th moment for expansion
+        plot(0.5*freq_struct_simulation.het_moments_mat(:,1).*freq_struct_simulation.prob_site_polymorphic_at_end, 'b') ;
+        plot(0.5*freq_struct_numeric.het_moments_mat(:,1).*freq_struct_numeric.prob_site_polymorphic_at_end, 'r');
+        plot(0.5*freq_struct_moments.het_moments_mat(:,1).*freq_struct_moments.prob_site_polymorphic_at_end, 'g');
+        plot(freq_struct_moments.mu_vec_analytic(1,1:end-1)' .* 4*N*mu, 'g*'); 
+        plot(freq_struct_numeric.mu_vec_analytic(1,:) * 4*mu * N, 'm--'); % Exacy zero'th moment 
         xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted', 'moments'); title('expansion');
     
+        figure; 
+        semilogx(freq_struct_numeric.x_vec{1}, cumsum(freq_struct_numeric.p_vec{1})); hold on; 
+        semilogx(freq_struct_simulation.x_vec{1}, cumsum(freq_struct_simulation.p_vec{1}), 'g');
+        semilogx(freq_struct_moments.x_vec{1}, cumsum(freq_struct_moments.p_vec{1}), 'r');
+        xlabel('x'); ylabel('\Phi(x)'); legend('numeric',  'simulation', 'moments'); title('cumulative \Phi at t=1'); 
+        
+        figure;
+        semilogx(freq_struct_numeric.x_vec{end-1}, cumsum(freq_struct_numeric.p_vec{end-1}));  hold on; 
+        semilogx(freq_struct_simulation.x_vec{end-1}, cumsum(freq_struct_simulation.p_vec{end-1}), 'g');
+        semilogx(freq_struct_moments.x_vec{end-1}, cumsum(freq_struct_moments.p_vec{end-1}), 'r');
+        xlabel('x'); ylabel('\Phi(x)'); legend('numeric', 'simulation', 'moments'); title(['cumulative \Phi at t=' length(freq_struct_numeric.x_vec)-1]); 
+        
+        freq_struct_numeric.het_moments_mat(1,:)
+        freq_struct_moments.het_moments_mat(1,:)
+        
+        freq_struct_numeric.het_moments_mat(end-1,:)
+        freq_struct_moments.het_moments_mat(end-1,:)
+        
+        num = load('numeric_file.mat'); mom = load('moments_file.mat'); 
+        figure; hold on; 
+        plot(num.new_vec); plot(num.old_vec, 'r'); 
+        plot(mom.new_vec, 'b--'); plot(mom.old_vec, 'r--'); 
+        legend('new-num', 'old-num', 'new-mom', 'old-mom'); 
+        
+        
+        
     end
     
     % % %     % Move to continuous limit - plot densities:

@@ -5,6 +5,7 @@
 % p - their probabilities
 % k - the order of moment
 % central_flag - compute central moments (default is on) 
+% normalize_flag - if to normalize 0th moment (i.e. force probability vector to sum to one)
 % 
 % Output: 
 % m - moment value: \int_x (x-mu)^k * p(x) dx where mu=0 for central

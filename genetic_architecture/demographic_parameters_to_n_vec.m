@@ -33,6 +33,6 @@ for j=1:length(D.generations) % loop on #generation
    else
        init_size = D.init_pop_size(j); 
    end
-   N_vec((ctr+1):(ctr+D.generations(j))) = ceil(init_size * D.expan_rate(j) .^ (1:D.generations(j))); % get (rounded) population size 
+   N_vec((ctr+1):(ctr+D.generations(j))) = ceil(init_size * D.expan_rate(j) .^ (0:D.generations(j)-1)); % get (rounded) population size 
    ctr = ctr + D.generations(j); 
 end
