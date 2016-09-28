@@ -728,7 +728,7 @@ end % use gegenbauer
 if(use_moments) % this works only for s=0 !!!!
     prob_site_polymorphic_at_end = zeros(num_generations, 1);
     prob_site_polymorphic_at_end(1) = prob_site_polymorphic_at_equilibrium; % initialize
-    prob_site_polymorphic_at_end3 = prob_site_polymorphic_at_end;
+%    prob_site_polymorphic_at_end3 = prob_site_polymorphic_at_end;
     if(~exist('num_moments', 'var') || isempty(num_moments))
         num_moments = 5; % how many moments to compute
     end
@@ -755,41 +755,48 @@ if(use_moments) % this works only for s=0 !!!!
         f_max_ent = mu_vec_analytic(1,j) .* g_het_max_ent' ./ (x_vec{j} .* (1-x_vec{j}));
 
         % New Normalization !!!
-        prob_site_polymorphic_at_end2(j) = (N_vec(1)/N_vec(j)) * sum(f_max_ent * 2*mu)./2; 
+%        prob_site_polymorphic_at_end2(j) = (N_vec(1)/N_vec(j)) * sum(f_max_ent * 2*mu)./2; 
+        
+
+
         
         
         % Yet another one! based on exponential distribution
-        prob_site_polymorphic_at_end3(j+1) = (1-prob_site_polymorphic_at_end3(j)) * 2*N_vec(j)*mu; 
-        p_absorb3=1; 
-        for k=1:num_moments
-            p_absorb3=p_absorb3-sum( f_max_ent .* ( (-2*N_vec(j+1).*x_vec{j}).^k ./ factorial(k)) ) / sum(f_max_ent);
-            prob_site_polymorphic_at_end3(j+1) = prob_site_polymorphic_at_end3(j+1) - ...
-                prob_site_polymorphic_at_end3(j) * ...
-                sum( f_max_ent .* ( (-2*N_vec(j+1).*x_vec{j}).^k ./ factorial(k)) ) / sum(f_max_ent); %  UPDATE PROB. OF BEING POLYMORPHIC
-        end
+%         prob_site_polymorphic_at_end3(j+1) = (1-prob_site_polymorphic_at_end3(j)) * 2*N_vec(j)*mu; 
+%         p_absorb3=1; 
+%         for k=1:num_moments
+%             p_absorb3=p_absorb3-sum( f_max_ent .* ( (-2*N_vec(j+1).*x_vec{j}).^k ./ factorial(k)) ) / sum(f_max_ent);
+%             prob_site_polymorphic_at_end3(j+1) = prob_site_polymorphic_at_end3(j+1) - ...
+%                 prob_site_polymorphic_at_end3(j) * ...
+%                 sum( f_max_ent .* ( (-2*N_vec(j+1).*x_vec{j}).^k ./ factorial(k)) ) / sum(f_max_ent); %  UPDATE PROB. OF BEING POLYMORPHIC
+%         end
        
          
         f_max_ent = f_max_ent ./ sum(f_max_ent);
-        p_absorb = sum ( f_max_ent .* (x_vec{j}.^(2*N_vec(j)) + (1-x_vec{j}).^(2*N_vec(j))) );
-        if(j < num_generations)
-            new_vec(j) = prob_site_polymorphic_at_end(j) * (1-p_absorb);
-            old_vec(j) = (1-prob_site_polymorphic_at_end(j)) * 2*N_vec(j)*mu;
-            prob_site_polymorphic_at_end(j+1) = prob_site_polymorphic_at_end(j) * (1-p_absorb) + ...
-                (1-prob_site_polymorphic_at_end(j)) * 2*N_vec(j)*mu; %  UPDATE PROB. OF BEING POLYMORPHIC
-        end
+%        p_absorb = sum ( f_max_ent .* (x_vec{j}.^(2*N_vec(j)) + (1-x_vec{j}).^(2*N_vec(j))) );
+%         if(j < num_generations)
+%             new_vec(j) = prob_site_polymorphic_at_end(j) * (1-p_absorb);
+%             old_vec(j) = (1-prob_site_polymorphic_at_end(j)) * 2*N_vec(j)*mu;
+%             prob_site_polymorphic_at_end(j+1) = prob_site_polymorphic_at_end(j) * (1-p_absorb) + ...
+%                 (1-prob_site_polymorphic_at_end(j)) * 2*N_vec(j)*mu; %  UPDATE PROB. OF BEING POLYMORPHIC
+%         end
         
 %        prob_site_polymorphic_at_end2(j+1) = (1-prob_site_polymorphic_at_end2(j)) * 2*N_vec(j)*mu + ...
 %            prob_site_polymorphic_at_end2(j).^1 .* sum(p_vec{j}(2:end) .* (1 - x_vec{j}(2:end).^(2*N_vec(j)) - (1-x_vec{j}(2:end)).^(2*N_vec(j)) ) );
         
         p_vec{j} = [0 f_max_ent 0]; % get p. Normalize and add zeros at boundaries
+        
+        prob_site_polymorphic_at_end(j) = 4*N_vec(1)*mu*mu_vec_analytic(1,j) / moment_hist(f_max_ent, ...
+            f_max_ent .* vec2row(x_vec{j} .* (1-x_vec{j})), 0, 0, 0);
         x_vec{j} = [0 round(x_vec{j}*2*N_vec(j)) 2*N_vec(j)]; % get x in integers
+
         
     end % loop on number of generations
 %    prob_site_polymorphic_at_end = prob_site_polymorphic_at_end .* (N_vec(1)./N_vec(1:num_generations));
 %    prob_site_polymorphic_at_end = prob_site_polymorphic_at_end2';
 end % use moments. Function doesn't use mutation rate mu !!
 
-save('moments_file', 'new_vec', 'old_vec'); 
+%save('moments_file', 'new_vec', 'old_vec'); 
 
 
 % Temp: Plot individual trajectories of simulations

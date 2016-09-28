@@ -219,6 +219,7 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         all_p_vec_moments(1:max(freq_struct_moments.x_vec{end-1})+1) = ...
             accumarray(freq_struct_moments.x_vec{end-1}'+1, ...
             freq_struct_moments.p_vec{end-1}') * ...
+            new_p_poly(end);
             freq_struct_moments.prob_site_polymorphic_at_end(end); % NEW! compute #generations from moments! need to debug here!
         all_p_vec_analytic = 2.*mu.*exp( allele_freq_spectrum((0:2*N) ./ (2*N), s, N, two_side_flag, 'log') ); % compute analytic approxiamtion (valid only for constant population size)
         all_p_vec_analytic_end = 2.*mu.*exp( allele_freq_spectrum((0:2*N_vec(end)) ./ (2*N_vec(end)), s, N_vec(end), two_side_flag, 'log') ); % compute analytic approxiamtion (valid only for constant population size)
@@ -238,17 +239,17 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
             density_str = '';
         end
         if(~cum_flag) % Plot PROBABILITY at each allele frequency !!!
-        figure; loglog( x_vec_final, all_p_vec_simulation(2:end-1) ./ bin_size_final, 'linewidth', 2 ); hold on;
-        loglog( x_vec_final, all_p_vec_numeric(2:end-1) ./ bin_size_final, 'm', 'linewidth', 2 ); % Why divide by # simulations here?? problem with Normalization here!!!
-        loglog( x_vec, all_p_vec_analytic(2:end-1) ./ bin_size, 'r' , 'linewidth', 2); % HERE WE MULTIPLY BY FACTOR 2 !!!
-        loglog( x_vec_final, all_p_vec_analytic_end(2:end-1) ./ bin_size_final, 'r--' , 'linewidth', 2 );
-        loglog( x_vec_final, all_p_vec_moments(2:end-1) ./ bin_size_final, 'c' , 'linewidth', 2 );        % New! add moments based calculations
+            figure; loglog( x_vec_final, all_p_vec_simulation(2:end-1) ./ bin_size_final, 'linewidth', 2 ); hold on;
+            loglog( x_vec_final, all_p_vec_numeric(2:end-1) ./ bin_size_final, 'm', 'linewidth', 2 ); % Why divide by # simulations here?? problem with Normalization here!!!
+            loglog( x_vec, all_p_vec_analytic(2:end-1) ./ bin_size, 'r' , 'linewidth', 2); % HERE WE MULTIPLY BY FACTOR 2 !!!
+            loglog( x_vec_final, all_p_vec_analytic_end(2:end-1) ./ bin_size_final, 'r--' , 'linewidth', 2 );
+            loglog( x_vec_final, all_p_vec_moments(2:end-1) ./ bin_size_final, 'c' , 'linewidth', 2 );        % New! add moments based calculations
         else        % cumulative
-        figure; semilogx( x_vec_final, cumsum(all_p_vec_simulation(2:end-1)), 'linewidth', 2 ); hold on;
-        semilogx( x_vec_final, cumsum(all_p_vec_numeric(2:end-1)), 'm', 'linewidth', 2 ); % Why divide by # simulations here?? problem with Normalization here!!!
-        semilogx( x_vec, cumsum(all_p_vec_analytic(2:end-1)), 'r' , 'linewidth', 2); % HERE WE MULTIPLY BY FACTOR 2 !!!
-        semilogx( x_vec_final, cumsum(all_p_vec_analytic_end(2:end-1)), 'r--' , 'linewidth', 2 );
-        semilogx( x_vec_final, cumsum(all_p_vec_moments(2:end-1)), 'c' , 'linewidth', 2 );        % New! add moments based calculations
+            figure; semilogx( x_vec_final, cumsum(all_p_vec_simulation(2:end-1)), 'linewidth', 2 ); hold on;
+            semilogx( x_vec_final, cumsum(all_p_vec_numeric(2:end-1)), 'm', 'linewidth', 2 ); % Why divide by # simulations here?? problem with Normalization here!!!
+            semilogx( x_vec, cumsum(all_p_vec_analytic(2:end-1)), 'r' , 'linewidth', 2); % HERE WE MULTIPLY BY FACTOR 2 !!!
+            semilogx( x_vec_final, cumsum(all_p_vec_analytic_end(2:end-1)), 'r--' , 'linewidth', 2 );
+            semilogx( x_vec_final, cumsum(all_p_vec_moments(2:end-1)), 'c' , 'linewidth', 2 );        % New! add moments based calculations
             
             
         end
@@ -329,6 +330,9 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         plot(freq_struct_numeric.prob_site_polymorphic_at_end, 'r'); 
         plot(freq_struct_moments.prob_site_polymorphic_at_end, 'g'); 
         xlabel('Generation'); ylabel('P_{poly}'); legend('simulation', 'numeric', 'moments'); title('expansion'); 
+        new_p_poly = 4*2*N*mu*freq_struct_moments.mu_vec_analytic(1,1:end-1) ./ freq_struct_moments.het_moments_mat(:,1)'
+        plot(new_p_poly, 'g*'); 
+        
         
         figure; hold on; % plot zero'th moment for equilibrium 
         plot(freq_struct_simulation_equil.het_moments_mat(:,1), 'b');
@@ -338,14 +342,33 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted', 'moments');title('equilibrium');
 
     
+        
         figure; hold on; % plot zero'th moment for expansion
-        plot(0.5*freq_struct_simulation.het_moments_mat(:,1).*freq_struct_simulation.prob_site_polymorphic_at_end, 'b') ;
-        plot(0.5*freq_struct_numeric.het_moments_mat(:,1).*freq_struct_numeric.prob_site_polymorphic_at_end, 'r');
-        plot(0.5*freq_struct_moments.het_moments_mat(:,1).*freq_struct_moments.prob_site_polymorphic_at_end, 'g');
-        plot(freq_struct_moments.mu_vec_analytic(1,1:end-1)' .* 4*N*mu, 'g*'); 
-        plot(freq_struct_numeric.mu_vec_analytic(1,:) * 4*mu * N, 'm--'); % Exacy zero'th moment 
-        xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted', 'moments'); title('expansion');
-    
+        for j=1:num_moments
+            subplot(2,3, j); hold on;
+            plot(0.5*freq_struct_simulation.het_moments_mat(:,j).*freq_struct_simulation.prob_site_polymorphic_at_end, 'b') ;
+            plot(0.5*freq_struct_numeric.het_moments_mat(:,j).*freq_struct_numeric.prob_site_polymorphic_at_end, 'r');
+            plot(0.5*freq_struct_moments.het_moments_mat(:,j).*freq_struct_moments.prob_site_polymorphic_at_end, 'g+');
+            plot(freq_struct_moments.mu_vec_analytic(j,1:end-1)' .* 4*N*mu, 'co');  % Exacy zero'th moment
+            xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted', 'moments'); title('expansion');
+        end
+        
+        figure; hold on; 
+        plot(freq_struct_simulation.het_moments_mat(:,2)./freq_struct_simulation.het_moments_mat(:,1), 'b') ;
+        plot(freq_struct_numeric.het_moments_mat(:,2)./freq_struct_numeric.het_moments_mat(:,1), 'r') ;
+        plot(freq_struct_moments.het_moments_mat(:,2)./freq_struct_moments.het_moments_mat(:,1), 'g') ;
+        plot(freq_struct_moments.mu_vec_analytic(2,:) ./ freq_struct_moments.mu_vec_analytic(1,:), 'g*'); 
+        xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted'); title('expansion'); title('\mu_1 / \mu_0 ratio'); 
+        
+        figure; hold on; 
+        plot(freq_struct_simulation.het_moments_mat(:,1), 'b') ;
+        plot(freq_struct_numeric.het_moments_mat(:,1), 'r') ;
+        plot(freq_struct_moments.het_moments_mat(:,1), 'g') ;
+        plot(freq_struct_moments.mu_vec_analytic(1,1:end-1)  .* 8*N*mu ./ freq_struct_moments.prob_site_polymorphic_at_end', 'g*') ;
+        xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted'); title('expansion'); title('\mu_0 '); 
+
+        
+        
         figure; 
         semilogx(freq_struct_numeric.x_vec{1}, cumsum(freq_struct_numeric.p_vec{1})); hold on; 
         semilogx(freq_struct_simulation.x_vec{1}, cumsum(freq_struct_simulation.p_vec{1}), 'g');
