@@ -1,4 +1,13 @@
 % Compute Jacobian matrix for spherical coordinates in n dimensions
+% 
+% Input: 
+% r - radius
+% phi_vec - vector with n-1 angles in spherical coordinates
+% 
+% Output: 
+% J - Jacobina matrix with transferint to Cartesian coordiantes
+% det_J - determinant of J
+%
 function [J, det_J] = SphericalJacobian(r, phi_vec)
 
 n = length(phi_vec) + 1; % set dimension

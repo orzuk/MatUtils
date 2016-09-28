@@ -138,7 +138,7 @@ switch compute_mode
             plot(mu_vec_analytic(k,:), 'r'); title(['Moment: ' num2str(k-1)]); legend('het-moments', 'analytic-het-moments-Ewens');
         end
         % plot ratio
-        figure; plot( het_moments_mat(:,1)  .* prob_site_polymorphic_at_end ./ (mu_vec_analytic(1,1:num_generations)')); title('Ratio (should be constant)');
+%        figure; plot( het_moments_mat(:,1)  .* prob_site_polymorphic_at_end ./ (mu_vec_analytic(1,1:num_generations)')); title('Ratio (should be constant)');
 %        figure; plot( het_moments_mat(:,1)  .* prob_site_polymorphic_at_end ./ (N_vec(1:num_generations) .* mu_vec_analytic(1,1:num_generations)')); title('Ratio (should be constant)');
 end
 
