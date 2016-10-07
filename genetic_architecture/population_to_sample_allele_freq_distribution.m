@@ -13,12 +13,15 @@ function [sample_x_vec, sample_p_vec] = population_to_sample_allele_freq_distrib
 sample_x_vec = (0:n) ./ n; % take possible allele frequencies in sample, including monomorphic alleles !
 sample_p_vec = zeros(1, n+1);
 
+if(max(x_vec) >= 2) % transfer from counts to frequencies (must have highest frequency: 2N counts)
+    x_vec = x_vec ./ max(x_vec); 
+end
 
 for i=0:n % loop on allele frequencies
     %    sample_p_vec(i+1) = nchoosek(n, i) * sum( x_vec.^i .* (1-x_vec).^(n-i) .* p_vec);
     
     % here use log-scale to avoid underflows
-    sample_p_vec2(i+1) = exp( log_binom(n, i) + my_log_sum_exp(i .* log(max(eps,x_vec)) + (n-i) .* log(max(eps,1-x_vec)) + log(p_vec)) );
+    sample_p_vec(i+1) = exp( log_binom(n, i) + my_log_sum_exp(i .* log(max(eps,x_vec)) + (n-i) .* log(max(eps,1-x_vec)) + log(p_vec)) );
 end
 
 

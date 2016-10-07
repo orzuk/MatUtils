@@ -1,8 +1,8 @@
 % Take a random sample from a population and compute allele frequencies in sample
 % Input:
 % f_vec - frequency of each allele
-% N - population size
-% n_vec - number of individuals in sample for each allele (usually all the same)
+% N - population size - total number of CHROMOSOMES !!!! 
+% n_vec - number of individual CHROMOSOMES!!! in sample for each allele (usually all the same)
 %
 % Output:
 % k_vec - number of allele carriers for each allele (drawn at random)
@@ -19,8 +19,12 @@ if(length(n_vec)==1)
 end
 k_vec = zeros(size(n_vec));
 
+if((max(f_vec) <= 1.001) && ~isempty(find(f_vec(f_vec>0) < 1, 1))) % transfer alleles frequencies to counts 
+    f_vec = round(f_vec .* N); 
+end
+
 for i=1:num_alleles % Sample without replacement
-    k_vec(i) = hygernd(N, round(f_vec(i)*N), n_vec(i));
+    k_vec(i) = hygernd(N, round(f_vec(i)), n_vec(i));
 end
 if(~return_counts) % return frequencies rather than counts (counts is defaule)
     k_vec = k_vec ./ n_vec;
