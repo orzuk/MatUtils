@@ -36,11 +36,12 @@ switch compute_flag
     case {'simulation', 'simulations', 'numeric'}
         [freq_struct, absorption_struct, simulation_struct, N_vec, simulation_time] = ... % New: separate output to different structures
             FisherWrightSimulation([], D, mu, s, init_str, iters, compute_flag, num_bins);
-        
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one? 
         f_vec = freq_struct.p_vec{end-1};
 
-        [k_vec, n_vec] = population_to_sample_allele_freq(simulation_struct.q(:,end), N_vec(end-1), n_sample);
+        num_alleles = length(simulation_struct.q(:,end)); 
+        k_vec = population_to_sample_allele_freq(simulation_struct.q(:,end), N_vec(end-1), n_sample);
+        n_vec = repmat(n_sample, num_alleles, 1); 
         
     case 'moments'
         

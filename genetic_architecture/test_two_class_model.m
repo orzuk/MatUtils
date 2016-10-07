@@ -1,5 +1,6 @@
 % Test different computations for the two-class model: power-calculations, likelihood
 AssignGeneralConstants;
+AssignRVASConstants;
 total_test_time = cputime;
 figs_dir = '../../common_disease_model/figs/EyreWalker';
 new_figs_dir = fullfile(figs_dir, 'new_eric');
@@ -14,7 +15,6 @@ in_matlab_flag = 1;
 
 
 global cumsum_log_vec;
-cumsum_log_vec = cumsum([0 log(1:2*N)]);
 
 test_power = 1; run_compute_power=0; % here test detection power.
 test_ratio_likelihood = 0; % test rare alleles using maximum likelihood for enrichment data

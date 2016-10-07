@@ -14,6 +14,6 @@ global cumsum_log_vec;
 
 if(length(cumsum_log_vec) < max(N)) % no pre-computation
     res = log_factorial_vec(N) - log_factorial_vec(k) - log_factorial_vec(N-k);
-else
+else % compute from scratch
     res = cumsum_log_vec(N+1) - cumsum_log_vec(k+1) - cumsum_log_vec(N-k+1); % add one to include log(0) '=' 0
 end
