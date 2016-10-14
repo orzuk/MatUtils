@@ -4,12 +4,15 @@
 % Input:
 % k_vec - number of dervied allele carriers observed in population for each allele
 % n_vec - number of individuals profiled in population for each allele
-%
+% mu - total mutation rate for region (assume this is known for now) 
+% 
 % Output:
 % D - demographic model (expansion, population size etc.)
 % max_LL - log-likelihood of data for spectrum
 %
-function [D, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec)
+function [D, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, mu, D_opt)
+
+
 
 % We fit expansion model from allele-frequency data, assuming that all alleles are neutral
 s = 0; % Assume no selection (synonymous)
@@ -20,18 +23,18 @@ X = [k_vec n_vec]; % Represent counts in a packed form
 
 % Set different demographic models:
 D.init_pop_size_vec{1} = 2*10000; % 1. ancestral population
-D.init_pop_size_vec{2} = round(logspace(1, 4, 20)); % 2. bottleneck size
+D.init_pop_size_vec{2} = round(logspace(1, 4, 10)); % 2. bottleneck size
 D.init_pop_size_vec{3} = -1; % 3. population after bottleneck
 %D.num_params_vec(1) = length(D.init_pop_size_vec{2});
 
 D.generations_vec{1} = 500; % 4. burnout time
 D.generations_vec{2} = 10;  % 5. number of generations since bottleneck
-D.generations_vec{3} = round(logspace(1, 4, 20));  % 6. number of generations for expansion
+D.generations_vec{3} = round(logspace(1, 4, 10));  % 6. number of generations for expansion
 %D.num_params_vec(2) = length(D.generations_vec{3});
 
 D.expan_rate_vec{1} = 1; % fixed ancestral population size
 D.expan_rate_vec{2} = 1; % fixed buttleneck size
-D.expan_rate_vec{3} = logspace(0.001, 0.1, 20); % 5. expansion rate per generation
+D.expan_rate_vec{3} = logspace(0.001, 0.1, 10); % 5. expansion rate per generation
 %D.num_params_vec(3) = length(D.expan_rate_vec{3});
 
 D.num_params_vec = [length_cell(D.init_pop_size_vec) length_cell(D.generations_vec) length_cell(D.expan_rate_vec)];
@@ -52,6 +55,7 @@ filter_by_moments=1; num_moments=1; % First filter by moments !!!
 if(filter_by_moments)
     moments_time=cputime;
     het_moment_mat_all_models = zeros(D.num_params, num_moments);
+    init_N = zeros(D.num_params, 1);
     for i=1:D.num_params
         if(mod(i, 100) == 0)
             sprintf('Fitting %ld out of %ld demographic model', i, D.num_params)
@@ -64,9 +68,12 @@ if(filter_by_moments)
             [mu_vec_expansion_analytic] = FisherWright_Compute_SFS_Moments(N_vec, 0, num_moments); % compute moments with Formulas from Ewens
             het_moment_mat_all_models(i,:) = mu_vec_expansion_analytic(:,end);
             
+            j_vec = i_vec;
             for j=1:length(D.generations_vec{end}) % loop on all smaller numbers of generations !
-                cur_ind=j; % TEMP WRONG !!
+                j_vec(2*D.num_stages) = j; 
+                cur_ind = mysub2ind(D.num_params_vec, length(D.num_params_vec), j_vec);
                 het_moment_mat_all_models(cur_ind,:) = mu_vec_expansion_analytic(:,D.generations_vec{3}(j));
+                init_N(cur_ind) = N_vec(1); % take first value of N 
             end
             
         end
@@ -76,12 +83,18 @@ end
 
 
 % need to convert sample to population!
-het_moment_mat_data = moment_hist(x_vec, x_vec .* (1-x_vec) .* p_vec, 0, 0, 0);
+[x_vec, p_vec] = unique_with_counts(k_vec ./ n_vec); % get an empirical distribution 
+total_sum = sum(p_vec);
+p_vec = p_vec ./ sum(p_vec); % normalize
+het_moment_mat_data = moment_hist(x_vec, x_vec .* (1-x_vec) .* p_vec, 0, 0, 0) .* total_sum;
 
 
 
 epsilon = 0.05; % allow error in moments
-good_inds = find( abs(het_moment_mat_all_models(:,1) - het_moment_mat_data(:,1))  < epsilon );
+region_het_moment_mat_all_models = het_moment_mat_all_models(:,1) .* 4 .* init_N .* mu; 
+good_inds = find( (abs(region_het_moment_mat_all_models - het_moment_mat_data(:,1)) ./ het_moment_mat_data(:,1))  < epsilon );
+
+
 
 for i=good_inds % 1:D.num_params
     
@@ -112,5 +125,12 @@ end
 D = D{max_J};
 
 
-
+% New: allow D_opt to use the fastneutrino method of Song et al.: 
+switch D_opt 
+    case 'neutrino'
+        % prepare output file 
+        
+        fit_run_str = 'fastNeutrino'; % ...; % generate running command 
+        
+end
 
