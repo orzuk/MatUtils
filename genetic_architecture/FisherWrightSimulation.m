@@ -283,7 +283,7 @@ end
 p_vec = cell(num_generations+1, 1); x_vec = p_vec; % het_vec = p_vec; % initilize distributions
 
 rand_str = 'poisson'; % 'binomial'; % 'poisson'; % 'binomial'; % How to simulate each generation: poisson is much faster (approximation)
-block_size = min(1000, iters); % number of simulations to perform simultaniously
+block_size = min(5000, iters); % number of simulations to perform simultaniously
 final_q = zeros(iters, num_generations, 'single'); % fill this with alleles not absorbed
 num_simulated_polymorphic_alleles_vec = zeros(num_generations, 1); % count how many iterations are left at each generation
 
@@ -302,13 +302,16 @@ prob_site_polymorphic_at_equilibrium = (2*N*mu) * 2 * absorption_time_by_selecti
 total_het_at_each_generation_vec = zeros(num_generations, 1, 'single');
 
 while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec(1) < 20000) ) % simulate blocks. Problem: No new alleles born here! (these can be simulated separatey?)
-    q = zeros(block_size, num_generations, 'single');  % matrix of derived allele frequencies at each generation
+%    q = zeros(block_size, 1, 'single');  % matrix of derived allele frequencies at each generation
+%%%    q = zeros(block_size, num_generations, 'single');  % matrix of derived allele frequencies at each generation
     weights = ones(block_size, num_generations, 'single');  % give later generations higher weights (why?)
     switch init_str % determine starting allele frequencies
         case 'equilibrium'
-            q(:,1) = round(2*N.* allele_freq_spectrum_rnd(s, N, two_side_flag, block_size)); % sample allele frequency from equilibrium distribution
+            q = round(2*N.* vec2column(allele_freq_spectrum_rnd(s, N, two_side_flag, block_size))); % sample allele frequency from equilibrium distribution
+%            q(:,1) = round(2*N.* allele_freq_spectrum_rnd(s, N, two_side_flag, block_size)); % sample allele frequency from equilibrium distribution
         case 'newly_born'
-            q(:,1) = 1; % start with newly born alleles
+            q = ones(block_size, 1); 
+%            q(:,1) = 1; % start with newly born alleles
     end
     
     first_time_vec = ones(1, iters); last_time_vec = ones(1, iters); % For each allele record the first and last polymorphic times
@@ -323,7 +326,7 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         unique_time=cputime;
         [U, C] = unique_with_counts(vec2row(q(:,j))); % Compute histogram of counts
         [x_vec{j}, p_vec{j}] = union_with_counts(x_vec{j}, p_vec{j}, [0 U 2*N_vec(j)], [num_losses C num_fixations]);
-        new_q = q(:,j) .* ((1+s)./(1+s.*q(:,j)./(2*N_vec(j)))) ./ (2*N_vec(j));  % new allele freq. of the deleterious alleles
+        new_expected_q = q(:,j) .* ((1+s)./(1+s.*q(:,j)./(2*N_vec(j)))) ./ (2*N_vec(j));  % new allele freq. of the deleterious alleles
         total_het_at_each_generation_vec(j) = total_het_at_each_generation_vec(j) + ...
             2 .* sum(q(:,j) ./ (2.*N_vec(j)) .* (1-  q(:,j) ./ (2.*N_vec(j)) ) ); % this indicates how much heterozygosity was absorbed at each time - should go down if we start at equilibrium!
         
@@ -333,27 +336,28 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         
         switch rand_str % sample new generation
             case {'binomial', 'exact'}
-                q(:,j+1) = binornd(2*N_vec(j+1), new_q); % ./ (2*N_vec(j+1)); % randomize next generation
+                new_q = binornd(2*N_vec(j+1), new_expected_q); % ./ (2*N_vec(j+1)); % randomize next generation
             case {'poisson', 'approx', 'approximate'} % use poisson approximation (good for large N)
                 % here change so that poisson/Gaussian criteria is the same as in numeric !!!
-                small_inds = find(new_q .* 2*N_vec(j+1) < 50);
-                big_inds = find((1-new_q) .* 2*N_vec(j+1) < 50); % for high frequency alleles poisson approximation isn't good enough and we simulate binomial distribution
-                medium_inds = setdiff(1:length(new_q), union(small_inds, big_inds));
-                q(small_inds, j+1) = poissrnd(double(2*N_vec(j+1) .* new_q(small_inds))); % ./ (2*N_vec(j+1)); % randomize next generation
-                q(big_inds, j+1) = 2*N_vec(j+1) - poissrnd(double(2*N_vec(j+1) .* (1-new_q(big_inds))));
+                small_inds = find(new_expected_q .* 2*N_vec(j+1) < 50);
+                big_inds = find((1-new_expected_q) .* 2*N_vec(j+1) < 50); % for high frequency alleles poisson approximation isn't good enough and we simulate binomial distribution
+                medium_inds = setdiff(1:length(new_expected_q), union(small_inds, big_inds));
+                new_q = zeros(size(q(:,j)));
+                new_q(small_inds) = poissrnd(double(2*N_vec(j+1) .* new_expected_q(small_inds))); % ./ (2*N_vec(j+1)); % randomize next generation
+                new_q(big_inds) = 2*N_vec(j+1) - poissrnd(double(2*N_vec(j+1) .* (1-new_expected_q(big_inds))));
                 if(~isempty(medium_inds)) % for these alleles, simulation does depend on N.
-                    q(medium_inds,j+1) = round( normrnd( 2*N_vec(j+1) .* new_q(medium_inds), ...
-                        sqrt(2*N_vec(j+1) .* new_q(medium_inds) .* (1-new_q(medium_inds))) ) ); % ./ (2*N_vec(j+1)); % randomize next generation
+                    new_q(medium_inds) = round( normrnd( 2*N_vec(j+1) .* new_expected_q(medium_inds), ...
+                        sqrt(2*N_vec(j+1) .* new_expected_q(medium_inds) .* (1-new_expected_q(medium_inds))) ) ); % ./ (2*N_vec(j+1)); % randomize next generation
                     %                    q(medium_inds,j+1) = max(0, round(q(medium_inds,j+1)));
                 end
-                q(:,j+1) = max(0, min(q(:,j+1), 2*N_vec(j+1)));
+                new_q = max(0, min(new_q, 2*N_vec(j+1)));
                 if(mod(j,100)==0)
                     if(~isempty(medium_inds))
-                        frac_full_normal_simulation = length(medium_inds) / iters
+                        frac_full_normal_simulation = length(medium_inds) / length(new_q)
                     end
                 end
         end % switch rand_str
-        loss_inds = find(q(:,j+1) == 0); fixation_inds = find(q(:,j+1) == 2*N_vec(j+1));
+        loss_inds = find(new_q == 0); fixation_inds = find(new_q == 2*N_vec(j+1));
         absorption_inds = union(loss_inds, fixation_inds); % reached fixation/extinsion and stop
         survived_inds = setdiff(1:size(q,1), absorption_inds);
         total_polymorphic_generations=total_polymorphic_generations+length(survived_inds);
@@ -382,16 +386,29 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         num_absorptions_by_generation_vec(j) = num_absorptions_by_generation_vec(j) + length(absorption_inds); % count absorptions to see how much of the distirbution is kept
         num_fixations_by_generation_vec(j) = num_fixations_by_generation_vec(j) + length(fixation_inds);
         num_losses_by_generation_vec(j) = num_losses_by_generation_vec(j) + length(loss_inds);
-        q = q(survived_inds,:); % take only indices that are left
+
+        q = [q new_q]; % add new generation
+        
         
         if(D.add_new_alleles) % NEW! Add newly born alleles. Rate DOES NOT depend on current polymorphic probability !!!
+            q(absorption_inds,:) = 0;
             num_new_alleles = poissrnd( (block_size /(2*mean_time_allele_polymorphic_at_equilibrium)) * (N_vec(j+1)/N) ); % Proportional to mutation rate times # of chromosomes . Mutation rate is cancelled !
+            if(num_new_alleles <= length(absorption_inds)) % just throw away alleles
+               q = q([survived_inds absorption_inds(1:num_new_alleles)'],:); 
+                q((end-num_new_alleles+1:end), j+1) = 1; % set frequency for new alleles
+            else % also add alleles 
+                q(absorption_inds, j+1) = 1; % set frequency for new alleles
+                q = [q' zeros(j+1, num_new_alleles-length(absorption_inds), 'single')]'; % set frequency for new alleles
+                q(((end-(num_new_alleles-length(absorption_inds))+1):end), j+1) = 1; % set frequency for new alleles
+            end
+            
             %            num_new_alleles = round(  (block_size /(2*mean_time_allele_polymorphic_at_equilibrium)) * (N_vec(j+1)/N) ); % reduce randomness! inject fixed number of new alleles !!
-            q = [q' zeros(num_generations, num_new_alleles, 'single')]'; % set frequency for new alleles
             num_simulated_polymorphic_alleles_vec(j+1) = num_simulated_polymorphic_alleles_vec(j+1)+num_new_alleles;
-            q((end-num_new_alleles+1:end), j+1) = 1; % set frequency for new alleles
+%            q((end-num_new_alleles+1:end), j+1) = 1; % set frequency for new alleles
             first_time_vec = [first_time_vec(survived_inds) repmat(j, 1, num_new_alleles)];
             last_time_vec = [last_time_vec(survived_inds) repmat(j, 1, num_new_alleles)];
+        else
+            q = q(survived_inds,:); % take only indices that are left            
         end
         arrange_time=cputime-arrange_time;
         arrange_time_cum = arrange_time_cum+arrange_time;
