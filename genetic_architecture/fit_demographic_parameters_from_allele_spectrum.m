@@ -110,7 +110,8 @@ for i=good_inds % 1:D.num_params
         continue;
     end
     
-    [demographic_x_vec, demographic_f_vec] = compute_allele_freq_spectrum_from_demographic_model(D, 0, compute_flag); % Try a grid of different values
+    [demographic_x_vec, demographic_f_vec, ~, ~, demographic_compute_time] = ...
+        compute_allele_freq_spectrum_from_demographic_model(D, 0, compute_flag); % Try a grid of different values
     
     % Compute likelihood. This is trivial one-class likelihood (no mixture bullshit) so should be fast !!!
     rare_cumulative_per_gene = []; % set dummy variables

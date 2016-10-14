@@ -90,9 +90,10 @@ switch compute_mode
             absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, loss_time_given_init_freq_vec, ...
             num_simulated_polymorphic_alleles_vec, count_vec, prob_site_polymorphic_at_end] = ...
             simulate_expansion_internal( ...
-            N_vec, s, mu, two_side_flag, iters, num_generations, init_str, D.add_new_alleles);
+            D, s, mu, two_side_flag, iters, num_generations, init_str);
         frac_polymorphic_vec = 1-num_absorptions_by_generation_vec ./ iters;
         num_effective_iters = sum(p_vec{end}(2:end-1)) % total number of single-generation single-allele steps performed (?)
+        
         
     case 'numeric' % here compute everything by matrix multiplications
         [x_vec, p_vec, total_het_at_each_generation_vec, num_absorptions, num_fixations, ...
@@ -138,8 +139,8 @@ switch compute_mode
             plot(mu_vec_analytic(k,:), 'r'); title(['Moment: ' num2str(k-1)]); legend('het-moments', 'analytic-het-moments-Ewens');
         end
         % plot ratio
-%        figure; plot( het_moments_mat(:,1)  .* prob_site_polymorphic_at_end ./ (mu_vec_analytic(1,1:num_generations)')); title('Ratio (should be constant)');
-%        figure; plot( het_moments_mat(:,1)  .* prob_site_polymorphic_at_end ./ (N_vec(1:num_generations) .* mu_vec_analytic(1,1:num_generations)')); title('Ratio (should be constant)');
+        %        figure; plot( het_moments_mat(:,1)  .* prob_site_polymorphic_at_end ./ (mu_vec_analytic(1,1:num_generations)')); title('Ratio (should be constant)');
+        %        figure; plot( het_moments_mat(:,1)  .* prob_site_polymorphic_at_end ./ (N_vec(1:num_generations) .* mu_vec_analytic(1,1:num_generations)')); title('Ratio (should be constant)');
 end
 
 
@@ -262,12 +263,22 @@ function [q, weights, x_vec, p_vec, total_het_at_each_generation_vec, ...
     absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, loss_time_given_init_freq_vec, ...
     num_simulated_polymorphic_alleles_vec, count_vec, prob_site_polymorphic_at_end] = ...
     simulate_expansion_internal( ...
-    N_vec, s, mu, two_side_flag, iters, num_generations, init_str, add_new_alleles)
+    D, s, mu, two_side_flag, iters, num_generations, init_str)
 
+N_vec = demographic_parameters_to_n_vec(D, D.index);  % compute population size at each generation
 N = N_vec(1); max_N = max(N_vec);
-if(~exist('add_new_alleles', 'var') || isempty(add_new_alleles)) % default: add newly born alleles at each generation
-    add_new_alleles = 1;
+if(~isfield(D, 'add_new_alleles') || isempty(D.add_new_alleles)) % default: add newly born alleles at each generation
+    D.add_new_alleles = 1;
 end
+
+if(~isfield(D, 'compute_absorb')) % default: add newly born alleles at each generation
+    if(nargout > 11) % compute absorption time and count vec. Can be heavy (?)
+        D.compute_absorb = 1;
+    else
+        D.compute_absorb = 0;
+    end
+end
+
 
 p_vec = cell(num_generations+1, 1); x_vec = p_vec; % het_vec = p_vec; % initilize distributions
 
@@ -303,16 +314,22 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
     first_time_vec = ones(1, iters); last_time_vec = ones(1, iters); % For each allele record the first and last polymorphic times
     num_simulated_polymorphic_alleles_vec(1) = num_simulated_polymorphic_alleles_vec(1)+ block_size;
     total_polymorphic_generations = total_polymorphic_generations + iters;
-    for j=1:num_generations-1 % run vectorized
+    unique_time_cum=0; rand_time_cum=0; arrange_time_cum=0;
+    for j=1:num_generations-1 % run vectorized. This is heaviest loop!
         if(mod(j,100)==0)
             run_generation = j
         end
         %        cur_mu = mu .* N_vec(j+1) / N; % determine how many new mutations arise at each generation
+        unique_time=cputime;
         [U, C] = unique_with_counts(vec2row(q(:,j))); % Compute histogram of counts
         [x_vec{j}, p_vec{j}] = union_with_counts(x_vec{j}, p_vec{j}, [0 U 2*N_vec(j)], [num_losses C num_fixations]);
         new_q = q(:,j) .* ((1+s)./(1+s.*q(:,j)./(2*N_vec(j)))) ./ (2*N_vec(j));  % new allele freq. of the deleterious alleles
         total_het_at_each_generation_vec(j) = total_het_at_each_generation_vec(j) + ...
             2 .* sum(q(:,j) ./ (2.*N_vec(j)) .* (1-  q(:,j) ./ (2.*N_vec(j)) ) ); % this indicates how much heterozygosity was absorbed at each time - should go down if we start at equilibrium!
+        
+        unique_time=cputime-unique_time;
+        unique_time_cum = unique_time_cum+unique_time;
+        rand_time=cputime;
         
         switch rand_str % sample new generation
             case {'binomial', 'exact'}
@@ -342,8 +359,12 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         total_polymorphic_generations=total_polymorphic_generations+length(survived_inds);
         num_simulated_polymorphic_alleles_vec(j+1) = num_simulated_polymorphic_alleles_vec(j+1) + length(survived_inds);
         last_time_vec(absorption_inds) = j; % set the time at which these indices were absorbed
+        rand_time=cputime-rand_time;
+        rand_time_cum = rand_time_cum+rand_time;
         
-        if(nargout > 11) % compute absorption time and count vec
+        arrange_time=cputime;
+        
+        if(D.compute_absorb) % compute absorption time and count vec. Can be heavy (?) 
             if(~isempty(absorption_inds))
                 for k=1:j % Alternative: loop on generations (not on indices of iterations)
                     %                    cur_gen = j
@@ -363,7 +384,7 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         num_losses_by_generation_vec(j) = num_losses_by_generation_vec(j) + length(loss_inds);
         q = q(survived_inds,:); % take only indices that are left
         
-        if(add_new_alleles) % NEW! Add newly born alleles. Rate DOES NOT depend on current polymorphich probability !!!
+        if(D.add_new_alleles) % NEW! Add newly born alleles. Rate DOES NOT depend on current polymorphic probability !!!
             num_new_alleles = poissrnd( (block_size /(2*mean_time_allele_polymorphic_at_equilibrium)) * (N_vec(j+1)/N) ); % Proportional to mutation rate times # of chromosomes . Mutation rate is cancelled !
             %            num_new_alleles = round(  (block_size /(2*mean_time_allele_polymorphic_at_equilibrium)) * (N_vec(j+1)/N) ); % reduce randomness! inject fixed number of new alleles !!
             q = [q' zeros(num_generations, num_new_alleles, 'single')]'; % set frequency for new alleles
@@ -372,11 +393,14 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
             first_time_vec = [first_time_vec(survived_inds) repmat(j, 1, num_new_alleles)];
             last_time_vec = [last_time_vec(survived_inds) repmat(j, 1, num_new_alleles)];
         end
+        arrange_time=cputime-arrange_time;
+        arrange_time_cum = arrange_time_cum+arrange_time;
         
         %%%       weights = weights(survived_inds,:); % take only indices that are left
         %%% q(absorption_inds,j+1) = 1; % /(2*N_vec(j+1));  % start over with new alleles for extint/fixed alleles
         %%% weights(absorption_inds,j+1:end) = N_vec(j+1)/N; % give newly born alleles higher weights
     end % loop on generations
+    sprintf('init-time=%f, rand-time=%f, arrange-time=%f\n', unique_time, rand_time_cum, arrange_time_cum)
     cur_num_alleles_survived = min(size(q, 1), iters - num_alleles_simulated);
     %     if(size(q,1) > iters  - num_alleles_simulated) % adjust last block
     %         num_simulated_polymorphic_alleles_vec = num_simulated_polymorphic_alleles_vec - size(q,1) ..; % adjust num alleles vec
@@ -505,7 +529,7 @@ for j=1:slack_generations % perform a few 'burn-in' steps at constant size to re
     init_p_vec = new_p_vec;
 end % slack generations
 if(~exist('mu', 'var') || isempty(mu))
-    mu =  sum(vec2row(init_p_vec) .* binopdf(0, 2*N, x_vec) ./ (2*N)); % compute mutation rate per site (assuming T=1 target size)
+    mu = sum(vec2row(init_p_vec) .* binopdf(0, 2*N, x_vec) ./ (2*N)); % compute mutation rate per site (assuming T=1 target size)
 end
 p_vec{1} = vec2column(init_p_vec); het_vec{1} = 2.* p_vec{1} .* vec2column(x_vec{1} .* (1-x_vec{1}));
 
@@ -629,17 +653,17 @@ prob_fixation = 1; % THIS IS WRONG. HOW TO COMPUTE THIS?
 fixation_time_given_init_freq_vec = zeros(size(absorption_time_given_init_freq_vec));
 loss_time_given_init_freq_vec = zeros(size(absorption_time_given_init_freq_vec)); % Time conditioned on fixation/loss. NEED TO FILL THESE
 
-prob_site_polymorphic_at_end2 = zeros(num_generations,1); % NEW! compute also with recursive formula 
+prob_site_polymorphic_at_end2 = zeros(num_generations,1); % NEW! compute also with recursive formula
 prob_site_polymorphic_at_end2(1) = frac_polymorphic_vec(1);
 for j=1:num_generations+1  %change output format (convention)
     p_vec{j} = vec2row(p_vec{j});
     new_vec(j) = (1-prob_site_polymorphic_at_end2(j)) * 2*N_vec(j)*mu;
     old_vec(j) = prob_site_polymorphic_at_end2(j).^1 .* sum(p_vec{j}(2:end) .* (1 - x_vec{j}(2:end).^(2*N_vec(j)) - (1-x_vec{j}(2:end)).^(2*N_vec(j)) ) );
     prob_site_polymorphic_at_end2(j+1) = (1-prob_site_polymorphic_at_end2(j)) * 2*N_vec(j)*mu + ...
-        prob_site_polymorphic_at_end2(j).^1 .* sum(p_vec{j}(2:end) .* (1 - x_vec{j}(2:end).^(2*N_vec(j)) - (1-x_vec{j}(2:end)).^(2*N_vec(j)) ) );     
+        prob_site_polymorphic_at_end2(j).^1 .* sum(p_vec{j}(2:end) .* (1 - x_vec{j}(2:end).^(2*N_vec(j)) - (1-x_vec{j}(2:end)).^(2*N_vec(j)) ) );
 end
 
-save('numeric_file', 'new_vec', 'old_vec'); 
+save('numeric_file', 'new_vec', 'old_vec');
 for j=1:num_generations+1  %change output format (convention)
     x_vec{j} = round(x_vec{j} .* (2*N_vec(j))); % get number of individual alleles (not fracion)
 end
@@ -728,7 +752,7 @@ end % use gegenbauer
 if(use_moments) % this works only for s=0 !!!!
     prob_site_polymorphic_at_end = zeros(num_generations, 1);
     prob_site_polymorphic_at_end(1) = prob_site_polymorphic_at_equilibrium; % initialize
-%    prob_site_polymorphic_at_end3 = prob_site_polymorphic_at_end;
+    %    prob_site_polymorphic_at_end3 = prob_site_polymorphic_at_end;
     if(~exist('num_moments', 'var') || isempty(num_moments))
         num_moments = 5; % how many moments to compute
     end
@@ -753,50 +777,50 @@ if(use_moments) % this works only for s=0 !!!!
         %         end
         %         f_max_ent = exp(-f_max_ent) ./ (x_vec{j} .* (1-x_vec{j})); % Compute f. How to normalize?
         f_max_ent = mu_vec_analytic(1,j) .* g_het_max_ent' ./ (x_vec{j} .* (1-x_vec{j}));
-
-        % New Normalization !!!
-%        prob_site_polymorphic_at_end2(j) = (N_vec(1)/N_vec(j)) * sum(f_max_ent * 2*mu)./2; 
         
-
-
+        % New Normalization !!!
+        %        prob_site_polymorphic_at_end2(j) = (N_vec(1)/N_vec(j)) * sum(f_max_ent * 2*mu)./2;
+        
+        
+        
         
         
         % Yet another one! based on exponential distribution
-%         prob_site_polymorphic_at_end3(j+1) = (1-prob_site_polymorphic_at_end3(j)) * 2*N_vec(j)*mu; 
-%         p_absorb3=1; 
-%         for k=1:num_moments
-%             p_absorb3=p_absorb3-sum( f_max_ent .* ( (-2*N_vec(j+1).*x_vec{j}).^k ./ factorial(k)) ) / sum(f_max_ent);
-%             prob_site_polymorphic_at_end3(j+1) = prob_site_polymorphic_at_end3(j+1) - ...
-%                 prob_site_polymorphic_at_end3(j) * ...
-%                 sum( f_max_ent .* ( (-2*N_vec(j+1).*x_vec{j}).^k ./ factorial(k)) ) / sum(f_max_ent); %  UPDATE PROB. OF BEING POLYMORPHIC
-%         end
-       
-         
-        f_max_ent = f_max_ent ./ sum(f_max_ent);
-%        p_absorb = sum ( f_max_ent .* (x_vec{j}.^(2*N_vec(j)) + (1-x_vec{j}).^(2*N_vec(j))) );
-%         if(j < num_generations)
-%             new_vec(j) = prob_site_polymorphic_at_end(j) * (1-p_absorb);
-%             old_vec(j) = (1-prob_site_polymorphic_at_end(j)) * 2*N_vec(j)*mu;
-%             prob_site_polymorphic_at_end(j+1) = prob_site_polymorphic_at_end(j) * (1-p_absorb) + ...
-%                 (1-prob_site_polymorphic_at_end(j)) * 2*N_vec(j)*mu; %  UPDATE PROB. OF BEING POLYMORPHIC
-%         end
+        %         prob_site_polymorphic_at_end3(j+1) = (1-prob_site_polymorphic_at_end3(j)) * 2*N_vec(j)*mu;
+        %         p_absorb3=1;
+        %         for k=1:num_moments
+        %             p_absorb3=p_absorb3-sum( f_max_ent .* ( (-2*N_vec(j+1).*x_vec{j}).^k ./ factorial(k)) ) / sum(f_max_ent);
+        %             prob_site_polymorphic_at_end3(j+1) = prob_site_polymorphic_at_end3(j+1) - ...
+        %                 prob_site_polymorphic_at_end3(j) * ...
+        %                 sum( f_max_ent .* ( (-2*N_vec(j+1).*x_vec{j}).^k ./ factorial(k)) ) / sum(f_max_ent); %  UPDATE PROB. OF BEING POLYMORPHIC
+        %         end
         
-%        prob_site_polymorphic_at_end2(j+1) = (1-prob_site_polymorphic_at_end2(j)) * 2*N_vec(j)*mu + ...
-%            prob_site_polymorphic_at_end2(j).^1 .* sum(p_vec{j}(2:end) .* (1 - x_vec{j}(2:end).^(2*N_vec(j)) - (1-x_vec{j}(2:end)).^(2*N_vec(j)) ) );
+        
+        f_max_ent = f_max_ent ./ sum(f_max_ent);
+        %        p_absorb = sum ( f_max_ent .* (x_vec{j}.^(2*N_vec(j)) + (1-x_vec{j}).^(2*N_vec(j))) );
+        %         if(j < num_generations)
+        %             new_vec(j) = prob_site_polymorphic_at_end(j) * (1-p_absorb);
+        %             old_vec(j) = (1-prob_site_polymorphic_at_end(j)) * 2*N_vec(j)*mu;
+        %             prob_site_polymorphic_at_end(j+1) = prob_site_polymorphic_at_end(j) * (1-p_absorb) + ...
+        %                 (1-prob_site_polymorphic_at_end(j)) * 2*N_vec(j)*mu; %  UPDATE PROB. OF BEING POLYMORPHIC
+        %         end
+        
+        %        prob_site_polymorphic_at_end2(j+1) = (1-prob_site_polymorphic_at_end2(j)) * 2*N_vec(j)*mu + ...
+        %            prob_site_polymorphic_at_end2(j).^1 .* sum(p_vec{j}(2:end) .* (1 - x_vec{j}(2:end).^(2*N_vec(j)) - (1-x_vec{j}(2:end)).^(2*N_vec(j)) ) );
         
         p_vec{j} = [0 f_max_ent 0]; % get p. Normalize and add zeros at boundaries
         
         prob_site_polymorphic_at_end(j) = 4*N_vec(1)*mu*mu_vec_analytic(1,j) / moment_hist(f_max_ent, ...
             f_max_ent .* vec2row(x_vec{j} .* (1-x_vec{j})), 0, 0, 0);
         x_vec{j} = [0 round(x_vec{j}*2*N_vec(j)) 2*N_vec(j)]; % get x in integers
-
+        
         
     end % loop on number of generations
-%    prob_site_polymorphic_at_end = prob_site_polymorphic_at_end .* (N_vec(1)./N_vec(1:num_generations));
-%    prob_site_polymorphic_at_end = prob_site_polymorphic_at_end2';
+    %    prob_site_polymorphic_at_end = prob_site_polymorphic_at_end .* (N_vec(1)./N_vec(1:num_generations));
+    %    prob_site_polymorphic_at_end = prob_site_polymorphic_at_end2';
 end % use moments. Function doesn't use mutation rate mu !!
 
-%save('moments_file', 'new_vec', 'old_vec'); 
+%save('moments_file', 'new_vec', 'old_vec');
 
 
 % Temp: Plot individual trajectories of simulations

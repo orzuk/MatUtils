@@ -4,6 +4,8 @@
 % D - structure with demographic models
 % s - selection coefficient
 % compute_flag - 'simulation' (default) or 'moments' (computation based on moments)
+% n_sample - # of individuals in a sample 
+% mu - regional mutation rate 
 %
 % Output:
 % x_vec - vector of x values (allele frequencies) at each generation
@@ -11,33 +13,38 @@
 % k_vec - alleles in sample
 % n_vec - sample sizes
 %
-function [x_vec, p_vec, k_vec, n_vec] = compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample)
+function [x_vec, p_vec, k_vec, n_vec, compute_time] = compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, ...
+    n_sample, mu)
 
+compute_time=cputime;
 if(~exist('compute_flag', 'var') || isempty(compute_flag))
     compute_flag = 'simulation';
     %    compute_mode = 'simulation'; % for general demography
 end
 
-iters = 5000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
-mu = 2*10^(-8); % set mutation rate
-init_str = 'newly_born';
-num_bins = 100; % used for binning in Fisher Right simulation
+if(~exist('init_str', 'var') || isempty(init_str)) % default is start at equilibrium
+    init_str = 'equilibrium';
+end
 
-% i_vec = myind2sub(D.num_params_vec, length(D.num_params_vec), i); % create vector of indices
-% D.generations = zeros(1, D.num_stages); D.expan_rate = zeros(1, D.num_stages); D.init_pop_size = zeros(1, D.num_stages);
-% for j=1:D.num_stages
-%     D.init_pop_size(j) = D.init_pop_size_vec{j}(i_vec(j));
-%     D.generations(j) = D.generations_vec{j}(i_vec(j+D.num_stages));
-%     D.expan_rate(j) = D.expan_rate_vec{j}(i_vec(j+2*D.num_stages));
-% end
+if(~exist('mu', 'var') || isempty(mu))
+    mu = 2*10^(-8); % set mutation rate
+end
+
+if(~isfield('iters', D))
+%    D.iters = 5000;
+    D.iters = 5000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
+end
+D.num_bins = 100; % used for binning in Fisher Right simulation
+D.compute_absorb = 0; % no need for extra computation!!! 
+
 N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
 
 num_final_generations = length(N_vec)-1; % simulation at the end
 
 switch compute_flag
     case {'simulation', 'simulations', 'numeric'}
-        [freq_struct, absorption_struct, simulation_struct, N_vec, simulation_time] = ... % New: separate output to different structures
-            FisherWrightSimulation([], D, mu, s, init_str, iters, compute_flag, num_bins);
+        [freq_struct, ~, simulation_struct, N_vec, simulation_time] = ... % New: separate output to different structures
+            FisherWrightSimulation([], D, mu, s, init_str, D.iters, compute_flag, D.num_bins);
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
         p_vec = freq_struct.p_vec{end-1};
         
@@ -68,4 +75,4 @@ switch compute_flag
         
 end
 
-
+compute_time=cputime-compute_time;
