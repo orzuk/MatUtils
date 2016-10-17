@@ -10,9 +10,7 @@
 % D - demographic model (expansion, population size etc.)
 % max_LL - log-likelihood of data for spectrum
 %
-function [D, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, mu, D_opt)
-
-
+function [D, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, mu, L_correction_factor, D_opt)
 
 % We fit expansion model from allele-frequency data, assuming that all alleles are neutral
 s = 0; % Assume no selection (synonymous)
@@ -86,6 +84,9 @@ end
 [x_vec, p_vec] = unique_with_counts(k_vec ./ n_vec); % get an empirical distribution 
 total_sum = sum(p_vec);
 p_vec = p_vec ./ sum(p_vec); % normalize
+
+het_moment_mat_data = sum ( (k_vec./n_vec) .* (1-k_vec./n_vec) ) / L_correction_factor;  % compute empirical heterozygosity (corrected)
+
 het_moment_mat_data = moment_hist(x_vec, x_vec .* (1-x_vec) .* p_vec, 0, 0, 0) .* total_sum;
 
 
@@ -96,7 +97,7 @@ good_inds = find( (abs(region_het_moment_mat_all_models - het_moment_mat_data(:,
 
 
 
-for i=good_inds % 1:D.num_params
+for i=vec2row(good_inds) % 1:D.num_params
     
     length(D) % Loop on D: enumerate on many different demographic parameters
     

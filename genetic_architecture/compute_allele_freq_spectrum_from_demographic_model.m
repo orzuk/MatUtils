@@ -13,7 +13,7 @@
 % k_vec - alleles in sample
 % n_vec - sample sizes
 %
-function [x_vec, p_vec, k_vec, n_vec, compute_time] = compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, ...
+function [x_vec, p_vec, k_vec, n_vec, L_correction_factor, compute_time] = compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, ...
     n_sample, mu)
 
 compute_time=cputime;
@@ -40,6 +40,7 @@ D.compute_absorb = 0; % no need for extra computation!!!
 N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
 
 num_final_generations = length(N_vec)-1; % simulation at the end
+L_correction_factor=[]; 
 
 switch compute_flag
     case {'simulation', 'simulations', 'numeric'}
@@ -47,7 +48,7 @@ switch compute_flag
             FisherWrightSimulation([], D, mu, s, init_str, D.iters, compute_flag, D.num_bins);
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
         p_vec = freq_struct.p_vec{end-1};
-        
+        L_correction_factor = simulation_struct.L_correction_factor;
         %       [x_vec, p_vec] = unique_with_counts(vec2row(simulation_struct.q(:,end))); p_vec = p_vec ./ sum(p_vec); % Compute histogram of counts
         
         
