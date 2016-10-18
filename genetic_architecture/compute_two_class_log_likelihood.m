@@ -1,5 +1,5 @@
 % Compute log-likelihood for data using the two-class model
-% Formula is taken from eq. (XXX) from document : 
+% Formula is taken from eq. (XXX) from document on RVAS: 
 %
 % Input:
 % s_null_vec - vector of possible selection coefficients for the null alleles. Should be NEGATIVE for delterious alleles (so fitness is 1+s)
@@ -11,7 +11,7 @@
 %                            not their frequencies !  %%% NEW! alleles class type vector. This states for each allele if it is neutral, harmfull, or in a mixture (missense)
 % N - effective population size
 % X - genotype data matrix - for some models we actually need it. For others, just the allele frequencies.
-% y - phenotype data vector
+% y - phenotype data vector - (optional) may be used if likelihood includes phenotype 
 % trait_type - disease or quantitative
 % prevalence - frequency of disease in the population for disease trait
 % null_w_vec - (optional) this is the assignment of which alleles are null and which not.
@@ -80,7 +80,7 @@ if(size(null_w_vec, 2) == 2) % get also true null state (for each missense allel
     true_null_w_vec = null_w_vec(:,2); 
     null_w_vec = null_w_vec(:,1); 
 end
-if(~exist('print_flag') || uisempty(print_flag)) % default: don't print 
+if(~exist('print_flag', 'var') || uisempty(print_flag)) % default: don't print 
     print_flag = 0; 
 end
 %%%%%%%%%%%%%%%%%%%%%%%% End Set Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
@@ -90,20 +90,22 @@ num_s = length(s_null_vec);
 num_alpha = length(alpha_vec);
 num_beta = length(beta_vec);
 if(poisson_model_flag) % Compute counts
-    num_distinct_null_alleles_observed = sum(null_w_vec == 1);  % Polymorphic in POPULATION. these may be not polymorphic in sample
-    num_distinct_neutral_alleles_observed = sum(null_w_vec == 0); % Polymorphic in POPULATION. these may be not polymorphic in sample
-    num_distinct_missense_alleles_observed = sum(null_w_vec == -1); % mixture. % Polymorphic in POPULATION. these may be not polymorphic in sample
+%    num_distinct_null_alleles_observed = sum(null_w_vec == 1);  % Polymorphic in POPULATION. these may be not polymorphic in sample
+%    num_distinct_neutral_alleles_observed = sum(null_w_vec == 0); % Polymorphic in POPULATION. these may be not polymorphic in sample
+%    num_distinct_missense_alleles_observed = sum(null_w_vec == -1); % mixture. % Polymorphic in POPULATION. these may be not polymorphic in sample
     num_polymorphic_null_alleles_observed = sum(X(null_w_vec == 1,:)>0); % polymorphic in SAMPLE
     num_polymorphic_neutral_alleles_observed = sum(X(null_w_vec == 0,:)>0); % polymorphic in SAMPLE
     num_polymorphic_missense_alleles_observed = sum(X(null_w_vec == -1,:)>0); % polymorphic in SAMPLE
-    if(exist('true_null_w_vec', 'var'))
-        num_polymorphic_missense_null_alleles_observed = sum(X((null_w_vec == -1)&(true_null_w_vec==1),:)>0); 
-        num_polymorphic_missense_neutral_alleles_observed = ...
-            num_polymorphic_missense_alleles_observed - num_polymorphic_missense_null_alleles_observed;
+%    if(exist('true_null_w_vec', 'var'))
+%        num_polymorphic_missense_null_alleles_observed = sum(X((null_w_vec == -1)&(true_null_w_vec==1),:)>0); 
+%        num_polymorphic_missense_neutral_alleles_observed = ...
+%            num_polymorphic_missense_alleles_observed - num_polymorphic_missense_null_alleles_observed;
+%    end
+%    num_polymorphic_alleles_observed = num_polymorphic_null_alleles_observed + ...
+%        num_polymorphic_neutral_alleles_observed+num_polymorphic_missense_alleles_observed; % total # of poymorphic alleles in sample (should replace L)
+    if(~isfield(D, 'mu'))
+        D.mu = 1.5 * 10^(-8); % TEMP! Set a default value for mu !
     end
-    num_polymorphic_alleles_observed = num_polymorphic_null_alleles_observed + ...
-        num_polymorphic_neutral_alleles_observed+num_polymorphic_missense_alleles_observed; % total # of poymorphic alleles in sample (should replace L)
-    mu = 1.5 * 10^(-8); % TEMP! Set a default value for mu !
     
     prob_null_allele_polymorphic_in_population = zeros(num_s, 1);
     prob_null_allele_polymorphic_in_sample = zeros(num_s, 1);
@@ -169,7 +171,7 @@ if(poisson_model_flag)
     lambda_s = zeros(num_s, 1);
     lambda_missense = zeros(num_s, num_alpha);
     tmp_z0_vec = exp( num_individuals_vec(1) .* (log_one_minus_x_vec)); %  - log(underflow_correction_q(1))  ); % what's this? multinomial/binomial coefficient?
-    prob_neutral_allele_polymorphic_in_population = 4 * N * mu * T_0; % prob. allele polymorphic in population
+    prob_neutral_allele_polymorphic_in_population = 4 * N * D.mu * T_0; % prob. allele polymorphic in population
     prob_neutral_allele_polymorphic_in_sample = prob_neutral_allele_polymorphic_in_population .* ...
         (1 - sum( neutral_allele_freq_hist .* (1-x_vec) .^ num_individuals_vec(1) ) / sum(neutral_allele_freq_hist));
     % (1 - integral_hist(x_vec,  neutral_allele_freq_hist .* tmp_z0_vec ) ./ integral_hist(x_vec, neutral_allele_freq_hist) ); % This gives wrong results!!
@@ -205,7 +207,7 @@ for i_s = 1:num_s % loop on parameters
     if(poisson_model_flag) % compute poisson part of likelihood
         % we must assume here we know the number of individuals profiled at each region
         %        tmp_z0_vec = exp( num_individuals_vec(1) .* (log_one_minus_x_vec)); %  - log(underflow_correction_q(1))  ); % what's this? multinomial/binomial coefficient?
-        prob_null_allele_polymorphic_in_population(i_s) = 4 * N * mu * T_s(i_s); % prob. allele polymorphic in population
+        prob_null_allele_polymorphic_in_population(i_s) = 4 * N * D.mu * T_s(i_s); % prob. allele polymorphic in population
         prob_null_allele_polymorphic_in_sample(i_s) = prob_null_allele_polymorphic_in_population(i_s) .* ...
             (1 - sum( null_allele_freq_hist .* (1-x_vec) .^ num_individuals_vec(1) ) / sum(null_allele_freq_hist));
         %            (1 - integral_hist(x_vec,  null_allele_freq_hist .* tmp_z0_vec ) ./ integral_hist(x_vec, null_allele_freq_hist) );
@@ -215,9 +217,9 @@ for i_s = 1:num_s % loop on parameters
             (1-alpha_vec) .* prob_neutral_allele_polymorphic_in_sample;
         
         % set lambdas for poisson model
-        lambda_s(i_s) = 4 * N * mu * target_size_null_alleles * T_s(i_s);
-        %        lambda_0 = 4 * N * mu * target_size_neutral_alleles * T_0;
-        lambda_missense(i_s,:) = 4 * N * mu * target_size_missense_alleles .* ( alpha_vec .* T_s(i_s) + (1-alpha_vec) .* T_0 );
+        lambda_s(i_s) = 4 * N * D.mu * target_size_null_alleles * T_s(i_s);
+        %        lambda_0 = 4 * N * D.mu * target_size_neutral_alleles * T_0;
+        lambda_missense(i_s,:) = 4 * N * D.mu * target_size_missense_alleles .* ( alpha_vec .* T_s(i_s) + (1-alpha_vec) .* T_0 );
         
     end
 % % % % %     p_null_vec_in_population = alpha_vec .* T_s(i_s) ./ (alpha_vec .* T_s(i_s) + (1-alpha_vec) .* T_0); % compute probability that a given observed polymorphic locus is null in the population!!!!

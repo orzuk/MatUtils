@@ -20,7 +20,7 @@ beta=[];  % effect size on phenotype IRRELEVANT! (we use only genpotypes)
 X = [k_vec n_vec]; % Represent counts in a packed form
 
 % Set different demographic models:
-D.init_pop_size_vec{1} = 2*10000; % 1. ancestral population
+D.init_pop_size_vec{1} = 500; % 1. ancestral population
 D.init_pop_size_vec{2} = round(logspace(1, 4, 10)); % 2. bottleneck size
 D.init_pop_size_vec{3} = -1; % 3. population after bottleneck
 %D.num_params_vec(1) = length(D.init_pop_size_vec{2});
@@ -32,7 +32,7 @@ D.generations_vec{3} = round(logspace(1, 4, 10));  % 6. number of generations fo
 
 D.expan_rate_vec{1} = 1; % fixed ancestral population size
 D.expan_rate_vec{2} = 1; % fixed buttleneck size
-D.expan_rate_vec{3} = logspace(0.001, 0.1, 10); % 5. expansion rate per generation
+D.expan_rate_vec{3} = logspace(0.001, 0.04, 10); % 5. expansion rate per generation
 %D.num_params_vec(3) = length(D.expan_rate_vec{3});
 
 D.num_params_vec = [length_cell(D.init_pop_size_vec) length_cell(D.generations_vec) length_cell(D.expan_rate_vec)];
@@ -45,7 +45,7 @@ D.num_stages = length(D.init_pop_size_vec);
 
 
 D.num_params = prod(D.num_params_vec); % how many parameters to enumerate
-compute_flag = 'numeric';
+compute_flag = 'simulation'; % numeric 
 
 log_like_mat = zeros(size(D));
 
@@ -62,18 +62,32 @@ if(filter_by_moments)
         D.index = i;
         i_vec = myind2sub(D.num_params_vec, length(D.num_params_vec), i); % create vector of indices
         if(i_vec(2*D.num_stages) == length(D.generations_vec{end})) % get highest number of generations
-            N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
-            [mu_vec_expansion_analytic] = FisherWright_Compute_SFS_Moments(N_vec, 0, num_moments); % compute moments with Formulas from Ewens
-            het_moment_mat_all_models(i,:) = mu_vec_expansion_analytic(:,end);
-            
+
             j_vec = i_vec;
-            for j=1:length(D.generations_vec{end}) % loop on all smaller numbers of generations !
+            for j=length(D.generations_vec{end}):-1:1 % loop on all smaller numbers of generations !
                 j_vec(2*D.num_stages) = j; 
                 cur_ind = mysub2ind(D.num_params_vec, length(D.num_params_vec), j_vec);
-                het_moment_mat_all_models(cur_ind,:) = mu_vec_expansion_analytic(:,D.generations_vec{3}(j));
-                init_N(cur_ind) = N_vec(1); % take first value of N 
+                N_vec = demographic_parameters_to_n_vec(D, cur_ind); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
+                if(~filter_N_vec_internal(N_vec)) % get rid of this model 
+                    max_j = j; 
+                    break;
+                end
             end
+%             if(filter_N_vec_internal(N_vec)) % get rid of this model 
+%                 continue;  % PROBLEM! this gets rid of a 'bad' model, and then will get rid of all sub-models, some of which might be 'good'
+%             end
+            [mu_vec_expansion_analytic] = FisherWright_Compute_SFS_Moments(N_vec, 0, num_moments); % compute moments with Formulas from Ewens
+%            het_moment_mat_all_models(i,:) = mu_vec_expansion_analytic(:,end);
             
+            for j=1:max_j % length(D.generations_vec{end}) % loop on all smaller numbers of generations !
+                j_vec(2*D.num_stages) = j; 
+                cur_ind = mysub2ind(D.num_params_vec, length(D.num_params_vec), j_vec);
+                if(cur_ind == 250)
+                    xxx = 24354325
+                end
+                het_moment_mat_all_models(cur_ind,:) = mu_vec_expansion_analytic(:,D.generations_vec{3}(j)+D.generations_vec{1}+D.generations_vec{2});
+                init_N(cur_ind) = N_vec(1); % take first value of N 
+            end            
         end
     end
     moments_time=cputime - moments_time
@@ -85,9 +99,9 @@ end
 total_sum = sum(p_vec);
 p_vec = p_vec ./ sum(p_vec); % normalize
 
-het_moment_mat_data = sum ( (k_vec./n_vec) .* (1-k_vec./n_vec) ) / L_correction_factor;  % compute empirical heterozygosity (corrected)
+het_moment_mat_data = sum ( (k_vec./n_vec) .* (1-k_vec./n_vec) ) * L_correction_factor;  % compute empirical heterozygosity (corrected)
 
-het_moment_mat_data = moment_hist(x_vec, x_vec .* (1-x_vec) .* p_vec, 0, 0, 0) .* total_sum;
+% het_moment_mat_data = moment_hist(x_vec, x_vec .* (1-x_vec) .* p_vec, 0, 0, 0) .* L_correction_factor;
 
 
 
@@ -103,12 +117,9 @@ for i=vec2row(good_inds) % 1:D.num_params
     
     D.index = i;
     N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
-    % Filter first unreasonable models !!!
-    if(max(N_vec) > 10^(10)) % 10 billion
-        continue;
-    end
-    if(length(N_vec) > 10^4) % 10000 generations
-        continue;
+
+    if(filter_N_vec_internal(N_vec))
+        continue; 
     end
     
     [demographic_x_vec, demographic_f_vec, ~, ~, demographic_compute_time] = ...
@@ -135,4 +146,15 @@ switch D_opt
         fit_run_str = 'fastNeutrino'; % ...; % generate running command 
         
 end
+
+
+function filter_flag = filter_N_vec_internal(N_vec)    % Filter first unreasonable models !!!
+filter_flag=0;
+if(max(N_vec) > 10^9) % 1 billion
+    filter_flag=1;
+end
+if(length(N_vec) > 10^4) % 10000 generations
+    filter_flag=1;
+end
+
 

@@ -13,15 +13,14 @@
 % k_vec - alleles in sample
 % n_vec - sample sizes
 %
-function [x_vec, p_vec, k_vec, n_vec, L_correction_factor, compute_time] = compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, ...
-    n_sample, mu)
+function [x_vec, p_vec, k_vec, n_vec, L_correction_factor, compute_time] = ...
+    compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu)
 
 compute_time=cputime;
 if(~exist('compute_flag', 'var') || isempty(compute_flag))
     compute_flag = 'simulation';
     %    compute_mode = 'simulation'; % for general demography
 end
-
 if(~exist('init_str', 'var') || isempty(init_str)) % default is start at equilibrium
     init_str = 'equilibrium';
 end
@@ -38,6 +37,10 @@ D.num_bins = 100; % used for binning in Fisher Right simulation
 D.compute_absorb = 0; % no need for extra computation!!! 
 
 N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
+if(~exist('n_sample', 'var') || isempty(n_sample))
+   n_sample =  2*N_vec(end-1);
+end
+
 
 num_final_generations = length(N_vec)-1; % simulation at the end
 L_correction_factor=[]; 
