@@ -12,6 +12,8 @@
 %
 function [D, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, mu, L_correction_factor, D_opt)
 
+AssignGeneralConstants;    AssignRVASConstants; 
+
 % We fit expansion model from allele-frequency data, assuming that all alleles are neutral
 s = 0; % Assume no selection (synonymous)
 alpha=0; % No mixture. Everything is neutral (synonymous)

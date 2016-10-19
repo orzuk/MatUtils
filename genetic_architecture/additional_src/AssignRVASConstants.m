@@ -1,5 +1,7 @@
 % Set constants and paths for RVAS project
-
+if(~exist('machine', 'var'))
+    AssignGeneralConstants;
+end
 if(machine == UNIX) % set sfs_code path
     % sfs_code_dir = 'c/Users/user/Downloads/sfscode';
 else % PC
