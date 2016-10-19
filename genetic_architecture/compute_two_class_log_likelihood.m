@@ -9,11 +9,11 @@
 % target_size_by_class_vec - NEW! target size for each allele type (used in poisson model).
 %                            This is like the above but counts expected number of different alleles,
 %                            not their frequencies !  %%% NEW! alleles class type vector. This states for each allele if it is neutral, harmfull, or in a mixture (missense)
-% N - effective population size
+% D - demographic model (could be N:  effective population size for equilibrium model)  NEW! (currently only constant pop. size supported)
 % X - genotype data matrix - for some models we actually need it. For others, just the allele frequencies.
 % y - phenotype data vector - (optional) may be used if likelihood includes phenotype
-% trait_type - disease or quantitative
-% prevalence - frequency of disease in the population for disease trait
+% trait_struct - structure with: type - disease or quantitative
+%                                prevalence - frequency of disease in the population for disease trait
 % null_w_vec - (optional) this is the assignment of which alleles are null and which not.
 %                   This simplifies the likelihood computation a lot when it is known
 %                   (no need to average over possible assignments of w). Convention:
@@ -28,26 +28,26 @@
 %                      1: X is genotype matrix (default)
 %                      0: X contains sufficient statistics (sums of rows and columns)
 % num_individuals - input number of individuals (when not given in input vectors)
-% D - demographic parameters (NEW! optional! (currently only constant pop. size supported)
+% print_flag - print likelihood (optional) 
 %
 % Output:
 % log_like_mat - Matrix (3-d) of log-likelihood of data for each parameter choice (s, alpha and beta)
-% P_poly - ??? Probability of polymorphic alleles?
+% P_poly - Structure with computation information. Probability of polymorphic alleles ???
 %
 function [log_like_mat, P_poly] = ...
-    compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
-    X, y, trait_type, prevalence, null_w_vec, include_phenotype, full_flag, num_individuals, D, print_flag)
+    compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, D, ...
+    X, y, trait_struct, null_w_vec, include_phenotype, full_flag, num_individuals, print_flag)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%% Set Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 ttt=cputime;
 use_allele_freq_flag=2; % should be 2. (temp for debugging - allow computing only partial likelihoods)
 AssignGeneralConstants;
-if(~exist('trait_type', 'var') || isempty(trait_type))
-    trait_type = 'quantitative';
+if(~isfield(trait_struct, 'type', 'var'))
+    trait_struct.type = 'quantitative';
 end
-if(~exist('prevalence', 'var') || isempty(prevalence))
-    prevalence = [];
+if(~isfield(trait_struct, 'prevalence'))
+    trait_struct.prevalence = [];
 end
 if(~exist('include_phenotype', 'var') || isempty(include_phenotype))
     include_phenotype = 1; % flag saying if to include phenotypes when computing likelihood (default is one.)
@@ -68,7 +68,7 @@ else
     target_size_null_alleles = target_size_by_class_vec(2);
     target_size_missense_alleles = target_size_by_class_vec(3);
 end
-if(~exist('null_w_vec', 'var') || isempty(null_w_vec))                 % Perform exponential search on all values of w
+if(~exist('null_w_vec', 'var') || isempty(null_w_vec))  % Perform exponential search on all values of w
     optimize_alpha = 1;
 else  % here we know which alleles are null and which are neutral
     optimize_alpha = 0;
@@ -77,7 +77,7 @@ if(~exist('full_flag', 'var') || isempty(full_flag)) % default: use entire genot
     full_flag = 1;
 end
 if(size(null_w_vec, 2) == 2) % get also true null state (for each missense allele)
-    true_null_w_vec = null_w_vec(:,2);
+%    true_null_w_vec = null_w_vec(:,2);
     null_w_vec = null_w_vec(:,1);
 end
 if(~exist('print_flag', 'var') || uisempty(print_flag)) % default: don't print
@@ -85,6 +85,12 @@ if(~exist('print_flag', 'var') || uisempty(print_flag)) % default: don't print
 end
 %%%%%%%%%%%%%%%%%%%%%%%% End Set Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
+if(isscalar(D)) % equilibrium model
+    N=D; compute_flag = 'analytic';    
+    D = []; D.N_vec = N; 
+else
+    compute_flag = 'simulation'; 
+end
 
 num_s = length(s_null_vec);
 num_alpha = length(alpha_vec);
@@ -106,7 +112,6 @@ if(poisson_model_flag) % Compute counts
     if(~isfield(D, 'mu'))
         D.mu = 1.5 * 10^(-8); % TEMP! Set a default value for mu !
     end
-    
     prob_null_allele_polymorphic_in_population = zeros(num_s, 1);
     prob_null_allele_polymorphic_in_sample = zeros(num_s, 1);
     prob_missense_allele_polymorphic_in_population = zeros(num_s, num_alpha);
@@ -131,19 +136,14 @@ if(full_flag)
     for i=1:num_individuals % record alternative alleles
         x_inds{i} = find(X(i,:));
     end
-    % [unique_num_people unique_inds num_dup] = unique_with_inds(num_carriers_vec'); % why do we need this?
     num_carriers_vec = sum(X); % num. of individuals carrying each rare allele
     num_alleles_vec = sum(X,2); % num. of rare alleles in each individual
     num_individuals_vec = repmat(num_individuals, L, 1); % just repeat (assume for all alleles the same # of individuals is profiled)
 else % here we only have summary statistics (sum of rows and columns)
     [num_alleles_vec, num_null_alleles_vec, num_carriers_vec, num_individuals_vec, L] = ...
         expand_two_class_summary_statistics(X, num_individuals, expand_format_flag);% get num. of individuals for each rare allele, num. of rare allele for each individual
-    %     num_carriers_vec = X(end-L+1:end,:); % num. of individuals for each rare allele
-    %     num_alleles_vec = X(1:num_individuals,:);  % num. of rare alleles in each individual
 end
-allele_freq_vec = num_carriers_vec ./ num_individuals; % get observed allele frequency of each derived allele
-
-[unique_num_alleles_vec, I_num_alleles, J_num_alleles] = unique(num_alleles_vec);
+[unique_num_alleles_vec, ~, J_num_alleles] = unique(num_alleles_vec);
 
 % Determine distribution. For equilibrium use analytic solution. Otherwise, use simulation!!!
 switch compute_flag
@@ -156,14 +156,14 @@ switch compute_flag
 end
 sum_neutral_allele_freq_hist = sum(neutral_allele_freq_hist);
 
-prob_null_given_x = zeros(L,1); % conditional probability of allele being null when we know th
+prob_null_given_x = zeros(L,1); % conditional probability of allele being null when we know the frequency 
 T_0 = sum(neutral_allele_freq_hist) * (x_vec(2)-x_vec(1)); %T_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot! %%% T_0 = integral_hist(x_vec, neutral_allele_freq_hist); %%% T_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq');
 
 log_x_vec = log(x_vec); log_one_minus_x_vec = log(1-x_vec);
-underflow_correction_p = min(num_individuals-1, max(1, num_carriers_vec)) ./ num_individuals;
-underflow_correction_q = 1-underflow_correction_p;
-log_like_correction = num_carriers_vec .* log(underflow_correction_p) + (num_individuals-num_carriers_vec) .* log(underflow_correction_q); % update log-likelihood: correction for multinomial/binomial sampling?
 tmp_likelihood_one_allele = repmat(BIG_NUM, max(num_individuals_vec), 3);
+%underflow_correction_p = min(num_individuals-1, max(1, num_carriers_vec)) ./ num_individuals;
+%underflow_correction_q = 1-underflow_correction_p;
+%log_like_correction = num_carriers_vec .* log(underflow_correction_p) + (num_individuals-num_carriers_vec) .* log(underflow_correction_q); % update log-likelihood: correction for multinomial/binomial sampling?
 
 if(optimize_alpha) % Here find best alpha value 
     cond_y_tab = zeros(num_individuals, max(num_alleles_vec)+1); % table. entry (i,j) is Prob. (y(i) | beta*(j-1) nulls)
@@ -178,7 +178,6 @@ if(poisson_model_flag)
     prob_neutral_allele_polymorphic_in_population = 4 * N * D.mu * T_0; % prob. allele polymorphic in population
     prob_neutral_allele_polymorphic_in_sample = prob_neutral_allele_polymorphic_in_population .* ...
         (1 - sum( neutral_allele_freq_hist .* (1-x_vec) .^ num_individuals_vec(1) ) / sum(neutral_allele_freq_hist));
-    % (1 - integral_hist(x_vec,  neutral_allele_freq_hist .* tmp_z0_vec ) ./ integral_hist(x_vec, neutral_allele_freq_hist) ); % This gives wrong results!!
     
     [unique_num_carriers, I] = unique(num_carriers_vec);
     tmp_z_vec = sparse(length(unique_num_carriers), length(x_vec)); % creat sparse matrix
@@ -186,8 +185,7 @@ if(poisson_model_flag)
     %%    t2 = cputime; % tmp_ind_vec = []; tmp_val_vec = [];
     for j=1:length(unique_num_carriers) % loop on unique
         %        run_j = j
-        tmp_vec = ...
-            exp( log_binom(num_individuals_vec(I(j)), num_carriers_vec(I(j))) + ...
+        tmp_vec = exp( log_binom(num_individuals_vec(I(j)), num_carriers_vec(I(j))) + ...
             num_carriers_vec(I(j)) .* log_x_vec + ...
             (num_individuals_vec(I(j))-num_carriers_vec(I(j))) .* log_one_minus_x_vec ); % assumes num individuals is the same
         pos_tmp_z_inds{j} = find(tmp_vec > 10^(-8));
@@ -304,8 +302,7 @@ for i_s = 1:num_s % loop on parameters
             end % loop on loci
             %            ttt_loop_on_loci = cputime - ttt
             if(include_genotype) % here add genotype part of log-likelihood
-                log_like_mat(i_s,i_alpha,i_beta) = log_like_mat(i_s,i_alpha,i_beta) + 0 * sum(log_like_correction); % add correction. Just a constant (who cares)
-                
+%                log_like_mat(i_s,i_alpha,i_beta) = log_like_mat(i_s,i_alpha,i_beta) + 0 * sum(log_like_correction); % add correction. Just a constant (who cares)
                 if(poisson_model_flag) % here include all alleles classes
                     log_like_mat(i_s,i_alpha,i_beta) = log_like_mat(i_s,i_alpha,i_beta) - 0; %%%%... % add normalization constant
                 else % here assume all alleles are missnese
@@ -317,7 +314,10 @@ for i_s = 1:num_s % loop on parameters
             % Skip this for now (we just use genotypes)
             %%%%%%%%%%%%%%%%%%%%%%%%%%%% End if include phenotypes %%%%%%%%%%%%
             if(include_phenotype) % compute phenotypes contribution to likelihood
-                switch trait_type
+                
+                log_like_mat(i_s,i_alpha,i_beta) = internal_log_like_pheotype(log_like_mat(i_s,i_alpha,i_beta), ...
+                    X, y, alpha_vec(i_alpha), beta_vec(i_beta), num_individuals, num_alleles_vec, optimize_alpha, prob_null_given_x)
+                switch trait_struct.type
                     case {'binary', 'disease'}
                         mean_x = mean(X(:));
                         mean_f = mean_x * alpha_vec(i_alpha);
@@ -328,7 +328,7 @@ for i_s = 1:num_s % loop on parameters
                     for i=1:n
                         %                        for j=1:num_alleles_vec(i)+1
                         cond_y_tab(i,1:num_alleles_vec(i)+1) = internal_phenotype_fun( ...
-                            y(i), beta_vec(i_beta).*(0:num_alleles_vec(i)), sigma_e, trait_type, prevalence);
+                            y(i), beta_vec(i_beta).*(0:num_alleles_vec(i)), sigma_e, trait_struct);
                         %                        end
                     end
                     if(full_flag) % exponential search
@@ -371,7 +371,7 @@ for i_s = 1:num_s % loop on parameters
                     for i=1:num_individuals          % Compute phenotype part. Loop on individuals. Heaviest loop
                         log_like_mat(i_s,i_alpha,i_beta) = log_like_mat(i_s,i_alpha,i_beta) + ...
                             log(internal_phenotype_fun(y(i), beta_vec(i_beta)*weight_vec(i), ...
-                            sigma_e, trait_type, prevalence));
+                            sigma_e, trait_struct));
                     end
                 end % switch if we have mixture or not
             end % if to include phenotypes
@@ -457,23 +457,24 @@ end % if use allele freq flag
 % y - vector of phenotypes
 % sum_x - total additive effect of all functional rare alleles for each person
 % sigma_e - evnironmental noise
-% trait_type - quantitative or binary (disease)
-% prevalence - when trait is binary (disease)
+% trait_struct - type - quantitative or binary (disease)
+%                prevalence - when trait is binary (disease)
 %
 % Output:
 % ret - likelihood of phenotype for each individual
 %
-function ret = internal_phenotype_fun(y, sum_x, sigma_e, trait_type, prevalence)
+function ret = internal_phenotype_fun(y, sum_x, sigma_e, trait_struct)
 
-if(~exist('trait_type', 'var'))
-    trait_type = 'quantitative';
+if(~exist('trait_struct', 'var'))
+    trait_struct = []; 
+    trait_struct.type = 'quantitative';
 end
 
-switch trait_type
+switch trait_struct.type
     case {'quantitative', 'continuous', 'QTL'}
         ret = normpdf( (y - sum_x) ./ sigma_e ); % For a gaussian quantitative trait
     case {'discrete', 'disease'}
-        x_mu = norminv(1-prevalence);
+        x_mu = norminv(1-trait_struct.prevalence);
         %        ret = 1-normcdf( (x_mu - sum_x) / sigma_e );
         ret = y + (1-2.*y) .* normcdf( (x_mu - sum_x) / sigma_e );  % use liability transformation for disease trait. take cumulative (tail) probability
 end

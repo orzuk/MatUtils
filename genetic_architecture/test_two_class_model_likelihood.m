@@ -5,14 +5,14 @@
 % L - # of loci
 % num_individuals - sample size
 % mu - mutation rate
-% trait_type - quantitative or diseaes
-% prevalence -  prevalence (for disease trait)
+% trait_struct - structure describing phenotype: type - quantitative or diseaes
+%                                                prevalence -  prevalence (for disease trait)
 % rare_cumulative_per_gene - cumulative allele freqeuncy of rare variants per gene
 % theta - effective mutation rate
 % full_flag - simulate and compute likelihood on full genotypes (default) or just summary statistics
 % figs_dir - where to save figures
 %
-function test_two_class_model_likelihood(N, L, num_individuals, mu, trait_type, prevalence, ...
+function test_two_class_model_likelihood(N, L, num_individuals, mu, trait_struct, ...
     rare_cumulative_per_gene, target_size_by_class_vec, theta, poisson_flag, iters, full_flag, figs_dir)
 
 Assign24MammalsGlobalConstants;
@@ -56,18 +56,18 @@ if(test_likelihood_sum_to_one)    % New: just test that the total likelihood sum
             end
             total_prob(x_vec+1,x2_vec+1) = exp(compute_two_class_log_likelihood( ...
                 s_null, 0.99999999999999999, [], rare_cumulative_per_gene, target_size_by_class_vec, N, X, [], ...
-                'disease', prevalence, [], 0, 1)); % compute only genotype part
+                trait_struct, [], 0, 1)); % compute only genotype part
             
             for y_vec = 0:2^small_n-1 % now sum also on y,
                 Y = my_dec2base(y_vec, 2, small_n);
                 total_prob_with_phenotype(x_vec+1,x2_vec+1, y_vec+1) = ...
                     exp(compute_two_class_log_likelihood( ...
                     s_null, 0.99999999999999999, beta, rare_cumulative_per_gene, target_size_by_class_vec, N, X, Y, ...
-                    'disease', prevalence, beta, 1, 1)); % include also phenotype
+                    trait_struct,  beta, 1, 1)); % include also phenotype
                 total_prob_phenotype_only(x_vec+1,x2_vec+1, y_vec+1) = ...
                     exp(compute_two_class_log_likelihood( ...
                     s_null, 0.99999999999999999, beta, rare_cumulative_per_gene, target_size_by_class_vec, N, X, Y, ...
-                    'disease', prevalence, beta, -1, 1)); % compute ONLY phenotype part
+                    trait_struct,  beta, -1, 1)); % compute ONLY phenotype part
             end % loop on phenotype
         end
     end
@@ -78,7 +78,7 @@ if(test_likelihood_sum_to_one)    % New: just test that the total likelihood sum
 end % test that likelihoods sum to one
 
 
-[X y is_null_mat f_mat allele_type_vec P_poly_empirical] = simulate_two_class_genotype_phenotype(s_null, alpha, beta, ...
+[X, y, is_null_mat, f_mat, allele_type_vec, P_poly_empirical] = simulate_two_class_genotype_phenotype(s_null, alpha, beta, ...
     rare_cumulative_per_gene, target_size_by_class_vec, ...
     N, L, num_individuals, iters, trait_type, prevalence, full_flag, poisson_flag); % generate data (genotype and phenotype). We have here only missense!!
 
@@ -167,7 +167,7 @@ if(test_s || test_alpha)
         end
         [log_like_mat_change_alpha_or_s P_poly] = ... % compute likelihood (here vary only alpha)
             compute_two_class_log_likelihood(run_s_vec, run_alpha_vec, beta, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
-            X([1:L_vec(i)  end-L_vec(i)+1:end],i)   , y(:,i), [], [], cur_is_null_vec, 0, full_flag, num_individuals); % don't include phenotype !!
+            X([1:L_vec(i)  end-L_vec(i)+1:end],i)   , y(:,i), [], cur_is_null_vec, 0, full_flag, num_individuals); % don't include phenotype !!
         if(i == 1)
             Q_poly = P_poly;
         else
@@ -268,7 +268,7 @@ end % test alpha
 if(test_beta)% Debug: Test only beta. All alleles are almost neutral, and they're all functional
     log_like_mat_change_beta = ... % compute likelihood (here vary only alpha)
         compute_two_class_log_likelihood(s_null, alpha, beta_vec, rare_cumulative_per_gene, N, ...
-        first_X, y(:,1), [], [], [], [], full_flag);
+        first_X, y(:,1), [], [], [], full_flag);
     
     figure; hold on; plot(beta_vec, reshape(log_like_mat_change_beta, length(beta_vec), 1), '*');
     line([beta, beta], [min(log_like_mat_change_beta(:))-1, max(log_like_mat_change_beta(:))+1], 'color', 'k', 'linewidth', 2);
@@ -284,7 +284,7 @@ end % test beta
 if(test_alpha_beta)
     log_like_mat_change_alpha_beta = ... % compute likelihood (here vary only alpha)
         compute_two_class_log_likelihood(s_null, alpha_vec, beta_vec, rare_cumulative_per_gene, N, ...
-        first_X, y(:,1), [], [], [], 1, full_flag);
+        first_X, y(:,1), [], [], 1, full_flag);
     figure; hold on; plot3(alpha_vec, beta_vec, log_like_mat_change_alpha_beta);
     
     

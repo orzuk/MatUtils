@@ -13,8 +13,8 @@
 %       If full_flag=0: A vector of size: 2*num-snps. First half:
 %       #carriers, Second half: # of total individuals for this SNP 
 % y - phenotype data vector.  THIS IS THE PHENOTYPE DATA (optional) 
-% trait_type - disease or quantitative
-% prevalence - population frequency of disease for disease trait
+% trait_struct:  type - disease or quantitative
+%                prevalence - population frequency of disease for disease trait
 % null_w_vec - (optional) this is the assignment of which alleles are null
 %            and which not. This simplifies the likelihood computation a lot when it is known
 % maximize_parameters - on which parameters to do the maximization. Default is all (s, alpha, beta). Format is [S alpha beta]  (all binary variables)
@@ -33,17 +33,17 @@
 %
 function [max_LL, max_s, max_alpha, max_beta] = ...
     maximize_two_class_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
-    X, y, trait_type, prevalence, null_w_vec, maximize_parameters, full_flag, D, num_individuals, implementation_str)
+    X, y, trait_struct, null_w_vec, maximize_parameters, full_flag, D, num_individuals, implementation_str)
 
 
 if(~exist('implementation_str', 'var') || isempty(implementation_str))
     implementation_str = 'minsearch'; % 'brute-force'; % how to find optimum 
 end
-if(~exist('trait_type', 'var') || isempty(trait_type))
-    trait_type = [];
+if(~isfield(trait_struct, 'type'))
+    trait_struct.type = [];
 end
-if(~exist('prevalence', 'var') || isempty(prevalence))
-    prevalence = [];
+if(~isfield(trait_struct, 'prevalence'))
+    trait_struct.prevalence = [];
 end
 if(~exist('null_w_vec', 'var') || isempty(null_w_vec))
     null_w_vec = [];
@@ -85,7 +85,7 @@ switch implementation_str  % choose how to maximize likelihood
         % ALPHA - WHY? 
         log_like_mat = ... % compute likelihood (currently vary only alpha)
             compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
-            X, y, trait_type, prevalence, null_w_vec, include_phenotype, full_flag, num_individuals);        
+            X, y, trait_struct, null_w_vec, include_phenotype, full_flag, num_individuals);        
         [max_LL, tmp_ind] = max(log_like_mat(:)); % find the maximal grid-point
         [I, J, K] = ind2sub(size(log_like_mat), tmp_ind); 
         max_s = s_null_vec(I); 
@@ -102,7 +102,7 @@ switch implementation_str  % choose how to maximize likelihood
         if(isempty(null_w_vec) || poisson_model_flag) % here we don't know alpha and the null positions
             [max_s_alpha, max_LL_genotype] = fminsearch(@(s_alpha) ... % use genotypes
                 -compute_two_class_log_likelihood(s_alpha(1), s_alpha(2), [], rare_cumulative_per_gene, target_size_by_class_vec, ...
-                N, X, [], [], [], null_w_vec, include_phenotype, full_flag, num_individuals, D), ...
+                N, X, [], [], null_w_vec, include_phenotype, full_flag, num_individuals, D), ...
                 [s_null_vec; alpha_vec]); % here s_null_vec and alpha_vec serve as initial guesses! (should be scalars)
             % use phenotypes            
             max_s = max_s_alpha(1); max_alpha = max_s_alpha(2); % We need to check that 0 < alpha < 1
@@ -110,17 +110,17 @@ switch implementation_str  % choose how to maximize likelihood
         else % here we do know alpha
             [max_s, max_LL_genotype] = fminsearch(@(s_alpha) ... % use genotypes
                 -compute_two_class_log_likelihood(s_alpha, 1, [], rare_cumulative_per_gene, target_size_by_class_vec, N, X, [], ...
-                trait_type, prevalence, null_w_vec, include_phenotype, full_flag, num_individuals), s_null_vec); % maximize over genotypes only 
+                trait_struct, null_w_vec, include_phenotype, full_flag, num_individuals), s_null_vec); % maximize over genotypes only 
             max_alpha = 1;
                         
             if(maximize_parameters(3)) % optimize also on effect size beta - here we must use phenotype !! (slower)
                 [max_beta, max_LL_phenotype] = fminsearch(@(beta) ... % now optimize only phenotype part
                     -compute_two_class_log_likelihood(max_s, 1, beta, rare_cumulative_per_gene, target_size_by_class_vec, N, X, y, ...
-                    trait_type, prevalence, null_w_vec, -1, full_flag), beta_vec);
+                    trait_struct, null_w_vec, -1, full_flag), beta_vec);
             else
                 max_LL_phenotype = ... % Compute likelihood for beta=0
                     compute_two_class_log_likelihood(max_s, 1, 0, rare_cumulative_per_gene, target_size_by_class_vec, N, X, y, ...
-                    trait_type, prevalence, null_w_vec, -1, full_flag);
+                    trait_struct, null_w_vec, -1, full_flag);
                 max_beta = 0;
             end
             max_LL = max_LL_genotype + max_LL_phenotype;            

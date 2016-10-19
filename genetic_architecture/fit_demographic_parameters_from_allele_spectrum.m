@@ -128,10 +128,11 @@ for i=vec2row(good_inds) % 1:D.num_params
     % Compute likelihood. This is trivial one-class likelihood (no mixture bullshit) so should be fast !!!
     rare_cumulative_per_gene = []; % set dummy variables
     target_size_by_class_vec = []; % ???
+    full_flag = 0; % use summary statistics 
     [log_like_mat(i)] = ... % compute likelihood (here vary only alpha)
-        compute_two_class_log_likelihood(s, alpha, beta, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
-        X, [], [], [], [cur_is_null_vec is_null_mat(1:L_vec(i),i)], ...
-        0, full_flag, num_individuals, D{i}); % don't include phenotype !!
+        compute_two_class_log_likelihood(s, alpha, beta, rare_cumulative_per_gene, target_size_by_class_vec, N_vec, ...
+        X, [], [], 1, ...
+        0, full_flag, [], D); % don't include phenotype !!
 end
 
 [max_LL, max_J] = max(log_like_mat); % maximize likelihood

@@ -1,4 +1,4 @@
-% Sample alleles according to allele frequency distribution in a population
+% Sample polymorphic alleles according to allele frequency distribution in a population at equilibrium. 
 % Formula for density is from Sawyer&Hartl paper. We use 4*N*s (not 2*N*s) since N
 % is the number of individuals (not chromosomes)
 % The formula is: g(f) =  (1 - e^(s(1-q))) / [f(1-f)(1-e^(-S))]

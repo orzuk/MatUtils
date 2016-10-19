@@ -226,14 +226,16 @@ if(test_likelihood) % New: test likelihood
     L = 100; % number of loci (gene length)
     n = 2000; % number of individuals
     mu = 2*10^(-8); % mutation rate per-nucleotide
-    trait_type = 'quantitative'; % 'disease'; % simulate either disease or quqantitative traits
-    prevalence = 0.1; % disease prevalence for disease traits
+    trait_struct = []; 
+    trait_struct.type = 'disease'; % 'disease'; % simulate either disease or quqantitative traits
+    trait_struct.prevalence = 0.1; % disease prevalence for disease traits
     rare_cumulative_per_gene = 1; % cumulative allele frequency of rare alleles per gene (theta)
     target_size_by_class_vec = 10000 .* [5 5 5]; %[5 1 10]; % [synonymous,  stop, missense]
     theta = 4*N*mu; % effective mutation rate
     iters = 20; % number of simulations to perform
     full_flag = 0; % use summary statistics (faster)
-    test_two_class_model_likelihood(N, L, n, mu, trait_type, prevalence, rare_cumulative_per_gene, target_size_by_class_vec, ...
+    
+    test_two_class_model_likelihood(N, L, n, mu, trait_struct, rare_cumulative_per_gene, target_size_by_class_vec, ...
         theta, poisson_flag, iters, full_flag, figs_dir);
     
     

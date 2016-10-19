@@ -26,7 +26,7 @@
 % stat_vec - (optional) empirical statistic-values we got. Used to create the power plot.   Size: 1Xiters
 % non_centrality_parameter - parameter capturing effect size (for analytic tests).          Size: (#samples, #cutoffs) (second is #params)
 %
-function [power_mat p_vals_vec stat_vec non_centrality_parameter] = ...
+function [power_mat, p_vals_vec, stat_vec, non_centrality_parameter] = ...
     compute_association_power(p_mat, n_cases_vec, n_controls_vec, alpha_vec, ...
     iters, test_type, test_stat, sampling_type, const_effect_flag, model_params, varargin)
 
@@ -40,10 +40,11 @@ if(~exist('sampling_type', 'var') || isempty(sampling_type))
         sampling_type = 'population';
     end
 end
+trait_struct = []; 
 if(~isempty(strfind(test_stat, 'QTL')))
-    trait_type = 'QTL';
+    trait_struct.type = 'QTL';
 else
-    trait_type = 'binary';
+    trait_struct.type = 'binary';
 end
 if(~exist('const_effect_flag', 'var') || isempty(const_effect_flag))
     const_effect_flag = 0;
@@ -60,8 +61,8 @@ end
 % end
 
 if(isempty(n_controls_vec)) % assume we've got only cases, or cases=controls
-    switch trait_type
-        case 'binary'
+    switch trait_struct.type
+        case {'binary', 'disease'}
             switch sampling_type
                 case {'full-case-control', 'case-control'}
                     n_samples_vec = n_cases_vec - mod(n_cases_vec, 2); % cases=controls
@@ -75,7 +76,7 @@ if(isempty(n_controls_vec)) % assume we've got only cases, or cases=controls
                     end
                     n_controls_vec = n_samples_vec - n_cases_vec;
             end
-        case 'QTL'
+        case {'QTL', 'quantitative', 'continuous'}
             n_samples_vec = n_cases_vec;
     end
 else
@@ -118,8 +119,8 @@ p_vec_original = p_vec; % save original for analytic calculations. p_vec may now
 full_flag = 0;
 switch sampling_type % adjust effect size
     case {'case_control', 'case_controls', 'case-control', 'case-controls'} % change p_mat to reflect case-control design
-        switch trait_type % case controls makes sense only for binary trait
-            case 'binary'
+        switch trait_struct.type % case controls makes sense only for binary trait
+            case {'binary', 'disease'}
                 p_vec = pop_prob_to_case_control_prob(p_vec, n_cases_vec, n_controls_vec);
         end
     case {'all_population', 'population'} % just sample randomly from entire population (do nothing)
@@ -187,10 +188,10 @@ else % no full flag (summary statistics)
     end
     diff_n_samples_vec = [n_samples_vec(1) vec2row(diff(n_samples_vec))];
     diff_n_cases_vec = [n_cases_vec(1) vec2row(diff(n_cases_vec))];
-    switch trait_type
-        case {'Binary', 'binary'}
+    switch lower(trait_struct.type)
+        case {'binary', 'disease'}
             diff_n_controls_vec = [n_controls_vec(1) vec2row(diff(n_controls_vec))];
-        case 'QTL'
+        case {'qtl', 'quantitative'}
             diff_n_controls_vec = zeros(size(diff_n_cases_vec));
     end
     
@@ -211,19 +212,19 @@ else % no full flag (summary statistics)
                         cur_contigency_table_vec((j-1)*iters+1:j*iters,:,:) = ... %  cur_genotype_phenotype_prod cur_genotype_sqr] = ...
                             simulate_genotype_phenotype( ...
                             p_vec(j,:), diff_n_cases_vec(i), diff_n_controls_vec(i), ...
-                            iters, trait_type, trait_mode, full_flag);
+                            iters, trait_struct.type, trait_mode, full_flag);
                     else
                         cur_contigency_table_vec((j-1)*iters+1:j*iters,:) = ... %  cur_genotype_phenotype_prod cur_genotype_sqr] = ...
                             simulate_genotype_phenotype( ...
                             p_vec(j,:), diff_n_cases_vec(i), diff_n_controls_vec(i), ...
-                            iters, trait_type, trait_mode, full_flag);
+                            iters, trait_struct.type, trait_mode, full_flag);
                     end
                 end % for loop on different p_vecs (SNPs)
             else % always 'sample' the same (true) effect size
                 cur_contigency_table_vec = repmat(p_vec, ... % .* diff_n_samples_vec(i)
                     iters, 1);    % no rounding here - just multiply counts
-                switch trait_type
-                    case 'binary' % compute counts
+                switch trait_struct.type
+                    case {'binary', 'disease'} % compute counts
                         cur_contigency_table_vec = cur_contigency_table_vec .* diff_n_samples_vec(i);
                 end
             end
@@ -247,8 +248,8 @@ else % no full flag (summary statistics)
         if(~exist('contigency_table_vec', 'var'))
             contigency_table_vec = [];
         end
-        [tmp_stat_vec tmp_pvals_vec power_mat(i,:) non_centrality_parameter(i,:)] = ...
-            internal_assoc_test(model_params, contigency_table_vec, test_type, test_stat, trait_type, ...
+        [tmp_stat_vec, tmp_pvals_vec, power_mat(i,:), non_centrality_parameter(i,:)] = ...
+            internal_assoc_test(model_params, contigency_table_vec, test_type, test_stat, trait_struct.type, ...
             p_vec, p_vec_original, num_params, ...
             n_samples_vec(i), n_cases_vec(i), n_controls_vec(i), ...
             alpha_vec, i, iters, full_flag, const_effect_flag, num_sample_sizes); % compuyte test statistic
@@ -329,7 +330,7 @@ end % if analytic
 % power_mat - matrix of power. Size: (1, num_params)
 % non_centrality_parameter - parameter determining power. Size: (1, num_params). (For multiple cutoffs they'll all be the same)
 %
-function [stat_vec p_vals_vec power_vec non_centrality_parameter] = ...
+function [stat_vec, p_vals_vec, power_vec, non_centrality_parameter] = ...
     internal_assoc_test(model_params, contigency_table_vec, test_type, test_stat, trait_type, ...
     p_vec, p_vec_original, num_params, ... % f_vec, grr_vec,
     n_samples, n_cases, n_controls, ...
@@ -347,7 +348,7 @@ analytic_flag = strfind(test_stat, 'analytic');
 
 switch strrep(lower(test_stat), '_', '-') % set parameters for test
     case {'chi-square-analytic', 'chi_square_analytic', 'chi-square', 'eric-crude-enrichment-analytic'} % New: perform analytic computation via non-centrality parameter
-        [f_vec grr_vec mu_vec] = p_z_x_marginal_to_genetic_relative_risk(p_vec_original);
+        [f_vec, grr_vec, mu_vec] = p_z_x_marginal_to_genetic_relative_risk(p_vec_original);
         % % % % NEW: We don't need to convert to liability scale
         % % % %         [~, h_liability] = genetic_relative_risk_to_variance_explained(f_vec, grr_vec, mu_vec, 'diploid');
         % % % %         if(h_liability > 1)
@@ -355,7 +356,7 @@ switch strrep(lower(test_stat), '_', '-') % set parameters for test
         % % % %         end
         % % % %         beta = sqrt(h_liability ./ (2.*f_vec.*(1-f_vec)));
     case {'chi-square-QTL-analytic', 'chi-square-QTL'} % QTL
-        [f_vec beta V] = p_mat_to_QTL_params(p_vec_original);
+        [f_vec, beta, V] = p_mat_to_QTL_params(p_vec_original);
         V_explained = min(beta_to_variance_explained(beta, f_vec, V, 'diploid'), 1); % multiply effect by two
         
     case {'epistasis-analytic', 'pairwise-epistasis-analytic', 'pairwise_epistasis-analytic'} % here test for 2x2x2 table
@@ -384,7 +385,7 @@ switch strrep(lower(test_stat), '_', '-') % set parameters for test
                 prevalence = [];
         end
         rare_cumulative_per_gene = 1;
-        [contigency_table_vec y is_null_mat f_mat] = ...
+        [contigency_table_vec, y, is_null_mat, f_mat] = ...
             simulate_two_class_genotype_phenotype(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, ...
             N, L, n_samples, iters, trait_type, prevalence, full_flag); % Special! Prepare at once the contigency table (full_flag=0)
         %        contigency_table_vec = [contigency_table_vec' y']'; % NEW! Don't concatenate !!! % concatenate genotype and phenotype (why???)
