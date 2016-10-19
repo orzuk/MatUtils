@@ -160,22 +160,24 @@ end
 log_like_mat = zeros(num_s, num_alpha, num_beta);
 
 % Determine distribution. For equilibrium use analytic solution. Otherwise, use simulation!!!
-allele_freq_hist = cell(num_classes,1); sum_allele_freq_hist = zeros(num_classes, 1);
+x_vec = cell(num_classes, 1); allele_freq_hist = cell(num_classes,1); sum_allele_freq_hist = zeros(num_classes, 1);
+log_x_vec = x_vec; log_one_minus_x_vec = x_vec; 
 switch compute_flag
     case 'analytic'
-        x_vec = (1:2*N-1) ./ (2*N); % vector of allele frequencies
-        allele_freq_hist{NEUTRAL_C} = exp(allele_freq_spectrum(x_vec, 0, N, 0, 'log')); % allele freq. distribution for neutral alleles. NOT Normalized!
+        x_vec{NEUTRAL_C} = (1:2*N-1) ./ (2*N); % vector of allele frequencies
+        allele_freq_hist{NEUTRAL_C} = exp(allele_freq_spectrum(x_vec{NEUTRAL_C}, 0, N, 0, 'log')); % allele freq. distribution for neutral alleles. NOT Normalized!
     case 'simulation'
-        [x_vec, allele_freq_hist{NEUTRAL_C}, ~, ~, demographic_compute_time] = ...
-            compute_allele_freq_spectrum_from_demographic_model(D, 0, compute_flag); % Try a grid of different values
         N_vec = demographic_parameters_to_n_vec(D, D.index); N=N_vec(1);
+        [x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}, ~, ~, demographic_compute_time] = ...
+            compute_allele_freq_spectrum_from_demographic_model(D, 0, compute_flag); % Try a grid of different values
+        x_vec{NEUTRAL_C} = x_vec{NEUTRAL_C} ./ (2*N_vec(end-1)); % normalize: from counts to allele freq. 
 end
 sum_allele_freq_hist(NEUTRAL_C) = sum(allele_freq_hist{NEUTRAL_C});
 
 prob_null_given_x = zeros(L,1); % conditional probability of allele being null when we know the frequency
-T_0 = sum(allele_freq_hist{NEUTRAL_C}) * (x_vec(2)-x_vec(1)); %T_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot! %%% T_0 = integral_hist(x_vec, allele_freq_hist{NEUTRAL_C}); %%% T_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq');
+T_0 = sum(allele_freq_hist{NEUTRAL_C}) * (x_vec{NEUTRAL_C}(2)-x_vec{NEUTRAL_C}(1)); %T_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot! %%% T_0 = integral_hist(x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}); %%% T_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq');
 
-log_x_vec = log(x_vec); log_one_minus_x_vec = log(1-x_vec);
+log_x_vec{NEUTRAL_C} = log(x_vec{NEUTRAL_C}); log_one_minus_x_vec{NEUTRAL_C} = log(1-x_vec{NEUTRAL_C});
 tmp_likelihood_one_allele = repmat(BIG_NUM, max(num_individuals_vec), 3);
 %underflow_correction_p = min(num_individuals-1, max(1, num_carriers_vec)) ./ num_individuals;
 %underflow_correction_q = 1-underflow_correction_p;
@@ -189,20 +191,20 @@ end
 if(poisson_model_flag)
     lambda_s = zeros(num_s, 1);
     lambda_missense = zeros(num_s, num_alpha);
-    % tmp_z0_vec = exp( num_individuals_vec(1) .* (log_one_minus_x_vec)); %  - log(underflow_correction_q(1))  ); % what's this? multinomial/binomial coefficient?
+    % tmp_z0_vec = exp( num_individuals_vec(1) .* (log_one_minus_x_vec{NEUTRAL_C})); %  - log(underflow_correction_q(1))  ); % what's this? multinomial/binomial coefficient?
     prob_neutral_allele_polymorphic_in_population = 4 * N * D.mu * T_0; % prob. allele polymorphic in population
     prob_neutral_allele_polymorphic_in_sample = prob_neutral_allele_polymorphic_in_population .* ...
-        (1 - sum( allele_freq_hist{NEUTRAL_C} .* (1-x_vec) .^ num_individuals_vec(1) ) / sum(allele_freq_hist{NEUTRAL_C}));
+        (1 - sum( allele_freq_hist{NEUTRAL_C} .* (1-x_vec{NEUTRAL_C}) .^ num_individuals_vec(1) ) / sum(allele_freq_hist{NEUTRAL_C}));
     
     [unique_num_carriers, I] = unique(num_carriers_vec);
-    tmp_z_vec = sparse(length(unique_num_carriers), length(x_vec)); % creat sparse matrix
+    tmp_z_vec = sparse(length(unique_num_carriers), length(x_vec{NEUTRAL_C})); % creat sparse matrix
     pos_tmp_z_inds = cell(length(unique_num_carriers), 1);
     %%    t2 = cputime; % tmp_ind_vec = []; tmp_val_vec = [];
     for j=1:length(unique_num_carriers) % loop on unique
         %        run_j = j
         tmp_vec = exp( log_binom(num_individuals_vec(I(j)), num_carriers_vec(I(j))) + ...
-            num_carriers_vec(I(j)) .* log_x_vec + ...
-            (num_individuals_vec(I(j))-num_carriers_vec(I(j))) .* log_one_minus_x_vec ); % assumes num individuals is the same
+            num_carriers_vec(I(j)) .* log_x_vec{NEUTRAL_C} + ...
+            (num_individuals_vec(I(j))-num_carriers_vec(I(j))) .* log_one_minus_x_vec{NEUTRAL_C} ); % assumes num individuals is the same
         pos_tmp_z_inds{j} = find(tmp_vec > 10^(-8));
         tmp_z_vec(j, pos_tmp_z_inds{j}) = tmp_vec(pos_tmp_z_inds{j});
     end
@@ -214,21 +216,24 @@ T_s = zeros(num_s,1); % time an allele spends at polymorphic state
 for i_s = 1:num_s % loop on parameters
     switch compute_flag     % Get allele frequency based on spectrum
         case 'analytic'
-            allele_freq_hist{NULL_C} = exp(allele_freq_spectrum(x_vec, s_null_vec(i_s), N, 0, 'log')); % allele freq. distribution for null alleles.  NOT Normalized!
+            x_vec{NULL_C} = x_vec{NEUTRAL_C};
+            allele_freq_hist{NULL_C} = exp(allele_freq_spectrum(x_vec{NULL_C}, s_null_vec(i_s), N, 0, 'log')); % allele freq. distribution for null alleles.  NOT Normalized!
         case {'simulations', 'simulation'}
-            [~, allele_freq_hist{NULL_C}, ~, ~, demographic_compute_time] = ...
+            [x_vec{NULL_C}, allele_freq_hist{NULL_C}, ~, ~, demographic_compute_time] = ...
                 compute_allele_freq_spectrum_from_demographic_model(D, s_null_vec(i_s), compute_flag); % Try a grid of different values
+            x_vec{NULL_C} = x_vec{NULL_C} ./ (2*N_vec(end-1)); % normalize: from counts to allele freq.
+
     end
     sum_allele_freq_hist(NULL_C) = sum(allele_freq_hist{NULL_C});
-    T_s(i_s) = sum(allele_freq_hist{NULL_C}) * (x_vec(2)-x_vec(1));     %%    T_s(i_s) = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot!     %    T_s = integral_hist(x_vec, allele_freq_hist{NULL_C}); %%% T_s = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq'); % sure we need to use 'freq' here ???
+    T_s(i_s) = sum(allele_freq_hist{NULL_C}) * (x_vec{NULL_C}(2)-x_vec{NULL_C}(1));     %%    T_s(i_s) = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot!     %    T_s = integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C}); %%% T_s = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq'); % sure we need to use 'freq' here ???
     
     if(poisson_model_flag) % compute poisson part of likelihood
         % we must assume here we know the number of individuals profiled at each region
-        %        tmp_z0_vec = exp( num_individuals_vec(1) .* (log_one_minus_x_vec)); %  - log(underflow_correction_q(1))  ); % what's this? multinomial/binomial coefficient?
+        %        tmp_z0_vec = exp( num_individuals_vec(1) .* (log_one_minus_x_vec{NEUTRAL_C})); %  - log(underflow_correction_q(1))  ); % what's this? multinomial/binomial coefficient?
         prob_allele_polymorphic_in_population(i_s, NULL_C) = 4 * N * D.mu * T_s(i_s); % prob. allele polymorphic in population. Is this stuff just for equilibrium?
         prob_allele_polymorphic_in_sample(i_s, NULL_C) = prob_allele_polymorphic_in_population(i_s, NULL_C) .* ...
-            (1 - sum( allele_freq_hist{NULL_C} .* (1-x_vec) .^ num_individuals_vec(1) ) / sum(allele_freq_hist{NULL_C}));
-        %            (1 - integral_hist(x_vec,  allele_freq_hist{NULL_C} .* tmp_z0_vec ) ./ integral_hist(x_vec, allele_freq_hist{NULL_C}) );
+            (1 - sum( allele_freq_hist{NULL_C} .* (1-x_vec{NULL_C}) .^ num_individuals_vec(1) ) / sum(allele_freq_hist{NULL_C}));
+        %            (1 - integral_hist(x_vec{NULL_C},  allele_freq_hist{NULL_C} .* tmp_z0_vec ) ./ integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C}) );
         prob_missense_allele_polymorphic_in_population(i_s,:) = alpha_vec .* prob_allele_polymorphic_in_population(i_s, NULL_C) + ...
             (1-alpha_vec) .* prob_neutral_allele_polymorphic_in_population;
         prob_missense_allele_polymorphic_in_sample(i_s,:) = alpha_vec .* prob_allele_polymorphic_in_sample(i_s, NULL_C) + ...
@@ -285,9 +290,9 @@ for i_s = 1:num_s % loop on parameters
                     run_locus = j
                 end
                 if(include_phenotype && optimize_alpha)  % compute conditional probability of allele being null given frequency x.
-                    prob_null_given_x(j) = p_null * integral_hist(x_vec, allele_freq_hist{NULL_C} .* tmp_z_vec);
+                    prob_null_given_x(j) = p_null * integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C} .* tmp_z_vec);
                     prob_null_given_x(j) = prob_null_given_x(j) / (prob_null_given_x(j) + ...
-                        (1-p_null) * integral_hist(x_vec, allele_freq_hist{NEUTRAL_C} .* tmp_z_vec));
+                        (1-p_null) * integral_hist(x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C} .* tmp_z_vec));
                 end
             end % loop on loci
             %            ttt_loop_on_loci = cputime - ttt

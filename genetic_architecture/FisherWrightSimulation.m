@@ -64,10 +64,10 @@ two_side_flag = 0; % use derived allele frequency
 if(~exist('plot_flag', 'var') || isempty(plot_flag))
     plot_flag = 0; % default: don't plot anything
 end
-if(~isfield('index', D)) % assume only one demography
+if(~isfield(D, 'index')) % assume only one demography
     D.index = 1;
 end
-if(~isfield('add_new_alleles', D)) % generate new alleles in each generation
+if(~isfield(D, 'add_new_alleles')) % generate new alleles in each generation
     D.add_new_alleles = 1;
 end
 
