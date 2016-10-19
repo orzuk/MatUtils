@@ -34,7 +34,7 @@
 % log_like_mat - Matrix (3-d) of log-likelihood of data for each parameter choice (s, alpha and beta)
 % P_poly - Structure with computation information. Probability of polymorphic alleles ???
 %
-function [log_like_mat, P_poly] = ...
+function [log_like_mat, P_poly, compute_time] = ...
     compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, D, ...
     X, y, trait_struct, null_w_vec, include_phenotype, full_flag, num_individuals, print_flag)
 
@@ -197,16 +197,16 @@ if(poisson_model_flag)
         (1 - sum( allele_freq_hist{NEUTRAL_C} .* (1-x_vec{NEUTRAL_C}) .^ num_individuals_vec(1) ) / sum(allele_freq_hist{NEUTRAL_C}));
     
     [unique_num_carriers, I] = unique(num_carriers_vec);
-    tmp_z_vec = sparse(length(unique_num_carriers), length(x_vec{NEUTRAL_C})); % creat sparse matrix
-    pos_tmp_z_inds = cell(length(unique_num_carriers), 1);
+    tmp_z_vec = cell(num_classes, 1)
+    tmp_z_vec{NEUTRAL_C} = sparse(length(unique_num_carriers), length(x_vec{NEUTRAL_C})); % creat sparse matrix
+    pos_tmp_z_inds = cell(length(unique_num_carriers), num_classes);
     %%    t2 = cputime; % tmp_ind_vec = []; tmp_val_vec = [];
     for j=1:length(unique_num_carriers) % loop on unique
-        %        run_j = j
         tmp_vec = exp( log_binom(num_individuals_vec(I(j)), num_carriers_vec(I(j))) + ...
             num_carriers_vec(I(j)) .* log_x_vec{NEUTRAL_C} + ...
             (num_individuals_vec(I(j))-num_carriers_vec(I(j))) .* log_one_minus_x_vec{NEUTRAL_C} ); % assumes num individuals is the same
-        pos_tmp_z_inds{j} = find(tmp_vec > 10^(-8));
-        tmp_z_vec(j, pos_tmp_z_inds{j}) = tmp_vec(pos_tmp_z_inds{j});
+        pos_tmp_z_inds{j, NEUTRAL_C} = find(tmp_vec > 10^(-8));
+        tmp_z_vec{NEUTRAL_C}(j, pos_tmp_z_inds{j, NEUTRAL_C}) = tmp_vec(pos_tmp_z_inds{j, NEUTRAL_C});
     end
     %%    cputime - t2
 end
@@ -218,10 +218,23 @@ for i_s = 1:num_s % loop on parameters
         case 'analytic'
             x_vec{NULL_C} = x_vec{NEUTRAL_C};
             allele_freq_hist{NULL_C} = exp(allele_freq_spectrum(x_vec{NULL_C}, s_null_vec(i_s), N, 0, 'log')); % allele freq. distribution for null alleles.  NOT Normalized!
+            tmp_z_vec{NULL_C} = tmp_z_vec{NEUTRAL_C};
+            tmp_z_vec{MISSENSE_C} = tmp_z_vec{NEUTRAL_C};
         case {'simulations', 'simulation'}
             [x_vec{NULL_C}, allele_freq_hist{NULL_C}, ~, ~, demographic_compute_time] = ...
                 compute_allele_freq_spectrum_from_demographic_model(D, s_null_vec(i_s), compute_flag); % Try a grid of different values
             x_vec{NULL_C} = x_vec{NULL_C} ./ (2*N_vec(end-1)); % normalize: from counts to allele freq.
+            log_x_vec{NULL_C} = log(x_vec{NULL_C}); log_one_minus_x_vec{NULL_C} = log(1-x_vec{NULL_C});
+            
+            % here we need to recalculate tmp_z_vec again for each s value (because x_vec changes!)
+            tmp_z_vec{NULL_C} = sparse(length(unique_num_carriers), length(x_vec{NULL_C})); % creat sparse matrix
+            for j=1:length(unique_num_carriers) % loop on unique
+                tmp_vec = exp( log_binom(num_individuals_vec(I(j)), num_carriers_vec(I(j))) + ...
+                    num_carriers_vec(I(j)) .* log_x_vec{NULL_C} + ...
+                    (num_individuals_vec(I(j))-num_carriers_vec(I(j))) .* log_one_minus_x_vec{NULL_C} ); % assumes num individuals is the same
+                pos_tmp_z_inds{j, NULL_C} = find(tmp_vec > 10^(-8));
+                tmp_z_vec{NULL_C}(j, pos_tmp_z_inds{j, NULL_C}) = tmp_vec(pos_tmp_z_inds{j, NULL_C});
+            end
 
     end
     sum_allele_freq_hist(NULL_C) = sum(allele_freq_hist{NULL_C});
@@ -247,7 +260,9 @@ for i_s = 1:num_s % loop on parameters
     for i_alpha = 1:num_alpha
         ttt = cputime;
         %        p_null = alpha_vec(i_alpha) * T_s(i_s) / (alpha_vec(i_alpha) * T_s(i_s) + (1-alpha_vec(i_alpha)) * T_0); % compute probability that a given observed polymorphic locus is null
-        allele_freq_hist{MISSENSE_C} = alpha_vec(i_alpha) .* allele_freq_hist{NULL_C} + (1-alpha_vec(i_alpha)) .* allele_freq_hist{NEUTRAL_C}; % mixture of neutral and null freq. distributions.  NOT Normalized! the weight of neutral and null may be very different!
+%        allele_freq_hist{MISSENSE_C} = alpha_vec(i_alpha) .* allele_freq_hist{NULL_C} + (1-alpha_vec(i_alpha)) .* allele_freq_hist{NEUTRAL_C}; % mixture of neutral and null freq. distributions.  NOT Normalized! the weight of neutral and null may be very different!
+        [x_vec{MISSENSE_C}, allele_freq_hist{MISSENSE_C}] = sum_hist(x_vec{NULL_C}, alpha_vec(i_alpha) .* allele_freq_hist{NULL_C}, ...
+            x_vec{NEUTRAL_C}, (1-alpha_vec(i_alpha)) .* allele_freq_hist{NEUTRAL_C}, 1, 2); % add histograms (with different x values. Normalize to keep histogram sums) 
         sum_allele_freq_hist(MISSENSE_C) = sum(allele_freq_hist{MISSENSE_C});
         if(include_phenotype && optimize_alpha) % prepare binomial tables
             for i=1:length(unique_num_alleles_vec)
@@ -269,18 +284,25 @@ for i_s = 1:num_s % loop on parameters
             %            time_before_looping_on_alleles = cputime-ttt
             
             for j=1:L    % Compute genotype part. Loop on loci. Compute for each # of carriers only once
-                if( (num_carriers_vec(j) == 0) || (null_w_vec(j) == 0) )% loop only on poylmorphic non-synonmous alleles
+                if( (num_carriers_vec(j) == 0) || (null_w_vec(j) == 0) )% loop only on polymorphic non-synonmous alleles
                     continue;
                 end
                 
                 num_carriers_ind = find(num_carriers_vec(j) == unique_num_carriers);
                 if(include_genotype || optimize_alpha)
-                    if(tmp_likelihood_one_allele(num_carriers_vec(j), null_w_vec(j)+2 ) == BIG_NUM) % this means we've already computed for this frequency
-                        
+                    if(tmp_likelihood_one_allele(num_carriers_vec(j), null_w_vec(j)+2 ) == BIG_NUM) % this means we've already computed for this frequency                        
                         if(include_genotype)
+% % % %                             j_is = j 
+% % % %                             num_carriers_ind_is = num_carriers_ind
+% % % %                             size_is = size(tmp_z_vec)
+% % % %                             pos_tmp_z_is = max(pos_tmp_z_inds{num_carriers_ind})
+% % % %                             length_allele_freq_hist = length(allele_freq_hist{null_w_vec(j)+2})
+% % % %                             allele_freq_hist_is = sum(allele_freq_hist{null_w_vec(j)+2}(pos_tmp_z_inds{num_carriers_ind}))
+% % % %                             tmp_z_vec_is = sum( tmp_z_vec(num_carriers_ind,pos_tmp_z_inds{num_carriers_ind}) )
+                            
                             tmp_likelihood_one_allele(num_carriers_vec(j), null_w_vec(j)+2) = ...
-                                log( max(10^(-100), sum(allele_freq_hist{null_w_vec(j)+2}(pos_tmp_z_inds{num_carriers_ind}) .* ...
-                                tmp_z_vec(num_carriers_ind,pos_tmp_z_inds{num_carriers_ind})) / sum_allele_freq_hist(null_w_vec(j)+2)) );
+                                log( max(10^(-100), sum(allele_freq_hist{null_w_vec(j)+2}(pos_tmp_z_inds{num_carriers_ind, null_w_vec(j)+2}) .* ...
+                                tmp_z_vec{null_w_vec(j)+2}(num_carriers_ind, pos_tmp_z_inds{num_carriers_ind, null_w_vec(j)+2})) / sum_allele_freq_hist(null_w_vec(j)+2)) );
                         end
                     end % already computed likelihood
                     log_like_mat(i_s,i_alpha,i_beta) = log_like_mat(i_s,i_alpha,i_beta) + ...
@@ -290,9 +312,9 @@ for i_s = 1:num_s % loop on parameters
                     run_locus = j
                 end
                 if(include_phenotype && optimize_alpha)  % compute conditional probability of allele being null given frequency x.
-                    prob_null_given_x(j) = p_null * integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C} .* tmp_z_vec);
+                    prob_null_given_x(j) = p_null * integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C} .* tmp_z_vec{null_w_vec(j)+2});
                     prob_null_given_x(j) = prob_null_given_x(j) / (prob_null_given_x(j) + ...
-                        (1-p_null) * integral_hist(x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C} .* tmp_z_vec));
+                        (1-p_null) * integral_hist(x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C} .* tmp_z_vec{null_w_vec(j)+2}));
                 end
             end % loop on loci
             %            ttt_loop_on_loci = cputime - ttt
@@ -328,7 +350,7 @@ end % loop on selection coefficients
 P_poly = var2struct(prob_neutral_allele_polymorphic_in_population, prob_neutral_allele_polymorphic_in_sample, ...
     prob_allele_polymorphic_in_population, prob_allele_polymorphic_in_sample, ...
     prob_missense_allele_polymorphic_in_population, prob_missense_allele_polymorphic_in_sample); % create output struct
-
+compute_time = cputime-ttt;
 
 
 % Internal function: return the log-likelihood of ...

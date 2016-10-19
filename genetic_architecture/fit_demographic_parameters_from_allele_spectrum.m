@@ -19,7 +19,7 @@ s = 0; % Assume no selection (synonymous)
 alpha=0; % No mixture. Everything is neutral (synonymous)
 beta=[];  % effect size on phenotype IRRELEVANT! (we use only genpotypes)
 
-X = [k_vec n_vec]; % Represent counts in a packed form
+X = [vec2row(k_vec) vec2row(n_vec)]'; % Represent counts in a packed form
 
 % Set different demographic models:
 D.init_pop_size_vec{1} = 500; % 1. ancestral population
@@ -112,7 +112,7 @@ region_het_moment_mat_all_models = het_moment_mat_all_models(:,1) .* 4 .* init_N
 good_inds = find( (abs(region_het_moment_mat_all_models - het_moment_mat_data(:,1)) ./ het_moment_mat_data(:,1))  < epsilon );
 
 
-
+i_ctr=1;compute_time=zeros(length(good_inds), 1); 
 for i=vec2row(good_inds) % 1:D.num_params
     
     length(D) % Loop on D: enumerate on many different demographic parameters
@@ -129,18 +129,19 @@ for i=vec2row(good_inds) % 1:D.num_params
     
     % Compute likelihood. This is trivial one-class likelihood (no mixture bullshit) so should be fast !!!
     rare_cumulative_per_gene = []; % set dummy variables
-    target_size_by_class_vec = []; % ???
+    target_size_by_class_vec = [mu, mu, mu]; % [neutral, null, missense]
     full_flag = 0; % use summary statistics 
-    null_w_vec = NULL_C; % assume all alleles are 'null' (but s=0 so actually neutral) 
-    log_like_mat(i) = ... % compute likelihood (here vary only alpha)
+    null_w_vec = 1; % NULL_C % assume all alleles are 'null' (but s=0 so actually neutral) 
+    [log_like_mat(i), ~, compute_time(i)] = ... % compute likelihood (here vary only alpha)
         compute_two_class_log_likelihood(s, alpha, beta, rare_cumulative_per_gene, target_size_by_class_vec, D, ...
         X, [], [], null_w_vec, ...
         0, full_flag, []); % don't include phenotype !!
+    sprintf('run good ind out of , time=%f\n', i_ctr, length(good_inds), compute_time(i))
     
-    
+    i_ctr=i_ctr+1;
 end
 
-[max_LL, max_J] = max(log_like_mat); % maximize likelihood
+[max_LL, max_J] = max(log_like_mat(good_inds)); max_J = good_inds(max_J); % maximize likelihood. (Take only good inds)
 D = D{max_J};
 
 
