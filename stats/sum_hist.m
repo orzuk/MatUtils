@@ -14,7 +14,7 @@
 % p1 - new p1 (interpolated)
 % p2 - new p2 (interpolated)
 % 
-function [x_sum p_sum p1 p2] = sum_hist(x1, p1, x2, p2, scale_factor, normalize_flag)
+function [x_sum, p_sum, p1, p2] = sum_hist(x1, p1, x2, p2, scale_factor, normalize_flag)
 
 if(~exist('scale_factor', 'var') || isempty(scale_factor)) % set refinement level
     scale_factor = 2;
@@ -29,19 +29,23 @@ new_step = (sum_max - sum_min) / (new_n-1);
 x_sum = sum_min:new_step:sum_max; % set new bins
 
 % sum values % First generate a refinement of the distributions and bring them both to the same x vec
-% p1_integral = integral_hist(x1, p1)
-% p2_integral = integral_hist(x2, p2)
+if(normalize_flag == 2)
+    p1_integral = sum(p1); %  integral_hist(x1, p1);
+    p2_integral = sum(p2); % integral_hist(x2, p2);
+end
 p1 = interp1(x1, p1, x_sum, 'linear', 0);
 p2 = interp1(x2, p2, x_sum, 'linear', 0);
-% p1_interp_integral = integral_hist(x_sum, p1)
-% p2_interp_integral = integral_hist(x_sum, p2)
 
-if(normalize_flag) % normalize histograms to get area one
-    p1 = normalize_hist(x_sum, p1);
-    p2 = normalize_hist(x_sum, p2);
-end
+switch normalize_flag % normalize histograms to get area one (TODO: can also normalize to get area same as p1, p2 !!!!)
+    case 1 % normalize to integrate to one
+        p1 = normalize_hist(x_sum, p1);
+        p2 = normalize_hist(x_sum, p2);
+    case 2 % normalize to have same integral as original p1, p2
+        p1 = p1 .* p1_integral ./ max(1/flintmax, sum(p1)); % integral_hist(x_sum, p1));
+        p2 = p2 .* p2_integral ./ max(1/flintmax, sum(p2)); % integral_hist(x_sum, p2));
+end % switch
 p_sum = p1 + p2; % sum values in new bins
 
-if(normalize_flag) % normalize result
+if(normalize_flag == 1) % normalize result
     p_sum = normalize_hist(x_sum, p_sum);
 end

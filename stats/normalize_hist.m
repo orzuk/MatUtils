@@ -28,7 +28,7 @@ if(~exist('standardize_flag', 'var') || isempty(standardize_flag))
 end
 mu = mean_hist(x, p_norm); sigma = std_hist(x, p_norm);
 if(standardize_flag)
-    x_norm = x - mu; x_norm = x_norm ./ sigma; % normalize bin sizes
+    x_norm = (x - mu) ./ sigma; % normalize bin sizes
 else
     x_norm = x;
 end

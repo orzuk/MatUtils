@@ -1,8 +1,8 @@
 % Perform integral for a histogram (we use simple rectangle integration) 
 % 
 % Input: 
-% x - values
-% p - their density. This is treated as (continuous) density function - not discrete probability funnction
+% x - vector of values
+% p - their density. This is treated as (continuous) density function - NOT discrete probability function
 % cumulative_flag - (NEW!) if this is 'on', we return the cumulative function 
 % 
 % Output: 
