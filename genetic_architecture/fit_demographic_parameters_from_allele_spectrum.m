@@ -97,7 +97,7 @@ end
 
 
 % need to convert sample to population!
-[x_vec, p_vec] = unique_with_counts(k_vec ./ n_vec); % get an empirical distribution 
+[~, p_vec] = unique_with_counts(k_vec ./ n_vec); % get an empirical distribution 
 total_sum = sum(p_vec);
 p_vec = p_vec ./ sum(p_vec); % normalize
 
@@ -106,17 +106,15 @@ het_moment_mat_data = sum ( (k_vec./n_vec) .* (1-k_vec./n_vec) ) * L_correction_
 % het_moment_mat_data = moment_hist(x_vec, x_vec .* (1-x_vec) .* p_vec, 0, 0, 0) .* L_correction_factor;
 
 
-
 epsilon = 0.05; % allow error in moments
 region_het_moment_mat_all_models = het_moment_mat_all_models(:,1) .* 4 .* init_N .* mu; 
 good_inds = find( (abs(region_het_moment_mat_all_models - het_moment_mat_data(:,1)) ./ het_moment_mat_data(:,1))  < epsilon );
 
 
-i_ctr=1;compute_time=zeros(length(good_inds), 1); 
+i_ctr=1; log_like_mat = zeros(D.num_params, 1); compute_time=zeros(D.num_params, 1); 
 for i=vec2row(good_inds) % 1:D.num_params
     
-    length(D) % Loop on D: enumerate on many different demographic parameters
-    
+    length(D) % Loop on D: enumerate on many different demographic parameters    
     D.index = i;
     N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
 
@@ -136,7 +134,8 @@ for i=vec2row(good_inds) % 1:D.num_params
         compute_two_class_log_likelihood(s, alpha, beta, rare_cumulative_per_gene, target_size_by_class_vec, D, ...
         X, [], [], null_w_vec, ...
         0, full_flag, []); % don't include phenotype !!
-    sprintf('run good ind out of , time=%f\n', i_ctr, length(good_inds), compute_time(i))
+    fprintf('run good ind %ld out of %ld, ', i_ctr, length(good_inds));
+    fprintf(' Loglike=%f, cur-time=%f, total-time=%f\n', log_like_mat(i), compute_time(i), sum(compute_time(1:i)));
     
     i_ctr=i_ctr+1;
 end
@@ -154,7 +153,7 @@ switch D_opt
         
 end
 
-
+% Internal function for filtering out obviously unrealistic demographic models 
 function filter_flag = filter_N_vec_internal(N_vec)    % Filter first unreasonable models !!!
 filter_flag=0;
 if(max(N_vec) > 10^9) % 1 billion

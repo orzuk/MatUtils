@@ -31,7 +31,7 @@ end
 
 if(~isfield('iters', D))
 %    D.iters = 5000;
-    D.iters = 5000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
+    D.iters = 1000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
 end
 D.num_bins = 100; % used for binning in Fisher Right simulation
 D.compute_absorb = 0; % no need for extra computation!!! 

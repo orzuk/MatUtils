@@ -92,7 +92,7 @@ switch compute_mode
             simulate_expansion_internal( ...
             D, s, mu, two_side_flag, iters, num_generations, init_str);
         frac_polymorphic_vec = 1-num_absorptions_by_generation_vec ./ iters;
-        num_effective_iters = sum(p_vec{end}(2:end-1)) % total number of single-generation single-allele steps performed (?)
+%        num_effective_iters = sum(p_vec{end}(2:end-1)) % total number of single-generation single-allele steps performed (?)
         
         
     case 'numeric' % here compute everything by matrix multiplications
@@ -186,7 +186,7 @@ switch compute_mode % add simulations details
     otherwise % do not hold simulation information
         simulation_struct = [];
 end
-simulation_time = cputime - simulation_time
+simulation_time = cputime - simulation_time; % compute total time 
 
 
 
@@ -350,11 +350,11 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
                     %                    q(medium_inds,j+1) = max(0, round(q(medium_inds,j+1)));
                 end
                 new_q = max(0, min(new_q, 2*N_vec(j+1)));
-                if(mod(j,100)==0)
-                    if(~isempty(medium_inds))
-                        frac_full_normal_simulation = length(medium_inds) / length(new_q)
-                    end
-                end
+%                 if(mod(j,100)==0)
+%                     if(~isempty(medium_inds))
+%                         frac_full_normal_simulation = length(medium_inds) / length(new_q)
+%                     end
+%                 end
         end % switch rand_str
         loss_inds = find(new_q == 0); fixation_inds = find(new_q == 2*N_vec(j+1));
         absorption_inds = union(loss_inds, fixation_inds); % reached fixation/extinsion and stop

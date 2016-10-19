@@ -160,7 +160,7 @@ end
 log_like_mat = zeros(num_s, num_alpha, num_beta);
 
 % Determine distribution. For equilibrium use analytic solution. Otherwise, use simulation!!!
-x_vec = cell(num_classes, 1); allele_freq_hist = cell(num_classes,1); sum_allele_freq_hist = zeros(num_classes, 1);
+x_vec = cell(num_classes, 1); allele_freq_hist = cell(num_classes,1); sum_allele_freq_hist = zeros(num_classes, 1); L_correction_factor = zeros(num_classes, 1); 
 log_x_vec = x_vec; log_one_minus_x_vec = x_vec; 
 switch compute_flag
     case 'analytic'
@@ -168,8 +168,9 @@ switch compute_flag
         allele_freq_hist{NEUTRAL_C} = exp(allele_freq_spectrum(x_vec{NEUTRAL_C}, 0, N, 0, 'log')); % allele freq. distribution for neutral alleles. NOT Normalized!
     case 'simulation'
         N_vec = demographic_parameters_to_n_vec(D, D.index); N=N_vec(1);
-        [x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}, ~, ~, demographic_compute_time] = ...
+        [x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}, ~, ~, L_correction_factor(NEUTRAL_C), demographic_compute_time] = ...
             compute_allele_freq_spectrum_from_demographic_model(D, 0, compute_flag); % Try a grid of different values
+        sprintf('Compute neutral spectrum time=%f', demographic_compute_time)
         x_vec{NEUTRAL_C} = x_vec{NEUTRAL_C} ./ (2*N_vec(end-1)); % normalize: from counts to allele freq. 
 end
 sum_allele_freq_hist(NEUTRAL_C) = sum(allele_freq_hist{NEUTRAL_C});
@@ -197,7 +198,7 @@ if(poisson_model_flag)
         (1 - sum( allele_freq_hist{NEUTRAL_C} .* (1-x_vec{NEUTRAL_C}) .^ num_individuals_vec(1) ) / sum(allele_freq_hist{NEUTRAL_C}));
     
     [unique_num_carriers, I] = unique(num_carriers_vec);
-    tmp_z_vec = cell(num_classes, 1)
+    tmp_z_vec = cell(num_classes, 1);
     tmp_z_vec{NEUTRAL_C} = sparse(length(unique_num_carriers), length(x_vec{NEUTRAL_C})); % creat sparse matrix
     pos_tmp_z_inds = cell(length(unique_num_carriers), num_classes);
     %%    t2 = cputime; % tmp_ind_vec = []; tmp_val_vec = [];
@@ -220,22 +221,34 @@ for i_s = 1:num_s % loop on parameters
             allele_freq_hist{NULL_C} = exp(allele_freq_spectrum(x_vec{NULL_C}, s_null_vec(i_s), N, 0, 'log')); % allele freq. distribution for null alleles.  NOT Normalized!
             tmp_z_vec{NULL_C} = tmp_z_vec{NEUTRAL_C};
             tmp_z_vec{MISSENSE_C} = tmp_z_vec{NEUTRAL_C};
-        case {'simulations', 'simulation'}
-            [x_vec{NULL_C}, allele_freq_hist{NULL_C}, ~, ~, demographic_compute_time] = ...
-                compute_allele_freq_spectrum_from_demographic_model(D, s_null_vec(i_s), compute_flag); % Try a grid of different values
-            x_vec{NULL_C} = x_vec{NULL_C} ./ (2*N_vec(end-1)); % normalize: from counts to allele freq.
-            log_x_vec{NULL_C} = log(x_vec{NULL_C}); log_one_minus_x_vec{NULL_C} = log(1-x_vec{NULL_C});
-            
-            % here we need to recalculate tmp_z_vec again for each s value (because x_vec changes!)
-            tmp_z_vec{NULL_C} = sparse(length(unique_num_carriers), length(x_vec{NULL_C})); % creat sparse matrix
             for j=1:length(unique_num_carriers) % loop on unique
-                tmp_vec = exp( log_binom(num_individuals_vec(I(j)), num_carriers_vec(I(j))) + ...
-                    num_carriers_vec(I(j)) .* log_x_vec{NULL_C} + ...
-                    (num_individuals_vec(I(j))-num_carriers_vec(I(j))) .* log_one_minus_x_vec{NULL_C} ); % assumes num individuals is the same
-                pos_tmp_z_inds{j, NULL_C} = find(tmp_vec > 10^(-8));
-                tmp_z_vec{NULL_C}(j, pos_tmp_z_inds{j, NULL_C}) = tmp_vec(pos_tmp_z_inds{j, NULL_C});
+                pos_tmp_z_inds{j, NULL_C} = pos_tmp_z_inds{j, NEUTRAL_C};
             end
-
+        case {'simulations', 'simulation'}
+            if(s_null_vec(i_s) == 0) % neutral. already computed, save time
+                x_vec{NULL_C} = x_vec{NEUTRAL_C}; allele_freq_hist{NULL_C} = allele_freq_hist{NEUTRAL_C};
+                log_x_vec{NULL_C} = log_x_vec{NEUTRAL_C}; log_one_minus_x_vec{NULL_C} = log_one_minus_x_vec{NEUTRAL_C}; 
+                tmp_z_vec{NULL_C} = tmp_z_vec{NEUTRAL_C};
+                tmp_z_vec{MISSENSE_C} = tmp_z_vec{NEUTRAL_C};
+                for j=1:length(unique_num_carriers) % loop on unique
+                    pos_tmp_z_inds{j, NULL_C} = pos_tmp_z_inds{j, NEUTRAL_C};
+                end
+            else % here s not 0 (deleterious alleles) 
+                [x_vec{NULL_C}, allele_freq_hist{NULL_C}, ~, ~, L_correction_factor(NULL_C), demographic_compute_time] = ...
+                    compute_allele_freq_spectrum_from_demographic_model(D, s_null_vec(i_s), compute_flag); % Try a grid of different values
+                sprintf('Compute null spectrum time=%f', demographic_compute_time)
+                x_vec{NULL_C} = x_vec{NULL_C} ./ (2*N_vec(end-1)); % normalize: from counts to allele freq.
+                log_x_vec{NULL_C} = log(x_vec{NULL_C}); log_one_minus_x_vec{NULL_C} = log(1-x_vec{NULL_C});
+                % here we need to recalculate tmp_z_vec again for each s value (because x_vec changes!)
+                tmp_z_vec{NULL_C} = sparse(length(unique_num_carriers), length(x_vec{NULL_C})); % creat sparse matrix
+                for j=1:length(unique_num_carriers) % loop on unique
+                    tmp_vec = exp( log_binom(num_individuals_vec(I(j)), num_carriers_vec(I(j))) + ...
+                        num_carriers_vec(I(j)) .* log_x_vec{NULL_C} + ...
+                        (num_individuals_vec(I(j))-num_carriers_vec(I(j))) .* log_one_minus_x_vec{NULL_C} ); % assumes num individuals is the same
+                    pos_tmp_z_inds{j, NULL_C} = find(tmp_vec > 10^(-8));
+                    tmp_z_vec{NULL_C}(j, pos_tmp_z_inds{j, NULL_C}) = tmp_vec(pos_tmp_z_inds{j, NULL_C});
+                end
+            end % if s==0
     end
     sum_allele_freq_hist(NULL_C) = sum(allele_freq_hist{NULL_C});
     T_s(i_s) = sum(allele_freq_hist{NULL_C}) * (x_vec{NULL_C}(2)-x_vec{NULL_C}(1));     %%    T_s(i_s) = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot!     %    T_s = integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C}); %%% T_s = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq'); % sure we need to use 'freq' here ???
@@ -258,7 +271,7 @@ for i_s = 1:num_s % loop on parameters
         lambda_missense(i_s,:) = 4 * N * D.mu * target_size_missense_alleles .* ( alpha_vec .* T_s(i_s) + (1-alpha_vec) .* T_0 );
     end % if poisson
     for i_alpha = 1:num_alpha
-        ttt = cputime;
+        ttt_one = cputime;
         %        p_null = alpha_vec(i_alpha) * T_s(i_s) / (alpha_vec(i_alpha) * T_s(i_s) + (1-alpha_vec(i_alpha)) * T_0); % compute probability that a given observed polymorphic locus is null
 %        allele_freq_hist{MISSENSE_C} = alpha_vec(i_alpha) .* allele_freq_hist{NULL_C} + (1-alpha_vec(i_alpha)) .* allele_freq_hist{NEUTRAL_C}; % mixture of neutral and null freq. distributions.  NOT Normalized! the weight of neutral and null may be very different!
         [x_vec{MISSENSE_C}, allele_freq_hist{MISSENSE_C}] = sum_hist(x_vec{NULL_C}, alpha_vec(i_alpha) .* allele_freq_hist{NULL_C}, ...
@@ -308,9 +321,9 @@ for i_s = 1:num_s % loop on parameters
                     log_like_mat(i_s,i_alpha,i_beta) = log_like_mat(i_s,i_alpha,i_beta) + ...
                         tmp_likelihood_one_allele(num_carriers_vec(j), null_w_vec(j)+2);
                 end % include genotypes or optimize alpha
-                if(mod(j, 1000) == 0)
-                    run_locus = j
-                end
+%                if(mod(j, 1000) == 0)
+%                    run_locus = j
+%                end
                 if(include_phenotype && optimize_alpha)  % compute conditional probability of allele being null given frequency x.
                     prob_null_given_x(j) = p_null * integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C} .* tmp_z_vec{null_w_vec(j)+2});
                     prob_null_given_x(j) = prob_null_given_x(j) / (prob_null_given_x(j) + ...
@@ -338,7 +351,7 @@ for i_s = 1:num_s % loop on parameters
             if(print_flag)
                 if( (mod(i_alpha, 50) == 0) || mod(i_s, 50) == 0)
                     run_index_s_alpha_beta = [i_s i_alpha i_beta]
-                    time_one_likelihood = cputime-ttt
+                    time_one_likelihood = cputime-ttt_one
                 end
             end
         end % loop on effect size beta
