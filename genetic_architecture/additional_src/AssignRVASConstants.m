@@ -29,6 +29,11 @@ exons_file = 'hg18_exons.mat'; % where to save exons
 triplet_mutations_file = 'scone_hg17_m3_64x64_rates.txt'; % 'triplets_file_human_chimp_baboon.mat'; % file with mutation rates from all 64 codons (estimated from human-chimp-baboon alignment)
 mutation_rates_file = 'human_genes_mutation_rates_hg18.mat'; % output file with triplet mutation rates
 
+MISSENSE_C = 1;  NEUTRAL_C = 2; SYNONYMOUS_C = 2;  NULL_C = 3; % set allele classes 
 
 N_eff = 10000; % set effective population size 
 mu_per_site = 2*10^(-8); % set mutation rate 
+
+global cumsum_log_vec;
+cumsum_log_vec = cumsum([0 log(1:2*N_eff)]);
+

@@ -122,17 +122,20 @@ for i=vec2row(good_inds) % 1:D.num_params
         continue; 
     end
     
-    [demographic_x_vec, demographic_f_vec, ~, ~, demographic_compute_time] = ...
-        compute_allele_freq_spectrum_from_demographic_model(D, 0, compute_flag); % Try a grid of different values
+%    [demographic_x_vec, demographic_f_vec, ~, ~, demographic_compute_time] = ...
+%        compute_allele_freq_spectrum_from_demographic_model(D, 0, compute_flag); % Try a grid of different values
     
     % Compute likelihood. This is trivial one-class likelihood (no mixture bullshit) so should be fast !!!
     rare_cumulative_per_gene = []; % set dummy variables
     target_size_by_class_vec = []; % ???
     full_flag = 0; % use summary statistics 
-    [log_like_mat(i)] = ... % compute likelihood (here vary only alpha)
-        compute_two_class_log_likelihood(s, alpha, beta, rare_cumulative_per_gene, target_size_by_class_vec, N_vec, ...
-        X, [], [], 1, ...
-        0, full_flag, [], D); % don't include phenotype !!
+    null_w_vec = NULL_C; % assume all alleles are 'null' (but s=0 so actually neutral) 
+    log_like_mat(i) = ... % compute likelihood (here vary only alpha)
+        compute_two_class_log_likelihood(s, alpha, beta, rare_cumulative_per_gene, target_size_by_class_vec, D, ...
+        X, [], [], null_w_vec, ...
+        0, full_flag, []); % don't include phenotype !!
+    
+    
 end
 
 [max_LL, max_J] = max(log_like_mat); % maximize likelihood
