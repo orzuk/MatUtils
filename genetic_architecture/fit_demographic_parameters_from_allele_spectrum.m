@@ -10,8 +10,9 @@
 % Output:
 % D - demographic model (expansion, population size etc.)
 % max_LL - log-likelihood of data for spectrum
-%
-function [D, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, weights_vec, mu, L_correction_factor, D_opt)
+% N_vec_hat - best demographic model (MLE)
+% 
+function [D, max_LL, N_vec_hat, log_like_mat] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, weights_vec, mu, L_correction_factor, D_opt)
 
 AssignGeneralConstants;    AssignRVASConstants; 
 
@@ -116,7 +117,7 @@ region_het_moment_mat_all_models = het_moment_mat_all_models(:,1) .* 4 .* init_N
 good_inds = find( (abs(region_het_moment_mat_all_models - het_moment_mat_data(:,1)) ./ het_moment_mat_data(:,1))  < epsilon );
 
 
-i_ctr=1; log_like_mat = zeros(D.num_params, 1); compute_time=zeros(D.num_params, 1); 
+i_ctr=1; log_like_mat = zeros(D.num_params, 1)-Inf; compute_time=zeros(D.num_params, 1); 
 for i=vec2row(good_inds) % 1:D.num_params
     
     % length(D) % Loop on D: enumerate on many different demographic parameters    
@@ -144,17 +145,18 @@ for i=vec2row(good_inds) % 1:D.num_params
 end
 
 [max_LL, max_J] = max(log_like_mat(good_inds)); max_J = good_inds(max_J); % maximize likelihood. (Take only good inds)
-D = D{max_J};
+% D = D{max_J};
+
+D.index = max_J; 
+N_vec_hat = demographic_parameters_to_n_vec(D, D.index); 
 
 
-% New: allow D_opt to use the fastneutrino method of Song et al.: 
-switch D_opt 
-    case 'neutrino'
-        % prepare output file 
-        
-        fit_run_str = 'fastNeutrino'; % ...; % generate running command 
-        
-end
+% % New: allow D_opt to use the fastneutrino method of Song et al.: 
+% switch D_opt 
+%     case 'neutrino'
+%         % prepare output file 
+%         fit_run_str = 'fastNeutrino'; % ...; % generate running command 
+% end
 
 % Internal function for filtering out obviously unrealistic demographic models 
 function filter_flag = filter_N_vec_internal(N_vec)    % Filter first unreasonable models !!!
