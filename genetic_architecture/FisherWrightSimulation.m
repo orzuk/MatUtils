@@ -180,7 +180,7 @@ absorption_struct = var2struct(absorption_time_given_init_freq_vec, fixation_tim
     frac_polymorphic_vec, prob_fixation, frac_old_alleles_survived_vec, frac_het_kept_vec);
 switch compute_mode % add simulations details
     case 'simulation'
-        simulation_struct = var2struct(q, num_simulated_polymorphic_alleles_vec, ...
+        simulation_struct = var2struct(q, num_simulated_polymorphic_alleles_vec, weights, ...
             frac_polymorphic_vec, prob_fixation, frac_het_kept_vec, L_correction_factor); % add many things here
         
     otherwise % do not hold simulation information
@@ -333,7 +333,7 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         else  % here use weighted sums
             [U, C] = unique_with_counts(vec2row(q(:,j)), [], weights); % Compute histogram of counts with weights !!!
             total_het_at_each_generation_vec(j) = total_het_at_each_generation_vec(j) + ...
-                2 .* sum(weights .* q(:,j) ./ (2.*N_vec(j)) .* (1-  q(:,j) ./ (2.*N_vec(j)) ) ); % this indicates how much heterozygosity was absorbed at each time - should go down if we start at equilibrium!
+                2 .* sum(vec2column(weights) .* q(:,j) ./ (2.*N_vec(j)) .* (1-  q(:,j) ./ (2.*N_vec(j)) ) ); % this indicates how much heterozygosity was absorbed at each time - should go down if we start at equilibrium!
         end
         [x_vec{j}, p_vec{j}] = union_with_counts(x_vec{j}, p_vec{j}, [0 U 2*N_vec(j)], [num_losses C num_fixations]);
         new_expected_q = q(:,j) .* ((1+s)./(1+s.*q(:,j)./(2*N_vec(j)))) ./ (2*N_vec(j));  % new allele freq. of the deleterious alleles
@@ -366,7 +366,7 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
 %                 end
         end % switch rand_str
         loss_inds = find(new_q == 0); fixation_inds = find(new_q == 2*N_vec(j+1));
-        absorption_inds = union(loss_inds, fixation_inds); % reached fixation/extinsion and stop
+        absorption_inds = vec2row(union(loss_inds, fixation_inds)); % reached fixation/extinsion and stop
         survived_inds = setdiff(1:size(q,1), absorption_inds);
         total_polymorphic_generations=total_polymorphic_generations+length(survived_inds);
         num_simulated_polymorphic_alleles_vec(j+1) = num_simulated_polymorphic_alleles_vec(j+1) + length(survived_inds);
@@ -414,7 +414,14 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
                 end
             end    
             if(num_new_alleles <= length(absorption_inds)) % just throw away alleles
-               q = q([survived_inds absorption_inds(1:num_new_alleles)'],:); 
+%                 if(((num_new_alleles == 0) || isempty(absorption_inds)) || isempty(survived_inds))
+%                     tttt = 2145345 
+%                 end
+%                 size_q = size(q)
+%                 size_survived = size(survived_inds)
+%                 size_absorb = size(absorption_inds)
+%                 num_new_alleles_is = num_new_alleles
+               q = q([survived_inds absorption_inds(1:num_new_alleles)],:); 
                 q((end-num_new_alleles+1:end), j+1) = 1; % set frequency for new alleles
                 if(exist('weights', 'var') && (~isempty(weights))) % update weights 
                    weights = [weights(survived_inds) repmat(new_weight, 1, num_new_alleles)]; 

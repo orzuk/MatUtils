@@ -52,13 +52,19 @@ switch compute_flag
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
         p_vec = freq_struct.p_vec{end-1};
         L_correction_factor = simulation_struct.L_correction_factor;
-        %       [x_vec, p_vec] = unique_with_counts(vec2row(simulation_struct.q(:,end))); p_vec = p_vec ./ sum(p_vec); % Compute histogram of counts
-        
-        
-        allele_freq_vec = hist_to_vals(x_vec, p_vec .* simulation_struct.num_simulated_polymorphic_alleles_vec(end));
-        
+                
+        [sample_x_vec, sample_p_vec] = population_to_sample_allele_freq_distribution(x_vec, p_vec, n_sample); % compute distribution at sample (no further sampling here!)
+        if(~isfield(simulation_struct, 'weights'))
+            simulation_struct.weights = []; 
+        end
+        % currently: round p_vec to integers! (could be innaccurate, and also have many alleles for large N)
+        allele_freq_vec = hist_to_vals(x_vec, round(p_vec .* simulation_struct.num_simulated_polymorphic_alleles_vec(end))); % compute alleles at sample ?
         num_alleles = length(allele_freq_vec);
-        k_vec = population_to_sample_allele_freq(allele_freq_vec, 2*N_vec(end-1), n_sample);
+        pop_to_sample_t = cputime; 
+        k_vec = population_to_sample_allele_freq(allele_freq_vec, 2*N_vec(end-1), n_sample); % simulate a sample from population 
+        pop_to_sample_t = cputime-pop_to_sample_t; 
+        fprintf('Converted %d alleles to sample freq. time=%f\n', num_alleles, pop_to_sample_t); 
+        
         n_vec = repmat(n_sample, num_alleles, 1);
         
     case 'moments'
