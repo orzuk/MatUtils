@@ -159,7 +159,7 @@ filter_flag=0;
 if(max(N_vec) > 10^9) % 1 billion
     filter_flag=1;
 end
-if(length(N_vec) > 10^4) % 10000 generations
+if(length(N_vec) > 4000) % we model maximum of 4000 generations
     filter_flag=1;
 end
 
