@@ -14,7 +14,7 @@
 % H = a row vector of weighted counts, such that H(x) is the weighted
 % number of times min_val+(x-1) appears in vals
 %
-function [H bins] =  weighted_hist(vals, weights, bins, min_val)
+function [H, bins] =  weighted_hist(vals, weights, bins, min_val)
 
 if ~exist('weights','var')
     weights = ones(1, size(vals,2));
@@ -38,10 +38,4 @@ H = (accumarray(vec2column(bin_inds), vec2column(weights)))';
 if(length(bins) > length(H))
     bins = 0.5 .* (bins(1:end-1) + bins(2:end));
 end
-
-% x = (1:10)'; f = 20+(1:10)';
-% edges = [0 3.3 6.7 10];
-% [count,bin] = histc(x,edges)
-% totfreq = accumarray(bin,f)
-% bar(edges,totfreq)
 
