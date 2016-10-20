@@ -168,7 +168,7 @@ switch compute_flag
         allele_freq_hist{NEUTRAL_C} = exp(allele_freq_spectrum(x_vec{NEUTRAL_C}, 0, N, 0, 'log')); % allele freq. distribution for neutral alleles. NOT Normalized!
     case 'simulation'
         N_vec = demographic_parameters_to_n_vec(D, D.index); N=N_vec(1);
-        [x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}, ~, ~, L_correction_factor(NEUTRAL_C), demographic_compute_time] = ...
+        [x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}, L_correction_factor(NEUTRAL_C), demographic_compute_time] = ...
             compute_allele_freq_spectrum_from_demographic_model(D, 0, compute_flag); % Try a grid of different values
         sprintf('Compute neutral spectrum time=%f', demographic_compute_time)
         x_vec{NEUTRAL_C} = x_vec{NEUTRAL_C} ./ (2*N_vec(end-1)); % normalize: from counts to allele freq. 
@@ -234,7 +234,7 @@ for i_s = 1:num_s % loop on parameters
                     pos_tmp_z_inds{j, NULL_C} = pos_tmp_z_inds{j, NEUTRAL_C};
                 end
             else % here s not 0 (deleterious alleles) 
-                [x_vec{NULL_C}, allele_freq_hist{NULL_C}, ~, ~, L_correction_factor(NULL_C), demographic_compute_time] = ...
+                [x_vec{NULL_C}, allele_freq_hist{NULL_C}, L_correction_factor(NULL_C), demographic_compute_time] = ...
                     compute_allele_freq_spectrum_from_demographic_model(D, s_null_vec(i_s), compute_flag); % Try a grid of different values
                 sprintf('Compute null spectrum time=%f', demographic_compute_time)
                 x_vec{NULL_C} = x_vec{NULL_C} ./ (2*N_vec(end-1)); % normalize: from counts to allele freq.

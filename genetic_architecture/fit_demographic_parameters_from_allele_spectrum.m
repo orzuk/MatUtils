@@ -4,15 +4,20 @@
 % Input:
 % k_vec - number of dervied allele carriers observed in population for each allele
 % n_vec - number of individuals profiled in population for each allele
+% weights_vec - weight of each allele (default: 1)
 % mu - total mutation rate for region (assume this is known for now) 
 % 
 % Output:
 % D - demographic model (expansion, population size etc.)
 % max_LL - log-likelihood of data for spectrum
 %
-function [D, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, mu, L_correction_factor, D_opt)
+function [D, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, weights_vec, mu, L_correction_factor, D_opt)
 
 AssignGeneralConstants;    AssignRVASConstants; 
+
+if(~exist('weights_vec', 'var') || isempty(weights_vec))
+    weights_vec = 1; 
+end
 
 % We fit expansion model from allele-frequency data, assuming that all alleles are neutral
 s = 0; % Assume no selection (synonymous)
@@ -114,7 +119,7 @@ good_inds = find( (abs(region_het_moment_mat_all_models - het_moment_mat_data(:,
 i_ctr=1; log_like_mat = zeros(D.num_params, 1); compute_time=zeros(D.num_params, 1); 
 for i=vec2row(good_inds) % 1:D.num_params
     
-    length(D) % Loop on D: enumerate on many different demographic parameters    
+    % length(D) % Loop on D: enumerate on many different demographic parameters    
     D.index = i;
     N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
 
@@ -122,8 +127,6 @@ for i=vec2row(good_inds) % 1:D.num_params
         continue; 
     end
     
-%    [demographic_x_vec, demographic_f_vec, ~, ~, demographic_compute_time] = ...
-%        compute_allele_freq_spectrum_from_demographic_model(D, 0, compute_flag); % Try a grid of different values
     
     % Compute likelihood. This is trivial one-class likelihood (no mixture bullshit) so should be fast !!!
     rare_cumulative_per_gene = []; % set dummy variables
@@ -157,6 +160,9 @@ end
 function filter_flag = filter_N_vec_internal(N_vec)    % Filter first unreasonable models !!!
 filter_flag=0;
 if(max(N_vec) > 10^9) % 1 billion
+    filter_flag=1;
+end
+if(max(N_vec > 10^4 * N_vec(1))) % don't allow too big expansion
     filter_flag=1;
 end
 if(length(N_vec) > 4000) % we model maximum of 4000 generations

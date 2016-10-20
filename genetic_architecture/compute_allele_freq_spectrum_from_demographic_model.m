@@ -4,16 +4,19 @@
 % D - structure with demographic models
 % s - selection coefficient
 % compute_flag - 'simulation' (default) or 'moments' (computation based on moments)
-% n_sample - # of individuals in a sample 
-% mu - regional mutation rate 
+% n_sample - # of individuals in a sample
+% mu - regional mutation rate
 %
 % Output:
 % x_vec - vector of x values (allele frequencies) at each generation
 % p_vec - vector of their frequencies at each generation
+% L_correction_factor - 
+% compute_time - 
 % k_vec - alleles in sample
 % n_vec - sample sizes
+% weights_vec - weight of each allele (each allele can represent multiple alleles)
 %
-function [x_vec, p_vec, k_vec, n_vec, L_correction_factor, compute_time] = ...
+function [x_vec, p_vec, L_correction_factor, compute_time, k_vec, n_vec, weights_vec] = ...
     compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu)
 
 compute_time=cputime;
@@ -30,43 +33,59 @@ if(~exist('mu', 'var') || isempty(mu))
 end
 
 if(~isfield('iters', D))
-%    D.iters = 5000;
+    %    D.iters = 5000;
     D.iters = 1000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
 end
 D.num_bins = 100; % used for binning in Fisher Right simulation
-D.compute_absorb = 0; % no need for extra computation!!! 
+D.compute_absorb = 0; % no need for extra computation!!!
 
 N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
 if(~exist('n_sample', 'var') || isempty(n_sample))
-   n_sample =  2*N_vec(end-1);
+    n_sample =  2*N_vec(end-1);
 end
-
+weights_vec = 1;
 
 num_final_generations = length(N_vec)-1; % simulation at the end
-L_correction_factor=[]; 
+L_correction_factor=[];
 
 switch compute_flag
     case {'simulation', 'simulations', 'numeric'}
+        max_num_alleles = 20000; % set maximum to save time
         [freq_struct, ~, simulation_struct, N_vec, simulation_time] = ... % New: separate output to different structures
             FisherWrightSimulation([], D, mu, s, init_str, D.iters, compute_flag, D.num_bins);
+        fprintf('Fisher-Wright simulation time was %f\n', simulation_time);
+        
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
         p_vec = freq_struct.p_vec{end-1};
         L_correction_factor = simulation_struct.L_correction_factor;
-                
-        [sample_x_vec, sample_p_vec] = population_to_sample_allele_freq_distribution(x_vec, p_vec, n_sample); % compute distribution at sample (no further sampling here!)
-        if(~isfield(simulation_struct, 'weights'))
-            simulation_struct.weights = []; 
-        end
-        % currently: round p_vec to integers! (could be innaccurate, and also have many alleles for large N)
-        allele_freq_vec = hist_to_vals(x_vec, round(p_vec .* simulation_struct.num_simulated_polymorphic_alleles_vec(end))); % compute alleles at sample ?
-        num_alleles = length(allele_freq_vec);
-        pop_to_sample_t = cputime; 
-        k_vec = population_to_sample_allele_freq(allele_freq_vec, 2*N_vec(end-1), n_sample); % simulate a sample from population 
-        pop_to_sample_t = cputime-pop_to_sample_t; 
-        fprintf('Converted %d alleles to sample freq. time=%f\n', num_alleles, pop_to_sample_t); 
         
-        n_vec = repmat(n_sample, num_alleles, 1);
+        %        [sample_x_vec, sample_p_vec] = population_to_sample_allele_freq_distribution(x_vec, p_vec, n_sample); % compute distribution at sample (no further sampling here!)
         
+        if(nargout > 4) % output k_vec, n_vec ...
+            if(~isfield(simulation_struct, 'weights'))
+                simulation_struct.weights = [];
+            end
+            % currently: round p_vec to integers! (could be innaccurate, and also have many alleles for large N)
+            p_vec_counts = round(p_vec .* simulation_struct.num_simulated_polymorphic_alleles_vec(end));
+            if(sum(p_vec_counts) > max_num_alleles)
+                for M=(sum(p_vec_counts)-max_num_alleles):-1:0 % determine where to chop
+                    if(sum(min(max(p_vec_counts)-M, p_vec_counts)) > max_num_alleles)
+                        break;
+                    end
+                end
+                weights_vec = p_vec_counts ./ min(p_vec_counts, max(p_vec_counts)-M+1);
+                p_vec_counts = min(p_vec_counts, max(p_vec_counts)-M+1);
+            else
+                weights_vec =1;
+            end
+            allele_freq_vec = hist_to_vals(x_vec, p_vec_counts); % compute alleles at sample ?
+            num_alleles = length(allele_freq_vec);
+            pop_to_sample_t = cputime;
+            k_vec = population_to_sample_allele_freq(allele_freq_vec, 2*N_vec(end-1), n_sample); % simulate a sample from population
+            pop_to_sample_t = cputime-pop_to_sample_t; % note: we don't always need k_vec, n_vec !!!
+            fprintf('Converted %d alleles to sample freq. time=%f\n', num_alleles, pop_to_sample_t);
+            n_vec = repmat(n_sample, num_alleles, 1);
+        end % if nargout > 4
     case 'moments'
         
         N_vec = demographic_parameters_to_n_vec(D, 1);

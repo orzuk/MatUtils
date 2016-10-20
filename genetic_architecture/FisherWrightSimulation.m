@@ -279,7 +279,6 @@ if(~isfield(D, 'compute_absorb')) % default: add newly born alleles at each gene
     end
 end
 
-
 p_vec = cell(num_generations+1, 1); x_vec = p_vec; % het_vec = p_vec; % initilize distributions
 
 rand_str = 'poisson'; % 'binomial'; % 'poisson'; % 'binomial'; % How to simulate each generation: poisson is much faster (approximation)
@@ -304,16 +303,13 @@ total_het_at_each_generation_vec = zeros(num_generations, 1, 'single');
 weights = []; 
 
 while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec(1) < 20000) ) % simulate blocks. Problem: No new alleles born here! (these can be simulated separatey?)
-%    q = zeros(block_size, 1, 'single');  % matrix of derived allele frequencies at each generation
-%%%    q = zeros(block_size, num_generations, 'single');  % matrix of derived allele frequencies at each generation
 %    weights = ones(block_size, num_generations, 'single');  % give later generations higher weights (why?)
     switch init_str % determine starting allele frequencies
         case 'equilibrium'
-            q = round(2*N.* vec2column(allele_freq_spectrum_rnd(s, N, two_side_flag, block_size))); % sample allele frequency from equilibrium distribution
+            q = single(round(2*N.* vec2column(allele_freq_spectrum_rnd(s, N, two_side_flag, block_size)))); % sample allele frequency from equilibrium distribution
 %            q(:,1) = round(2*N.* allele_freq_spectrum_rnd(s, N, two_side_flag, block_size)); % sample allele frequency from equilibrium distribution
         case 'newly_born'
-            q = ones(block_size, 1); 
-%            q(:,1) = 1; % start with newly born alleles
+            q = ones(block_size, 1, 'single'); % start with newly born alleles
     end
     
     first_time_vec = ones(1, iters); last_time_vec = ones(1, iters); % For each allele record the first and last polymorphic times
@@ -325,7 +321,6 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
             fprintf('Run Generation %ld out of %ld\n', j, num_generations); 
         end
         unique_time=cputime;
-        
         if(isempty(weights))
             [U, C] = unique_with_counts(vec2row(q(:,j))); % Compute histogram of counts
             total_het_at_each_generation_vec(j) = total_het_at_each_generation_vec(j) + ...
@@ -356,7 +351,6 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
                 if(~isempty(medium_inds)) % for these alleles, simulation does depend on N.
                     new_q(medium_inds) = round( normrnd( 2*N_vec(j+1) .* new_expected_q(medium_inds), ...
                         sqrt(2*N_vec(j+1) .* new_expected_q(medium_inds) .* (1-new_expected_q(medium_inds))) ) ); % ./ (2*N_vec(j+1)); % randomize next generation
-                    %                    q(medium_inds,j+1) = max(0, round(q(medium_inds,j+1)));
                 end
                 new_q = max(0, min(new_q, 2*N_vec(j+1)));
 %                 if(mod(j,100)==0)
@@ -379,8 +373,6 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         if(D.compute_absorb) % compute absorption time and count vec. Can be heavy (?) 
             if(~isempty(absorption_inds))
                 for k=1:j % Alternative: loop on generations (not on indices of iterations)
-                    %                    cur_gen = j
-                    %                    record_gen = k
                     [unique_inds, unique_counts] = unique_with_counts(  q(absorption_inds, k) );
                     unique_counts = unique_counts(unique_inds>0); unique_inds = unique_inds(unique_inds>0);
                     absorption_time_given_init_freq_vec(unique_inds) = ...
@@ -396,8 +388,6 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         num_losses_by_generation_vec(j) = num_losses_by_generation_vec(j) + length(loss_inds);
 
         q = [q new_q]; % add new generation
-        
-        
         if(D.add_new_alleles) % NEW! Add newly born alleles. Rate DOES NOT depend on current polymorphic probability !!!
             q(absorption_inds,:) = 0;
             num_new_alleles = poissrnd( (block_size /(2*mean_time_allele_polymorphic_at_equilibrium)) * (N_vec(j+1)/N) ); % Proportional to mutation rate times # of chromosomes . Mutation rate is cancelled !
@@ -409,18 +399,12 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
                 num_new_alleles = max_num_alleles - length(survived_inds);
                 if(~exist('weights', 'var') || isempty(weights))
                     weights = ones(1, size(q, 1)); % [ones(1, length(survived_inds)) repmat(new_weight, 1, num_new_alleles)];
-%                else
-%                    weights = [weights(survived_inds)  repmat(new_weight, 1, num_new_alleles)];
                 end
             end    
             if(num_new_alleles <= length(absorption_inds)) % just throw away alleles
 %                 if(((num_new_alleles == 0) || isempty(absorption_inds)) || isempty(survived_inds))
 %                     tttt = 2145345 
 %                 end
-%                 size_q = size(q)
-%                 size_survived = size(survived_inds)
-%                 size_absorb = size(absorption_inds)
-%                 num_new_alleles_is = num_new_alleles
                q = q([survived_inds absorption_inds(1:num_new_alleles)],:); 
                 q((end-num_new_alleles+1:end), j+1) = 1; % set frequency for new alleles
                 if(exist('weights', 'var') && (~isempty(weights))) % update weights 
@@ -490,7 +474,7 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
     %         total_het_at_each_generation_vec(j) = total_het_at_each_generation_vec(j) - ...
     %             2 .* sum(q(absorption_inds,j) ./ (2.*N_vec(j)) .* (1-  q(absorption_inds,j) ./ (2.*N_vec(j)) ) ); % this indicates how much heterozygosity was absorbed at each time
     %     end
-    ctr_alleles_blocks_simulated = ctr_alleles_blocks_simulated + block_size
+    ctr_alleles_blocks_simulated = ctr_alleles_blocks_simulated + block_size;
 end % while num_alleles <= iters
 
 total_het_at_each_generation_vec = total_het_at_each_generation_vec ./ ...

@@ -21,7 +21,8 @@ mu = 2*10^(-8) * 100000; % take effective mutation rate in a region
 D.mu=mu; 
 
 % Simulate data:
-[x_vec, p_vec, k_vec, n_vec, L_correction_factor]  = compute_allele_freq_spectrum_from_demographic_model(D, 0, 'simulation', n_sample, mu); % simulate from neutral model
+[x_vec, p_vec, L_correction_factor, ~, k_vec, n_vec, weights_vec]  = ...
+    compute_allele_freq_spectrum_from_demographic_model(D, 0, 'simulation', n_sample, mu); % simulate from neutral model
 
 % D_equi = D; D_equi.expan_rate(:) = 1; 
 % [x_vec_equi, p_vec_equi, k_vec_equi, n_vec_equi]  = compute_allele_freq_spectrum_from_demographic_model(D_equi, 0, 'simulation', n_sample); % simulate from neutral model
@@ -34,7 +35,7 @@ D.mu=mu;
 % now run and see if we get correct demography back
 
 
-[D_hat, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, mu, L_correction_factor, D)
+[D_hat, max_LL] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, weights_vec, mu, L_correction_factor, D)
 
 
 N_vec_hat = demographic_parameters_to_n_vec(D_hat, 1);
@@ -52,7 +53,7 @@ legend({'True', 'Fitted'});
 % Temp tesT:
 if(test_population_to_sample)
     n_sample = 25;
-    [x_vec, p_vec, k_vec, n_vec] = compute_allele_freq_spectrum_from_demographic_model(D, 0, [], n_sample);
+    [x_vec, p_vec, ~, ~, k_vec, n_vec, weights_vec] = compute_allele_freq_spectrum_from_demographic_model(D, 0, [], n_sample);
     
     allele_freq_vec = hist_to_vals(x_vec, p_vec ./ min(p_vec(p_vec>0)));
     
