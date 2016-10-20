@@ -14,6 +14,9 @@ global cumsum_log_vec; % why global?
 if(length(cumsum_log_vec) == 1) % cumsum_log_vec not initialized yet
     cumsum_log_vec = cumsum([0 log(1:max(N))]);
 end
+if(length(cumsum_log_vec) < max(N)) % cumsum_log_vec initialized but too short
+    cumsum_log_vec = cumsum([0 log(1:max(N))]); % can make more efficient: compute only new values !! 
+end
 
 [unisorted_N, ~, rev_ind] = unique(N); % Take all input numbers
 
