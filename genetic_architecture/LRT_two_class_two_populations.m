@@ -21,29 +21,6 @@ LRT = LRT - 2*LL_joint;
 
 
 
-% Aggregate alleles (should be transferred to a different function!)
-% 
-% Input: 
-% s_mat - matrix of selection coefficients estimated for each population
-% s_mat_std - matrix of standard deviations for selection coefficients estimated for each population
-% 
-% Output: 
-% s_combined - combined estimator for selection
-% s_combined_std - estimated standard deviation of combined estimator 
-% 
-function [s_combined, s_combined_std] = aggregate_selection_coefficients(s_mat, s_mat_std)
-
-Sigma_hat_s_population = estimate_selection_cov_internal(s_mat, s_mat_std); % estimate covarinace matrix for s 
-
-% use estimated covariance to compute aggregated estimates
-% Model is: for each gene g we have: 
-% s_mat_g ~ N(s_g, s_population_Sigma_hat)
-s_combined = s_mat .* s_population_Sigma_hat 
-
-
-
-
-
 
 
 
