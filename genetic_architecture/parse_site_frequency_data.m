@@ -2,8 +2,8 @@
 %
 % Input:
 % site_frequency_file_name - file with information on each allele
-% gene_list - list of possible gene names
-% read_to_mat_flag - initial parsing. Read tab-delimited file with ... and convert it to .mat file (to fill!)
+% gene_list - list of possible gene names (currently not used)
+% read_to_mat_flag - initial parsing. Read tab-delimited file with allele information (vcf) and convert it to .mat file (to fill!)
 % extract_fields_flag - second parsing. Fill in field with new field names ... this convert the text extracted from text file to numerical values in matlab vectors (to fill!)
 % compute_gene_matrices_flag - third parsing. Collect set of variants for each gene
 %
