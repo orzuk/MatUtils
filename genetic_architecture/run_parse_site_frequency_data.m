@@ -31,6 +31,27 @@ exome_struct = get_exome_data_info(exome_data); % get metadata: file names, dire
 % for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
 i_pop=1;
 
+
+if(parse_site_frequency_flag) % here we parse 
+    if(read_to_mat_flag)
+        vcf_file_names =  GetFileNames(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, [exome_struct.prefix, '*.vcf']), 1); 
+        for i=1:length(vcf_file_names) % loop on all chunks (By chromosomes or otherwise)
+              job_str = ['[A] =' ... % , n_vec, count_vec, f_vec, allele_types] = ' ...
+                'parse_site_frequency_data(''' vcf_file_names{i} ...
+                ''', [], ' num2str(read_to_mat_flag) ', ' num2str(extract_fields_flag) ', ' ...
+                num2str(compute_gene_matrices_flag) ');']; %, gene_list
+
+                if(in_matlab_flag)
+                    eval(job_str);
+                else
+                    SubmitMatlabJobToFarm(job_str, ...
+                        fullfile('out', ['parse_' exome_struct.prefix '.' i '.out']), queue_str, [], [], mem_flag); % allow specifying memory allocation
+                end
+        end
+    end
+end
+        
+
 for population = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
     if(~strcmp(population, 'African')) % temp: work only on one population1
         continue;
@@ -44,7 +65,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     chr_file_str = suffix_from_file_name(remove_suffix_from_file_name(exome_struct.spectrum_data_file));
     
     %                min_chr=22; max_chr=23; % TEMP FOR DEBUG! TAKE SHORT CHROMOSOME
-    for chr = min_chr:max_chr % take short chrom for debugging min_chr:max_chr % 1:23
+    for chr = min_chr:max_chr % Issue: not always good to split by chromosomes !! % take short chrom for debugging min_chr:max_chr % 1:23
         do_chr = chr
         if(read_vcf_flag) % One file per chromosome. (includes ALL populations)
             tmp_file_name = GetFileNames(fullfile(spectrum_data_dir, sub_dir_str, ...

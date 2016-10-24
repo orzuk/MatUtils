@@ -11,7 +11,7 @@
 % file_names - names of files in dir
 % file_sizes - sizes of files
 %
-function [file_names file_sizes] = GetFileNames(files_dir_str, with_dir, min_date, varargin)
+function [file_names, file_sizes] = GetFileNames(files_dir_str, with_dir, min_date, varargin)
 
 if(~exist('with_dir', 'var') || isempty(with_dir))
     with_dir = 0;
@@ -24,10 +24,10 @@ if(exist('min_date', 'var')) % filter by date
     for i=1:num_files
         new_inds(i) = (etime( datevec(f(i).date), datevec(min_date) ) >= 0);
     end
-    f = f(find(new_inds));
+    f = f(new_inds);
 end
 
-num_files = length(f); file_names = {}; file_sizes = zeros(1,num_files);
+num_files = length(f); file_sizes = zeros(1,num_files);
 bad_files = []; % files without permission 
 file_names = cell(1,num_files); 
 for i=1:num_files

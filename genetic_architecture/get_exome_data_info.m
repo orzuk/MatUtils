@@ -14,7 +14,9 @@ spectrum_data_files = {'/Nelson_Science_2012/Nelson_Science_data_table_S2.txt', 
     []}; % Data file with exome sequencing results %  '/Tennessen_Science_2012/ESP6500.chr19.snps.vcf', []}; % S3
 
 spectrum_files_prefix = {'Nelson', 'all_chr_ESP6500', 'all_chr_ESP6500.small_gene_list', ...    
-'ESP6500', 'ExAC'}; % 'ESP6500*.chr', 'ExAC'};
+'ESP6500', 'ExAC.chunks'}; % 'ESP6500*.chr', 'ExAC'};
+
+
 
 
 populations_vec = cell(num_datasets, 1); 
@@ -30,6 +32,7 @@ target_length_vec = [ 50*10^6/100,  50*10^6, 50*10^6/100, 50*10^6, 50*10^6]; % e
 
 
 exome_struct.spectrum_data_file = spectrum_data_files{exome_ind}; 
+exome_struct.sub_dir_str = dir_from_file_name(exome_struct.spectrum_data_file);
 exome_struct.spectrum_label = spectrum_labels{exome_ind};
 exome_struct.target_length = target_length_vec(exome_ind); 
 exome_struct.populations = populations_vec{exome_ind}; 
@@ -38,3 +41,6 @@ exome_struct.triplet_mutations_file = 'scone_hg17_m3_64x64_rates.txt'; % 'triple
 exome_struct.mutation_rates_file = 'human_genes_mutation_rates_hg18.mat'; % output file with triplet mutation rates
 exome_struct.exons_file = 'hg18_exons.mat'; % where to save exons
 exome_struct.spectrum_data_files_str = '{';
+
+
+
