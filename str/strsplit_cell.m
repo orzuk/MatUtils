@@ -1,9 +1,18 @@
-% Split each string in a cell array 
+% Split each string in a cell array
+% Input:
+% c - cell array with strings
+% delim - delimiter for spring split
+%
+% Output:
+% parts - cell array with splitted strings
+%
 function parts = strsplit_cell(c, delim)
-n = length(c); 
-parts = cell(n,1);
-for i=1:n
-    parts{i} = strsplit(c{i}, delim); 
+[m, n] = size(c);
+parts = cell(m, n);
+for i=1:m
+    for j=1:n
+        parts{i,j} = strsplit(c{i,j}, delim);
+    end
 end
 
 
