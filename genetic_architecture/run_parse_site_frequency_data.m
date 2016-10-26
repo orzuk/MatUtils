@@ -7,7 +7,7 @@ exome_data = 'ExAC'; % 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!
 
 % Set of flags determining which analysis to perform
 parse_site_frequency_flag = 1; % parse original datafile (different between different datasets)
-read_vcf_flag=1; % read vcf files for exome data
+read_vcf_flag=0; % read vcf files for exome data
 unite_flag=0; % 0: parse ESP data. 1: unite all data to one chromosome
 read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
 extract_fields_flag=1; % extract ??? fields

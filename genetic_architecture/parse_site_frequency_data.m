@@ -98,7 +98,7 @@ if(~exist(file_name_to_mat(site_frequency_file_name), 'file')) % read input .vcf
     reading_vcf_file=1
     %    populations_vec = {'_European', '_African'};
     if(strfind(lower(site_frequency_file_name), 'vcf'))
-        S = read_vcf(site_frequency_file_name, file_name_to_mat(site_frequency_file_name)); % read as vcf file
+        S = read_vcf(site_frequency_file_name, file_name_to_mat(site_frequency_file_name), sprintf('\t')); % read as vcf file
     else
         S = ReadDataFile(site_frequency_file_name, file_name_to_mat(site_frequency_file_name)); % , cell_to_mat, skip_lines, delimiter, varargin)
     end
@@ -155,12 +155,10 @@ for population = populations_vec  % save different files per population
     S.GENE = cell(num_snps,1);
     S.aminoAcidChange = cell(num_snps,1);
     S.INFO_ARR = cell(num_snps, num_fields); % create big array of all fields !!
-    %%%%        for j=1:length(S.field_names) % loop on all fields - this may be unnecessary
-    %%%%            prepare_field=j
-    %%%%            eval_str = ['S.' S.field_descriptions{j} ' = cell(' num2str(num_snps) ', 1);'];
-    %%%%            eval(eval_str);
-    %%%%        end
     start_snp_loop_time = cputime;
+    
+    pop_struct = internal_get_pop_indices_info(S, population, exome_struct);
+    
     for i=1:num_snps  % heavy loop: run on all SNPs and parse information
         if(mod(i, 500) == 0)
             sprintf('Parse SNP %d out of %d, time=%f', i, num_snps, cputime - start_snp_loop_time)
@@ -168,18 +166,12 @@ for population = populations_vec  % save different files per population
         cur_snp_fields = regexp(S.INFO{i}, '[=;]', 'split'); cur_snp_values = cur_snp_fields(2:2:end); cur_snp_fields=cur_snp_fields(1:2:end-1);
         
         % NEW! intersect current SNP info (cur_snp_fields) with fields. Slower but more robust to changes in fields availability
-        [common_fields, fields_I, fields_J] = intersect(S.field_names, cur_snp_fields);
+        [~, fields_I, fields_J] = intersect(S.field_names, cur_snp_fields);
         S.INFO_ARR(i,fields_I) = cur_snp_fields(fields_J); % assign all fields to S.INFO
         
         % Next assign specieal fields (like gene index)
-        %        S.XXX_VARIANT_COUNT_(i) = tmp_allele_counts(1);
-        %        S.XXX_REF_ALLELE_COUNT_(i) = tmp_allele_counts(2);
-        %        S.XXX_FEATURE_{i} =  []
-        %        S.GENE{i} = []
-        %        S.aminoAcidChange{i} = []
-        
         [S.XXX_VARIANT_COUNT_(i), S.XXX_REF_ALLELE_COUNT_(i), S.XXX_FEATURE_{i}, S.GENE{i}, S.aminoAcidChange{i}] = ...
-            internal_extract_special_fields(S, cur_snp_fields, cur_snp_values, exome_struct, population);
+            internal_extract_special_fields(S, cur_snp_fields, cur_snp_values, exome_struct, pop_struct, population);
         
     end % loop on SNPs
     tmp_INFO = S.INFO;
@@ -211,9 +203,6 @@ end % loop on population
 % % % %         end
 % % % %     end % loop on population
 %end % if .mat file exists
-if(return_flag) % leave function
-    return;
-end
 
 
 
@@ -384,12 +373,10 @@ end
 
 % Internal-Internal function for extracting special features
 function [XXX_VARIANT_COUNT, XXX_REF_ALLELE_COUNT, XXX_FEATURE, GENE, aminoAcidChange] = ...
-    internal_extract_special_fields(S, cur_snp_fields, cur_snp_values, exome_struct, population)
+    internal_extract_special_fields(S, cur_snp_fields, cur_snp_values, exome_struct, pop_struct, population)
 
 switch exome_struct.data_str
-    
     case 'ESP'
-        
         switch population{1}
             case {'European', '_European'}
                 tmp_allele_counts = str2nums(cur_snp_fields{2}); % Take Europian allele counts (special for ESP)
@@ -402,39 +389,62 @@ switch exome_struct.data_str
         for j=1:length(S.field_names)
             field_ind_vec(j) = strmatch([S.field_names{j} '='], cur_snp_fields); % here we assume this never changes !!!!
         end
-        gene_ind = field_ind_vec( strmatch('GL', S.field_names, 'exact') );
-        amino_acid_change_ind = field_ind_vec( strmatch('HGVS_PROTEIN_VAR', S.field_names, 'exact') );
-        feature_ind = field_ind_vec( strmatch('FG', S.field_names, 'exact') );
+        
         
         %end % if i == 1
         XXX_VARIANT_COUNT = tmp_allele_counts(1);
         XXX_REF_ALLELE_COUNT = tmp_allele_counts(2);
-        XXX_FEATURE = str2word(',', cur_snp_fields{feature_ind}(4:end), 1); % why this is hard-coded?
+        XXX_FEATURE = str2word(',', cur_snp_fields{pop_struct.feature_ind}(4:end), 1); % why this is hard-coded?
         if(~isempty( strfind(XXX_FEATURE, ':') )) % remove gene name
             XXX_FEATURE = str2word(':', XXX_FEATURE, 2);
         end
-        GENE = cur_snp_fields{gene_ind}(4:end); % get gene name
-        aminoAcidChange =  str2word(')', str2word('(', cur_snp_fields{amino_acid_change_ind}, 2), 1); % get amino-acid change
+        GENE = cur_snp_fields{pop_struct.gene_ind}(4:end); % get gene name
+        aminoAcidChange =  str2word(')', str2word('(', cur_snp_fields{pop_struct.AA_change_ind}, 2), 1); % get amino-acid change
         
     case 'ExAC' % here parse field 79: the one with all infomration for allele
-        gene_ind = strmatch('CSQ',  cur_snp_fields);
-        gene_str = strsplit(cur_snp_values{gene_ind}, '|');
         
-        GENE = gene_str{1}; % get gene name
-        aminoAcidChange = gene_str{1}; % get variant amino acid change
-        XXX_FEATURE = gene_str{1}; % get variant type! important for next analysis !!! 
+        snp_info_ind = strmatch('CSQ',  cur_snp_fields);
+        if(isempty(snp_info_ind)) % didn't find info
+            GENE = ''; aminoAcidChange = ''; XXX_FEATURE = '';
+        else
+            snp_info_str = strsplit(cur_snp_values{snp_info_ind}, ','); num_alleles = length(snp_info_str);
+            for j=1:1 % num_alleles
+                snp_info_str{j} = strsplit(snp_info_str{j}, '|', 'CollapseDelimiters', false);
+            end
+            % TEMP! Always take first allele
+            GENE = snp_info_str{1}{pop_struct.gene_ind}; % get gene name % GENE
+            aminoAcidChange = snp_info_str{1}{pop_struct.AA_change_ind}; % get variant amino acid change % 'Amino_acids'
+            XXX_FEATURE = snp_info_str{1}{pop_struct.feature_ind}; % get variant type! important for next analysis !!!
+        end
         
-        pop_ind = strmatch(population, exome_struct.populations); 
-        snp_pop_ind = strmatch(exome_struct.pop_str{pop_ind}, S.field_names); 
-        
-        snp_pop_total_ind = strmatch(strrep(exome_struct.pop_str{pop_ind}, 'AC_', 'AN_'), S.field_names); 
-        XXX_VARIANT_COUNT = str2num(cur_snp_fields{snp_pop_ind});
-        XXX_REF_ALLELE_COUNT = str2num(cur_snp_fields{snp_pop_total_ind})-XXX_VARIANT_COUNT; % MUST BE DIFFERENT !!! 
-        
-        
+        snp_pop_ind = strmatch(exome_struct.pop_str{pop_struct.pop_ind}, cur_snp_fields);  % S.field_names);        
+        snp_pop_total_ind = strmatch(strrep(exome_struct.pop_str{pop_struct.pop_ind}, 'AC_', 'AN_'), cur_snp_fields); % S.field_names);
+        XXX_VARIANT_COUNT = str2nums(cur_snp_values{snp_pop_ind}, 1);
+        XXX_REF_ALLELE_COUNT = str2nums(cur_snp_values{snp_pop_total_ind}, 1)-XXX_VARIANT_COUNT; % MUST BE DIFFERENT !!!
 end % switch data string
 
+% Internal function for getting indivces right
+function pop_struct = internal_get_pop_indices_info(S, population, exome_struct)
 
+pop_struct = [];
+switch exome_struct.data_str
+    case 'ESP'
+        
+        pop_struct.gene_ind = field_ind_vec( strmatch('GL', S.field_names, 'exact') );
+        pop_struct.AA_change_ind = field_ind_vec( strmatch('HGVS_PROTEIN_VAR', S.field_names, 'exact') );
+        pop_struct.feature_ind = field_ind_vec( strmatch('FG', S.field_names, 'exact') );
+        
+    case 'ExAC'
+        pop_struct.variant_info_ind = strmatch('CSQ',  S.field_names);
+        pop_struct.variant_info_str = strsplit(S.field_descriptions{pop_struct.variant_info_ind}, '|');
+        pop_struct.variant_info_str{1} = str2word(':', pop_struct.variant_info_str{1}, 2);
+        
+        pop_struct.gene_ind = strmatch('SYMBOL', pop_struct.variant_info_str, 'exact');
+        pop_struct.AA_change_ind = strmatch('HGVSc', pop_struct.variant_info_str, 'exact');
+        pop_struct.feature_ind = strmatch('Feature', pop_struct.variant_info_str, 'exact');
+        pop_struct.pop_ind = strmatch(strdiff(population{1}, '_'), exome_struct.populations);
+
+end
 
 % % % for j=1:length(S.field_names) % loop on all fields - this is quite slow !! ('eval' inside a loop over all SNPs and all fields
 % % %     S.INFO_ARR{i,j} = cur_snp_fields{field_ind_vec(j)}(equal_sign_ind_vec(j):end);
