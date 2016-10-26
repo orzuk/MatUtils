@@ -7,14 +7,18 @@
 % Output:
 % VCF - structure with all relevant data
 %
-function VCF = read_vcf(vcf_file_name, output_file)
+function VCF = read_vcf(vcf_file_name, output_file, vcf_delimiter)
 
+if(~exist('vcf_delimiter', 'var') || isempty(vcf_delimiter))
+    vcf_delimiter = []; 
+end
 skip_lines = '##'; % 10
-[VCF, R, R_skipped] = ReadDataFile(vcf_file_name, output_file, -1, skip_lines); % skip first 10 lines
+[VCF, R, R_skipped] = ReadDataFile(vcf_file_name, output_file, -1, skip_lines, vcf_delimiter); % skip first 10 lines
 
 ctr=1;
 for i=1:size(R_skipped, 1)
-    if(~isempty(strfind(R_skipped{i,1}, 'INFO')))
+    %    if(~isempty(strfind(R_skipped{i,1}, 'INFO')))
+    if(strncmp('##INFO', R_skipped{i,1}, 6))
         ID_str = strsplit(R_skipped{i,1}, '=');
         VCF.field_names{ctr} = str2word(',', ID_str{3}, 1);
         VCF.field_descriptions{ctr} = strdiff(strdiff(strdiff(ID_str{end}, '"'), ''''), '>');
