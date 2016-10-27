@@ -210,9 +210,11 @@ end % loop on population
 
 function  [S, n_vec, count_vec, f_vec]  = internal_compute_gene_matrices(site_frequency_file_name, populations_vec, compute_frac_carriers)
 
+Assign24MammalsGlobalConstants; AssignRVASConstants;
+
 for population = populations_vec % perform further preprocessing (compute SNP specific parameters)
     S = load([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], ... % load only neccessary fields
-        'XXX_VARIANT_COUNT_', 'XXX_REF_ALLELE_COUNT_', 'XXX_FEATURE_', 'XXX_GENE_', 'GENE', ...
+        'XXX_VARIANT_COUNT_', 'XXX_REF_ALLELE_COUNT_', 'XXX_FEATURE_', 'GENE', ... % 'XXX_GENE_', ...
         'XXX_CHROM', 'POS'); % enable unique identifier for each allele
     
     % allele_types = {'Synonymous', 'NonSynonymous', 'intron', 'utr'};
@@ -441,7 +443,7 @@ switch exome_struct.data_str
         
         pop_struct.gene_ind = strmatch('SYMBOL', pop_struct.variant_info_str, 'exact');
         pop_struct.AA_change_ind = strmatch('HGVSc', pop_struct.variant_info_str, 'exact');
-        pop_struct.feature_ind = strmatch('Feature', pop_struct.variant_info_str, 'exact');
+        pop_struct.feature_ind = strmatch('Consequence', pop_struct.variant_info_str, 'exact'); % Feature 
         pop_struct.pop_ind = strmatch(strdiff(population{1}, '_'), exome_struct.populations);
 
 end

@@ -53,7 +53,9 @@ if(parse_site_frequency_flag) % here we parse
     
     %    end
 end
-        
+
+return;
+
 
 for population = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
     if(~strcmp(population, 'African')) % temp: work only on one population1
