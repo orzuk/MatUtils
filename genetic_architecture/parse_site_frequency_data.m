@@ -79,9 +79,9 @@ end % if compute_gene_matrices_flag
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%% End Stage 3: Compute Gene-Specific Matrices          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if(isempty(S)) % load data
-    S = load([remove_suffix_from_file_name(site_frequency_file_name) populations_vec{1} '.mat']);
-end
+%if(isempty(S)) % load data
+%    S = load([remove_suffix_from_file_name(site_frequency_file_name) populations_vec{1} '.mat']);
+%end
 
 
 
@@ -207,7 +207,10 @@ function  [S, n_vec, count_vec, f_vec]  = internal_compute_gene_matrices(site_fr
 
 Assign24MammalsGlobalConstants; AssignRVASConstants;
 
+output_dir = dir_from_file_name(site_frequency_file_name);
+
 for population = populations_vec % perform further preprocessing (compute SNP specific parameters)
+    my_mkdir(fullfile(output_dir, strdiff(population{1}, '_'))); 
     S = load([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], ... % load only neccessary fields
         'XXX_VARIANT_COUNT_', 'XXX_REF_ALLELE_COUNT_', 'XXX_FEATURE_', 'GENE', ... % 'XXX_GENE_', ...
         'XXX_CHROM', 'POS'); % enable unique identifier for each allele
@@ -262,7 +265,6 @@ for population = populations_vec % perform further preprocessing (compute SNP sp
     S.gene_by_allele_type_pos_list = cell(S.num_allele_types, S.num_genes); % NEW! Save identifiers (positions)
     
     S.gene_by_allele_type_inds_list = cell(S.num_allele_types, S.num_genes); % indices in original data
-    
     for i=1:S.num_allele_types % Divide alleles to types
         sprintf('Create tables for allele type %ld out of %ld', i, S.num_allele_types)
 %        allele_type_inds = strfind_cell(lower(S.XXX_FEATURE_), lower(S.allele_types{i})); % find current alleles
@@ -329,9 +331,11 @@ for population = populations_vec % perform further preprocessing (compute SNP sp
                 S.all_allele_types = [vec2row(S.all_allele_types) coding_allele_types{i}{1}];
             end
             S.num_all_allele_types = length(S.all_allele_types); % get #alleles with aggregate alleles
-            output_filename = [remove_suffix_from_file_name(site_frequency_file_name) ...
+           
+            output_filename = fullfile(output_dir, strdiff(population{1}, '_'), [remove_dir_from_file_name(remove_suffix_from_file_name(site_frequency_file_name)) ...
                 population{1} '.freq_rare_variants_per_gene_DAF_less_' ...
-                strrep(num2str(upper_freq_vec(j)), '.', '_') ];
+                strrep(num2str(upper_freq_vec(j)), '.', '_') ]);
+
             WriteDataFile(T{j}  , [output_filename '.txt']);  % save in .txt format
             if(j == length(upper_freq_vec))
                 save([output_filename '.mat'], 'T'); % save in .mat format

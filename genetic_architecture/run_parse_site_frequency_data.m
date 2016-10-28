@@ -5,13 +5,14 @@ num_bins = 0:0.01:1; % bins for what?
 
 exome_data = 'ExAC'; % 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!!
 
+old_run=0;
 % Set of flags determining which analysis to perform
 parse_site_frequency_flag = 1; % parse original datafile (different between different datasets)
 read_vcf_flag=0; % read vcf files for exome data
 unite_flag=0; % 0: parse ESP data. 1: unite all data to one chromosome
 read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
 extract_fields_flag=0; % extract ??? fields
-compute_gene_matrices_flag=1; % 1. Compute for each gene ?? flag for parsing ???
+compute_gene_matrices_flag=0; % 1. Compute for each gene ?? flag for parsing ???
 plot_site_frequency_flag = 1; % 1: plot SFS data (this is also part of pre-processing)
 estimate_gene_by_gene = 0; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 plot_gene_by_gene = 0; % make figures for individual genes
@@ -54,120 +55,27 @@ if(parse_site_frequency_flag) % here we parse
     %    end
 end
 
-return;
+% return;
 
 
 for population = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
-    if(~strcmp(population, 'African')) % temp: work only on one population1
+    
+    if(~strcmp(population, 'African')) % temp: work only on one population!
         continue;
     end
-    if(read_vcf_flag)
-        max_chr=23; min_chr=1;
-    else % run only once 
-        max_chr=1; min_chr=1;
-    end
-    sub_dir_str = dir_from_file_name(exome_struct.spectrum_data_file);
-    chr_file_str = suffix_from_file_name(remove_suffix_from_file_name(exome_struct.spectrum_data_file));
     
-    %                min_chr=22; max_chr=23; % TEMP FOR DEBUG! TAKE SHORT CHROMOSOME
-    for chr = min_chr:max_chr % Issue: not always good to split by chromosomes !! % take short chrom for debugging min_chr:max_chr % 1:23
-        do_chr = chr
-        if(read_vcf_flag) % One file per chromosome. (includes ALL populations)
-            tmp_file_name = GetFileNames(fullfile(spectrum_data_dir, sub_dir_str, ...
-                [exome_struct.prefix '*.chr' chr_num2str(chr) '.' chr_file_str '.vcf' ]));
-            exome_struct.spectrum_data_file = fullfile(sub_dir_str, tmp_file_name{1});
-            %                 spectrum_data_files{i} = fullfile(sub_dir_str, ...
-            %                     ['ESP6500.chr' chr_num2str(chr) '.' chr_file_str '.vcf' ]); % '_' population{1} '.vcf']; %    .vcf'];
-        else % One file. Already includes population string
-            %                spectrum_data_files{i} = ['/Tennessen_Science_2012/all_chr_ESP6500.snps' '_' population{1} '.mat']; %    .vcf'];
-            
-            if(read_to_mat_flag)
-                exome_struct.spectrum_data_file = fullfile(dir_from_file_name(exome_struct.spectrum_data_file), ...
-                    ['all_chr_' exome_struct.prefix '.' chr_file_str '.vcf']); %  '_' population{1} '.mat']; %    .vcf'];
-            else % already have a .mat file
-                exome_struct.spectrum_data_file = fullfile(dir_from_file_name(exome_struct.spectrum_data_file), ...
-                    ['all_chr_' exome_struct.prefix '.' chr_file_str '.mat']); %  '_' population{1} '.mat']; %    .vcf'];
-            end
-        end
-        exome_struct.spectrum_data_files_str = [exome_struct.spectrum_data_files_str '''' ...
-            remove_suffix_from_file_name(exome_struct.spectrum_data_file) '_' population{1} '.mat' ''','];
-        
-        if(parse_site_frequency_flag)
-            job_str = ['[A] =' ... % , n_vec, count_vec, f_vec, allele_types] = ' ...
-                'parse_site_frequency_data(''' fullfile(spectrum_data_dir, exome_struct.spectrum_data_file) ...
-                ''', [], ' num2str(read_to_mat_flag) ', ' num2str(extract_fields_flag) ', ' ...
-                num2str(compute_gene_matrices_flag) ');']; %, gene_list
-            
-            %                 [A n_vec count_vec f_vec allele_types] = ...
-            %                     parse_site_frequency_data(fullfile(spectrum_data_dir, spectrum_data_files{i})); % , gene_list);
-            
-            if(unite_flag)
-                %                    if(chr == min_chr)
-                %                        A = load(fullfile(spectrum_data_dir, sub_dir_str, ...
-                %                            ['all_chr_ESP6500.' chr_file_str '_'  population{1} '_up_to_chr' num2str(chr) '.mat'])); % load union
-                %                    else % load current
-                A = load([remove_suffix_from_file_name(fullfile(spectrum_data_dir, exome_struct.spectrum_data_file))  '_' population{1} '.mat']);
-                A = my_rmfield(A, 'INFO_ARR');
-                %                    end
-                
-                in_matlab_flag=1;
-            else % don't unite chroms
-                if(in_matlab_flag)
-                    eval(job_str);
-                else
-                    SubmitMatlabJobToFarm(job_str, ...
-                        fullfile('out', ['parse_ESP_chr' chr_num2str(chr) '.out']), queue_str, ...
-                        [], [], mem_flag); % allow specifying memory allocation
-                end
-            end % if unite chroms
-            if(read_vcf_flag && in_matlab_flag) % unite different files (even without 'unite chr')
-                if(isfield(A, 'GENE'))
-                    A.GENE = vec2column(A.GENE);
-                end
-                if(unite_flag)
-                    if(chr == min_chr) % 1)
-                        all_A = A;
-                    else
-                        field_names = fieldnames(A);
-                        unite_field_names = intersect(fieldnames(A), {'XXX_VARIANT_COUNT_', 'XXX_REF_ALLELE_COUNT_', 'XXX_FEATURE_', 'GENE', 'XXX_CHROM', ...
-                            'POS',  'ALLELE_FREQ',   'GENE_INDS', 'unique_genes'});
-                        for j=1:length(unite_field_names)  % concatenate all chromosomes to one file (is this for population file? or one file for all populations?)
-                            unite_str = ['all_A.' unite_field_names{j} ' = [all_A.' unite_field_names{j} ''' A.' unite_field_names{j} ''']'';'];
-                            eval(unite_str)
-                        end
-                        [intercet_allele_types, I_types, J_types] = intersect(all_A.allele_types, A.allele_types); % Here unite cell-array. Problem! for different chromosomes might have different #allele_types and their encoding
-                        for j=1:length(I_types)
-                            all_A.n_vec{I_types(j)} = [all_A.n_vec{I_types(j)}' A.n_vec{J_types(j)}']';
-                            all_A.f_vec{I_types(j)} = [all_A.f_vec{I_types(j)}' A.f_vec{J_types(j)}']';
-                            all_A.count_vec{I_types(j)} = [all_A.count_vec{I_types(j)}' A.count_vec{J_types(j)}']';
-                        end
-                        [diff_allele_types, I_diff_types] = setdiff(A.allele_types, all_A.allele_types); % Here get different #allele_types and their encoding
-                        for j=1:length(I_diff_types)% New alleles
-                            all_A.n_vec{all_A.num_allele_types+j} = A.n_vec{I_diff_types(j)};
-                            all_A.f_vec{all_A.num_allele_types+j} = A.f_vec{I_diff_types(j)};
-                            all_A.count_vec{all_A.num_allele_types+j} = A.count_vec{I_diff_types(j)};
-                            all_A.allele_types{all_A.num_allele_types+j} = A.allele_types{I_diff_types(j)}; % add allele types
-                        end
-                        all_A.num_allele_types = length(all_A.allele_types); % update # of allele types
-                    end
-                end % unite chr
-                close all;
-            end % if read vcf
-            if(unite_flag)  % Here unite - why only first population? (Europeans?)
-                save(fullfile(spectrum_data_dir, sub_dir_str, ...
-                    ['all_chr_' exome_struct.prefix '.' chr_file_str '_'  population{1} '_up_to_chr' num2str(chr) '.mat']), '-struct', 'all_A'); % Save union
-            end
-        end % if parse SFS data
-    end % loop on chr.
+    if(old_run)
+        old_run_parse_site_frequency_data;
+    end
     
     if(plot_site_frequency_flag)
-        plot_site_frequency_data(fullfile(spectrum_data_dir, ...
-            [remove_suffix_from_file_name(exome_struct.spectrum_data_file)  '.mat']), ... % '_' population{1}% _unique
+        plot_site_frequency_data(fullfile(spectrum_data_dir, exome_struct.data_str, ...
+            [exome_struct.prefix, '*.mat']), ... %  exome_struct.spectrum_data_file)  '.mat']), ... % '_' population{1}% _unique
             fullfile(mammals_data_dir, genome_version, [remove_suffix_from_file_name(exons_file) '_unique.mat']),  ... % GeneStruct
             exome_struct.populations, ... %   {'European', 'African'}, ...
             fullfile(spectrum_data_dir, mutation_rates_file), ...
             [], [], [], [], exome_struct.target_length, num_bins, ...
-            fullfile(spectrum_data_dir, 'out', remove_suffix_from_file_name(exome_struct.spectrum_data_file)));
+            fullfile(spectrum_data_dir, 'out', exome_struct.data_str, exome_struct.prefix)); %   remove_suffix_from_file_name(exome_struct.spectrum_data_file)));
         % %         plot_site_frequency_data(A, n_vec, count_vec, f_vec, allele_types, exome_struct.target_length, num_bins, ...
         % %             fullfile(spectrum_data_dir, 'out', remove_suffix_from_file_name(exome_struct.spectrum_data_file)));
     end
