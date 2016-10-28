@@ -130,11 +130,6 @@ S.field_descriptions = S.field_descriptions(1,:);
 save_file_mat_format=1
 save(file_name_to_mat(site_frequency_file_name), '-struct', 'S'); % always save in new format
 
-
-
-
-
-
 % Internal function: Extract fields
 %
 function    S = internal_extract_fields(site_frequency_file_name, populations_vec, exome_struct)
@@ -222,6 +217,10 @@ for population = populations_vec % perform further preprocessing (compute SNP sp
     S.ALLELE_FREQ = S.XXX_VARIANT_COUNT_ ./ (S.XXX_VARIANT_COUNT_ + S.XXX_REF_ALLELE_COUNT_);
     [S.unique_genes, unique_gene_inds, S.GENE_INDS] = unique(upper(S.GENE)); S.num_genes = length(S.unique_genes);
     S.unique_chr = S.XXX_CHROM(unique_gene_inds);
+    S.XXX_FEATURE_(cellfun('isempty',S.XXX_FEATURE_)) = {'unknown'};
+    S.XXX_FEATURE_ = strrep_cell(S.XXX_FEATURE_, '3', 'UTR3'); % don't let field start with digit! 
+    S.XXX_FEATURE_ = strrep_cell(S.XXX_FEATURE_, '5', 'UTR5'); 
+    S.XXX_FEATURE_ = strrep_cell(S.XXX_FEATURE_, '&', '__'); % field seperator 
     S.allele_types = unique(S.XXX_FEATURE_);
     S.num_allele_types = length(S.allele_types);
     S.good_allele_inds = union(strfind_cell(lower(S.allele_types), 'syno'), strfind_cell(lower(S.allele_types), 'missen'));
@@ -266,7 +265,13 @@ for population = populations_vec % perform further preprocessing (compute SNP sp
     
     for i=1:S.num_allele_types % Divide alleles to types
         sprintf('Create tables for allele type %ld out of %ld', i, S.num_allele_types)
-        allele_type_inds = strfind_cell(lower(S.XXX_FEATURE_), lower(S.allele_types{i})); % find current alleles
+%        allele_type_inds = strfind_cell(lower(S.XXX_FEATURE_), lower(S.allele_types{i})); % find current alleles
+%        if(isempty(allele_type_inds) && isempty(S.allele_types{i}))
+%            allele_type_inds = isempty_cell(lower(S.XXX_FEATURE_)); % find current alleles (empty string)
+%        end
+        allele_type_inds = strmatch(lower(S.allele_types{i}), lower(S.XXX_FEATURE_), 'exact'); % find current alleles (require exact match!)
+            
+            
         n_vec{i} =  S.XXX_REF_ALLELE_COUNT_(allele_type_inds) +  S.XXX_VARIANT_COUNT_(allele_type_inds);
         count_vec{i} =   S.XXX_VARIANT_COUNT_(allele_type_inds);
         f_vec{i} = S.XXX_VARIANT_COUNT_(allele_type_inds) ./ n_vec{i};
