@@ -140,6 +140,7 @@ for population = populations_vec  % save different files per population
     if(exist([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], 'file')) % take only valuse which appear
         continue;
     end
+    my_mkdir( fullfile(dir_from_file_name(site_frequency_file_name), strdiff(population{1}, '_') ) );
     
     % Further parsing of vcf file
     num_snps = length(S.POS);
@@ -182,7 +183,7 @@ for population = populations_vec  % save different files per population
     if(isfield(S, 'clinicalAssociation'))
         S.clinicalAssociation = strrep_cell(S.clinicalAssociation, 'unknown', '');
     end
-    save([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], '-struct', 'S'); % add new fields% remove fields to reduce memory
+    save(add_pop_to_file_name(site_frequency_file_name, population{1}), '-struct', 'S'); % add new fields% remove fields to reduce memory
     S.INFO = tmp_INFO; clear tmp_INFO;
     return_flag=1 % only convert to .mat
 end % loop on population
@@ -210,8 +211,8 @@ Assign24MammalsGlobalConstants; AssignRVASConstants;
 output_dir = dir_from_file_name(site_frequency_file_name);
 
 for population = populations_vec % perform further preprocessing (compute SNP specific parameters)
-    my_mkdir(fullfile(output_dir, strdiff(population{1}, '_'))); 
-    S = load([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], ... % load only neccessary fields
+    my_mkdir(fullfile(output_dir, strdiff(population{1}, '_')));
+    S = load(add_pop_to_file_name(site_frequency_file_name, population{1}), ... % load only neccessary fields
         'XXX_VARIANT_COUNT_', 'XXX_REF_ALLELE_COUNT_', 'XXX_FEATURE_', 'GENE', ... % 'XXX_GENE_', ...
         'XXX_CHROM', 'POS'); % enable unique identifier for each allele
     
@@ -221,9 +222,11 @@ for population = populations_vec % perform further preprocessing (compute SNP sp
     [S.unique_genes, unique_gene_inds, S.GENE_INDS] = unique(upper(S.GENE)); S.num_genes = length(S.unique_genes);
     S.unique_chr = S.XXX_CHROM(unique_gene_inds);
     S.XXX_FEATURE_(cellfun('isempty',S.XXX_FEATURE_)) = {'unknown'};
-    S.XXX_FEATURE_ = strrep_cell(S.XXX_FEATURE_, '3', 'UTR3'); % don't let field start with digit! 
-    S.XXX_FEATURE_ = strrep_cell(S.XXX_FEATURE_, '5', 'UTR5'); 
-    S.XXX_FEATURE_ = strrep_cell(S.XXX_FEATURE_, '&', '__'); % field seperator 
+    
+    S.XXX_FEATURE_strmatch('3', S.XXX_S.XXX_FEATURE_) = strcat('UTR', S.XXX_FEATURE_(strmatch('3', S.XXX_S.XXX_FEATURE_))); % don't let field start with digit!
+    S.XXX_FEATURE_strmatch('5', S.XXX_S.XXX_FEATURE_) = strcat('UTR', S.XXX_FEATURE_(strmatch('5', S.XXX_S.XXX_FEATURE_)));
+    
+    S.XXX_FEATURE_ = strrep_cell(S.XXX_FEATURE_, '&', '__'); % field seperator
     S.allele_types = unique(S.XXX_FEATURE_);
     S.num_allele_types = length(S.allele_types);
     S.good_allele_inds = union(strfind_cell(lower(S.allele_types), 'syno'), strfind_cell(lower(S.allele_types), 'missen'));
@@ -267,13 +270,13 @@ for population = populations_vec % perform further preprocessing (compute SNP sp
     S.gene_by_allele_type_inds_list = cell(S.num_allele_types, S.num_genes); % indices in original data
     for i=1:S.num_allele_types % Divide alleles to types
         sprintf('Create tables for allele type %ld out of %ld', i, S.num_allele_types)
-%        allele_type_inds = strfind_cell(lower(S.XXX_FEATURE_), lower(S.allele_types{i})); % find current alleles
-%        if(isempty(allele_type_inds) && isempty(S.allele_types{i}))
-%            allele_type_inds = isempty_cell(lower(S.XXX_FEATURE_)); % find current alleles (empty string)
-%        end
+        %        allele_type_inds = strfind_cell(lower(S.XXX_FEATURE_), lower(S.allele_types{i})); % find current alleles
+        %        if(isempty(allele_type_inds) && isempty(S.allele_types{i}))
+        %            allele_type_inds = isempty_cell(lower(S.XXX_FEATURE_)); % find current alleles (empty string)
+        %        end
         allele_type_inds = strmatch(lower(S.allele_types{i}), lower(S.XXX_FEATURE_), 'exact'); % find current alleles (require exact match!)
-            
-            
+        
+        
         n_vec{i} =  S.XXX_REF_ALLELE_COUNT_(allele_type_inds) +  S.XXX_VARIANT_COUNT_(allele_type_inds);
         count_vec{i} =   S.XXX_VARIANT_COUNT_(allele_type_inds);
         f_vec{i} = S.XXX_VARIANT_COUNT_(allele_type_inds) ./ n_vec{i};
@@ -331,19 +334,19 @@ for population = populations_vec % perform further preprocessing (compute SNP sp
                 S.all_allele_types = [vec2row(S.all_allele_types) coding_allele_types{i}{1}];
             end
             S.num_all_allele_types = length(S.all_allele_types); % get #alleles with aggregate alleles
-           
+            
             output_filename = fullfile(output_dir, strdiff(population{1}, '_'), [remove_dir_from_file_name(remove_suffix_from_file_name(site_frequency_file_name)) ...
                 population{1} '.freq_rare_variants_per_gene_DAF_less_' ...
                 strrep(num2str(upper_freq_vec(j)), '.', '_') ]);
-
+            
             WriteDataFile(T{j}  , [output_filename '.txt']);  % save in .txt format
             if(j == length(upper_freq_vec))
                 save([output_filename '.mat'], 'T'); % save in .mat format
             end
         end % loop on frequency threshold
     end % if compute frac carriers
-    save([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], '-append', '-struct', 'S'); % add new fields
-    save([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], '-append', ...
+    save(add_pop_to_file_name(site_frequency_file_name, population{1}), '-append', '-struct', 'S'); % add new fields
+    save(add_pop_to_file_name(site_frequency_file_name, population{1}), '-append', ...
         'n_vec', 'count_vec', 'f_vec'); % , 'allele_types'); % Save again, add new fields
 end % loop on population again
 
@@ -401,7 +404,6 @@ switch exome_struct.data_str
             field_ind_vec(j) = strmatch([S.field_names{j} '='], cur_snp_fields); % here we assume this never changes !!!!
         end
         
-        
         %end % if i == 1
         XXX_VARIANT_COUNT = tmp_allele_counts(1);
         XXX_REF_ALLELE_COUNT = tmp_allele_counts(2);
@@ -428,7 +430,7 @@ switch exome_struct.data_str
             XXX_FEATURE = snp_info_str{1}{pop_struct.feature_ind}; % get variant type! important for next analysis !!!
         end
         
-        snp_pop_ind = strmatch(exome_struct.pop_str{pop_struct.pop_ind}, cur_snp_fields);  % S.field_names);        
+        snp_pop_ind = strmatch(exome_struct.pop_str{pop_struct.pop_ind}, cur_snp_fields);  % S.field_names);
         snp_pop_total_ind = strmatch(strrep(exome_struct.pop_str{pop_struct.pop_ind}, 'AC_', 'AN_'), cur_snp_fields); % S.field_names);
         XXX_VARIANT_COUNT = str2nums(cur_snp_values{snp_pop_ind}, 1);
         XXX_REF_ALLELE_COUNT = str2nums(cur_snp_values{snp_pop_total_ind}, 1)-XXX_VARIANT_COUNT; % MUST BE DIFFERENT !!!
@@ -452,11 +454,16 @@ switch exome_struct.data_str
         
         pop_struct.gene_ind = strmatch('SYMBOL', pop_struct.variant_info_str, 'exact');
         pop_struct.AA_change_ind = strmatch('HGVSc', pop_struct.variant_info_str, 'exact');
-        pop_struct.feature_ind = strmatch('Consequence', pop_struct.variant_info_str, 'exact'); % Feature 
+        pop_struct.feature_ind = strmatch('Consequence', pop_struct.variant_info_str, 'exact'); % Feature
         pop_struct.pop_ind = strmatch(strdiff(population{1}, '_'), exome_struct.populations);
-
 end
 
 % % % for j=1:length(S.field_names) % loop on all fields - this is quite slow !! ('eval' inside a loop over all SNPs and all fields
 % % %     S.INFO_ARR{i,j} = cur_snp_fields{field_ind_vec(j)}(equal_sign_ind_vec(j):end);
 % % % end
+
+% Internal function: add population to SFS file name
+function pop_file_name = add_pop_to_file_name(site_frequency_file_name, population)
+
+fullfile(dir_from_file_name(site_frequency_file_name), strdiff(population{1}, '_'), ...
+    [remove_suffix_from_file_name(remove_dir_from_file_name(site_frequency_file_name)) population{1} '.mat']);
