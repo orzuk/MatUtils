@@ -73,7 +73,7 @@ end % if extract_fields_flag
 %%%%%%%%%%%%% Stage 3: Compute Gene-Specific Matrices            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if(compute_gene_matrices_flag)
-    [S, n_vec, count_vec, f_vec] = internal_compute_gene_matrices(site_frequency_file_name, populations_vec, compute_frac_carriers);
+    [S, n_vec, count_vec, f_vec] = internal_compute_gene_matrices(site_frequency_file_name, populations_vec, exome_struct, compute_frac_carriers);
 end % if compute_gene_matrices_flag
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -132,12 +132,13 @@ save(file_name_to_mat(site_frequency_file_name), '-struct', 'S'); % always save 
 
 % Internal function: Extract fields
 %
-function    S = internal_extract_fields(site_frequency_file_name, populations_vec, exome_struct)
+function S = internal_extract_fields(site_frequency_file_name, populations_vec, exome_struct)
 
 S = load(file_name_to_mat(site_frequency_file_name));
 
 for population = populations_vec  % save different files per population
-    if(exist([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], 'file')) % take only valuse which appear
+    %if(exist([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], 'file')) % take only valuse which appear
+    if(exist(add_pop_to_file_name(site_frequency_file_name, population{1}), 'file'))
         continue;
     end
     my_mkdir( fullfile(dir_from_file_name(site_frequency_file_name), strdiff(population{1}, '_') ) );
@@ -204,7 +205,7 @@ end % loop on population
 
 % Internal function: Compute gene matrices
 
-function  [S, n_vec, count_vec, f_vec]  = internal_compute_gene_matrices(site_frequency_file_name, populations_vec, compute_frac_carriers)
+function  [S, n_vec, count_vec, f_vec]  = internal_compute_gene_matrices(site_frequency_file_name, populations_vec, exome_struct, compute_frac_carriers)
 
 Assign24MammalsGlobalConstants; AssignRVASConstants;
 
@@ -223,16 +224,13 @@ for population = populations_vec % perform further preprocessing (compute SNP sp
     S.unique_chr = S.XXX_CHROM(unique_gene_inds);
     S.XXX_FEATURE_(cellfun('isempty',S.XXX_FEATURE_)) = {'unknown'};
     
-    S.XXX_FEATURE_strmatch('3', S.XXX_S.XXX_FEATURE_) = strcat('UTR', S.XXX_FEATURE_(strmatch('3', S.XXX_S.XXX_FEATURE_))); % don't let field start with digit!
-    S.XXX_FEATURE_strmatch('5', S.XXX_S.XXX_FEATURE_) = strcat('UTR', S.XXX_FEATURE_(strmatch('5', S.XXX_S.XXX_FEATURE_)));
+    S.XXX_FEATURE_(strmatch('3', S.XXX_FEATURE_)) = strcat('UTR', S.XXX_FEATURE_(strmatch('3', S.XXX_FEATURE_))); % don't let field start with digit!
+    S.XXX_FEATURE_(strmatch('5', S.XXX_FEATURE_)) = strcat('UTR', S.XXX_FEATURE_(strmatch('5', S.XXX_FEATURE_)));
     
     S.XXX_FEATURE_ = strrep_cell(S.XXX_FEATURE_, '&', '__'); % field seperator
     S.allele_types = unique(S.XXX_FEATURE_);
     S.num_allele_types = length(S.allele_types);
-    S.good_allele_inds = union(strfind_cell(lower(S.allele_types), 'syno'), strfind_cell(lower(S.allele_types), 'missen'));
-    S.good_allele_inds = union(S.good_allele_inds, strfind_cell(lower(S.allele_types), 'stop-gained'));
-    % S.good_allele_inds = union(good_allele_inds, strfind_cell(lower(allele_types), 'coding-notmod3')); % NEW! Add frameshifts!!!
-    S.good_allele_inds = sort(setdiff(S.good_allele_inds, strfind_cell(lower(S.allele_types), 'splice'))); % set which types of alleles to plot
+    S.good_allele_inds = get_good_allele_inds(S, exome_struct);
     
     S.allele_types_ind = zeros(size(S.allele_types));
     [~, I, J] = my_intersect(genome_types, vec2row(lower(strrep_cell(S.allele_types, '-', '_'))));
@@ -462,8 +460,4 @@ end
 % % %     S.INFO_ARR{i,j} = cur_snp_fields{field_ind_vec(j)}(equal_sign_ind_vec(j):end);
 % % % end
 
-% Internal function: add population to SFS file name
-function pop_file_name = add_pop_to_file_name(site_frequency_file_name, population)
 
-pop_file_name = fullfile(dir_from_file_name(site_frequency_file_name), strdiff(population, '_'), ...
-    [remove_suffix_from_file_name(remove_dir_from_file_name(site_frequency_file_name)) population '.mat']);

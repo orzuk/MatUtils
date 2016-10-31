@@ -10,10 +10,10 @@ old_run=0;
 parse_site_frequency_flag = 1; % parse original datafile (different between different datasets)
 read_vcf_flag=0; % read vcf files for exome data
 unite_flag=0; % 0: parse ESP data. 1: unite all data to one chromosome
-read_to_mat_flag=1; % convert vcf (?) or other files to .mat format
+read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
 extract_fields_flag=0; % extract ??? fields
-compute_gene_matrices_flag=1; % 1. Compute for each gene ?? flag for parsing ???
-plot_site_frequency_flag = 0; % 1: plot SFS data (this is also part of pre-processing)
+compute_gene_matrices_flag=0; % 1. Compute for each gene ?? flag for parsing ???
+plot_site_frequency_flag = 1; % 1: plot SFS data (this is also part of pre-processing)
 estimate_gene_by_gene = 0; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 plot_gene_by_gene = 0; % make figures for individual genes
 fit_demography = 0;  % NEW! here fit a demographic model using only synonymous SNPs
@@ -72,7 +72,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
         plot_site_frequency_data(fullfile(spectrum_data_dir, exome_struct.data_str, ...
             [exome_struct.prefix, '*.mat']), ... %  exome_struct.spectrum_data_file)  '.mat']), ... % '_' population{1}% _unique
             fullfile(mammals_data_dir, genome_version, [remove_suffix_from_file_name(exons_file) '_unique.mat']),  ... % GeneStruct
-            exome_struct.populations, ... %   {'European', 'African'}, ...
+            exome_struct, ... %   {'European', 'African'}, ...
             fullfile(spectrum_data_dir, mutation_rates_file), ...
             [], [], [], [], exome_struct.target_length, num_bins, ...
             fullfile(spectrum_data_dir, 'out', exome_struct.data_str, exome_struct.prefix)); %   remove_suffix_from_file_name(exome_struct.spectrum_data_file)));
@@ -93,7 +93,7 @@ if(fit_demography) % here use Synonymous SNPs to fit demographic model
 end
 
 
-spectrum_data_files_str = [spectrum_data_files_str(1:end-1) '}'];
+spectrum_data_files_str = [exome_struct.spectrum_data_files_str(1:end-1) '}'];
 if(estimate_gene_by_gene) % estimate potential target size for each gene in the genome
     if(~exist(fullfile(mammals_data_dir, genome_version, exons_file), 'file')) % get all sequences
         GeneStruct = ExtractExons(mammals_data_dir, 'hg18', [], exons_file, 0); % Get gene sequences. (Don't get pwms!!!)

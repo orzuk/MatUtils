@@ -33,8 +33,12 @@ if(normalize_flag == 2)
     p1_integral = sum(p1); %  integral_hist(x1, p1);
     p2_integral = sum(p2); % integral_hist(x2, p2);
 end
-p1 = interp1(x1, p1, x_sum, 'linear', 0);
-p2 = interp1(x2, p2, x_sum, 'linear', 0);
+if(length(x1)>1)
+    p1 = interp1(x1, p1, x_sum, 'linear', 0);
+end
+if(length(x2)>1)
+    p2 = interp1(x2, p2, x_sum, 'linear', 0);
+end
 
 switch normalize_flag % normalize histograms to get area one (TODO: can also normalize to get area same as p1, p2 !!!!)
     case 1 % normalize to integrate to one

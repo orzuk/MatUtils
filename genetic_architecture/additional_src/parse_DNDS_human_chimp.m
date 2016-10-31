@@ -1,9 +1,10 @@
-% Parse dn-ds data from .. then compare to selection coefficient s
-% inferred from exon sequencing data 
+% Parse dn-ds data from Chimp-genome paper (Nature). 
+% Then compare to selection coefficient s inferred from exon sequencing data 
 
 AssignGeneralConstants
 AssignRVASConstants;
-DNDS_file_name = 'C:\research\RVAS\Data\nature04072-s6.txt'
+
+DNDS_file_name = 'C:\research\RVAS\Data\nature04072-s6.txt'; % 
 
 % Read human-chimp file:
 if(exist(file_name_to_mat(DNDS_file_name), 'file'))
@@ -21,7 +22,7 @@ good_inds = setdiff(1:num_genes, bad_inds);
 HumanChimp.w(bad_inds) = HumanChimp.Ka(bad_inds) ./ HumanChimp.Ki(bad_inds) % Compute selection 
 figure; hist(HumanChimp.w, 100); xlabel('w=Ka/Ks'); ylabel('Freq.'); 
 
-% fit s by solving : Ka/Ks = S / (1-e^{-S})   from Nielsen&Yang
+% fit s by solving : Ka/Ks = S / (1-e^{-S})   from [Nielsen&Yang]
 HumanChimp.s = zeros(num_genes,1); 
 
 for i=1:num_genes
@@ -36,8 +37,7 @@ figure; hist(HumanChimp.s, 100); xlabel('s-hat (Human-Chimp)'); ylabel('Freq.');
 my_saveas(gcf, fullfile(sfs_figs_dir, 'Inter_vs_Intra_species_selection', 'S_hat_distribution_human_chimp'), {'epsc', 'pdf', 'jpg'}); 
 
 
-
-% Plot theoretical Curve from Nielsen&Yang
+% Plot theoretical Curve from [Nielsen&Yang]
 S_vec = -5:0.01:5; w_vec = S_vec ./ (1-exp(-S_vec));
 figure; hold on; plot(S_vec, w_vec); 
 xlabel('S'); ylabel('w = Ka/Ks'); 
@@ -46,11 +46,17 @@ title('Formula: w = S / (1-e^{-S})');
 my_saveas(gcf, fullfile(sfs_figs_dir, 'S_vs_KaKs'), {'epsc', 'pdf', 'jpg'}); 
 
 
-
 % Get SFS selection scores 
-use_ExAC_constraint=1; 
-if(use_ExAC_constraint) % use constraint from Samocha et al. 
-     Constraint_file_name = 'C:\research\RVAS\Data\SiteFrequencySpectra\ExAC\ConstraintSamocha\fordist_cleaned_exac_r03_march16_z_pli_rec_null_data.txt'; 
+exome_contraint='ExAC_Samocha'; % 'ExAC_PTV' 
+
+switch exome_constraint
+	case 'ExAC_Samocha'  % use constraint from Samocha et al. 
+	     Constraint_file_name = 'C:\research\RVAS\Data\SiteFrequencySpectra\ExAC\ConstraintSamocha\fordist_cleaned_exac_r03_march16_z_pli_rec_null_data.txt'; 
+	case 'ExAC_PTV' % protein truncation varinats from Shamil's biorxiv
+	     Constraint_file_name = 'C:\research\RVAS\Data\SiteFrequencySpectra\ExAC\PTV\XXX.txt'; % fill file name!!!  
+	case 'ExAC_TwoClass'; % s_hat estimator from our model using missense+stops  
+	     Constraint_file_name = 'C:\research\RVAS\Data\SiteFrequencySpectra\ExAC\out\GeneByGene.txt'; % fill file name!!!  
+end
     % Read constraint file:
     if(exist(file_name_to_mat(Constraint_file_name), 'file'))
         HumanExome = load(file_name_to_mat(Constraint_file_name));
@@ -64,12 +70,11 @@ if(use_ExAC_constraint) % use constraint from Samocha et al.
     plot(sort(HumanExome.lof_z), (1:HumanExome.num_genes)./HumanExome.num_genes, 'g'); 
     legend({'Synonymous', 'Missense', 'LOF'}); legend('boxoff'); xlabel('Z-score'); ylabel('Cumulative freq.'); 
      
-     
-else % use our s-hat estimator 
-    
-    
-end
 
+% Perform comparison of selection coefficients inferred from different sources 
+plot_two_selection_comparison(HumanChimp, HumanExome);
+
+function plot_two_selection_comparison(HumanChimp, HumanExome)
 % Intersect list with the list of selection coefficients from human-exome studies 
 [common_genes, I, J] = intersect(upper(HumanChimp.Symbol), upper(HumanExome.gene)); 
 
