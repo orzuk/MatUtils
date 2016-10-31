@@ -54,6 +54,11 @@ if(ischar(A)) % load input data from file
                 'allele_types', 'allele_types_ind', 'all_allele_types', 'num_all_allele_types', 'good_allele_inds', 'population', ...
                 'count_vec', 'f_vec', 'n_vec', 'allele_types');
             
+            for j=1:length(cur_A.f_vec)
+                if(any(isnan(cur_A.f_vec{j})))
+                    problem_NAN = 12142314
+                end
+            end
             if(i_c==1) % first
                 A{i} = cur_A;
             else % next

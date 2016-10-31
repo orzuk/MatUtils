@@ -277,7 +277,12 @@ for population = populations_vec % perform further preprocessing (compute SNP sp
         
         n_vec{i} =  S.XXX_REF_ALLELE_COUNT_(allele_type_inds) +  S.XXX_VARIANT_COUNT_(allele_type_inds);
         count_vec{i} =   S.XXX_VARIANT_COUNT_(allele_type_inds);
-        f_vec{i} = S.XXX_VARIANT_COUNT_(allele_type_inds) ./ n_vec{i};
+        f_vec{i} = S.XXX_VARIANT_COUNT_(allele_type_inds) ./ max(n_vec{i}, 1); % TEMP!!! set to zero frequencies when total (ref+altnerative) counts are zero!!! 
+        
+        if(any(isnan(f_vec{i})))
+            problem_NAN = 12142314
+        end
+        
         
         [tmp_genes, ~, tmp_J] = unique(upper(S.GENE(allele_type_inds)) ); % get gene indices
         [~, ~, gene_inds{i}] = intersect(tmp_genes, S.unique_genes); % S.GENE(allele_type_inds), S.unique_genes);
