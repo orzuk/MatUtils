@@ -53,13 +53,20 @@ if(exist(file_name_to_mat(Constraint_file_name), 'file'))
 else
     [HumanExome, R] = ReadDataFile(Constraint_file_name, [], 1, [], tab);
 end
-HumanExome.num_genes = length(HumanExome.gene);
-figure; hold on;
-plot(sort(HumanExome.syn_z), (1:HumanExome.num_genes)./HumanExome.num_genes);
-plot(sort(HumanExome.mis_z), (1:HumanExome.num_genes)./HumanExome.num_genes, 'r');
-plot(sort(HumanExome.lof_z), (1:HumanExome.num_genes)./HumanExome.num_genes, 'g');
-legend({'Synonymous', 'Missense', 'LOF'}); legend('boxoff'); xlabel('Z-score'); ylabel('Cumulative freq.');
+if(isfield(HumanExome, 'gene'))
+    HumanExome.num_genes = length(HumanExome.gene);
+else
+    HumanExome.num_genes = length(HumanExome.gene_symbol);
+    HumanExome.gene = HumanExome.gene_symbol;
+end
 
+if(isfield(HumanExome, 'syn_z')) % plot SFS
+    figure; hold on;
+    plot(sort(HumanExome.syn_z), (1:HumanExome.num_genes)./HumanExome.num_genes);
+    plot(sort(HumanExome.mis_z), (1:HumanExome.num_genes)./HumanExome.num_genes, 'r');
+    plot(sort(HumanExome.lof_z), (1:HumanExome.num_genes)./HumanExome.num_genes, 'g');
+    legend({'Synonymous', 'Missense', 'LOF'}); legend('boxoff'); xlabel('Z-score'); ylabel('Cumulative freq.');
+end
 
 % Perform comparison of selection coefficients inferred from different sources
 plot_two_selection_comparison(HumanChimp, HumanExome, sfs_figs_dir);
