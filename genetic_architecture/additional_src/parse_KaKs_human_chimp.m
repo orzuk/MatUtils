@@ -25,16 +25,17 @@ else
 end
 HumanChimp.Symbol = num2str_cell(HumanChimp.Symbol); % correct problems in gene names (position appears instead)
 
-if(~isfield(HumanChimp, 's')) % compute selection coefficient (once)
+%if(~isfield(HumanChimp, 's')) % compute selection coefficient (once)
     [HumanChimp.s, HumanChimp.w] = KaKs_to_selection_coefficient(HumanChimp.Ka, HumanChimp.Ks); % Compute selection
     num_genes = length(HumanChimp.Ka);
-    bad_inds = union(find(HumanChimp.w > 5), find(isnan(HumanChimp.w)))
-    good_inds = setdiff(1:num_genes, bad_inds);
-    if(~isempty(bad_inds))
-        [HumanChimp.s(bad_inds), HumanChimp.w(bad_inds)] = KaKs_to_selection_coefficient(HumanChimp.Ka(bad_inds), HumanChimp.Ki(bad_inds));  % Compute selection
+    HumanChimp.bad_inds = union(find(HumanChimp.w > 5), find(isnan(HumanChimp.w)))
+    HumanChimp.good_inds = setdiff(1:num_genes, HumanChimp.bad_inds);
+    if(~isempty(HumanChimp.bad_inds))
+        [HumanChimp.s(HumanChimp.bad_inds), HumanChimp.w(HumanChimp.bad_inds)] = ...
+            KaKs_to_selection_coefficient(HumanChimp.Ka(HumanChimp.bad_inds), HumanChimp.Ki(HumanChimp.bad_inds));  % Compute selection
     end
     save(file_name_to_mat(DNDS_file_name), '-struct', 'HumanChimp'); % save again, with selected coefficients
-end
+%end
 
 figure; hist(HumanChimp.w, 100); xlabel('w=Ka/Ks'); ylabel('Freq.');
 figure; hist(HumanChimp.s, 100); xlabel('s-hat (Human-Chimp)'); ylabel('Freq.');

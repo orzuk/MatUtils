@@ -25,3 +25,4 @@ for i=1:n
     s(i) = fzero(@(S) S - (1-exp(-S))*max(10^(-6),w(i)), 2*log(max(10^(-6),w(i)))); % solve with close-by initial condition
 end
 s = s ./ (4*N_eff); % go from Big S to little s
+s(w==0)=-1;  % maximum possible
