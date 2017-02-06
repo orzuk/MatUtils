@@ -16,7 +16,7 @@ theta = 0.5; % proportion of cases in sample
 
 %% NEW! Test RVAS power 
 if(test_RVAS_power_for_paper) 
-    power_parameters_file = 'C:\research\matlab\libs\genetic_architecture\Data\powerParameters.txt';
+    power_parameters_file = fullfile(matlab_libs_root_dir, 'genetic_architecture\Data\PowerParameters.txt');
     power_output  = RVAS_power_calculator(power_parameters_file);
     
 end

@@ -9,7 +9,7 @@
 % GRR - disease relative risk for each locus
 % RAF - risk allele frequency for each locus 
 % 
-function [GRR RAF] = odds_ratio_to_genetic_relative_risk(OR, CAF, mu)
+function [GRR, RAF] = odds_ratio_to_genetic_relative_risk(OR, CAF, mu)
 
 %GRR = (1 - 2.*f_vec + f_vec.^2 - mu + mu.*f_vec + OR .*(f_vec-1)) ./ ...
 %    (f_vec - f_vec.^2 - OR .* (f_vec + mu));

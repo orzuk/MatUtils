@@ -64,7 +64,7 @@ R_med = cell(demographic_models_struct.num_models+2, length(show_s_null)+2); % N
 R_med{1,1} = 's';
 R_med{3,1} = 'f_{null}(equil.)';
 
-[mu gene_length mu_per_gene] = set_genomic_mutation_rates(); % set mutation rates
+[mu, gene_length, mu_per_gene] = set_genomic_mutation_rates(); % set mutation rates
 
 Big_S = show_s_null .* N .* 4;
 normalization_factor_vec = phi_s_integral(0.999999999,-Big_S, 1) - phi_s_integral(0.000000001,-Big_S, 1);
@@ -583,7 +583,7 @@ end
 
 
 
-
+% Plot SFS for different selection coefficients 
 function plot_frac_null_and_harmless_all_populations_internal(demographic_models_struct, ...
     show_s_null_ind, xi_prob_leq_f, frac_null_by_freq_cumulative, eric_color_vec, my_symbol_vec, legend_vec, title_str, ...
     figs_for_paper_flag, figs_dir)

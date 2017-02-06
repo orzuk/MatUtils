@@ -2,7 +2,7 @@
 % 
 % Input: 
 % vals - unique values
-% counts - how many time each value appears
+% counts - how many time each value appears (assumed integers)
 % 
 % Output: 
 % v - vector such that each value vals(i) appears count(i) times

@@ -8,7 +8,7 @@
 % N - population size
 % two_side_flag - return Derived (0) between 0 and 1 or Minor Allele Freq. (1) between 0 and 0.5
 % scale_mode - return results on linear or log scale (latter to avoid underflow). Default is linear
-% weight_flag - how do we weight different allele frequencies.
+% weight_flag - how do we weight different allele frequencies (default: no weight)
 %
 % Output:
 % g - probability of allele frequency being below x (NOT normalized!)

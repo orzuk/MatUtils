@@ -11,7 +11,6 @@
 %
 function p_z_x_marginal = genetic_relative_risk_to_p_z_x_marginal(f_vec, GRR_vec, mu_vec)
 
-
 p_z_x_marginal = zeros(max(length(f_vec), length(GRR_vec)), 4);
 f_vec = vec2column(f_vec);
 GRR_vec = vec2column(GRR_vec);

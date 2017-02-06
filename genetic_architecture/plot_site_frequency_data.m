@@ -185,6 +185,9 @@ figure_type_vec = ...
     'enrichment_missense_hist'};
 
 bin_size = min(diff(num_bins));
+
+new_fig_pop = 1; new_fig_allele_type = 1; 
+
 for figure_type = { ... % 'enrichment_missense_hist', ...  % figure_type_vec
         'num_variants_cum_log_x_normalized', 'num_variants_cum', ...
         'num_carriers_cum_normalized', ... % 'num_carriers_cum', 'heterozygosity_cum',
@@ -223,11 +226,24 @@ for figure_type = { ... % 'enrichment_missense_hist', ...  % figure_type_vec
     end
     if(exist('plot_x_vec', 'var') && (~isempty(plot_x_vec)))
         ctr=1;
-        for i=1:length(A{j}.good_allele_inds{5})
-            for j=1:num_populations % here plotting is done !!
-                eval(['h(' num2str(ctr) ') = ' plot_str '(plot_x_vec{' num2str(ctr) '}, plot_y_vec{' num2str(ctr) ...
-                    '}, ''' symbol_vec{j} ''', ''linewidth'', 2, ''color'', ''' color_vec(i) ''');']); hold on; ctr=ctr+1;
+        %             if(new_fig_allele_type)
+        %                 figure;
+        %             end
+        for j=1:num_populations % here plotting is done !!
+            if(new_fig_pop)
+                subplot(2, 4, j); j_sim=1;  % figure;
+            else
+                j_sim = j;
             end
+            for i=1:length(A{j}.good_allele_inds{5})
+                eval(['h(' num2str(ctr) ') = ' plot_str '(plot_x_vec{' num2str(ctr) '}, plot_y_vec{' num2str(ctr) ...
+                    '}, ''' symbol_vec{j_sim} ''', ''linewidth'', 2, ''color'', ''' color_vec(i) ''');']); hold on; ctr=ctr+1;
+            end
+            
+            if(new_fig_pop)
+                title(A{j}.population); 
+            end
+                
         end
     end
     if(exist('additional_plot_x_vec', 'var') && (~isempty(additional_plot_x_vec)))
@@ -245,12 +261,17 @@ for figure_type = { ... % 'enrichment_missense_hist', ...  % figure_type_vec
         ylim(my_y_lim);
     end
     
-    if(ismember(figure_type, 'heterozygosity_hist_zoom')) % [7])) % something weird is wrong with legend for 8 (zoom-in)
+      if(~new_fig_pop) % one title at end
+      if(ismember(figure_type, 'heterozygosity_hist_zoom')) % [7])) % something weird is wrong with legend for 8 (zoom-in)
         legend(legend_vec, 'location', legend_loc); % h 
     else
         %        legend(h([1:num_populations:num_populations*length(A{j}.good_allele_inds{5})  ctr-1]), legend_vec, ...
         legend(legend_vec, 'location', legend_loc, 'fontsize', 14, 'fontweight', 'bold'); % h 
-    end
+      end
+      else % here legend for subplots
+            legend({'Synonymous', 'Missense', 'Disruptive'}); 
+      end
+      
     legend boxoff;
     if( (iscell(legend_vec)) && (~isempty(strfind(lower(legend_vec{1}), 'nons'))) )
         tmp_str = {'NS', 'S', 'STOP'};
@@ -258,16 +279,18 @@ for figure_type = { ... % 'enrichment_missense_hist', ...  % figure_type_vec
         tmp_str = {'S', 'NS', 'STOP'};
     end
     
-    title(str2title([str2word('.', remove_dir_from_file_name(output_file_name), 'end') ...
-        ' ' fig_str ', 2n\_s=' num2str(num_chr)  ', #GENES=' num2str(A{1}.num_genes) ', #SNPs=(' tmp_str{1} ' ' ...
-        num2str(num_snps(A{j}.good_allele_inds{5}(1))) ', ' tmp_str{2} ' ' num2str(num_snps(A{j}.good_allele_inds{5}(2))) ...
-        ', ' tmp_str{3} ' ' num2str(num_snps(A{j}.good_allele_inds{5}(3))) ')'] ), 'fontsize', 8);
+    if(~new_fig_pop) % one title at end
+        title(str2title([str2word('.', remove_dir_from_file_name(output_file_name), 'end') ...
+            ' ' fig_str ', 2n\_s=' num2str(num_chr)  ', #GENES=' num2str(A{1}.num_genes) ', #SNPs=(' tmp_str{1} ' ' ...
+            num2str(num_snps(A{j}.good_allele_inds{5}(1))) ', ' tmp_str{2} ' ' num2str(num_snps(A{j}.good_allele_inds{5}(2))) ...
+            ', ' tmp_str{3} ' ' num2str(num_snps(A{j}.good_allele_inds{5}(3))) ')'] ), 'fontsize', 8);
+    end
     % ...
     %    '), het. per gene=(' tmp_str{1} ' ' num2str(heterozygosity.per_gene(A{j}.good_allele_inds{5}(1)),2) ', ' tmp_str{2} ' ' ...
     %    num2str(heterozygosity.per_gene(A{j}.good_allele_inds{5}(2)),2) ') ' ...
     %    ' het. per site=(' tmp_str{1} ' ' num2str(heterozygosity.per_site(A{j}.good_allele_inds{5}(1)),2) ', ' tmp_str{2} ' ' ...
     %    num2str(heterozygosity.per_site(A{j}.good_allele_inds{5}(2)),2) ')']), 'fontsize', 8);
-    my_saveas(gcf, [output_file_name '_' exome_struct.populations '_all_' fig_str], {'fig', 'pdf', 'epsc', 'jpg'}); % {'epsc', 'pdf', 'jpg', 'fig'});
+    my_saveas(gcf, [output_file_name '_' exome_struct.populations '_all_' fig_str], {'epsc', 'jpg'}); % {'epsc', 'pdf', 'jpg', 'fig'});
 end % loop on figure types
 
 
@@ -343,6 +366,7 @@ function [normalized_flag, plot_x_vec, plot_y_vec, additional_plot_x_vec, additi
     GeneStruct, MutationTypes, UniqueMutationRateTable, theta, ...
     alpha_fit)
 
+new_fig_pop = 1; new_fig_allele_type = 0; 
 Assign24MammalsGlobalConstants;
 
 normalized_flag = strfind(figure_type{1}, 'normalized'); % Get plots
@@ -352,6 +376,9 @@ my_x_lim = []; my_y_lim = [];
 
 figure; ctr=1; plot_x_vec = cell(num_populations*length(A{1}.good_allele_inds{5}), 1); plot_y_vec = plot_x_vec; legend_vec = plot_x_vec;
 for i=vec2row(A{1}.good_allele_inds{5}) % loop on different allele types 1:min(6, A.num_allele_types)
+    if(new_fig_allele_type)
+        figure; 
+    end
     for j=1:num_populations % loop on different populations
         cur_allele_type = A{j}.allele_types{i};  % good_allele_inds{4}(i)); % get string of allele type. Mis-match!!!
         [sorted_f_vec, sort_perm] = sort(f_vec{i,j});

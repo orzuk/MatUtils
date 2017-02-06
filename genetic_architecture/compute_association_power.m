@@ -369,7 +369,7 @@ switch strrep(lower(test_stat), '_', '-') % set parameters for test
         else
             true_model_str = 'MLT';
         end
-        [LRT_mu LRT_var] = ...
+        [LRT_mu, LRT_var] = ...
             LRT_stat_moments_MLT(2, 1, mu, h_x, true_model_str); % here h_x is on the liability scale
         
     case {'two-class-likelihood', 'two_class_likelihood', 'two_class_likelihood_QTL', 'two-class-likelihood-QTL'} % New !!! include likelihood based test for rare alleles

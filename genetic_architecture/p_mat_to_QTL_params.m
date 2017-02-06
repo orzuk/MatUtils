@@ -8,7 +8,7 @@
 % beta - effect size 
 % V - total trait's variance 
 %
-function [f_vec beta V] = p_mat_to_QTL_params( p_mat )
+function [f_vec, beta, V] = p_mat_to_QTL_params( p_mat )
 
 f_vec = p_mat(:,1); % encoding convention: first value is the frequency
 beta = p_mat(:,2);

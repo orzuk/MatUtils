@@ -1,4 +1,11 @@
 % Get indices of important class of alleles: missense, synonymous and stop
+% Input: 
+% S - structure 
+% exome_struct - structure with exome information
+% 
+% Output: 
+% good_allele_inds - indices of good alleles
+%
 function good_allele_inds = get_good_allele_inds(S, exome_struct)
 
 good_allele_inds = cell(4,1);
