@@ -30,8 +30,6 @@ end
 
 field_names = fieldnames(data_struct);
 
-
-
 for i=1:length(field_names)
     %    eval_str = ['S.' field_names{i} ' = R(2:end,' num2str(i) ');'];
     if(i == 1) % here set R

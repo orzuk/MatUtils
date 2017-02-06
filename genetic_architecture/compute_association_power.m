@@ -155,7 +155,7 @@ analytic_flag = ~isempty(strfind(test_stat, 'analytic'));
 
 block_size = 100; % number of iterations do do each time
 if(~analytic_flag) % just run empirical tests
-    [block_starts block_ends block_lens num_blocks] = divide_region_to_blocks(1, iters, block_size);
+    [block_starts, block_ends, block_lens, num_blocks] = divide_region_to_blocks(1, iters, block_size);
     non_centrality_parameter = []; % nothing to put here
 else % no meaning for blocks
     num_blocks = 1;
@@ -503,7 +503,7 @@ switch strrep(lower(test_stat), '_', '-') % perform test
         
         switch test_type
             case 'case-only'
-                [f_vec grr_vec mu_vec] = p_z_x_marginal_to_genetic_relative_risk(p_vec_original);
+                [f_vec, grr_vec, mu_vec] = p_z_x_marginal_to_genetic_relative_risk(p_vec_original);
                 er_vec = genetic_relative_risk_to_enrichment_over_pop(grr_vec, f_vec, mu_vec);
                 q_vec = er_vec.*f_vec;
                 non_centrality_parameter = 2 .* n_cases * ( q_vec .* log(q_vec ./ f_vec) + (1-q_vec) .* log((1-q_vec) ./ (1-f_vec)) ) -1; % take expectation minus one!!! (expectation is NCP + deg. freedom which is one here)
