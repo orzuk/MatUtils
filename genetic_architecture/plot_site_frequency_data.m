@@ -134,7 +134,8 @@ alpha_fit = zeros(num_populations, 1); alpha_fit_by_freq = alpha_fit;
 ratio_vec2 = zeros(num_populations,  A{1}.num_allele_types);
 for j=1:num_populations
     [variants, carriers, singletons, heterozygosity] = ... % New: compute mutation rates per site
-        compute_average_mutation_rates_per_class(A{j}, f_vec(:,j)', count_vec(:,j)', het_vec(:,j)', target_length, A{j}.good_allele_inds);
+        compute_average_mutation_rates_per_class(A{j}, f_vec(:,j)', count_vec(:,j)', ...
+        het_vec(:,j)', target_length, A{j}.good_allele_inds);
     if(exist('spectrum_data_file', 'var')) % Save again to same file new fields
         tmp_het_vec = het_vec; het_vec = het_vec(:,j);
         tmp_het_var_vec = het_var_vec; het_var_vec = het_var_vec(:,j);
@@ -225,27 +226,32 @@ for figure_type = { ... % 'enrichment_missense_hist', ...  % figure_type_vec
         end
     end
     if(exist('plot_x_vec', 'var') && (~isempty(plot_x_vec)))
-        ctr=1;
-        %             if(new_fig_allele_type)
-        %                 figure;
-        %             end
-        for j=1:num_populations % here plotting is done !!
+        for j=1:num_populations % here just make sub-plots. 
             if(new_fig_pop)
                 subplot(2, 4, j); j_sim=1;  % figure;
             else
                 j_sim = j;
             end
-            for i=1:length(A{j}.good_allele_inds{5})
+        end
+        ctr=1;
+        %             if(new_fig_allele_type)
+        %                 figure;
+        %             end
+        for i=1:length(A{j}.good_allele_inds{5})
+            for j=1:num_populations % here plotting is done !!
+                if(new_fig_pop)
+                    subplot(2, 4, j); j_sim=1;  % figure;
+                else
+                    j_sim = j;
+                end                
                 eval(['h(' num2str(ctr) ') = ' plot_str '(plot_x_vec{' num2str(ctr) '}, plot_y_vec{' num2str(ctr) ...
                     '}, ''' symbol_vec{j_sim} ''', ''linewidth'', 2, ''color'', ''' color_vec(i) ''');']); hold on; ctr=ctr+1;
             end
-            
             if(new_fig_pop)
-                title(A{j}.population); 
+                title(A{j}.population);
             end
-                
         end
-    end
+    end % loop on poplulations and ..
     if(exist('additional_plot_x_vec', 'var') && (~isempty(additional_plot_x_vec)))
         for i=1:length(additional_plot_x_vec)
             eval(['h(' num2str(ctr) ') = ' plot_str '(additional_plot_x_vec{' num2str(i) '}, additional_plot_y_vec{' num2str(i) ...
@@ -305,7 +311,15 @@ end % loop on figure types
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Internal function for plotting different SFS figures
+% Internal function for computing different SFS statistics
+% Input: 
+% A -  
+% MutationRateTable - 
+% MutationTypes - 
+% output_file_name - 
+% Output:
+% R - cell array with alleles information 
+% 
 function R = internal_compute_SFS_table(A, MutationRateTable, MutationTypes, output_file_name)
 
 Assign24MammalsGlobalConstants;
@@ -359,7 +373,13 @@ savecellfile(R, fullfile(output_file_dir, 'ESP_exome_statistics.txt'));
 
 
 % Internal function for plotting different SFS figures
-function [normalized_flag, plot_x_vec, plot_y_vec, additional_plot_x_vec, additional_plot_y_vec, x_str, y_str, my_x_lim, my_y_lim, legend_vec, legend_loc, fig_str] = ...
+% 
+% Input: 
+% ... (lots of variables. Put in structrs)
+% Output: 
+% ...
+function [normalized_flag, plot_x_vec, plot_y_vec, additional_plot_x_vec, additional_plot_y_vec, ...
+    x_str, y_str, my_x_lim, my_y_lim, legend_vec, legend_loc, fig_str] = ...
     internal_plot_SFS_figure(figure_type, A, new_A, num_populations, ...
     x_vec, f_vec, het_vec, num_alleles_vec, ...
     constant_size_cum_phi_zero_vec, constant_size_cum_phi_one_vec, constant_size_cum_het_vec, ...
@@ -560,6 +580,10 @@ for i=vec2row(A{1}.good_allele_inds{5}) % loop on different allele types 1:min(6
         end % switch figure type again ..
         legend_vec{ctr} = [strdiff(A{j}.allele_types{i}, 'coding-') ', ' A{j}.population ...
             ', het.=' num2str(new_A{j}.heterozygosity.per_gene(i),2)];
+%         num_points = length(plot_x_vec); num_pos_points = sum(plot_x_vec > 0);
+%         legend_vec{ctr} = [legend_vec{ctr} '(' num2str(num_pos_points) ', ' num2str(num_points) ')']; % add #points to legend
+        
+        
         ctr=ctr+1;
     end % loop on different populations
 end % loop on different allele types
@@ -607,13 +631,13 @@ switch clean_figure_type % additional plots specific to each type of plot
         legend_vec = num2str(vec2column(A{1}.upper_freq_vec)); %            legend_vec = {'log2(missense/synonymous)'};
         legend_vec = [repmat('DAF<', length(A{1}.upper_freq_vec), 1) legend_vec];
         
-    case 'num_variants_cum' % 0 % plot cumulative of fitted distribution for missense
-        additional_plot_x_vec = {x_vec}; % missense_fit_bins,
-        additional_plot_y_vec = {constant_size_cum_phi_zero_vec ./ constant_size_cum_phi_zero_vec(end)}; % missense_fit_hist,
-        legend_vec{end+1} = 'neutral, const. N'; %  'missense-fit',
-        if(normalized_flag)
-            my_y_lim = [0.98 1];
-        end
+    case 'num_variants_cum' % 0 % plot cumulative of fitted distribution for missense (why needed??)
+% % %         additional_plot_x_vec = {x_vec}; % missense_fit_bins,
+% % %         additional_plot_y_vec = {constant_size_cum_phi_zero_vec ./ constant_size_cum_phi_zero_vec(end)}; % missense_fit_hist,
+% % %         legend_vec{end+1} = 'neutral, const. N'; %  'missense-fit',
+% % %         if(normalized_flag)
+% % %             my_y_lim = [0.98 1];
+% % %         end
     case 'fraction_of_null_alleles' % 1.8 % 0.5 plot alpha (fraction of nulls ??) as function of allele frequency
         stop_hist_interp = stop_hist_interp ./ alpha_fit;
         synonymous_hist_interp = synonymous_hist_interp ./ (1-alpha_fit);
@@ -721,6 +745,10 @@ heterozygosity.ratio_over_stop_gained_vec = (heterozygosity.per_gene ./ singleto
 
 
 % Unite different sub-class annotations into three major classes: stop, missense and synonymous
+% Input: 
+% A - strcuture with alleles information
+% Output: 
+% A_new - new structure, with three major classes:  stop, missense and synonymous
 function A_new = internal_unite_by_class(A)
 
 A.good_allele_inds{5} = (A.num_allele_types+1):(A.num_allele_types+3); 

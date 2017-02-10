@@ -11,8 +11,8 @@ parse_site_frequency_flag = 1; % parse original datafile (different between diff
 read_vcf_flag=0; % read vcf files for exome data
 unite_flag=0; % 0: parse ESP data. 1: unite all data to one chromosome
 read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
-extract_fields_flag=0; % extract ??? fields
-compute_gene_matrices_flag=0; % 1. Compute for each gene ?? flag for parsing ???
+extract_fields_flag=1; % extract ??? fields
+compute_gene_matrices_flag=1; % 1. Compute for each gene ?? flag for parsing ???
 plot_site_frequency_flag = 1; % 1: plot SFS data (this is also part of pre-processing)
 estimate_gene_by_gene = 0; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 plot_gene_by_gene = 0; % make figures for individual genes
@@ -36,7 +36,7 @@ i_pop=1;
 if(parse_site_frequency_flag) % here we parse
     %    if(read_to_mat_flag)
     vcf_file_names =  GetFileNames(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, [exome_struct.prefix, '*.vcf']), 1);
-    for i=1:10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG. length(vcf_file_names) % loop on all chunks (By chromosomes or otherwise)
+    for i=1:1 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG. length(vcf_file_names) % loop on all chunks (By chromosomes or otherwise)
         job_str = ['[A] =' ... % , n_vec, count_vec, f_vec, allele_types] = ' ...
             'parse_site_frequency_data(''' vcf_file_names{i} ...
             ''', exome_struct, [], ' num2str(read_to_mat_flag) ', ' num2str(extract_fields_flag) ', ' ...

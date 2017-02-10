@@ -92,7 +92,7 @@ end % if compute_gene_matrices_flag
 
 % Internal function: Convert vcf file to .mat file
 %
-function    S = internal_read_to_mat(site_frequency_file_name)
+function  S = internal_read_to_mat(site_frequency_file_name)
 
 if(~exist(file_name_to_mat(site_frequency_file_name), 'file')) % read input .vcf file and convert to .mat
     reading_vcf_file=1
@@ -131,7 +131,13 @@ save_file_mat_format=1
 save(file_name_to_mat(site_frequency_file_name), '-struct', 'S'); % always save in new format
 
 % Internal function: Extract fields
-%
+% Input: 
+% site_frequency_file_name - file with data 
+% populations_vec - vector of population names 
+% exome_struct - structure with exome information
+% 
+% Output: 
+% S - vector of information 
 function S = internal_extract_fields(site_frequency_file_name, populations_vec, exome_struct)
 
 S = load(file_name_to_mat(site_frequency_file_name));
@@ -204,14 +210,26 @@ end % loop on population
 
 
 % Internal function: Compute gene matrices
-
-function  [S, n_vec, count_vec, f_vec]  = internal_compute_gene_matrices(site_frequency_file_name, populations_vec, exome_struct, compute_frac_carriers)
+% Input: 
+% site_frequency_file_name 
+% populations_vec 
+% exome_struct 
+% compute_frac_carriers
+% 
+% Output: 
+% S - 
+% n_vec - 
+% count_vec -  
+% f_vec - 
+% 
+function  [S, n_vec, count_vec, f_vec]  = ...
+    internal_compute_gene_matrices(site_frequency_file_name, populations_vec, exome_struct, compute_frac_carriers)
 
 Assign24MammalsGlobalConstants; AssignRVASConstants;
 
 output_dir = dir_from_file_name(site_frequency_file_name);
 
-for population = populations_vec % perform further preprocessing (compute SNP specific parameters)
+for population = populations_vec % perform further preprocessing (compute SNP-specific parameters)
     my_mkdir(fullfile(output_dir, strdiff(population{1}, '_')));
     S = load(add_pop_to_file_name(site_frequency_file_name, population{1}), ... % load only neccessary fields
         'XXX_VARIANT_COUNT_', 'XXX_REF_ALLELE_COUNT_', 'XXX_FEATURE_', 'GENE', ... % 'XXX_GENE_', ...
@@ -314,7 +332,7 @@ for population = populations_vec % perform further preprocessing (compute SNP sp
         S.upper_freq_vec = upper_freq_vec;
         for j=1:length(upper_freq_vec) % compute freq. below threshold for different thresholds and classes
             sprintf('Compute frac. carriers for threshold %ld out of %ld', j, length(upper_freq_vec))
-            [S.num_alleles_per_gene_mat{j} S.total_freq_per_gene_mat{j} ...
+            [S.num_alleles_per_gene_mat{j}, S.total_freq_per_gene_mat{j}, ...
                 S.total_heterozygosity_per_gene_mat{j} ] = ...
                 get_cumulative_freq_internal(S, S.upper_freq_vec(j)); % this gives correct cumulative but doesn't collapse alleles !
             num_coding_allele_types = length(coding_allele_types);
