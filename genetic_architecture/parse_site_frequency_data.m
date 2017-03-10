@@ -73,7 +73,8 @@ end % if extract_fields_flag
 %%%%%%%%%%%%% Stage 3: Compute Gene-Specific Matrices            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if(compute_gene_matrices_flag)
-    [S, n_vec, count_vec, f_vec] = internal_compute_gene_matrices(site_frequency_file_name, populations_vec, exome_struct, compute_frac_carriers);
+%    [S, n_vec, count_vec, f_vec] = internal_compute_gene_matrices(site_frequency_file_name, populations_vec, exome_struct, compute_frac_carriers);
+    [S, n_vec, count_vec, f_vec] = internal_compute_gene_matrices(site_frequency_file_name, {'_AllPop'}, exome_struct, compute_frac_carriers);
 end % if compute_gene_matrices_flag
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -92,6 +93,11 @@ end % if compute_gene_matrices_flag
 
 % Internal function: Convert vcf file to .mat file
 %
+% Input: 
+% site_frequency_file_name - name of file with vcf data
+% Output: 
+% S - structure with fields 
+% 
 function  S = internal_read_to_mat(site_frequency_file_name)
 
 if(~exist(file_name_to_mat(site_frequency_file_name), 'file')) % read input .vcf file and convert to .mat
@@ -138,62 +144,83 @@ save(file_name_to_mat(site_frequency_file_name), '-struct', 'S'); % always save 
 % 
 % Output: 
 % S - vector of information 
+%
 function S = internal_extract_fields(site_frequency_file_name, populations_vec, exome_struct)
 
 S = load(file_name_to_mat(site_frequency_file_name));
 
-for population = populations_vec  % save different files per population
+num_populations = length(populations_vec); 
+
+% Further parsing of vcf file
+num_snps = length(S.POS);
+num_fields = length(S.field_names);
+S.XXX_VARIANT_COUNT_= zeros(num_snps ,num_populations); % 1
+S.XXX_REF_ALLELE_COUNT_= zeros(num_snps ,num_populations); % 1
+S.XXX_FEATURE_ = cell(num_snps,1);
+S.GENE = cell(num_snps,1);
+S.aminoAcidChange = cell(num_snps,1);
+S.REF_CODON = cell(num_snps,1); S.ALT_CODON =  cell(num_snps,1); S.ProteinPos = cell(num_snps,1);
+
+S.INFO_ARR = cell(num_snps, num_fields); % create big array of all fields !!
+S.populations_vec = populations_vec; % Save populations!! 
+start_snp_loop_time = cputime;
+
+pop_struct = cell(num_populations, 1); j_pop=1;
+for population = populations_vec  % save different files per population. WHY??? 
+    pop_struct{j_pop} = internal_get_pop_indices_info(S, population, exome_struct); j_pop=j_pop+1; 
     %if(exist([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], 'file')) % take only valuse which appear
     if(exist(add_pop_to_file_name(site_frequency_file_name, population{1}), 'file'))
         continue;
     end
     my_mkdir( fullfile(dir_from_file_name(site_frequency_file_name), strdiff(population{1}, '_') ) );
     
-    % Further parsing of vcf file
-    num_snps = length(S.POS);
-    num_fields = length(S.field_names);
-    S.XXX_VARIANT_COUNT_= zeros(num_snps,1);
-    S.XXX_REF_ALLELE_COUNT_= zeros(num_snps,1);
-    S.XXX_FEATURE_ = cell(num_snps,1);
-    S.GENE = cell(num_snps,1);
-    S.aminoAcidChange = cell(num_snps,1);
-    S.INFO_ARR = cell(num_snps, num_fields); % create big array of all fields !!
-    start_snp_loop_time = cputime;
+end
+
+if(exist(add_pop_to_file_name(site_frequency_file_name, '_AllPop'), 'file')) % NEW! avoid work if file is ready !!! 
+    return;
+end
     
-    pop_struct = internal_get_pop_indices_info(S, population, exome_struct);
+for i=1:num_snps  % heavy loop: run on all SNPs and parse information
+    if(mod(i, 500) == 0)
+        sprintf('Parse SNP %d out of %d, time=%f', i, num_snps, cputime - start_snp_loop_time)
+    end
+    cur_snp_fields = regexp(S.INFO{i}, '[=;]', 'split'); cur_snp_values = cur_snp_fields(2:2:end); cur_snp_fields=cur_snp_fields(1:2:end-1);
     
-    for i=1:num_snps  % heavy loop: run on all SNPs and parse information
-        if(mod(i, 500) == 0)
-            sprintf('Parse SNP %d out of %d, time=%f', i, num_snps, cputime - start_snp_loop_time)
-        end
-        cur_snp_fields = regexp(S.INFO{i}, '[=;]', 'split'); cur_snp_values = cur_snp_fields(2:2:end); cur_snp_fields=cur_snp_fields(1:2:end-1);
-        
-        % NEW! intersect current SNP info (cur_snp_fields) with fields. Slower but more robust to changes in fields availability
-        [~, fields_I, fields_J] = intersect(S.field_names, cur_snp_fields);
-        S.INFO_ARR(i,fields_I) = cur_snp_fields(fields_J); % assign all fields to S.INFO
-        
-        % Next assign specieal fields (like gene index)
-        [S.XXX_VARIANT_COUNT_(i), S.XXX_REF_ALLELE_COUNT_(i), S.XXX_FEATURE_{i}, S.GENE{i}, S.aminoAcidChange{i}] = ...
-            internal_extract_special_fields(S, cur_snp_fields, cur_snp_values, exome_struct, pop_struct, population);
-        
-    end % loop on SNPs
-    tmp_INFO = S.INFO;
-    S = my_rmfield(S, {'European', 'African', 'dbSNP', 'Total', 'Minor', ...
-        'Observed', 'Average', 'geneList', 'Whether', 'PubMed', 'GenotypeMat', 'INFO'});  % why are these fields removed? save space!!!! (don't keep info field!!!)
-    %        rm_field_names = {'EXOME_CHIP', 'GWAS_PUBMED'}; % in the future use this to remove unnecessary fields
-    if(isfield(S, 'scorePhastCons') && iscell(S.scorePhastCons))  % convert to .mat to save space and ease work
-        S.scorePhastCons = cell2mat(empty_cell_to_numeric_val(str2num_cell(S.scorePhastCons), -9999999));
+    % NEW! intersect current SNP info (cur_snp_fields) with fields. Slower but more robust to changes in fields availability
+    [~, fields_I, fields_J] = intersect(S.field_names, cur_snp_fields);
+    S.INFO_ARR(i,fields_I) = cur_snp_fields(fields_J); % assign all fields to S.INFO
+    
+    % Next assign specieal fields (like gene index)
+    for j_pop=1:num_populations
+        [S.XXX_VARIANT_COUNT_(i,j_pop), S.XXX_REF_ALLELE_COUNT_(i,j_pop), S.XXX_FEATURE_{i}, S.GENE{i}, ...
+            S.aminoAcidChange{i},  S.REF_CODON{i}, S.ALT_CODON{i}, S.ProteinPos{i}] = ...
+            internal_extract_special_fields(S, cur_snp_fields, cur_snp_values, exome_struct, pop_struct{j_pop}, populations_vec(j_pop));
     end
-    if(isfield(S, 'consScoreGERP') && iscell(S.consScoreGERP))
-        S.consScoreGERP = cell2mat(empty_cell_to_numeric_val(str2num_cell(S.consScoreGERP), -9999999));
-    end
-    if(isfield(S, 'clinicalAssociation'))
-        S.clinicalAssociation = strrep_cell(S.clinicalAssociation, 'unknown', '');
-    end
-    save(add_pop_to_file_name(site_frequency_file_name, population{1}), '-struct', 'S'); % add new fields% remove fields to reduce memory
-    S.INFO = tmp_INFO; clear tmp_INFO;
-    return_flag=1 % only convert to .mat
-end % loop on population
+end % loop on SNPs
+tmp_INFO = S.INFO;
+S = my_rmfield(S, {'European', 'African', 'dbSNP', 'Total', 'Minor', ...
+    'Observed', 'Average', 'geneList', 'Whether', 'PubMed', 'GenotypeMat', 'INFO'});  % why are these fields removed? save space!!!! (don't keep info field!!!)
+%        rm_field_names = {'EXOME_CHIP', 'GWAS_PUBMED'}; % in the future use this to remove unnecessary fields
+if(isfield(S, 'scorePhastCons') && iscell(S.scorePhastCons))  % convert to .mat to save space and ease work
+    S.scorePhastCons = cell2mat(empty_cell_to_numeric_val(str2num_cell(S.scorePhastCons), -9999999));
+end
+if(isfield(S, 'consScoreGERP') && iscell(S.consScoreGERP))
+    S.consScoreGERP = cell2mat(empty_cell_to_numeric_val(str2num_cell(S.consScoreGERP), -9999999));
+end
+if(isfield(S, 'clinicalAssociation'))
+    S.clinicalAssociation = strrep_cell(S.clinicalAssociation, 'unknown', '');
+end
+
+% NEW !!! Save one file with info, for all populations !!! 
+
+my_mkdir( fullfile(dir_from_file_name(site_frequency_file_name), strdiff('_AllPop', '_') ) );
+save(add_pop_to_file_name(site_frequency_file_name, '_AllPop'), '-struct', 'S');  % add new fields% remove fields to reduce memory
+% save(add_pop_to_file_name(site_frequency_file_name, population{1}), '-struct', 'S'); % add new fields% remove fields to reduce memory
+S.INFO = tmp_INFO; clear tmp_INFO;
+return_flag=1 % only convert to .mat
+% end % loop on population
+
+
 % % % % else % here .mat file already exists
 % % % %     for population = populations_vec
 % % % %         S = load([remove_suffix_from_file_name(site_frequency_file_name) population{1} '.mat'], ...
@@ -206,6 +233,7 @@ end % loop on population
 % % % %         end
 % % % %     end % loop on population
 %end % if .mat file exists
+
 
 
 
@@ -233,7 +261,7 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
     my_mkdir(fullfile(output_dir, strdiff(population{1}, '_')));
     S = load(add_pop_to_file_name(site_frequency_file_name, population{1}), ... % load only neccessary fields
         'XXX_VARIANT_COUNT_', 'XXX_REF_ALLELE_COUNT_', 'XXX_FEATURE_', 'GENE', ... % 'XXX_GENE_', ...
-        'XXX_CHROM', 'POS'); % enable unique identifier for each allele
+        'XXX_CHROM', 'POS', 'REF', 'ALT', 'aminoAcidChange', 'REF_CODON', 'ALT_CODON', 'ProteinPos'); % enable unique identifier for each allele
     
     % allele_types = {'Synonymous', 'NonSynonymous', 'intron', 'utr'};
     S.population = strrep(strrep(population{1}, '_', ''), '-', '');
@@ -291,7 +319,6 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
         %            allele_type_inds = isempty_cell(lower(S.XXX_FEATURE_)); % find current alleles (empty string)
         %        end
         allele_type_inds = strmatch(lower(S.allele_types{i}), lower(S.XXX_FEATURE_), 'exact'); % find current alleles (require exact match!)
-        
         
         n_vec{i} =  S.XXX_REF_ALLELE_COUNT_(allele_type_inds) +  S.XXX_VARIANT_COUNT_(allele_type_inds);
         count_vec{i} =   S.XXX_VARIANT_COUNT_(allele_type_inds);
@@ -369,6 +396,34 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
     save(add_pop_to_file_name(site_frequency_file_name, population{1}), '-append', '-struct', 'S'); % add new fields
     save(add_pop_to_file_name(site_frequency_file_name, population{1}), '-append', ...
         'n_vec', 'count_vec', 'f_vec'); % , 'allele_types'); % Save again, add new fields
+    
+    save_tab=1; 
+    if(save_tab)  % Save tab-delimited version
+        S_NEW = []; good_gene_inds = find(~isempty_cell(S.GENE)); 
+        good_gene_inds = intersect(good_gene_inds, ...
+            union(union(strmatch('synonymous', S.XXX_FEATURE_), strmatch('missense', S.XXX_FEATURE_)), strmatch('stop', S.XXX_FEATURE_))); 
+%        good_gene_inds = intersect(good_gene_inds, strmatch('synonymous', S.XXX_FEATURE_)
+        S_NEW.Gene = S.GENE(good_gene_inds); 
+        S_NEW.Chr = S.XXX_CHROM(good_gene_inds); 
+        S_NEW.Pos = S.POS(good_gene_inds); 
+        S_NEW.Anc = S.REF(good_gene_inds); % get alleles 
+        S_NEW.Der = S.ALT(good_gene_inds); 
+        S_NEW.ProteinPos = S.ProteinPos(good_gene_inds);  % NEW! variables representing codons 
+        S_NEW.aminoAcidChange = S.aminoAcidChange(good_gene_inds); 
+        S_NEW.AncCodon = S.REF_CODON(good_gene_inds);
+        S_NEW.DerCodon = S.ALT_CODON(good_gene_inds);
+        
+        
+        S_NEW.Type = S.XXX_FEATURE_(good_gene_inds);
+        
+        for j_pop = 1:length(exome_struct.populations)
+            eval_pop_str = ['S_NEW.' exome_struct.populations{j_pop} 'Anc = S.XXX_REF_ALLELE_COUNT_(good_gene_inds,' num2str(j_pop) ');']; 
+            eval(eval_pop_str); 
+            eval_pop_str = ['S_NEW.' exome_struct.populations{j_pop} 'Der = S.XXX_VARIANT_COUNT_(good_gene_inds,' num2str(j_pop) ');']; 
+            eval(eval_pop_str); 
+        end            
+        WriteDataFile(S_NEW, file_name_to_txt(add_pop_to_file_name(site_frequency_file_name, population{1})));
+    end
 end % loop on population again
 
 
@@ -406,8 +461,9 @@ end
 
 
 
-% Internal-Internal function for extracting special features
-function [XXX_VARIANT_COUNT, XXX_REF_ALLELE_COUNT, XXX_FEATURE, GENE, aminoAcidChange] = ...
+% Internal function for extracting special features. Depends on database !!! 
+function [XXX_VARIANT_COUNT, XXX_REF_ALLELE_COUNT, XXX_FEATURE, GENE, ...
+    aminoAcidChange, REF_CODON, ALT_CODON, ProteinPos] = ...
     internal_extract_special_fields(S, cur_snp_fields, cur_snp_values, exome_struct, pop_struct, population)
 
 switch exome_struct.data_str
@@ -435,11 +491,10 @@ switch exome_struct.data_str
         GENE = cur_snp_fields{pop_struct.gene_ind}(4:end); % get gene name
         aminoAcidChange =  str2word(')', str2word('(', cur_snp_fields{pop_struct.AA_change_ind}, 2), 1); % get amino-acid change
         
-    case 'ExAC' % here parse field 79: the one with all infomration for allele
-        
+    case 'ExAC' % here parse field 79: the one with all infomration for allele        
         snp_info_ind = strmatch('CSQ',  cur_snp_fields);
         if(isempty(snp_info_ind)) % didn't find info
-            GENE = ''; aminoAcidChange = ''; XXX_FEATURE = '';
+            GENE = ''; aminoAcidChange = ''; XXX_FEATURE = ''; REF_CODON=''; ALT_CODON=''; ProteinPos=[]; 
         else
             snp_info_str = strsplit(cur_snp_values{snp_info_ind}, ','); num_alleles = length(snp_info_str);
             for j=1:1 % num_alleles
@@ -447,8 +502,22 @@ switch exome_struct.data_str
             end
             % TEMP! Always take first allele
             GENE = snp_info_str{1}{pop_struct.gene_ind}; % get gene name % GENE
-            aminoAcidChange = snp_info_str{1}{pop_struct.AA_change_ind}; % get variant amino acid change % 'Amino_acids'
             XXX_FEATURE = snp_info_str{1}{pop_struct.feature_ind}; % get variant type! important for next analysis !!!
+
+%             if(~isempty(snp_info_str{1}{pop_struct.AA_change_ind}))
+%                 YYYY = 13241234
+%             end
+            
+            aminoAcidChange = snp_info_str{1}{pop_struct.AA_change_ind}; % get variant amino acid change % 'Amino_acids'
+            REF_CODON = snp_info_str{1}{pop_struct.codons_ind}; % split codons
+            if(length(REF_CODON)>3)
+                ALT_CODON = REF_CODON(end-2:end);
+                REF_CODON = REF_CODON(1:3);
+            else
+                ALT_CODON = ''; % snp_info_str{1}{pop_struct.codons_ind};
+            end
+            ProteinPos = str2num(snp_info_str{1}{pop_struct.protein_pos_ind});
+        
         end
         
         snp_pop_ind = strmatch(exome_struct.pop_str{pop_struct.pop_ind}, cur_snp_fields);  % S.field_names);
@@ -458,12 +527,20 @@ switch exome_struct.data_str
 end % switch data string
 
 % Internal function for getting indivces right
+% 
+% Input: 
+% S - structure
+% population - string with population name
+% exome_struct - structure with exome
+% 
+% Output: 
+% pop_struct - structure representing population
+% 
 function pop_struct = internal_get_pop_indices_info(S, population, exome_struct)
 
 pop_struct = [];
 switch exome_struct.data_str
     case 'ESP'
-        
         pop_struct.gene_ind = field_ind_vec( strmatch('GL', S.field_names, 'exact') );
         pop_struct.AA_change_ind = field_ind_vec( strmatch('HGVS_PROTEIN_VAR', S.field_names, 'exact') );
         pop_struct.feature_ind = field_ind_vec( strmatch('FG', S.field_names, 'exact') );
@@ -474,9 +551,11 @@ switch exome_struct.data_str
         pop_struct.variant_info_str{1} = str2word(':', pop_struct.variant_info_str{1}, 2);
         
         pop_struct.gene_ind = strmatch('SYMBOL', pop_struct.variant_info_str, 'exact');
-        pop_struct.AA_change_ind = strmatch('HGVSc', pop_struct.variant_info_str, 'exact');
+        pop_struct.AA_change_ind = strmatch('Amino_acids', pop_struct.variant_info_str, 'exact'); % HGVSp
         pop_struct.feature_ind = strmatch('Consequence', pop_struct.variant_info_str, 'exact'); % Feature
         pop_struct.pop_ind = strmatch(strdiff(population{1}, '_'), exome_struct.populations);
+        pop_struct.protein_pos_ind = strmatch('Protein_position', pop_struct.variant_info_str, 'exact'); % protein position
+        pop_struct.codons_ind = strmatch('Codons', pop_struct.variant_info_str, 'exact'); % codons 
 end
 
 % % % for j=1:length(S.field_names) % loop on all fields - this is quite slow !! ('eval' inside a loop over all SNPs and all fields
