@@ -38,7 +38,9 @@ MSE = mean((Theta_hat - theta).^ 2)
 
 figs_dir = 'C:\Users\oorzu\Google Drive\HUJI\Teaching\StatisticalEvolutionaryGenomics_52887\Docs\figs';
 
-% Simulate for Qu 1.b. 
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Simulate for Qu 1.b. %  
+%%%%%%%%%%%%%%%%%%%%%%%%
 n=20; theta=2; M = 50000; % set parameters 
 
 [Mut2, Trees2] = SimulateCoalescent(n, theta, M); 
@@ -48,8 +50,9 @@ figure; hist_density(cell2vec(Mut.ages), 500); xlabel('Age $T$',  'interpreter',
 title(['Empirical density of ages. $E[T] = ' num2str(Mut.age_mean, '%.3f') ', Var[T] = ' num2str(Mut.age_var, '%.3f') '$.'], 'interpreter', 'latex', 'fontsize', 14); 
 my_saveas(gcf, fullfile(figs_dir, 'coalescent_age_sim'), {'jpg'}); 
 
-
-% Plot for Qu 1.c.
+%%%%%%%%%%%%%%%%%%%%
+% Plot for Qu 1.c. %
+%%%%%%%%%%%%%%%%%%%%
 t_vec = [0.1 0.5 1 2]; ages_vec = cell2vec(Mut.ages);  counts_vec = cell2vec(Mut.counts); figure; 
 for i=1:length(t_vec)
     good_inds = find( abs( ages_vec - t_vec(i) ) < 0.1 ); % find mutations with this age 
@@ -68,7 +71,9 @@ for i=1:length(t_vec)
 end
 my_saveas(gcf, fullfile(figs_dir, 'coalescent_count_given_age_sim'), {'jpg'}); 
 
-% Plot for Qu 1.d.
+%%%%%%%%%%%%%%%%%%%%
+% Plot for Qu 1.d. %
+%%%%%%%%%%%%%%%%%%%%
 mean_age_vec = zeros(n-1,1); var_age_vec = zeros(n-1,1); 
 for k=1:(n-1)
     mean_age_vec(k) = mean(ages_vec(counts_vec == k)); 
