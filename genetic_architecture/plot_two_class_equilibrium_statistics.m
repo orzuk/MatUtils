@@ -968,9 +968,8 @@ function fig_files_to_ppt = plot_mean_num_alleles_and_het_vs_s_internal(demograp
     two_class_stat_struct, s_null_vec, N, mu_per_gene, show_s_null, ...
     color_vec, new_figs_dir)    % Plot mean number of alleles present in a single chromosome
 
-
-AssignGeneralConstants;
-mu=1.6*10^(-8); L=625; %% 1500; % take typical parameters for mutation rate and gene length. We want to get mu*L=10^(-5)
+AssignGeneralConstants; AssignRVASConstants;
+mu=mu_per_site; L=625; %% mu=1.6*10^(-8); L=1500; % take typical parameters for mutation rate and gene length. We want to get mu*L=10^(-5)
 
 for log_y_flag=0:1 % loop on log-flag
     switch log_y_flag

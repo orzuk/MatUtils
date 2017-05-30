@@ -2,13 +2,13 @@
 % Formula is taken from eq. (XXX) from document on RVAS:
 %
 % Input:
-% s_null_vec - vector of possible selection coefficients for the null alleles. Should be NEGATIVE for delterious alleles (so fitness is 1+s)
+% s_null_vec - vector of possible selection coefficients for the null alleles. Should be NEGATIVE for deleterious alleles (so fitness is 1+s)
 % alpha_vec - vector of fraction of null alleles at birth
 % beta_vec - vector of effect size of null alleles
 % rare_cumulative_per_gene - total expected number of rare alleles in gene (related to theta)
 % target_size_by_class_vec - NEW! target size for each allele type (used in poisson model).
-%                            This is like the above but counts expected number of different alleles,
-%                            not their frequencies !  %%% NEW! alleles class type vector. This states for each allele if it is neutral, harmfull, or in a mixture (missense)
+%                            This is like the above but counts expected NUMBER of different alleles,
+%                            not their FREQUENCIES !  %%% NEW! alleles class type vector. This states for each allele if it is neutral, harmfull, or in a mixture (missense)
 % D - demographic model (could be N:  effective population size for equilibrium model)  NEW! (currently only constant pop. size supported)
 % X - genotype data matrix - for some models we actually need it. For others, just the allele frequencies.
 % y - phenotype data vector - (optional) may be used if likelihood includes phenotype
@@ -22,12 +22,14 @@
 %                     -1: missense (unknown, drawn from a mixture)
 % include_phenotype - flag saying which part of the likelihood we compute:
 %                      1: all (genotype+phenotype) (default)
-%                      0: only genotype part of LL
-%                     -1: only phenotype part of LL
+%                      0: only genotype part of LogLikelihood
+%                     -1: only phenotype part of LogLikelihood
+%                       : NEW !!! Allow flag for only genotype, but without
+%                       counting (only SFS!!)
 % full_flag - input format:
 %                      1: X is genotype matrix (default)
 %                      0: X contains sufficient statistics (sums of rows and columns)
-% num_individuals - input number of individuals (when not given in input vectors)
+% num_individuals - input number of individuals in sample (when not given in input vectors)
 % print_flag - print likelihood (optional)
 %
 % Output:
@@ -61,12 +63,9 @@ if(~include_phenotype) % here beta doesn't influence result
     beta_vec = 1;
 end
 if(~exist('target_size_by_class_vec', 'var') || isempty(target_size_by_class_vec))
-    poisson_model_flag = 0; expand_format_flag = 'individual'; % include individual-level information (how many alleles)
+    poisson_model_flag = 0; expand_format_flag = 'individual'; % include individual-level information (how many alleles for each individual)
 else
     poisson_model_flag = 1; expand_format_flag = 'summary'; % use poisson model for each class
-    target_size_neutral_alleles = target_size_by_class_vec(1); % convention: [neutral, null, missense]
-    target_size_null_alleles = target_size_by_class_vec(2);
-    target_size_missense_alleles = target_size_by_class_vec(3);
 end
 if(~exist('null_w_vec', 'var') || isempty(null_w_vec))  % Perform exponential search on all values of w
     optimize_alpha = 1;
@@ -77,20 +76,25 @@ if(~exist('full_flag', 'var') || isempty(full_flag)) % default: use entire genot
     full_flag = 1;
 end
 if(size(null_w_vec, 2) == 2) % get also true null state (for each missense allele)
-    %    true_null_w_vec = null_w_vec(:,2);
-    null_w_vec = null_w_vec(:,1);
+    null_w_vec = null_w_vec(:,1);   
 end
-if(~exist('print_flag', 'var') || uisempty(print_flag)) % default: don't print
+if(~exist('print_flag', 'var') || isempty(print_flag)) % default: don't print
     print_flag = 0;
 end
-%%%%%%%%%%%%%%%%%%%%%%%% End Set Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
-
-if(isstruct(D)) % equilibrium model
-    compute_flag = 'simulation';
-else
+if(isstruct(D)) % Set compute method
+    compute_flag = 'simulation'; % simulate forward alleles 
+else % equilibrium model
     N=D; compute_flag = 'analytic';
     D = []; D.N_vec = N;
 end
+if(~isfield(D, 'use_allele_counts'))
+    D.use_allele_counts = 1;
+end
+if(~isfield(D, 'mu'))
+    D.mu = mu_per_site; % TEMP! Set a default value for mu !
+end
+%%%%%%%%%%%%%%%%%%%%%%%% End Set Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
 
 num_s = length(s_null_vec);
 num_alpha = length(alpha_vec);
@@ -124,44 +128,20 @@ if(isscalar(null_w_vec)) % all alleles with same class
 end
 
 
-
 if(poisson_model_flag) % Compute counts
-    %    num_distinct_null_alleles_observed = sum(null_w_vec == 1);  % Polymorphic in POPULATION. these may be not polymorphic in sample
-    %    num_distinct_neutral_alleles_observed = sum(null_w_vec == 0); % Polymorphic in POPULATION. these may be not polymorphic in sample
-    %    num_distinct_missense_alleles_observed = sum(null_w_vec == -1); % mixture. % Polymorphic in POPULATION. these may be not polymorphic in sample
     num_polymorphic_alleles_observed = zeros(3,1);
-    for i=1:3 % loop on 3 classes
+    for i=1:num_classes % loop on 3 classes
         num_polymorphic_alleles_observed(i) = sum(X(null_w_vec+2 == i,:)>0); % polymorphic in SAMPLE for each classs
     end
-    
-    %    num_polymorphic_null_alleles_observed = sum(X(null_w_vec == 1,:)>0); % polymorphic in SAMPLE
-    %    num_polymorphic_neutral_alleles_observed = sum(X(null_w_vec == 0,:)>0); % polymorphic in SAMPLE
-    %    num_polymorphic_missense_alleles_observed = sum(X(null_w_vec == -1,:)>0); % polymorphic in SAMPLE
-    
-    %    if(exist('true_null_w_vec', 'var'))
-    %        num_polymorphic_missense_null_alleles_observed = sum(X((null_w_vec == -1)&(true_null_w_vec==1),:)>0);
-    %        num_polymorphic_missense_neutral_alleles_observed = ...
-    %            num_polymorphic_missense_alleles_observed - num_polymorphic_missense_null_alleles_observed;
-    %    end
-    %    num_polymorphic_alleles_observed = num_polymorphic_null_alleles_observed + ...
-    %        num_polymorphic_neutral_alleles_observed+num_polymorphic_missense_alleles_observed; % total # of poymorphic alleles in sample (should replace L)
-    if(~isfield(D, 'mu'))
-        D.mu = 1.5 * 10^(-8); % TEMP! Set a default value for mu !
-    end
-    
-    prob_allele_polymorphic_in_population = zeros(num_s, num_classes); prob_allele_polymorphic_in_sample = prob_allele_polymorphic_in_population;
-    %    prob_null_allele_polymorphic_in_population = zeros(num_s, 1);
-    %    prob_null_allele_polymorphic_in_sample = zeros(num_s, 1);
-    prob_missense_allele_polymorphic_in_population = zeros(num_s, num_alpha);
-    prob_missense_allele_polymorphic_in_sample = zeros(num_s, num_alpha);
+    P_poly = []; 
+    [P_poly.population, P_poly.sample] = deal(zeros(num_s, num_classes)); 
+    [P_poly.missense_population, P_poly.missense_sample] = deal(zeros(num_s, num_alpha));
 end
-
 
 log_like_mat = zeros(num_s, num_alpha, num_beta);
 
 % Determine distribution. For equilibrium use analytic solution. Otherwise, use simulation!!!
-x_vec = cell(num_classes, 1); allele_freq_hist = cell(num_classes,1); sum_allele_freq_hist = zeros(num_classes, 1); L_correction_factor = zeros(num_classes, 1); 
-log_x_vec = x_vec; log_one_minus_x_vec = x_vec; 
+[x_vec, log_x_vec, log_one_minus_x_vec, allele_freq_hist] = deal(cell(num_classes, 1)); [sum_allele_freq_hist, L_correction_factor ] = deal(zeros(num_classes, 1));  
 switch compute_flag
     case 'analytic'
         x_vec{NEUTRAL_C} = (1:2*N-1) ./ (2*N); % vector of allele frequencies
@@ -172,6 +152,8 @@ switch compute_flag
             compute_allele_freq_spectrum_from_demographic_model(D, 0, compute_flag); % Try a grid of different values
         sprintf('Compute neutral spectrum time=%f', demographic_compute_time)
         x_vec{NEUTRAL_C} = x_vec{NEUTRAL_C} ./ (2*N_vec(end-1)); % normalize: from counts to allele freq. 
+        
+        % NEW: can use moments !!! (so analytic but for non-constant population size)
 end
 sum_allele_freq_hist(NEUTRAL_C) = sum(allele_freq_hist{NEUTRAL_C});
 
@@ -193,8 +175,8 @@ if(poisson_model_flag)
     lambda_s = zeros(num_s, 1);
     lambda_missense = zeros(num_s, num_alpha);
     % tmp_z0_vec = exp( num_individuals_vec(1) .* (log_one_minus_x_vec{NEUTRAL_C})); %  - log(underflow_correction_q(1))  ); % what's this? multinomial/binomial coefficient?
-    prob_neutral_allele_polymorphic_in_population = 4 * N * D.mu * T_0; % prob. allele polymorphic in population
-    prob_neutral_allele_polymorphic_in_sample = prob_neutral_allele_polymorphic_in_population .* ...
+    P_poly.neutral_population = 4 * N * D.mu * T_0; % prob. allele polymorphic in population
+    P_poly.neutral_sample = P_poly.neutral_population .* ...
         (1 - sum( allele_freq_hist{NEUTRAL_C} .* (1-x_vec{NEUTRAL_C}) .^ num_individuals_vec(1) ) / sum(allele_freq_hist{NEUTRAL_C}));
     
     [unique_num_carriers, I] = unique(num_carriers_vec);
@@ -211,7 +193,6 @@ if(poisson_model_flag)
     end
     %%    cputime - t2
 end
-
 
 T_s = zeros(num_s,1); % time an allele spends at polymorphic state
 for i_s = 1:num_s % loop on parameters
@@ -256,20 +237,23 @@ for i_s = 1:num_s % loop on parameters
     if(poisson_model_flag) % compute poisson part of likelihood
         % we must assume here we know the number of individuals profiled at each region
         %        tmp_z0_vec = exp( num_individuals_vec(1) .* (log_one_minus_x_vec{NEUTRAL_C})); %  - log(underflow_correction_q(1))  ); % what's this? multinomial/binomial coefficient?
-        prob_allele_polymorphic_in_population(i_s, NULL_C) = 4 * N * D.mu * T_s(i_s); % prob. allele polymorphic in population. Is this stuff just for equilibrium?
-        prob_allele_polymorphic_in_sample(i_s, NULL_C) = prob_allele_polymorphic_in_population(i_s, NULL_C) .* ...
+        P_poly.population(i_s, NULL_C) = 4 * N * D.mu * T_s(i_s); % prob. allele polymorphic in population. Is this stuff just for equilibrium?
+        P_poly.sample(i_s, NULL_C) =  P_poly.population(i_s, NULL_C) .* ...
             (1 - sum( allele_freq_hist{NULL_C} .* (1-x_vec{NULL_C}) .^ num_individuals_vec(1) ) / sum(allele_freq_hist{NULL_C}));
         %            (1 - integral_hist(x_vec{NULL_C},  allele_freq_hist{NULL_C} .* tmp_z0_vec ) ./ integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C}) );
-        prob_missense_allele_polymorphic_in_population(i_s,:) = alpha_vec .* prob_allele_polymorphic_in_population(i_s, NULL_C) + ...
-            (1-alpha_vec) .* prob_neutral_allele_polymorphic_in_population;
-        prob_missense_allele_polymorphic_in_sample(i_s,:) = alpha_vec .* prob_allele_polymorphic_in_sample(i_s, NULL_C) + ...
-            (1-alpha_vec) .* prob_neutral_allele_polymorphic_in_sample;
+        P_poly.missense_population(i_s,:) = alpha_vec .* P_poly.population(i_s, NULL_C) + ...
+            (1-alpha_vec) .* P_poly.neutral_population;
+        P_poly.missense_sample(i_s,:) = alpha_vec .* P_poly.sample(i_s, NULL_C) + ...
+            (1-alpha_vec) .* P_poly.neutral_sample;
         
         % set lambdas for poisson model
-        lambda_s(i_s) = 4 * N * D.mu * target_size_null_alleles * T_s(i_s);
+        lambda_s(i_s) = 4 * N * D.mu * target_size_by_class_vec(NULL_C) * T_s(i_s);
         %        lambda_0 = 4 * N * D.mu * target_size_neutral_alleles * T_0; % Not needed?
-        lambda_missense(i_s,:) = 4 * N * D.mu * target_size_missense_alleles .* ( alpha_vec .* T_s(i_s) + (1-alpha_vec) .* T_0 );
+        lambda_missense(i_s,:) = 4 * N * D.mu * target_size_by_class_vec(MISSENSE_C) .* ( alpha_vec .* T_s(i_s) + (1-alpha_vec) .* T_0 );
     end % if poisson
+    
+
+    
     for i_alpha = 1:num_alpha
         ttt_one = cputime;
         %        p_null = alpha_vec(i_alpha) * T_s(i_s) / (alpha_vec(i_alpha) * T_s(i_s) + (1-alpha_vec(i_alpha)) * T_0); % compute probability that a given observed polymorphic locus is null
@@ -285,12 +269,11 @@ for i_s = 1:num_s % loop on parameters
         end % if include phenotype
         
         
-        if(poisson_model_flag) % compute poisson part of likelihood  (observation of polymorphic alleles)
-            log_like_mat(i_s, i_alpha, :) = internal_log_like(target_size_null_alleles, target_size_neutral_alleles, target_size_missense_alleles, ...
-                num_polymorphic_alleles_observed, ...
-                prob_allele_polymorphic_in_sample, prob_neutral_allele_polymorphic_in_sample, prob_missense_allele_polymorphic_in_sample, ...
-                prob_allele_polymorphic_in_population, prob_neutral_allele_polymorphic_in_population, prob_missense_allele_polymorphic_in_population, ...
-                use_allele_freq_flag, i_s, i_alpha);
+        if(poisson_model_flag && D.use_allele_counts) % compute poisson part of likelihood  (observation of polymorphic alleles)
+            log_like_mat(i_s, i_alpha, :) = internal_log_like_count_polymorphic_alleles(target_size_by_class_vec, num_polymorphic_alleles_observed, ...
+                P_poly, use_allele_freq_flag, i_s, i_alpha);
+        else
+            log_like_mat(i_s, i_alpha, :) = 0;
         end % if poisson model flag
         for i_beta = 1:num_beta % loop on effect size
             tmp_likelihood_one_allele(:) = BIG_NUM; % repmat(BIG_NUM, max(num_individuals_vec), 3);
@@ -305,14 +288,6 @@ for i_s = 1:num_s % loop on parameters
                 if(include_genotype || optimize_alpha)
                     if(tmp_likelihood_one_allele(num_carriers_vec(j), null_w_vec(j)+2 ) == BIG_NUM) % this means we've already computed for this frequency                        
                         if(include_genotype)
-% % % %                             j_is = j 
-% % % %                             num_carriers_ind_is = num_carriers_ind
-% % % %                             size_is = size(tmp_z_vec)
-% % % %                             pos_tmp_z_is = max(pos_tmp_z_inds{num_carriers_ind})
-% % % %                             length_allele_freq_hist = length(allele_freq_hist{null_w_vec(j)+2})
-% % % %                             allele_freq_hist_is = sum(allele_freq_hist{null_w_vec(j)+2}(pos_tmp_z_inds{num_carriers_ind}))
-% % % %                             tmp_z_vec_is = sum( tmp_z_vec(num_carriers_ind,pos_tmp_z_inds{num_carriers_ind}) )
-                            
                             tmp_likelihood_one_allele(num_carriers_vec(j), null_w_vec(j)+2) = ...
                                 log( max(10^(-100), sum(allele_freq_hist{null_w_vec(j)+2}(pos_tmp_z_inds{num_carriers_ind, null_w_vec(j)+2}) .* ...
                                 tmp_z_vec{null_w_vec(j)+2}(num_carriers_ind, pos_tmp_z_inds{num_carriers_ind, null_w_vec(j)+2})) / sum_allele_freq_hist(null_w_vec(j)+2)) );
@@ -341,8 +316,8 @@ for i_s = 1:num_s % loop on parameters
                 end
             end % if include genotypes
             
-            % Skip this for now (we just use genotypes)
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%% End if include phenotypes %%%%%%%%%%%%
+         
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%% Start if include phenotypes (skipped) %%%%%%%%%%%%
             if(include_phenotype) % compute phenotypes contribution to likelihood
                 log_like_mat(i_s,i_alpha,i_beta) = internal_log_like_pheotype(log_like_mat(i_s,i_alpha,i_beta), ...
                     X, x_inds, y, trait_struct, alpha_vec(i_alpha), beta_vec(i_beta), J_num_alleles, num_individuals, num_alleles_vec, optimize_alpha, prob_null_given_x);
@@ -355,42 +330,41 @@ for i_s = 1:num_s % loop on parameters
                 end
             end
         end % loop on effect size beta
-        
-        
     end % loop on mixture coefficient alpha
 end % loop on selection coefficients
 
-P_poly = var2struct(prob_neutral_allele_polymorphic_in_population, prob_neutral_allele_polymorphic_in_sample, ...
-    prob_allele_polymorphic_in_population, prob_allele_polymorphic_in_sample, ...
-    prob_missense_allele_polymorphic_in_population, prob_missense_allele_polymorphic_in_sample); % create output struct
 compute_time = cputime-ttt;
 
 
-% Internal function: return the log-likelihood of ...
-function log_like_vec = internal_log_like(target_size_null_alleles, target_size_neutral_alleles, target_size_missense_alleles, ...
-    num_polymorphic_alleles_observed, ...
-    prob_allele_polymorphic_in_sample, prob_neutral_allele_polymorphic_in_sample, prob_missense_allele_polymorphic_in_sample, ...
-    prob_allele_polymorphic_in_population, prob_neutral_allele_polymorphic_in_population, prob_missense_allele_polymorphic_in_population, ...
+% Internal function: return the log-likelihood of data (new one used) 
+% 
+% Input: 
+% P_poly - structure with probability of alleles from different class being polymorphic
+% i_s - index of s, selection coefficient
+% i_alpha - index of alpha, frac of missense alleles which are null 
+% 
+% Output:
+% log_like_vec
+function log_like_vec = internal_log_like_count_polymorphic_alleles(target_size_alleles, num_polymorphic_alleles_observed, P_poly, ...
     use_allele_freq_flag, i_s, i_alpha)
 
 AssignRVASConstants;
-
 if( ismember(use_allele_freq_flag, [0, 2]))
     log_like_vec = ...
-        (target_size_null_alleles - num_polymorphic_alleles_observed(NULL_C)) .* ...
-        log(1-prob_allele_polymorphic_in_sample(i_s, NULL_C)) + ...
-        (target_size_neutral_alleles - num_polymorphic_alleles_observed(NEUTRAL_C)) .* ... % Compute log-likelihood for alleles not present
-        log(1-prob_neutral_allele_polymorphic_in_sample) + ...
-        (target_size_missense_alleles - num_polymorphic_alleles_observed(MISSENSE_C)) .* ...
-        log(1-prob_missense_allele_polymorphic_in_sample(i_s, i_alpha));
+        (target_size_alleles(NULL_C) - num_polymorphic_alleles_observed(NULL_C)) .* ...
+        log(1-P_poly.sample(i_s, NULL_C)) + ...
+        (target_size_alleles(NEUTRAL_C) - num_polymorphic_alleles_observed(NEUTRAL_C)) .* ... % Compute log-likelihood for alleles not present
+        log(1-P_poly.neutral_sample) + ...
+        (target_size_alleles(MISSENSE_C) - num_polymorphic_alleles_observed(MISSENSE_C)) .* ...
+        log(1-P_poly.missense_sample(i_s, i_alpha));
     
     log_like_vec = log_like_vec + ... % add log-likelihood for observed alleles
         num_polymorphic_alleles_observed(NULL_C) .* ...
-        log(prob_allele_polymorphic_in_sample(i_s, NULL_C)) + ...
+        log(P_poly.sample(i_s, NULL_C)) + ...
         num_polymorphic_alleles_observed(NEUTRAL_C) .* ...
-        log(prob_neutral_allele_polymorphic_in_sample) + ...
+        log(P_poly.neutral_sample) + ...
         num_polymorphic_alleles_observed(MISSENSE_C) .* ...
-        log(prob_missense_allele_polymorphic_in_sample(i_s, i_alpha));            % all probs here should be in POPULATION!!! (if we include all parts of likelihood!)
+        log(P_poly.missense_sample(i_s, i_alpha));  % all probs here should be in POPULATION!!! (if we include all parts of likelihood!)
     if(use_allele_freq_flag == 0)
         return;
     end
@@ -401,25 +375,43 @@ end
 if( ismember(use_allele_freq_flag, [1, 2])) % add log of binomial coefficient (?)
     log_like_vec = log_like_vec + ...
         num_polymorphic_alleles_observed(NULL_C) .* ...
-        log(prob_allele_polymorphic_in_population(i_s, NULL_C)) + ...
+        log(P_poly.population(i_s, NULL_C)) + ...
         num_polymorphic_alleles_observed(NEUTRAL_C) .* ...
-        log(prob_neutral_allele_polymorphic_in_population) + ...
+        log(P_poly.neutral_population) + ...
         num_polymorphic_alleles_observed(MISSENSE_C) .* ...
-        log(prob_missense_allele_polymorphic_in_population(i_s, i_alpha));            % all probs here should be in POPULATION!!! (if we include all parts of likelihood!)
+        log(P_poly.missense_population(i_s, i_alpha));            % all probs here should be in POPULATION!!! (if we include all parts of likelihood!)
     
     log_like_vec = log_like_vec - ...
         num_polymorphic_alleles_observed(NULL_C) .* ...
-        log(prob_allele_polymorphic_in_sample(i_s, NULL_C)) - ...
+        log(P_poly.sample(i_s, NULL_C)) - ...
         num_polymorphic_alleles_observed(NEUTRAL_C) .* ...
-        log(prob_neutral_allele_polymorphic_in_sample) - ...
+        log(P_poly.neutral_sample) - ...
         num_polymorphic_alleles_observed(MISSENSE_C) .* ...
-        log(prob_missense_allele_polymorphic_in_sample(i_s, i_alpha));            % all probs here should be in POPULATION!!! (if we include all parts of likelihood!)
+        log(P_poly.missense_sample(i_s, i_alpha));            % all probs here should be in POPULATION!!! (if we include all parts of likelihood!)
     %                                 log_like_mat(i_s,i_alpha,:) = 0;
 end % if use allele freq flag
 
 
 
 % Internal function: return part of phenotype log-likelihood
+% 
+% Input: 
+% log_like_input, ...
+% X - 
+% x_inds - 
+% y - vector of phenotype
+% trait_struct - 
+% alpha -  
+% beta - 
+% J_num_alleles -
+% num_individuals -
+% num_alleles_vec - 
+% optimize_alpha - 
+% prob_null_given_x
+% 
+% Output: 
+% log_like - 
+% 
 function log_like = internal_log_like_pheotype(log_like_input, ...
     X, x_inds, y, trait_struct, alpha, beta, J_num_alleles, num_individuals, num_alleles_vec, optimize_alpha, prob_null_given_x)
 

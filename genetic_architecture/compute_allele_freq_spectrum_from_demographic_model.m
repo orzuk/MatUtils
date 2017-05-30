@@ -1,17 +1,16 @@
 % Compute allele frequency distribution using Fisher-Wright model with changing population size.
-% (Not sure if we need this here !!! )
 % Input:
 % D - structure with demographic models
 % s - selection coefficient
 % compute_flag - 'simulation' (default) or 'moments' (computation based on moments)
-% n_sample - # of individuals in a sample
-% mu - regional mutation rate
+% n_sample - # of individuals in a SAMPLE (default: = population size at beginning)
+% mu - regional mutation rate (default: mu for one site) 
 %
 % Output:
 % x_vec - vector of x values (allele frequencies) at each generation
 % p_vec - vector of their frequencies at each generation
-% L_correction_factor - 
-% compute_time - 
+% L_correction_factor - correction factor for total mutation rate 
+% compute_time - total time it took to run 
 % k_vec - alleles in sample
 % n_vec - sample sizes
 % weights_vec - weight of each allele (each allele can represent multiple alleles)
@@ -22,18 +21,15 @@ function [x_vec, p_vec, L_correction_factor, compute_time, k_vec, n_vec, weights
 compute_time=cputime;
 if(~exist('compute_flag', 'var') || isempty(compute_flag))
     compute_flag = 'simulation';
-    %    compute_mode = 'simulation'; % for general demography
 end
-if(~exist('init_str', 'var') || isempty(init_str)) % default is start at equilibrium
-    init_str = 'equilibrium';
-end
-
+% if(~exist('init_str', 'var') || isempty(init_str)) % default is start at equilibrium
+init_str = 'equilibrium';
+%end
 if(~exist('mu', 'var') || isempty(mu))
-    mu = 2*10^(-8); % set mutation rate
+    AssignRVASConstants; 
+    mu = mu_per_site; % set default mutation rate (per-nucleotide per-generation)
 end
-
 if(~isfield('iters', D))
-    %    D.iters = 5000;
     D.iters = 1000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
 end
 D.num_bins = 100; % used for binning in Fisher Right simulation
@@ -53,8 +49,7 @@ switch compute_flag
         max_num_alleles = 20000; % set maximum to save time
         [freq_struct, ~, simulation_struct, N_vec, simulation_time] = ... % New: separate output to different structures
             FisherWrightSimulation([], D, mu, s, init_str, D.iters, compute_flag, D.num_bins);
-        fprintf('Fisher-Wright simulation time was %f\n', simulation_time);
-        
+        fprintf('Fisher-Wright simulation time was %f\n', simulation_time);        
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
         p_vec = freq_struct.p_vec{end-1};
         L_correction_factor = simulation_struct.L_correction_factor;
@@ -86,22 +81,19 @@ switch compute_flag
             fprintf('Converted %d alleles to sample freq. time=%f\n', num_alleles, pop_to_sample_t);
             n_vec = repmat(n_sample, num_alleles, 1);
         end % if nargout > 4
-    case 'moments'
-        
+    case 'moments'        
         N_vec = demographic_parameters_to_n_vec(D, 1);
-        [mu_vec_expansion_analytic] = FisherWright_Compute_SFS_Moments(N_vec, 0, max_k); % compute moments with Formulas from Ewens
+        mu_vec_expansion_analytic = FisherWright_Compute_SFS_Moments(N_vec, 0, max_k); % compute moments with Formulas from Ewens
         
         % Estimate density using the max-entropy method? NO! just compute moments !
         x_vec = (1:(2*N-1)) ./ (2*N); % use initial pop size for resolution
-        [lambda_max_ent] = ...  % Fit density using moments % , lambda0)
+        lambda_max_ent = ...  % Fit density using moments % , lambda0)
             me_dens2(mu_vec_expansion_analytic(2:end) ./ mu_vec_expansion_analytic(1), x_vec); % normalize by 0th moment
-        
         p_vec = zeros(1, 2*N-1);
         for k=1:(max_k)
             p_vec = p_vec + lambda_max_ent(k) .* x_vec .^ (k-1);
         end
         p_vec = exp(-p_vec) ./ (x_vec .* (1-x_vec)); % Compute f. How to normalize?
-        
 end
 
 compute_time=cputime-compute_time;

@@ -58,7 +58,7 @@ if(test_power) % test detection power in rare-variant GWAS
     beta_vec = linspace(0.001, 10.001, 201); % logspace(-6,1,100); % effect size
     beta_vec = [beta_vec -linspace(0.0001, 0.5, 201)]; % NEW !!! add negarive effects !!! 
     prevalence = 0.05; % prevalence (assume 5%)
-    mu=1.6*10^(-8); % mutation rate per nucleotide per generation
+    mu=mu_per_site; % 1.6*10^(-8); % mutation rate per nucleotide per generation
     gene_length = 625; % 1500; % typical gene length in nucleotides. Makes the gene mutation rate mu_g at 10^(-5)
     
     
@@ -225,7 +225,7 @@ end
 if(test_likelihood) % New: test likelihood
     L = 100; % number of loci (gene length)
     n = 2000; % number of individuals
-    mu = 2*10^(-8); % mutation rate per-nucleotide
+    mu = mu_per_site; % mutation rate per-nucleotide
     trait_struct = []; 
     trait_struct.type = 'disease'; % 'disease'; % simulate either disease or quqantitative traits
     trait_struct.prevalence = 0.1; % disease prevalence for disease traits

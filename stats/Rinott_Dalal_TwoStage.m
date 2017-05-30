@@ -28,3 +28,13 @@ xlabel('k'); ylabel('h(k)');
 
 figure; plot(k_vec, h_k_rinott ./ h_k_dalal, 'g*'); 
 xlabel('k'); ylabel('h_{rinnot}(k) / h_{dalal}(k)'); 
+
+% Now implement procedures and call them: 
+
+N0=100; PCS = 0.95; Delta = 0.1; n_pop = 5; mu_vec = zeros(1, n_pop); mu_vec(end) =  Delta; sigma_vec = ones(1, n_pop); iters = 1000; 
+[max_I, PCS_D, h_D] = dalal_procedure(N0, PCS, Delta, mu_vec, sigma_vec, iters, 'dalal');
+[max_I_R, PCS_R, h_R] = dalal_procedure(N0, PCS, Delta, mu_vec, sigma_vec, iters, 'rinott');
+ 
+PCS_D
+PCS_R
+

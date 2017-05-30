@@ -4,19 +4,20 @@ Assign24MammalsGlobalConstants; AssignGeneralConstants; AssignStatsConstants; As
 num_bins = 0:0.01:1; % bins for what?
 
 exome_data = 'ExAC'; % 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!!
+% Need to add also gnomad data !
 
 old_run=0;
 % Set of flags determining which analysis to perform
-parse_site_frequency_flag = 1; % parse original datafile (different between different datasets)
+parse_site_frequency_flag = 0; % parse original datafile (different between different datasets)
 read_vcf_flag=0; % read vcf files for exome data
 unite_flag=0; % 0: parse ESP data. 1: unite all data to one chromosome
 read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
 extract_fields_flag=1; % extract ??? fields
 compute_gene_matrices_flag=1; % 1. Compute for each gene ?? flag for parsing ???
-plot_site_frequency_flag = 1; % 1: plot SFS data (this is also part of pre-processing)
+plot_site_frequency_flag = 0; % 1: plot SFS data (this is also part of pre-processing)
 estimate_gene_by_gene = 0; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 plot_gene_by_gene = 0; % make figures for individual genes
-fit_demography = 0;  % NEW! here fit a demographic model using only synonymous SNPs
+fit_demography = 1;  % NEW! here fit a demographic model using only synonymous SNPs
 aggregate_population_estimators = 0; % NEW! aggregate estimators from different populations
 test_population_differences = 0; % NEW! test for different in selection between different populations
 
@@ -25,7 +26,7 @@ queue_str = 'priority'; % for submitting jobs at broad farm
 global cumsum_log_vec;
 cumsum_log_vec = cumsum([0 log(1:2*10000)]); % compute log-binomial coefficients to save time
 
-%'rate.matrix.intergenic'; % matrix with codon annotations from Pazik
+%'rate.matrix.intergenic'; % matrix with codon annotations and mutation rates from Pazik
 
 exome_struct = get_exome_data_info(exome_data); % get metadata: file names, directories etc.
 
@@ -33,6 +34,9 @@ exome_struct = get_exome_data_info(exome_data); % get metadata: file names, dire
 i_pop=1;
 
 
+%%%%%%%%%%%%%%%%%%%
+% Parse SFS Files %
+%%%%%%%%%%%%%%%%%%%
 if(parse_site_frequency_flag) % here we parse
     %    if(read_to_mat_flag)
     vcf_file_names =  GetFileNames(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, [exome_struct.prefix, '*.vcf']), 1);
@@ -49,25 +53,21 @@ if(parse_site_frequency_flag) % here we parse
                 fullfile('out', ['parse_' exome_struct.prefix '.' i '.out']), queue_str, [], [], mem_flag); % allow specifying memory allocation
         end
     end
-    
-    %    else % here
-    
-    %    end
 end
 
 % return;
 
 
+%%%%%%%%%%%%%%%%%%
+% Plot SFS Files %
+%%%%%%%%%%%%%%%%%%
 for population = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
-    
     if(~strcmp(population, 'African')) % temp: work only on one population!
         continue;
     end
-    
     if(old_run)
         old_run_parse_site_frequency_data;
     end
-    
     if(plot_site_frequency_flag)
         plot_site_frequency_data(fullfile(spectrum_data_dir, exome_struct.data_str, ...
             [exome_struct.prefix, '*.mat']), ... %  exome_struct.spectrum_data_file)  '.mat']), ... % '_' population{1}% _unique
@@ -76,23 +76,31 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
             fullfile(spectrum_data_dir, mutation_rates_file), ...
             [], [], [], [], exome_struct.target_length, num_bins, ...
             fullfile(spectrum_data_dir, 'out', exome_struct.data_str, exome_struct.prefix)); %   remove_suffix_from_file_name(exome_struct.spectrum_data_file)));
-        % %         plot_site_frequency_data(A, n_vec, count_vec, f_vec, allele_types, exome_struct.target_length, num_bins, ...
-        % %             fullfile(spectrum_data_dir, 'out', remove_suffix_from_file_name(exome_struct.spectrum_data_file)));
     end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Use Synonymous SNPs to fit demographic model %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if(fit_demography)
+        spectrum_population_data_file{i_pop} = fullfile(dir_from_file_name(exome_struct.spectrum_data_file), ...
+            population{1}, [remove_suffix_from_file_name(remove_dir_from_file_name(exome_struct.spectrum_data_file)) '_' population{1} '.mat']);
+        all_A = load(fullfile(spectrum_data_dir, spectrum_population_data_file{i_pop}), 'count_vec', 'f_vec', 'n_vec', 'allele_types');
+        all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous 
+        synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)) % 'synonymous_variant' % 'coding-synonymous'
+        [Demographic_model, max_LL_demographic_model] = ...
+            fit_demographic_parameters_from_allele_spectrum( ...
+            all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, [],  all_A.mu); % PROBLEM HERE!! WORK (my implementation / software)
+        
+        % Save and plot demography 
+    end
+    
     i_pop=i_pop+1;
 end % loop on population (temp.)
 
 
-if(fit_demography) % here use Synonymous SNPs to fit demographic model
-    spectrum_population_data_file{i_pop} = [remove_suffix_from_file_name(exome_struct.spectrum_data_file) '_' population{1} '.mat'];
-    all_A = load(fullfile(spectrum_data_dir, spectrum_population_data_file{i_pop}), 'count_vec', 'f_vec', 'n_vec', 'allele_types');
-    synonymous_ind = find(strcmp( 'coding-synonymous', all_A.allele_types))
-    [Demographic_model, max_LL_demographic_model] = ...
-        fit_demographic_parameters_from_allele_spectrum( ...
-        all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind});
-end
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Use Missense+Stop SNPs to fit selection and tolerance parameters %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 spectrum_data_files_str = [exome_struct.spectrum_data_files_str(1:end-1) '}'];
 if(estimate_gene_by_gene) % estimate potential target size for each gene in the genome
     if(~exist(fullfile(mammals_data_dir, genome_version, exons_file), 'file')) % get all sequences
@@ -102,7 +110,6 @@ if(estimate_gene_by_gene) % estimate potential target size for each gene in the 
         GeneStruct = load(fullfile(mammals_data_dir, genome_version, exons_file), ...
             'chr_vec', 'pos_start_vec', 'pos_end_vec', 'seqs', 'strand', 'gene_names', 'sort_perm'); % don't load sequences?
     end
-    
     
     if(~exist(fullfile(spectrum_data_dir, mutation_rates_file), 'file')) % get estimated mutation rate per gene
         TripletsMutationTable = load(fullfile(spectrum_data_dir, 'mutation_rates', triplet_mutations_file)); % read 64x64 table
@@ -138,18 +145,23 @@ if(estimate_gene_by_gene) % estimate potential target size for each gene in the 
         
     end % loop on prefix
     
+    
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Aggregate s estimator for each gene from all populations %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if(aggregate_population_estimators) % compute an aggregate esitmator for each gene from multiple populations
         
         
     end
     
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Test for differences for s estimator for each gene from all populations %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if(test_population_differences) % test for differences in selection between different populations for each gene
         
         
     end
-    
-    
-    
 end % estimate gene by gene parameters
 
 

@@ -1,4 +1,10 @@
-function exome_struct = get_exome_data_info(exome_data) % get metadata: file names, directories etc. 
+% Get metadata: file names, directories etc. 
+% Input: 
+% exome_data - string representing exome datasets
+% Output: 
+% exome_struct - structure with meta-data for this dataset
+%
+function exome_struct = get_exome_data_info(exome_data) 
 
 exome_data_str = {'Nelson', 'Tennensen', 'TennensenSmall', 'ESP', 'ExAC'}; % name of different datasets 
 num_datasets = length(exome_data_str); 
@@ -10,8 +16,8 @@ spectrum_data_files = {'/Nelson_Science_2012/Nelson_Science_data_table_S2.txt', 
     '/Tennessen_Science_2012/all_chr_ESP6500.snps.vcf', ...
     '/Tennessen_Science_2012/all_chr_ESP6500.snps.small_gene_list.vcf', ...
     '/ESP/ESP6500SI*.snps_indels.vcf', ...
-    '/ExAC/ExAC.Small.sites.vep.vcf', ...  %    '/ExAC/exome_aggregation.snps_indels.vcf', ... % NEW! exome aggregation data (much richer!!!)
-    []}; % Data file with exome sequencing results %  '/Tennessen_Science_2012/ESP6500.chr19.snps.vcf', []}; % S3
+    '/ExAC/ExAC.chunks001.vcf', ...  %  '/ExAC/ExAC.Small.sites.vep.vcf', ...  %    '/ExAC/exome_aggregation.snps_indels.vcf', ... % NEW! exome aggregation data (much richer!!!)
+    []}; % NEW: add gnomad dataset  % Data file with exome sequencing results %  '/Tennessen_Science_2012/ESP6500.chr19.snps.vcf', []}; % S3
 
 spectrum_files_prefix = {'Nelson', 'all_chr_ESP6500', 'all_chr_ESP6500.small_gene_list', ...    
 'ESP6500', 'ExAC.chunks'}; % 'ESP6500*.chr', 'ExAC'};

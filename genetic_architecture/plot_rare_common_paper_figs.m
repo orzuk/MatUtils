@@ -1,6 +1,5 @@
 % Plot all figures we need for the paper
-
-
+AssignRVASConstants;
 figs_dir = '../../common_disease_model/docs/pnas/power_paper/figs/automatic';
 tables_dir = '../../common_disease_model/docs/pnas/power_paper/docs/tables/automatic';
 demographic_sims_dir = '../../common_disease_model/data/schaffner_simulations/EuropeFixed/files_europe_fixed/files_var_eric/mat'; % new file (corrected Europe) !!
@@ -48,7 +47,7 @@ s_null = 0.01; % selection coefficient on null (functional) alleles - pretty str
 
 
 L = 2000; % number of loci (gene length)
-mutation_rate = 2*10^(-8); % mutation rate per-nucleotide per-generation
+mutation_rate = mu_per_site;  % mutation rate per-nucleotide per-generation
 trait_type = 'quantitative'; % 'disease'; % simulate either disease or quqantitative traits
 rare_cumulative_per_gene = 1; % cumulative allele frequency of rare alleles per gene (theta)
 theta = 4*N*mutation_rate; % Effective mutation rate
@@ -88,8 +87,8 @@ if(~exist('w_x_null_mat', 'var'))  % no need to run again and again
     c_cumulative = cell(2,1); frac_null_by_freq_cumulative = cell(2,1);
     for j=1:1 % loop on ONE possible mixture
         compute_alpha_j = j
-        [two_class_stat_struct ...
-            w_x_null_mat{j} w_x_harmless{j} w_all{j} c_cumulative{j} frac_null_by_freq_cumulative{j}] = ...
+        [two_class_stat_struct, ...
+            w_x_null_mat{j}, w_x_harmless{j}, w_all{j}, c_cumulative{j}, frac_null_by_freq_cumulative{j}] = ...
             compute_two_class_model_parameters(s_null_vec, ...
             f_rare_vec, full_enrichment_alpha_vec(j), rare_cumulative_per_gene, N, two_class_output_file);
     end
@@ -154,14 +153,6 @@ for i=table_inds % create tables
 end % loop on table inds
 
 
-
-
-% for j=1:length(s_null_vec) % loop on different selection coefficients
-%     Z_empiric(j) = absorption_time_by_selection(s_null_vec(j), 1, N, 0, f_rare_vec(end), 'freq');
-%     Z_theoretic(j) = phi_s_integral(f_rare_vec(end), -4*N*s_null_vec(j), 1) - phi_s_integral(0.000000001, -4*N*s_null_vec(j), 1);
-% end
-% figure;  semilogx(s_null_vec, Z_empiric, 'linewidth', 4); hold on; semilogx(s_null_vec, Z_theoretic, 'r--', 'linewidth', 2)
-%figure; plot(Z_empiric, Z_theoretic)
 
 s = 0.001;  max_f = 0.999;
 Z_disease = phi_s_integral(max_f, -4*N*s, 'disease', 1) - ...

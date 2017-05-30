@@ -4,6 +4,7 @@
 
 % Set demography
 % New! create Demography structure
+AssignRVASConstants;
 test_population_to_sample=0;
 N = 500;
 num_generations = 100;
@@ -13,11 +14,12 @@ D.generations = [num_generations 1*num_generations]; %  num_generations]; % [num
 D.expan_rate = [expansion_factor 1]; %  0.99]; % [expansion_factor 1.0];
 D.index = 1; % only one demography
 D.add_new_alleles = 1; % use NEW! simulation (track all alleles: alleles at start and newly born alleles) - to be changed !!
+D.name = 'True'; 
 n_sample = 200; % take a smaller sample size (can be equal to final population size)
 
 N_vec = demographic_parameters_to_n_vec(D, 1);
 
-mu = 2*10^(-8) * 100000; % take effective mutation rate in a region 
+mu = mu_per_site * 100000; % take effective mutation rate in a region 
 D.mu=mu; 
 
 % Simulate data:
@@ -36,16 +38,17 @@ D.mu=mu;
 
 
 [D_hat, max_LL, N_vec_hat, log_like_mat] = ...
-    fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, weights_vec, mu, L_correction_factor, D)
+    fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, weights_vec, mu, L_correction_factor, D);
+D_hat.name = 'Fitted';
+
 % N_vec_hat = demographic_parameters_to_n_vec(D_hat, 1);
 
-figure; hold on; % Compare demographic model 
-plot(N_vec); plot(N_vec_hat, 'r');
-xlabel('Time (generations)'); ylabel('Population size');
-legend({'True', 'Fitted'});
-
-% Compare allele-freq distribution 
-[x_vec_hat, p_vec_hat, L_correction_factor_hat, ~, k_vec_hat, n_vec_hat, weights_vec_hat]  = ...
+demographic_model_plot({D, D_hat}, [D.index D_hat.index], log_like_mat, k_vec, n_vec); % plot
+% figure;  % Compare demographic model 
+% semilogy(N_vec, 'linewidth', 2); hold on; semilogy(N_vec_hat, 'r', 'linewidth', 2);
+% xlabel('Time (generations)'); ylabel('Population size');
+% legend({'True', 'Fitted'});
+[x_vec_hat, p_vec_hat, L_correction_factor_hat, ~, k_vec_hat, n_vec_hat, weights_vec_hat]  = ... % Compare allele-freq distribution 
     compute_allele_freq_spectrum_from_demographic_model(D_hat, 0, 'simulation', n_sample, mu); % simulate from neutral model
 figure; semilogx(x_vec ./ (2*N_vec(end-1)), p_vec); hold on; 
 semilogx(x_vec_hat ./ (2*N_vec_hat(end-1)), p_vec_hat, 'r');
@@ -54,24 +57,22 @@ legend({'True', 'Fitted'});
 
 
 
-% Temp tesT:
+% Temp tesT: see difference between population and sample allele frequencies 
 if(test_population_to_sample)
     n_sample = 25;
     [x_vec, p_vec, ~, ~, k_vec, n_vec, weights_vec] = compute_allele_freq_spectrum_from_demographic_model(D, 0, [], n_sample);
-    
     allele_freq_vec = hist_to_vals(x_vec, p_vec ./ min(p_vec(p_vec>0)));
     
     num_alleles = length(allele_freq_vec);
     k_vec2 = population_to_sample_allele_freq(allele_freq_vec, 2*N_vec(end-1), n_sample);
     n_vec2 = repmat(n_sample, num_alleles, 1);
     
-    
-    
     %k_vec = population_to_sample_allele_freq(f_vec, N, n_sample)
     [sample_x_vec, sample_p_vec] = population_to_sample_allele_freq_distribution(x_vec, p_vec, n_sample);
     [hhh, ccc] = hist(k_vec, 0:n_sample); simulated_p_vec = hhh./sum(hhh);
     [hhh2, ccc2] = hist(k_vec2, 0:n_sample); simulated_p_vec2 = hhh2./sum(hhh2); figure;
     figure; bar([simulated_p_vec', simulated_p_vec2', sample_p_vec']); legend('sampled', 'sampled2', 'average');
+    xlabel('Der. Allele Count (k)'); ylabel('Freq.'); 
     
     sample_p_vec
     simulated_p_vec

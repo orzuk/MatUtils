@@ -17,11 +17,9 @@
 function R = plot_site_frequency_data(A, GeneStruct, exome_struct, mutation_rates_files, n_vec, count_vec, f_vec, ...
     allele_types, target_length, num_bins, output_file_name)
 
-AssignGeneralConstants;
-Assign24MammalsGlobalConstants;
+AssignGeneralConstants; Assign24MammalsGlobalConstants; AssignRVASConstants;
 bar_plot = 0; % plot bar or histogram
 mean_gene_length_in_nt = 2500; % take average exonic length of human genes
-
 
 if(ischar(A)) % load input data from file
     spectrum_data_file = A; % keep file name
@@ -33,39 +31,23 @@ if(ischar(A)) % load input data from file
     end
     A = cell(num_populations, 10); % SET DIMENSIONS LATER !
     spectrum_population_data_file = cell(num_populations, 1); num_variants_vec = zeros(num_populations, 1);
-    
-    unite_field_names = {'XXX_FEATURE_', 'GENE', 'XXX_CHROM', 'POS',  'ALLELE_FREQ',   'GENE_INDS', 'unique_genes'}; % list of fields to take in union
-    
+    unite_field_names = {'XXX_FEATURE_', 'GENE', 'XXX_CHROM', 'POS',  'ALLELE_FREQ',   'GENE_INDS', 'unique_genes'}; % list of fields to take in union    
     for i=1:num_populations
         sfs_file_names =  GetFileNames(add_pop_to_file_name(spectrum_data_file, exome_struct.populations{i}), 1);
         for i_c=1:10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG. length(sfs_file_names) % loop on all chunks (By chromosomes or otherwise)  % NEW! let many populations !!
             spectrum_population_data_file{i,i_c} = sfs_file_names{i_c}; % [remove_suffix_from_file_name(spectrum_data_file) '_' exome_struct.populations{i} '.mat'];
-            %             tmp_cell = load(spectrum_population_data_file{i,i_c}, 'count_vec', 'f_vec', 'allele_types');
-            %             for j=1:length(tmp_cell.f_vec)
-            %                 count_vec{j,i} = tmp_cell.count_vec{j};
-            %                 f_vec{j,i} = tmp_cell.f_vec{j};
-            %             end
-            %             allele_types = tmp_cell.allele_types;
             cur_A = load(spectrum_population_data_file{i,i_c}, 'XXX_REF_ALLELE_COUNT_', 'XXX_VARIANT_COUNT_', 'num_genes', 'unique_genes', ... % 'GENE', ...
                 'num_allele_types', 'num_alleles_per_gene_mat', 'total_heterozygosity_per_gene_mat', ...
                 'upper_freq_vec', 'total_freq_per_gene_mat', 'num_genes', ...
                 'allele_types', 'allele_types_ind', 'all_allele_types', 'num_all_allele_types', 'good_allele_inds', 'population', ...
                 'count_vec', 'f_vec', 'n_vec', 'allele_types');
-            
-            for j=1:length(cur_A.f_vec)
-                if(any(isnan(cur_A.f_vec{j})))
-                    problem_NAN = 12142314
-                end
-            end
             if(i_c==1) % first
                 A{i} = cur_A;
             else % next
                 A{i} = union_SFS_structs(A{i}, cur_A, unite_field_names);
             end
-            
         end % loop on different files in population
         num_variants_vec(i) = length(A{i}.XXX_REF_ALLELE_COUNT_);
-        
         A{i}.good_allele_inds = get_good_allele_inds(A{i}, exome_struct);
         A{i} = internal_unite_by_class(A{i}); % NEW! unite sub-classes into class 
     end % loop on populations
@@ -81,19 +63,15 @@ if(exist('UniqueMutationRateTable', 'var'))
 end
 
 if(ischar(GeneStruct)) % load gene-struct file
-    gene_struct_input_file = GeneStruct;
-    load(GeneStruct); % load gene-struct
+    load(GeneStruct); % load gene-struct %     gene_struct_input_file = GeneStruct;
 end
 
 % Compute theoretical constant population size distribution
-N=10000; mu = 2*10^(-8); theta = 4*N*mu; % estimate for human effective population size and effective mutation rate 
+N=10000; mu = mu_per_site; theta = 4*N*mu; % estimate for human effective population size and effective mutation rate 
 x_vec = (1:2*N-1)./(2*N); % allele frequency
 constant_size_cum_phi_zero_vec = absorption_time_by_selection(0, 1, N, 1/(2*N), x_vec, 0);
 constant_size_cum_phi_one_vec = absorption_time_by_selection(0, 1, N, 1/(2*N), x_vec, 'freq');
 constant_size_cum_het_vec = absorption_time_by_selection(0, 1, N, 1/(2*N), x_vec, 'var');
-% constant_size_cum_phi_zero_vec = cumsum(constant_size_phi_zero_vec);
-% constant_size_cum_phi_one_vec  = cumsum(constant_size_phi_one_vec);
-% constant_size_cum_het_vec = cumsum(constant_size_het_vec);
 
 total_num_alleles = zeros(num_populations, 1); fraction_allele_types = cell(num_populations, 1);
 num_chr = max(A{1}.XXX_REF_ALLELE_COUNT_ + A{1}.XXX_VARIANT_COUNT_);
@@ -107,7 +85,6 @@ for i=1:A{1}.num_allele_types
         het_vec{i,j} = 2 .* f_vec{i,j} .* (1-f_vec{i,j}); % multiply by two
         het_var_vec{i,j} = f_vec{i,j} .* (1-f_vec{i,j}) .* (1-2.*f_vec{i,j}).^2 ./ num_chr; % variance of heterozygosity (???)
         %    [h_freq bin_freq] = hist(f_vec{i}, num_bins);
-        %    het_var_vec{i} = het_vec{i}.^2 ./ h_freq; % get st.d. from coefficient of variation
         num_alleles_vec{i,j} = f_vec{i,j} .* f_vec{i,j}; % weight by allele frequencies
     end
 end
@@ -147,7 +124,6 @@ for j=1:num_populations
     end
     
     % Fit alpha_0 (crude fit)
-    % alpha_fit = 0.61; % fit at birth (use singletons)
     alpha_fit(j) = ( heterozygosity.ratio_over_stop_gained_vec(A{j}.good_allele_inds{5}(2)) - heterozygosity.ratio_over_stop_gained_vec(A{j}.good_allele_inds{5}(3)) ) ./ ...
         ( heterozygosity.ratio_over_stop_gained_vec(A{j}.good_allele_inds{5}(1)) - heterozygosity.ratio_over_stop_gained_vec(A{j}.good_allele_inds{5}(3)) ); % fraction of missense which are roughly 'lethal'
     ratio_vec2(j,:) = (new_A{j}.variants.per_gene ./ new_A{j}.singletons.per_gene) ./ ...
@@ -158,13 +134,10 @@ for j=1:num_populations
 end
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% Save also data as tab-delimited text %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 R = internal_compute_SFS_table(A, MutationRateTable, MutationTypes, output_file_name);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 
 figure_type_vec = ...
     {'num_variants_cum', ... %
@@ -243,12 +216,12 @@ for figure_type = { ... % 'enrichment_missense_hist', ...  % figure_type_vec
                     subplot(2, 4, j); j_sim=1;  % figure;
                 else
                     j_sim = j;
-                end                
+                end
                 eval(['h(' num2str(ctr) ') = ' plot_str '(plot_x_vec{' num2str(ctr) '}, plot_y_vec{' num2str(ctr) ...
                     '}, ''' symbol_vec{j_sim} ''', ''linewidth'', 2, ''color'', ''' color_vec(i) ''');']); hold on; ctr=ctr+1;
-            end
-            if(new_fig_pop)
-                title(A{j}.population);
+                if(new_fig_pop)
+                    title(A{j}.population);
+                end
             end
         end
     end % loop on poplulations and ..
@@ -534,7 +507,7 @@ for i=vec2row(A{1}.good_allele_inds{5}) % loop on different allele types 1:min(6
                 h(ctr) = bar(bin_het+0.3*(ctr-1)*bin_size.*eps, h_het ./ save_total_het, 0.3, color_vec(ctr));
                 h2 = plot(bin_het, 2 .* new_A{j}.heterozygosity.per_site(i) .* (1-bin_het), [color_vec(ctr) '--'], 'linewidth', 2); % plot fitted line
                 if(i==A{j}.good_allele_inds{5}(1)) % plot once (synonymous)
-                    N=10000; mu = 2*10^(-8);
+                    N=10000; mu = mu_per_site; 
                     theta = 4*N*mu;
                     h2 = plot(bin_het, 2 .* theta .* (1-bin_het), 'k--', 'linewidth', 2); %
                 end

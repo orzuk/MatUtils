@@ -9,7 +9,7 @@
 % theta - effective mutation rate (2*N*mu for initial N) 
 % 
 % Output: 
-% mu_vec - vector of moments values 
+% mu_vec - matrix of moments values. mu_vec(k, j) is k-th moment at generation j
 % mu_vec_equilibrium - vector of moments values at equilibrium 
 % 
 function [mu_vec, mu_vec_equilibrium] = FisherWright_Compute_SFS_Moments(N_vec, s, max_k, init_str, theta)
@@ -29,7 +29,6 @@ if(~exist('s', 'var') || isempty(s)) % Assume s=0
     s = 0;
 end
 
-% Set t = ??? (scaling of time!) 
 % First compute moments at equilirbium 
 mu_vec_equilibrium =  zeros(max_k, 1); % need  a recurrence formula here !! 
     
@@ -48,7 +47,7 @@ switch init_str
         mu_vec_init = zeros(size(mu_vec_equilibrium));         
 end
 
-% Compute non-equilibrium vec (for s=0)
+% Compute non-equilibrium vec (for neutral, s=0) - use eqs. (36-37) in in Evans et al.:  
 for j=1:num_generations
     mu_vec(1,j) = exp(-int_one_over_rho_cum_vec(j)) * (mu_vec_init(1) + 0.5*theta * sum ( exp (int_one_over_rho_cum_vec(1:j)) ) / (2*N));
     for k=2:max_k

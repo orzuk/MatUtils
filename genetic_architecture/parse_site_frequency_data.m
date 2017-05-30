@@ -245,10 +245,10 @@ return_flag=1 % only convert to .mat
 % compute_frac_carriers
 % 
 % Output: 
-% S - 
-% n_vec - 
+% S - structure with .. 
+% n_vec - vector of counts for each allele 
 % count_vec -  
-% f_vec - 
+% f_vec - vector of allele frequencies for each allele 
 % 
 function  [S, n_vec, count_vec, f_vec]  = ...
     internal_compute_gene_matrices(site_frequency_file_name, populations_vec, exome_struct, compute_frac_carriers)
@@ -313,7 +313,7 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
     
     S.gene_by_allele_type_inds_list = cell(S.num_allele_types, S.num_genes); % indices in original data
     for i=1:S.num_allele_types % Divide alleles to types
-        sprintf('Create tables for allele type %ld out of %ld', i, S.num_allele_types)
+        % sprintf('Create tables for allele type %ld out of %ld', i, S.num_allele_types)
         %        allele_type_inds = strfind_cell(lower(S.XXX_FEATURE_), lower(S.allele_types{i})); % find current alleles
         %        if(isempty(allele_type_inds) && isempty(S.allele_types{i}))
         %            allele_type_inds = isempty_cell(lower(S.XXX_FEATURE_)); % find current alleles (empty string)
@@ -358,7 +358,7 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
         S.num_alleles_per_gene_mat = []; S.total_freq_per_gene_mat = []; S.total_heterozygosity_per_gene_mat = [];
         S.upper_freq_vec = upper_freq_vec;
         for j=1:length(upper_freq_vec) % compute freq. below threshold for different thresholds and classes
-            sprintf('Compute frac. carriers for threshold %ld out of %ld', j, length(upper_freq_vec))
+%            sprintf('Compute frac. carriers for threshold %ld out of %ld', j, length(upper_freq_vec))
             [S.num_alleles_per_gene_mat{j}, S.total_freq_per_gene_mat{j}, ...
                 S.total_heterozygosity_per_gene_mat{j} ] = ...
                 get_cumulative_freq_internal(S, S.upper_freq_vec(j)); % this gives correct cumulative but doesn't collapse alleles !

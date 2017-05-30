@@ -21,12 +21,12 @@
 % f_mat - vector of derived allele frequencies
 % allele_type_vec - NEW (optional) vector saying fro each allele if it is synonymous, missense, or stop
 %
-function [X y is_null_mat f_mat allele_type_vec P_poly] = simulate_two_class_genotype_phenotype(s_null, alpha, beta, ...
+function [X, y, is_null_mat, f_mat, allele_type_vec, P_poly] = simulate_two_class_genotype_phenotype(s_null, alpha, beta, ...
     rare_cumulative_per_gene, target_size_by_class_vec, ...
     N, L, num_individuals, iters, trait_type, prevalence, full_flag, poisson_flag)
 
-Assign24MammalsGlobalConstants;
-mu=1.5*10^(-8);
+Assign24MammalsGlobalConstants; AssignRVASConstants;
+mu= mu_per_site;
 
 % sigma_e = 1; % noise due to enviromnent and other hidden genetic effects
 if(~exist('full_flag', 'var') || isempty(full_flag)) % simulate entire genotype

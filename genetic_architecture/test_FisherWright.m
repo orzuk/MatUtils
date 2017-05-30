@@ -8,7 +8,7 @@ test_absorption_time = 1; % compare absorption time for simulations vs. analytic
 test_moments = 0; % NEW: test analytic moments calculation of SFS using Ewens paper
 debug_figures = 0;
 
-AssignGeneralConstants;
+AssignGeneralConstants; AssignRVASConstants;
 N = 10; % population size
 num_generations_vec = [200 10]; % two-stage model: slow and fast expansion % 2500; % 50;
 expansion_factor_vec = [1.005 1.05]; % 1.1; % 1.02; % two-stage moe: growth in population size
@@ -16,7 +16,7 @@ expansion_factor_vec = [1.005 1.05]; % 1.1; % 1.02; % two-stage moe: growth in p
 % s_vec = -[0 logspace(-6, -1, 11)]; % take log-space
 s_vec = -[0 0.000001 0.000005 0.00001 0.00005 0.0001 0.0005 0.001 0.005 0.01]; %  0.05 0.1]; % -0.00000001; % selection coefficient
 compute_mode = 'simulation'; % 'simulation'; % 'simulation';  % 'simulation'; % 'numeric'; % 'simulation'; % 'numeric'; % how to advance calculation
-mu = 2*10^(-8) * (10000 / N); % mutation rate (per nucleotide per generation)
+mu = mu_per_site * (10000 / N); % mutation rate (per nucleotide per generation)
 init_str = 'equilibrium'; % 'equilibrium' 'newly_born'; % start at newly born allele or equilibrium
 iters = [20000 20]; % relevant only for simulation. Spend more iterations on equilibrium (new alleles take more time per iteration)
 
@@ -144,7 +144,7 @@ end % loop on selection coefficients
 
 if(test_absorption_time || test_moments) % Test simulation/numerics only for CONSTANT population size where we have also analytic solution
     N = 500; % take moderate value to let all alleles die
-    mu = 2*10^(-8) * (10000 / N); % mutation rate (per nucleotide per generation)
+    mu = mu_per_site * (10000 / N); % mutation rate (per nucleotide per generation)
     s=0; % -0.0001;
     expansion_factor = 1.0263; % 1.01; % No EXPANSION! Constant population size
     model_name = 'equilibrium'; % 'expansion 1.01'
