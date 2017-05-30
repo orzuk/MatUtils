@@ -62,11 +62,11 @@ if(plot_sfs) % plot neutral sfs for demographic model
             compute_two_class_log_likelihood(0, 0, [], rare_cumulative_per_gene, target_size_by_class_vec, D_cell{i}, ...
             X, [], [], null_w_vec, ...
             0, full_flag, []); % don't include phenotype !!
-        LL_legend_vec{i} = [legend_vec{i} ', LL=' num2str(round(log_like_mat_again{i}, 2))];
     end
     
     figure;
     for i=1:length(D_cell)
+        LL_legend_vec{i} = [legend_vec{i} ', LL=' num2str(round(log_like_mat_again{i}, 2))];
         N_vec = demographic_parameters_to_n_vec(D_cell{i}, index(i));
         [x_vec_hat, p_vec_hat, L_correction_factor_hat, ~, k_vec_hat, n_vec_hat, weights_vec_hat]  = ... % Compare neutral allele-freq distribution for different demographies
             compute_allele_freq_spectrum_from_demographic_model(D_cell{i}, 0, 'simulation', n_sample, mu_per_site); % simulate from neutral model

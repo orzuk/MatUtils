@@ -20,7 +20,6 @@ num_dups = hist(J,1:num_unique);
 inds = cell(num_unique,1);
 I(end+1) = length(v)+1; 
 for i=1:num_unique
-%    inds{i} = sort_perm(ctr:I(i));
     inds{i} = sort_perm(I(i):(I(i+1)-1));
 %    ctr = I(i)+1;
 end
