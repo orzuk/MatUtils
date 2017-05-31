@@ -279,7 +279,7 @@ for i_s = 1:num_s % loop on parameters
             %            tmp_likelihood_one_allele(:) = BIG_NUM; % repmat(BIG_NUM, max(num_individuals_vec), 3);
             %            time_before_looping_on_alleles = cputime-ttt
             
-            LL_vec =  h_num_carriers .* log(sample_p_vec{null_w_vec(j)+2});
+            P_poly.LL_vec =  h_num_carriers .* log(sample_p_vec{null_w_vec(1)+2}); % TEMP !!!! 
             for j=1:length(unique_num_carriers) % here we go over alleles by frequency. We assume all of the same class (w_null)
                 if(unique_num_carriers(j)==0)
                     continue;

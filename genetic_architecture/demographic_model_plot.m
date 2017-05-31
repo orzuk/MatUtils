@@ -64,16 +64,33 @@ if(plot_sfs) % plot neutral sfs for demographic model
             0, full_flag, []); % don't include phenotype !!
     end
     
-    figure;
+    figure;  % Plot population SFS
     for i=1:length(D_cell)
         LL_legend_vec{i} = [legend_vec{i} ', LL=' num2str(round(log_like_mat_again{i}, 2))];
         N_vec = demographic_parameters_to_n_vec(D_cell{i}, index(i));
-        [x_vec_hat, p_vec_hat, L_correction_factor_hat, ~, k_vec_hat, n_vec_hat, weights_vec_hat]  = ... % Compare neutral allele-freq distribution for different demographies
+        [x_vec_hat{i}, p_vec_hat{i}, L_correction_factor_hat, ~, k_vec_hat{i}, n_vec_hat{i}, weights_vec_hat]  = ... % Compare neutral allele-freq distribution for different demographies
             compute_allele_freq_spectrum_from_demographic_model(D_cell{i}, 0, 'simulation', n_sample, mu_per_site); % simulate from neutral model
         %        semilogx(x_vec ./ (2*N_vec(end-1)), p_vec); hold on;
-        semilogx(x_vec_hat ./ (2*n_sample), p_vec_hat, color_vec(i)); hold on;
-    end % loop on modelsai
-    xlabel('f (allele freq.)'); ylabel('Psi(f)');
+        semilogx(x_vec_hat{i} ./ (2*N_vec(end-1)), p_vec_hat{i}, color_vec(i)); hold on;
+    end % loop on models
+    [unique_k_vec, h_k_vec] = unique_with_counts(k_vec);
+    semilogx(unique_k_vec ./ n_sample, h_k_vec ./ length(k_vec), 'm');  % PLOT ALSO DATA 
+    xlabel('f (allele freq. population)'); ylabel('Psi(f) population');
+    legend([LL_legend_vec' 'Data'], 'fontsize', 14); legend('boxoff');
+    figure; % Plot sample SFS
+    for i=1:length(D_cell)
+        [unique_k_vec_hat{i}, h_k_vec_hat{i}] = unique_with_counts(k_vec_hat{i});
+        semilogx(unique_k_vec_hat{i} ./ n_vec_hat{i}(1), h_k_vec_hat{i} ./ length(k_vec_hat{i}), color_vec(i)); hold on;
+        log_like_mat_direct(i) = sum(h_k_vec_hat{i} .* log( h_k_vec_hat{i} ./ length(k_vec_hat{i}) ) ); 
+    end
+    semilogx(unique_k_vec ./ n_sample, h_k_vec ./ length(k_vec), 'm');  % PLOT ALSO DATA 
+    xlabel('f (allele freq. sample)'); ylabel('Psi(f) sample');
+    legend([LL_legend_vec' 'Data'], 'fontsize', 14); legend('boxoff');
+    figure;
+    for i=1:length(D_cell)
+        plot(unique(k_vec(k_vec>0)), cumsum(P_poly_again{i}.LL_vec(2:end)), ['*' color_vec(i)]); hold on; % plot likelihood contribution for polymorphic alleles 
+    end
+    xlabel('k (sample allele count.)'); ylabel('LogLike');
     legend(LL_legend_vec, 'fontsize', 14); legend('boxoff');
 end % if plot_sfs
 
