@@ -8,13 +8,13 @@
 % sigma_vec - vector of true st.d.s
 %
 % Output:
-% CS - yes or now
-
+% CS - correct selection: yes or now
+%
 function [max_I, PCS_res, h] = dalal_procedure(N0, PCS, Delta, mu_vec, sigma_vec, iters, method_str)
 
 n_pop = length(mu_vec);
 
-q_p = gevinv(PCS, N0-1, 1,0); % what should we take here? how many deg. freedom? what is v-Frechet? 
+q_p = gevinv(PCS, 0, N0-1, 0); % what should we take here? how many deg. freedom? what is v-Frechet? 
 
 % Set init condition
 gamma_v = (gamma(N0/2) / ((N0-1)*gamma((N0-1)/2)*sqrt(pi))) ^ (1/(N0-1)) * (n_pop-1)^(1/(N0-1)) * q_p; 
