@@ -49,25 +49,27 @@ for i_pcs = 1:length(pcs_vec)
         xlabel('k'); ylabel('h(k)');
         title(['$h_k^1, h_k^2$ for $PCS=' num2str(pcs_vec(i_pcs)) ', \nu=' num2str(nu_vec(i_nu)) '$'], 'interpreter', 'latex');
     end % loop on nu
+    my_saveas(gcf, fullfile(two_stage_figs_dir, ['h1_and_h2_pcs_' num2str(pcs_vec(i_pcs))]), {'epsc', 'jpg'});
 end % loop on pcs
   
 for i_pcs = 1:length(pcs_vec)
     figure; % one figure for each PCS
     for i_nu = 1:length(nu_vec)
         plot(k_vec, h_k_rinott{i_pcs, i_nu} ./ h_k_dalal{i_pcs, i_nu} , [color_vec(i_nu) '*']); hold on;
-    end % loop on nu
+    end % loop on nu    
     xlabel('k'); ylabel('h_{rinnot}(k) / h_{dalal}(k)');
     title(['Relative efficiency for PCS=' num2str(pcs_vec(i_pcs))]);
     legend(legend_vec); legend('boxoff');
     plot(k_vec, repmat(sqrt(2), length(k_vec), 1), 'k--');
-    my_saveas(gcf, fullfile(two_stage_figs_dir, 'h1_h2_ratio'), {'epsc', 'jpg'});
+    ylim([1 2]); 
+    my_saveas(gcf, fullfile(two_stage_figs_dir, ['h1_h2_ratio_pcs_' num2str(pcs_vec(i_pcs))]), {'epsc', 'jpg'});
 end % loop on pcs
 
 % Now implement procedures and call them: 
 
 N0=100; PCS = 0.5; Delta = 0.1; n_pop = 50; mu_vec = zeros(1, n_pop); mu_vec(end) =  Delta; sigma_vec = ones(1, n_pop); iters = 100; 
-[max_I, PCS_D, h_D] = dalal_procedure(N0, PCS, Delta, mu_vec, sigma_vec, iters, 'dalal');
-[max_I_R, PCS_R, h_R] = dalal_procedure(N0, PCS, Delta, mu_vec, sigma_vec, iters, 'rinott');
+[max_I, PCS_D, h_D] = two_stage_selection_procedure(N0, PCS, Delta, mu_vec, sigma_vec, iters, 'dalal');
+[max_I_R, PCS_R, h_R] = two_stage_selection_procedure(N0, PCS, Delta, mu_vec, sigma_vec, iters, 'rinott');
  
 PCS_D
 PCS_R
