@@ -24,37 +24,10 @@ x_vec = (tinv(epsilon, nu)-h_1_rinott1):0.1:(-tinv(epsilon, nu));
 y_vec = tcdf(x_vec + h_1_rinott1, nu) .* tpdf(x_vec, nu);
 figure; plot(x_vec, y_vec); hold on;
 
-h_k_rinott = []; h_k_dalal = []; h_k_rinott_approx = []; h_k_dalal_approx = [];
-for i_pcs = 1:length(pcs_vec)
-    for i_nu = 1:length(nu_vec)
-        p = pcs_vec(i_pcs), nu = nu_vec(i_nu)
-        q_p = (-1/log(p))^(1/nu); % gevinv(p, nu, 1, 0); % the p-th quantile of nu-Frechet distribution with c.d.f.: e^{-x^{-nu}}
-        [h_k_rinott{i_pcs, i_nu}, h_k_rinott_approx{i_pcs, i_nu}, h_k_dalal{i_pcs, i_nu}, h_k_dalal_approx{i_pcs, i_nu}] = deal(zeros(1, num_k+1));
-        
-        for i_k=1:length(k_vec)
-            k=k_vec(i_k);
-            if(nu == Inf)
-                h_k_dalal_approx{i_pcs, i_nu}(i_k+1) = sqrt(2*log(k));
-                h_k_rinott_approx{i_pcs, i_nu}(i_k+1) = 2*sqrt(log(k));
-            else
-                h_k_dalal_approx{i_pcs, i_nu}(i_k+1) = (gamma((nu+1)/2) / (nu^(1-nu/2)*gamma(nu/2)*sqrt(pi))) ^ (1/nu) * k^(1/nu) * q_p; % Compute approximations
-                h_k_rinott_approx{i_pcs, i_nu}(i_k+1) = (gamma((nu+1)/2) / (nu^(1-nu/2)*gamma(nu/2)*sqrt(pi))) ^ (1/nu) * k^(1/nu) * q_p * 2^(1/nu); % sqrt(2); % Compute approximations
-            end
-            h_k_dalal{i_pcs, i_nu}(i_k+1) = fzero(@(x) two_stage_integral_dalal(x, k, nu)-p, ...
-                [-0.01 3] .* h_k_rinott_approx{i_pcs, i_nu}(i_k+1));
-            h_k_rinott{i_pcs, i_nu}(i_k+1) = fzero(@(x) two_stage_integral_rinott(x, nu)-(1-p^(1/k)), ... %   p, ... % , [tinv(epsilon, nu)-x -tinv(epsilon, nu)])-p, ...
-                [-0.01 3] .* h_k_dalal_approx{i_pcs, i_nu}(i_k+1));
-        end
-        h_k_dalal{i_pcs, i_nu} = h_k_dalal{i_pcs, i_nu}(2:end);
-        h_k_rinott{i_pcs, i_nu} = h_k_rinott{i_pcs, i_nu}(2:end);
-        h_k_dalal_approx{i_pcs, i_nu} = h_k_dalal_approx{i_pcs, i_nu}(2:end);
-        h_k_rinott_approx{i_pcs, i_nu} = h_k_rinott_approx{i_pcs, i_nu}(2:end);
-        
-    end % loop on nu
-end % loop on pcs
+[h_k_rinott, h_k_dalal, h_k_rinott_approx, h_k_dalal_approx] = compute_h_k_matrices(pcs_vec, nu_vec, k_vec); 
 
 % Save run: 
-%save('h1_h2_numerics', 'h_k_dalal', 'h_k_rinott', 'h_k_dalal_approx', 'h_k_rinott_approx', 'k_vec', 'nu_vec', 'pcs_vec'); 
+save('h1_h2_numerics', 'h_k_dalal', 'h_k_rinott', 'h_k_dalal_approx', 'h_k_rinott_approx', 'k_vec', 'nu_vec', 'pcs_vec'); 
 %load('h1_h2_numerics'); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,10 +43,10 @@ for i_pcs = 1:length(pcs_vec)
             for i_nu = 1:length(nu_vec)
                 if(proc_flag == 0) % dalal
                     proc_str = 'h_k^1'; proc_tilde_str = '\tilde{h}_k^1';
-                    rel_error_vec = (h_k_dalal_approx{i_pcs, i_nu}-h_k_dalal{i_pcs, i_nu}) ./ h_k_dalal{i_pcs, i_nu};
+                    rel_error_vec = reshape((h_k_dalal_approx(i_pcs, i_nu,:)-h_k_dalal(i_pcs, i_nu,:)) ./ h_k_dalal(i_pcs, i_nu,:), num_k, 1);
                 else
                     proc_str = 'h_k^2'; proc_tilde_str = '\tilde{h}_k^2';
-                    rel_error_vec = (h_k_rinott_approx{i_pcs, i_nu}-h_k_rinott{i_pcs, i_nu}) ./ h_k_rinott{i_pcs, i_nu};
+                    rel_error_vec = reshape((h_k_rinott_approx(i_pcs, i_nu,:)-h_k_rinott(i_pcs, i_nu,:)) ./ h_k_rinott(i_pcs, i_nu,:), num_k, 1);
                 end
                 y_lim(1) = min(y_lim(1), min(rel_error_vec));
                 y_lim(2) = max(y_lim(2), max(rel_error_vec));
@@ -104,17 +77,19 @@ for i_pcs = 1:length(pcs_vec)
         axes(ha(5+(i_pcs-1))); 
         for i_nu = 1:length(nu_vec)
             if(log_flag==0)
-                semilogx(k_vec, (h_k_rinott{i_pcs, i_nu} ./ h_k_dalal{i_pcs, i_nu}), [color_vec(i_nu) ], 'LineWidth', 2); hold on;
-                ylabel('$h_k^2 / h_k^1$', 'interpreter', 'latex', 'fontsize', 12);
+                semilogx(k_vec, reshape(((h_k_rinott(i_pcs, i_nu,:) ./ h_k_dalal(i_pcs, i_nu,:))).^2, num_k, 1), ...
+                    [color_vec(i_nu) ], 'LineWidth', 2); hold on;
+                ylabel('$(h_k^2 / h_k^1)^2$', 'interpreter', 'latex', 'fontsize', 12);
             else
-                semilogx(k_vec, 1./log2(h_k_rinott{i_pcs, i_nu} ./ h_k_dalal{i_pcs, i_nu})  , [color_vec(i_nu) '*'], 'LineWidth', 2); hold on; %   [color_vec(i_nu)], 'linestyle', symbol_vec{ceil(i_nu/6)} ); hold on;
-                ylabel('$1 / \log_2(\frac{h_k^2}{h_k^1})$', 'interpreter', 'latex', 'fontsize', 12);
+                semilogx(k_vec, reshape(1./log2((h_k_rinott(i_pcs, i_nu,:) ./ h_k_dalal(i_pcs, i_nu,:)).^2), num_k, 1), ...
+                    [color_vec(i_nu) '*'], 'LineWidth', 2); hold on; %   [color_vec(i_nu)], 'linestyle', symbol_vec{ceil(i_nu/6)} ); hold on;
+                ylabel('$1 / 2 \log_2(\frac{h_k^2}{h_k^1})$', 'interpreter', 'latex', 'fontsize', 12);
             end
         end % loop on nu
         xlabel('$k$', 'interpreter', 'latex',  'fontsize', 12);
         
         if(log_flag==0)
-            ylim([1 2]); % [0 2]
+            ylim([1 4]); % [1 2]
         else
             ylim([0.99 max(nu_vec)+1]);
         end
@@ -125,13 +100,11 @@ for i_pcs = 1:length(pcs_vec)
         a = get(gca,'XTickLabel'); set(gca,'XTickLabel',a,'fontsize',8);
     end
 end
-my_saveas(gcf, fullfile(two_stage_figs_dir, 'h1_and_h2'), {'epsc', 'jpg'});
+my_saveas(gcf, fullfile(two_stage_figs_dir, 'h1_and_h2_sqr'), {'epsc', 'jpg'});
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % End figure for paper:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 
 
 % Other figures: 
@@ -141,15 +114,15 @@ for(log_flag = 0:1)
         for i_nu = 1:length(nu_vec)
             subplot(3, 2, i_nu);
             if(log_flag)
-                loglog(k_vec, h_k_dalal{i_pcs, i_nu} , '*'); hold on;
-                loglog(k_vec, h_k_rinott{i_pcs, i_nu} , 'r*');
-                loglog(k_vec, h_k_dalal_approx{i_pcs, i_nu} , 'b');
-                loglog(k_vec, h_k_rinott_approx{i_pcs, i_nu} , 'r');
+                loglog(k_vec, h_k_dalal(i_pcs, i_nu,:) , '*'); hold on;
+                loglog(k_vec, h_k_rinott(i_pcs, i_nu,:) , 'r*');
+                loglog(k_vec, h_k_dalal_approx(i_pcs, i_nu,:) , 'b');
+                loglog(k_vec, h_k_rinott_approx(i_pcs, i_nu,:) , 'r');
             else
-                plot(k_vec, h_k_dalal{i_pcs, i_nu} , '*'); hold on;
-                plot(k_vec, h_k_rinott{i_pcs, i_nu} , 'r*');
-                plot(k_vec, h_k_dalal_approx{i_pcs, i_nu} , 'b');
-                plot(k_vec, h_k_rinott_approx{i_pcs, i_nu} , 'r');
+                plot(k_vec, h_k_dalal(i_pcs, i_nu,:) , '*'); hold on;
+                plot(k_vec, h_k_rinott(i_pcs, i_nu,:) , 'r*');
+                plot(k_vec, h_k_dalal_approx(i_pcs, i_nu,:) , 'b');
+                plot(k_vec, h_k_rinott_approx(i_pcs, i_nu,:) , 'r');
             end
             xlabel('k'); ylabel('$h_k^i$', 'interpreter', 'latex');
             title(['$\nu=' num2str(nu_vec(i_nu)) '$'], 'interpreter', 'latex');
@@ -165,6 +138,57 @@ for(log_flag = 0:1)
 end
 
 
+% New: find best h_k
+find_best_h=1;
+if(find_best_h)
+    k_vec = [2 10 100 1000 10000 100000]; % unique(round(logspace(log10(1.5), 7, 500))); % 500:500:100000; % list of k values - number of different populations is k+1
+    pcs_vec = [0.5 0.9 0.95 0.99] % [0.1 0.5 0.7 0.9 0.99]; % probability of getting maximum correctly (PCS)
+    num_k = length(k_vec); % maximum k
+    nu_vec = [1:100]; % 5 10]; %  100]; % deg. freedom for t-distribution (works for 2 !!!), nu = N0-1
+    
+    [h_k_rinott, h_k_dalal, h_k_rinott_approx, h_k_dalal_approx] = compute_h_k_matrices(pcs_vec, nu_vec, k_vec); 
+    
+    
+    figure; % Plot figure
+    legend_vec = num2str_cell(num2cell(pcs_vec));
+    for i_pcs=1:length(pcs_vec)
+        legend_vec{i_pcs} = ['$p=' legend_vec{i_pcs} '$'];
+    end
+    for i_k = 1:length(k_vec)
+        subplot(3,2,i_k);
+        for i_pcs = 1:length(pcs_vec)
+            semilogy(nu_vec, h_k_dalal(i_pcs,:, i_k), [color_vec(i_pcs) '--'], 'linewidth', 2); hold on;
+        end
+        for i_pcs = 1:length(pcs_vec)
+            semilogy(nu_vec, h_k_dalal_approx(i_pcs,:, i_k), color_vec(i_pcs), 'linewidth', 2); hold on;
+        end
+        title(['k=' num2str(k_vec(i_k))]);
+        xlabel('$\nu$', 'interpreter', 'latex'); ylabel('$h_k^1(\nu)$', 'interpreter', 'latex');
+        if(i_k == 1)
+            legend(legend_vec, 'location', 'northeast', 'interpreter', 'latex'); legend('boxoff');
+        end
+    end
+    
+    % here optimize h
+    best_nu_mat = zeros(length(k_vec), length(pcs_vec));
+    for i_k=1:length(k_vec)
+        optimize_k = i_k
+        for i_pcs=1:length(pcs_vec)
+            p=pcs_vec(i_pcs); k=k_vec(i_k);
+            best_nu_mat(i_k, i_pcs) = fminsearch(@(x) (gamma((x+1)/2) / (x^(1-x/2)*gamma(x/2)*sqrt(pi))) ^ (1/x) * k^(1/x) * (-1/log(p))^(1/x), 1);
+        end
+    end
+    figure; % Plot figure
+    for i_pcs = 1:length(pcs_vec)
+        semilogx(k_vec, best_nu_mat(:,i_pcs), [color_vec(i_pcs)], 'linewidth', 2); hold on;
+    end
+    title('Optimal $\nu$', 'interpreter', 'latex');
+    xlabel('$k$', 'interpreter', 'latex'); ylabel('$\nu$', 'interpreter', 'latex');
+    legend(legend_vec, 'location', 'northeast', 'interpreter', 'latex'); legend('boxoff');
+    semilogx(k_vec, 2*log(k_vec), ['y--'], 'linewidth', 2); hold on; % optimal nu
+%    semilogx(k_vec, sqrt(2*exp(1)*log(k_vec)), ['y--'], 'linewidth', 2); hold on; % optimal h_k^1
+end
+
 
 simulate_two=0;% Now implement procedures and call them:
 if(simulate_two)
@@ -175,4 +199,6 @@ if(simulate_two)
     PCS_D
     PCS_R
 end
+
+
 

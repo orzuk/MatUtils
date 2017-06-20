@@ -17,3 +17,9 @@ else
     ret = quadgk(@(t) my_tcdf(t+h, nu).^k .* tpdf(t, nu), -inf, inf, 'AbsTol', 10^(-15), 'RelTol', 10^(-10));
 end
 
+
+% New: take derivative of g(nu) to find best nu: 
+%(((c x^(-1 + x/2) Gamma[(1 + x)/2])/Gamma[x/2])^x^(-1) (-2 + x + x Log[x] - 
+%2 Log[(c x^(-1 + x/2) Gamma[(1 + x)/2])/Gamma[x/2]] - x PolyGamma[0, x/2] + x PolyGamma[0, (1 + x)/2]))/(2 x^2)
+
+% take derivative of log(g)
