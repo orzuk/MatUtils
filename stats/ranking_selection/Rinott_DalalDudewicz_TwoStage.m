@@ -137,7 +137,6 @@ for(log_flag = 0:1)
     end % loop on pcs
 end
 
-
 % New: find best h_k
 find_best_h=1;
 if(find_best_h)
@@ -147,9 +146,11 @@ if(find_best_h)
     nu_vec = [1:100]; % 5 10]; %  100]; % deg. freedom for t-distribution (works for 2 !!!), nu = N0-1
     
     [h_k_rinott, h_k_dalal, h_k_rinott_approx, h_k_dalal_approx] = compute_h_k_matrices(pcs_vec, nu_vec, k_vec); 
+    save('h1_h2_best_h', 'h_k_dalal', 'h_k_rinott', 'h_k_dalal_approx', 'h_k_rinott_approx', 'k_vec', 'nu_vec', 'pcs_vec'); 
+%load('h1_h2_best_h'); 
+
     
-    
-    figure; % Plot figure
+    figure; % Plot figure for 
     legend_vec = num2str_cell(num2cell(pcs_vec));
     for i_pcs=1:length(pcs_vec)
         legend_vec{i_pcs} = ['$p=' legend_vec{i_pcs} '$'];
@@ -169,13 +170,18 @@ if(find_best_h)
         end
     end
     
-    % here optimize h
-    best_nu_mat = zeros(length(k_vec), length(pcs_vec));
+    % here optimize h EXACTLY !! 
+    [best_nu_mat, best_h_mat] = deal(zeros(length(k_vec), length(pcs_vec)));
     for i_k=1:length(k_vec)
         optimize_k = i_k
         for i_pcs=1:length(pcs_vec)
             p=pcs_vec(i_pcs); k=k_vec(i_k);
-            best_nu_mat(i_k, i_pcs) = fminsearch(@(x) (gamma((x+1)/2) / (x^(1-x/2)*gamma(x/2)*sqrt(pi))) ^ (1/x) * k^(1/x) * (-1/log(p))^(1/x), 1);
+%            best_nu_mat(i_k, i_pcs) = fminsearch(@(x) two_stage_compute_h_k(p, x, k, 'dalal', 'numeric'), 1); 
+            best_nu_mat(i_k, i_pcs) = fminsearch(@(x) two_stage_sample_size(p, x, k, 'dalal', 'numeric', 1, 1), 1); 
+
+            best_h_mat(i_k, i_pcs) = two_stage_compute_h_k(p, best_nu_mat(i_k, i_pcs) , k, 'dalal', 'numeric');
+            best_nu_mat_approx(i_k, i_pcs) = fminsearch(@(x) two_stage_compute_h_k(p, x, k, 'dalal', 'asymptotic'), 1);
+            best_h_mat_approx(i_k, i_pcs) = two_stage_compute_h_k(p, best_nu_mat_approx(i_k, i_pcs) , k, 'dalal', 'asymptotic');
         end
     end
     figure; % Plot figure
@@ -185,10 +191,11 @@ if(find_best_h)
     title('Optimal $\nu$', 'interpreter', 'latex');
     xlabel('$k$', 'interpreter', 'latex'); ylabel('$\nu$', 'interpreter', 'latex');
     legend(legend_vec, 'location', 'northeast', 'interpreter', 'latex'); legend('boxoff');
-    semilogx(k_vec, 2*log(k_vec), ['y--'], 'linewidth', 2); hold on; % optimal nu
+    semilogx(k_vec, 2*log(k_vec), 'color', orange, '--', 'linewidth', 2); hold on; % optimal nu
 %    semilogx(k_vec, sqrt(2*exp(1)*log(k_vec)), ['y--'], 'linewidth', 2); hold on; % optimal h_k^1
-end
+    my_saveas(gcf, fullfile(two_stage_figs_dir, 'h1_and_h2_best'), {'epsc', 'jpg'});
 
+end
 
 simulate_two=0;% Now implement procedures and call them:
 if(simulate_two)
