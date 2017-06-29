@@ -11,12 +11,20 @@
 % 
 function ret = two_stage_integral_dalal(h, k, nu)
 
-if(nu == Inf) % take Gaussian approximation
-    ret = quadgk(@(t) normcdf(t+h).^k .* normpdf(t), -inf, inf, 'AbsTol', 10^(-15), 'RelTol', 10^(-10));
-else
-    ret = quadgk(@(t) my_tcdf(t+h, nu).^k .* tpdf(t, nu), -inf, inf, 'AbsTol', 10^(-15), 'RelTol', 10^(-10));
+if(isscalar(nu)) % here we have k1, k2
+    nu = [nu nu]; 
 end
-
+    
+    
+if(~isscalar(k)) % here we have k1, k2
+    ret = quadgk(@(t) tcdf(h-t, nu(1)).^k(1) .* k(2) .* tcdf(t, nu(2)).^(k(2)-1) .* tpdf(t, nu(2)), -inf, inf, 'AbsTol', 10^(-15), 'RelTol', 10^(-10));
+else
+    if(nu(1) == Inf) % take Gaussian approximation
+        ret = quadgk(@(t) normcdf(t+h).^k .* normpdf(t), -inf, inf, 'AbsTol', 10^(-15), 'RelTol', 10^(-10));
+    else
+        ret = quadgk(@(t) tcdf(t+h, nu(1)).^k .* tpdf(t, nu(2)), -inf, inf, 'AbsTol', 10^(-15), 'RelTol', 10^(-10));
+    end
+end
 
 % New: take derivative of g(nu) to find best nu: 
 %(((c x^(-1 + x/2) Gamma[(1 + x)/2])/Gamma[x/2])^x^(-1) (-2 + x + x Log[x] - 

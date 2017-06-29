@@ -18,8 +18,12 @@ for i_pcs = 1:length(pcs_vec)
                 h_k_dalal_approx(i_pcs, i_nu, i_k+1) = sqrt(2*log(k));
                 h_k_rinott_approx(i_pcs, i_nu, i_k+1) = 2*sqrt(log(k));
             else
-                h_k_dalal_approx(i_pcs, i_nu, i_k+1) = (gamma((nu+1)/2) / (nu^(1-nu/2)*gamma(nu/2)*sqrt(pi))) ^ (1/nu) * k^(1/nu) * q_p; % Compute approximations
-                h_k_rinott_approx(i_pcs, i_nu, i_k+1) = (gamma((nu+1)/2) / (nu^(1-nu/2)*gamma(nu/2)*sqrt(pi))) ^ (1/nu) * k^(1/nu) * q_p * 2^(1/nu); % sqrt(2); % Compute approximations
+                h_k_dalal_approx(i_pcs, i_nu, i_k+1) = dalal_h_k_1(nu, k, p, 0);
+                h_k_rinott_approx(i_pcs, i_nu, i_k+1) = dalal_h_k_1(nu, k, p, 0) * 2^(1/nu);
+%                 
+%                 
+%                 (gamma((nu+1)/2) / (nu^(1-nu/2)*gamma(nu/2)*sqrt(pi))) ^ (1/nu) * k^(1/nu) * q_p; % Compute approximations
+%                 h_k_rinott_approx(i_pcs, i_nu, i_k+1) = (gamma((nu+1)/2) / (nu^(1-nu/2)*gamma(nu/2)*sqrt(pi))) ^ (1/nu) * k^(1/nu) * q_p * 2^(1/nu); % sqrt(2); % Compute approximations
             end
             h_k_dalal(i_pcs, i_nu, i_k+1) = fzero(@(x) two_stage_integral_dalal(x, k, nu)-p, ...
                 [-0.01 3] .* h_k_rinott_approx(i_pcs, i_nu, i_k+1));
