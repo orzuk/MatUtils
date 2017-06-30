@@ -11,6 +11,7 @@ The package was used in the paper:
 R. Jacobovic and O. Zuk. 
 Submitted (2017) 
 
-In particular, the script 'AsymptoticSelectionFigures.m' generates all figures shown in the paper. 
+In particular, the script [AsymptoticSelectionFigures.m](https://github.com/orzuk/MatUtils/edit/master/stats/ranking_selection/AsymptoticSelectionFigures.m) generates all figures shown in the paper. 
+
 Please cite this paper if you are using the package. 
 
