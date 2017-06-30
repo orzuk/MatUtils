@@ -9,7 +9,7 @@
 % sigma2_vec - variance vector 
 % 
 % Output: 
-% N - expected sample size 
+% N - expected sample size (sum over all populations!)
 % 
 function N = two_stage_sample_size(pcs, nu, k, proc_str, mode_str, Delta, sigma2_vec)
 
