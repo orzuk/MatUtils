@@ -31,7 +31,7 @@ save('h1_h2_numerics', 'h_k_dalal', 'h_k_rinott', 'h_k_dalal_approx', 'h_k_rinot
 %load('h1_h2_numerics');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Create figures for paper:
+% Figure 2: Asymptotics of h_k^j
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 figure; % Figure 1 in paper
 [ha, pos] = tight_subplot(3,length(pcs_vec),[.07 .104],[.11 .02],[.1 -.00]); % flip sides !!!
@@ -102,41 +102,11 @@ for i_pcs = 1:length(pcs_vec)
 end
 my_saveas(gcf, fullfile(two_stage_figs_dir, 'h1_and_h2_sqr'), {'epsc', 'jpg'});
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% End figure for paper:
+% Figure 3: Optimal choice of nu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-% Other figures:
-for(log_flag = 0:1)
-    for i_pcs = 1:length(pcs_vec)
-        figure;
-        for i_nu = 1:length(nu_vec)
-            subplot(3, 2, i_nu);
-            if(log_flag)
-                loglog(k_vec, h_k_dalal(i_pcs, i_nu,:) , '*'); hold on;
-                loglog(k_vec, h_k_rinott(i_pcs, i_nu,:) , 'r*');
-                loglog(k_vec, h_k_dalal_approx(i_pcs, i_nu,:) , 'b');
-                loglog(k_vec, h_k_rinott_approx(i_pcs, i_nu,:) , 'r');
-            else
-                plot(k_vec, h_k_dalal(i_pcs, i_nu,:) , '*'); hold on;
-                plot(k_vec, h_k_rinott(i_pcs, i_nu,:) , 'r*');
-                plot(k_vec, h_k_dalal_approx(i_pcs, i_nu,:) , 'b');
-                plot(k_vec, h_k_rinott_approx(i_pcs, i_nu,:) , 'r');
-            end
-            xlabel('k'); ylabel('$h_k^i$', 'interpreter', 'latex');
-            title(['$\nu=' num2str(nu_vec(i_nu)) '$'], 'interpreter', 'latex');
-            
-            if(i_nu == length(nu_vec)) % last plot
-                legend({'$h_k^1$', '$h_k^2$', '$h_k^1$ (approx.)', '$h_k^2$ (approx.)'}, 'location', 'southeast', 'interpreter', 'latex'); legend('boxoff');
-            end
-        end % loop on nu
-        %    supertitle('asdfsaf');
-        supertitle(['$h_k^1, h_k^2$ for $PCS=' num2str(pcs_vec(i_pcs)) '$'], 'interpreter', 'latex');
-        %%        my_saveas(gcf, fullfile(two_stage_figs_dir, ['h1_and_h2_pcs_' strrep(num2str(pcs_vec(i_pcs)), '.', '_')]), {'epsc', 'jpg'});
-    end % loop on pcs
-end
-
 % New: find best h_k
 find_best_h=1;  % Figure 3 in paper
 if(find_best_h)
@@ -144,31 +114,10 @@ if(find_best_h)
     k_vec = unique(round(logspace(log10(1.5), 6, 20))); % [2 10 100 1000 10000 100000]; % unique(round(logspace(log10(1.5), 7, 500))); % 500:500:100000; % list of k values - number of different populations is k+1
     pcs_vec = [0.5 0.9 0.95 0.99] % [0.1 0.5 0.7 0.9 0.99]; % probability of getting maximum correctly (PCS)
     num_k = length(k_vec); % maximum k
-    nu_vec = [1:100]; % 5 10]; %  100]; % deg. freedom for t-distribution (works for 2 !!!), nu = N0-1
     
-    % % %     [h_k_rinott, h_k_dalal, h_k_rinott_approx, h_k_dalal_approx] = compute_h_k_matrices(pcs_vec, nu_vec, k_vec);
-    % % %     save('h1_h2_best_h', 'h_k_dalal', 'h_k_rinott', 'h_k_dalal_approx', 'h_k_rinott_approx', 'k_vec', 'nu_vec', 'pcs_vec');
-    % % % %load('h1_h2_best_h');
-    % % %
-    % % %
-    % % %     figure; % Plot figure for
-    % % %     for i_k = 1:length(k_vec)
-    % % %         subplot(3,2,i_k);
-    % % %         for i_pcs = 1:length(pcs_vec)
-    % % %             semilogy(nu_vec, h_k_dalal(i_pcs,:, i_k), [color_vec(i_pcs) '--'], 'linewidth', 2); hold on;
-    % % %         end
-    % % %         for i_pcs = 1:length(pcs_vec)
-    % % %             semilogy(nu_vec, h_k_dalal_approx(i_pcs,:, i_k), color_vec(i_pcs), 'linewidth', 2); hold on;
-    % % %         end
-    % % %         title(['k=' num2str(k_vec(i_k))]);
-    % % %         xlabel('$\nu$', 'interpreter', 'latex'); ylabel('$h_k^1(\nu)$', 'interpreter', 'latex');
-    % % %         if(i_k == 1)
-    % % %             legend(legend_vec, 'location', 'northeast', 'interpreter', 'latex'); legend('boxoff');
-    % % %         end
-    % % %     end
     
     % here optimize h EXACTLY !!
-    run_best_h=1;
+    run_best_h=0;
     
     pcs = [0.5 0.9 0.95 0.99]; % probability of getting maximum correctly (PCS)
     num_k = length(k_vec); % maximum k
@@ -231,11 +180,11 @@ if(find_best_h)
                 'best_nu_mat_approx_semi', 'best_h_mat_approx_semi', 'best_N_mat_approx_semi', ...
                 'k_vec', 'nu_vec', 'pcs_vec', 'sigma2_vec', 'Delta');
         end
-       if(i_run==0)
-           figure; % Plot figure: nu. Figure 3 in paper
-            [ha, pos] = tight_subplot(3, 1,[.07 .0954],[.11 .02],[.1 -.00]); % flip sides !!! (3,2)
-       end
-
+        if(i_run==0)
+            figure; % Plot figure: nu. Figure 3 in paper
+            [ha, pos] = tight_subplot(1, 3,[.07 .0954],[.11 .02],[.1 -.00]); % flip sides !!! (3,2)
+        end
+        
         legend_vec = num2str_cell(num2cell(pcs_vec));
         for i_pcs=1:length(pcs_vec)
             legend_vec{i_pcs} = ['$p=' legend_vec{i_pcs} '$'];
@@ -286,8 +235,8 @@ if(find_best_h)
         %    title('Optimal $N$', 'interpreter', 'latex');
         xlabel('$k$', 'interpreter', 'latex'); ylabel('$\mu_k^{1*}$', 'interpreter', 'latex');
         %    legend(legend_vec, 'location', 'northeast', 'interpreter', 'latex'); legend('boxoff');
-        semilogx(k_vec, best_N_mat_approx(:, i_pcs)./vec2column(k_vec), 'color', orange, 'linestyle', '--', 'linewidth', 2); hold on; % optimal N % 2*exp(1).*log(k_vec)
-        semilogx(k_vec, best_N_mat_using_nu_approx(:, i_pcs)./vec2column(k_vec), 'color', orange, 'linestyle', '-', 'linewidth', 2); hold on; % optimal nu
+        semilogx(k_vec, best_N_mat_approx(:, 1)./vec2column(k_vec), 'color', orange, 'linestyle', '--', 'linewidth', 2); hold on; % optimal N % 2*exp(1).*log(k_vec)
+        semilogx(k_vec, best_N_mat_using_nu_approx(:, 1)./vec2column(k_vec), 'color', orange, 'linestyle', '-', 'linewidth', 2); hold on; % optimal nu
         should_be_beta_N = polyfit(log(k_vec'), 2*exp(1).*log(k_vec'), 1);
         legend([legend_vec '$\sim$'], 'location', 'northwest', 'interpreter', 'latex'); legend('boxoff');
         xlim([1, max(k_vec)*1.01]);
@@ -297,76 +246,138 @@ if(find_best_h)
         %    semilogx(k_vec, sqrt(2*exp(1)*log(k_vec)), ['y--'], 'linewidth', 2); hold on; % optimal h_k^1
         
     end % loop on i_run
-    my_saveas(gcf, fullfile(two_stage_figs_dir, 'h1_and_h2_best_new2'), {'epsc', 'jpg'});
+    my_saveas(gcf, fullfile(two_stage_figs_dir, 'h1_and_h2_best'), {'epsc', 'jpg'});
     total_run_time = cputime-ttt
 end % find best h
 
-simulate_two=0;% Now implement procedures and call them:
-if(simulate_two)
-    N0=100; PCS = 0.5; Delta = 0.1; n_pop = 50; mu_vec = zeros(1, n_pop); mu_vec(end) =  Delta; sigma_vec = ones(1, n_pop); iters = 100;
-    [max_I, PCS_D, h_D] = two_stage_selection_procedure(N0, PCS, Delta, mu_vec, sigma_vec, iters, 'dalal');
-    [max_I_R, PCS_R, h_R] = two_stage_selection_procedure(N0, PCS, Delta, mu_vec, sigma_vec, iters, 'rinott');
-    
-    PCS_D
-    PCS_R
-end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% End figures for paper:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
-% Check monotonicity
-nu1=2; nu2=15; h=0.5; k1=1; k2=1; k=14;
-ret = quadgk(@(t) tcdf(t+h, nu1).^k1 .* tcdf(t, nu1).^(k2-1) .* tpdf(t, nu1) - tcdf(t+h, nu2).^k1 .* tcdf(t, nu2).^(k2-1) .* tpdf(t, nu2)  , -inf, inf, 'AbsTol', 10^(-15), 'RelTol', 10^(-10))
-t_vec = -10:0.01:10;
-figure; plot(t_vec, tcdf(t_vec, nu1).^k, 'b', 'linewidth', 2); hold on;
-plot(t_vec, tcdf(t_vec, nu2).^k, 'r', 'linewidth', 2);
-xlim([-0.5 0.5]);
-nu1=4; nu2=4.3; h=0.5; k1=1; k2=1; k=1;
-t_vec2 = 0:0.01:10; figure; y_vec2 = tcdf(h+t_vec2, nu2).^k+tcdf(h-t_vec2, nu2).^k - ...
-    tcdf(h+t_vec2, nu1).^k-tcdf(h-t_vec2, nu1).^k;
-plot(t_vec2, y_vec2, 'r', 'linewidth', 2);
-title(['min=' num2str(min(y_vec2))]);
-
-% Show two pdf's - do they really cross at zero?
-nu1=1; nu2=1.2; h=0.5; k1=3; k2=4; k=14;
-h_vec = -10:0.05:10; z_vec1 = zeros(size(h_vec)); z_vec2=z_vec1; z_vec3=z_vec1;
-for i_h = 1:length(h_vec)
-    if(mod(i_h, 100) == 0)
-        run_i = i_h
+% Other figures:
+additional_figures=0;
+if(additional_figures)
+    for(log_flag = 0:1)
+        for i_pcs = 1:length(pcs_vec)
+            figure;
+            for i_nu = 1:length(nu_vec)
+                subplot(3, 2, i_nu);
+                if(log_flag)
+                    loglog(k_vec, h_k_dalal(i_pcs, i_nu,:) , '*'); hold on;
+                    loglog(k_vec, h_k_rinott(i_pcs, i_nu,:) , 'r*');
+                    loglog(k_vec, h_k_dalal_approx(i_pcs, i_nu,:) , 'b');
+                    loglog(k_vec, h_k_rinott_approx(i_pcs, i_nu,:) , 'r');
+                else
+                    plot(k_vec, h_k_dalal(i_pcs, i_nu,:) , '*'); hold on;
+                    plot(k_vec, h_k_rinott(i_pcs, i_nu,:) , 'r*');
+                    plot(k_vec, h_k_dalal_approx(i_pcs, i_nu,:) , 'b');
+                    plot(k_vec, h_k_rinott_approx(i_pcs, i_nu,:) , 'r');
+                end
+                xlabel('k'); ylabel('$h_k^i$', 'interpreter', 'latex');
+                title(['$\nu=' num2str(nu_vec(i_nu)) '$'], 'interpreter', 'latex');
+                
+                if(i_nu == length(nu_vec)) % last plot
+                    legend({'$h_k^1$', '$h_k^2$', '$h_k^1$ (approx.)', '$h_k^2$ (approx.)'}, 'location', 'southeast', 'interpreter', 'latex'); legend('boxoff');
+                end
+            end % loop on nu
+            %    supertitle('asdfsaf');
+            supertitle(['$h_k^1, h_k^2$ for $PCS=' num2str(pcs_vec(i_pcs)) '$'], 'interpreter', 'latex');
+            %%        my_saveas(gcf, fullfile(two_stage_figs_dir, ['h1_and_h2_pcs_' strrep(num2str(pcs_vec(i_pcs)), '.', '_')]), {'epsc', 'jpg'});
+        end % loop on pcs
     end
-    z_vec1(i_h) = two_stage_integral_dalal(h_vec(i_h), [k1 k2], [nu1 nu1]);
-    z_vec2(i_h) = two_stage_integral_dalal(h_vec(i_h), [k1 k2], [nu2 nu2]);
-    z_vec3(i_h) = two_stage_integral_dalal(h_vec(i_h), [k1 k2], [nu2 nu1]);
-end
+    
+    
+    simulate_two=0;% Now implement procedures and call them:
+    if(simulate_two)
+        N0=100; PCS = 0.5; Delta = 0.1; n_pop = 50; mu_vec = zeros(1, n_pop); mu_vec(end) =  Delta; sigma_vec = ones(1, n_pop); iters = 100;
+        [max_I, PCS_D, h_D] = two_stage_selection_procedure(N0, PCS, Delta, mu_vec, sigma_vec, iters, 'dalal');
+        [max_I_R, PCS_R, h_R] = two_stage_selection_procedure(N0, PCS, Delta, mu_vec, sigma_vec, iters, 'rinott');
+        
+        PCS_D
+        PCS_R
+    end
+    
+    
+    
+    % Check monotonicity
+    nu1=2; nu2=15; h=0.5; k1=1; k2=1; k=14;
+    ret = quadgk(@(t) tcdf(t+h, nu1).^k1 .* tcdf(t, nu1).^(k2-1) .* tpdf(t, nu1) - tcdf(t+h, nu2).^k1 .* tcdf(t, nu2).^(k2-1) .* tpdf(t, nu2)  , -inf, inf, 'AbsTol', 10^(-15), 'RelTol', 10^(-10))
+    t_vec = -10:0.01:10;
+    figure; plot(t_vec, tcdf(t_vec, nu1).^k, 'b', 'linewidth', 2); hold on;
+    plot(t_vec, tcdf(t_vec, nu2).^k, 'r', 'linewidth', 2);
+    xlim([-0.5 0.5]);
+    nu1=4; nu2=4.3; h=0.5; k1=1; k2=1; k=1;
+    t_vec2 = 0:0.01:10; figure; y_vec2 = tcdf(h+t_vec2, nu2).^k+tcdf(h-t_vec2, nu2).^k - ...
+        tcdf(h+t_vec2, nu1).^k-tcdf(h-t_vec2, nu1).^k;
+    plot(t_vec2, y_vec2, 'r', 'linewidth', 2);
+    title(['min=' num2str(min(y_vec2))]);
+    
+    % Show two pdf's - do they really cross at zero?
+    nu1=1; nu2=1.2; h=0.5; k1=3; k2=4; k=14;
+    h_vec = -10:0.05:10; z_vec1 = zeros(size(h_vec)); z_vec2=z_vec1; z_vec3=z_vec1;
+    for i_h = 1:length(h_vec)
+        if(mod(i_h, 100) == 0)
+            run_i = i_h
+        end
+        z_vec1(i_h) = two_stage_integral_dalal(h_vec(i_h), [k1 k2], [nu1 nu1]);
+        z_vec2(i_h) = two_stage_integral_dalal(h_vec(i_h), [k1 k2], [nu2 nu2]);
+        z_vec3(i_h) = two_stage_integral_dalal(h_vec(i_h), [k1 k2], [nu2 nu1]);
+    end
+    
+    %z_vec1 = normcdf(h_vec, 1, 3);
+    %z_vec2 = normcdf(h_vec, 1, 2);
+    figure; plot(h_vec, z_vec1, 'b', 'linewidth', 2); hold on;
+    plot(h_vec, z_vec2, 'r', 'linewidth', 2);
+    plot(h_vec, z_vec3, 'g', 'linewidth', 2);
+    xlabel('h'); ylabel('$G_{\nu}^k(h)$', 'interpreter', 'latex');
+    legend({['\nu_1=' num2str(nu1)], ['\nu_2=' num2str(nu2)], 'mixed'}); legend('boxoff');
+    xlim([-0.5 0.5]);
+    
+    % Look at difference of t random variables:
+    nu1=2; nu2=5;  k=1; h=5.5;
+    w_vec = tcdf(h+t_vec2, nu2).^k + tcdf(h-t_vec2, nu2).^k - (tcdf(h+t_vec2, nu1).^k + tcdf(h-t_vec2, nu1).^k);
+    figure; plot(t_vec2, w_vec);
+    figure; plot(t_vec2, tcdf(h+t_vec2, nu2).^k + tcdf(h-t_vec2, nu2).^k, 'b'); hold on;
+    plot(t_vec2, tcdf(h+t_vec2, nu1).^k + tcdf(h-t_vec2, nu1).^k, 'r');
+    xlabel('t'); ylabel('diff diff');
+    title(['min=' num2str(min(w_vec))]);
+    figure; plot(t_vec, tcdf(h+t_vec, nu2).^k,  'b'); hold on;
+    plot(t_vec, tcdf(h+t_vec, nu1).^k, 'r');
+    
+    
+    % Look at G_nu^k(h+t)+G_nu^k(h-t) as function of t for h>0, t>0
+    nu1=1; nu2=5;  k=4; h=4.5;
+    u_vec = tcdf(h+t_vec2, nu2).^k + tcdf(h-t_vec2, nu1).^k;
+    figure; plot(t_vec2, u_vec);
+    xlabel('t'); ylabel('sum');
+    title(['min=' num2str(min(u_vec))]);
+    
+    figure; plot(t_vec, tcdf(t_vec-h, nu1), 'b'); hold on;
+    plot(t_vec, tcdf(t_vec-h, nu2), 'b--');
+    plot(t_vec, k .* tcdf(t_vec, nu1).^(k-1) .* tpdf(t_vec, nu1), 'r');
+    
+end % if additional figures
 
-%z_vec1 = normcdf(h_vec, 1, 3);
-%z_vec2 = normcdf(h_vec, 1, 2);
-figure; plot(h_vec, z_vec1, 'b', 'linewidth', 2); hold on;
-plot(h_vec, z_vec2, 'r', 'linewidth', 2);
-plot(h_vec, z_vec3, 'g', 'linewidth', 2);
-xlabel('h'); ylabel('$G_{\nu}^k(h)$', 'interpreter', 'latex');
-legend({['\nu_1=' num2str(nu1)], ['\nu_2=' num2str(nu2)], 'mixed'}); legend('boxoff');
-xlim([-0.5 0.5]);
-
-% Look at difference of t random variables:
-nu1=2; nu2=5;  k=1; h=5.5;
-w_vec = tcdf(h+t_vec2, nu2).^k + tcdf(h-t_vec2, nu2).^k - (tcdf(h+t_vec2, nu1).^k + tcdf(h-t_vec2, nu1).^k);
-figure; plot(t_vec2, w_vec);
-figure; plot(t_vec2, tcdf(h+t_vec2, nu2).^k + tcdf(h-t_vec2, nu2).^k, 'b'); hold on;
-plot(t_vec2, tcdf(h+t_vec2, nu1).^k + tcdf(h-t_vec2, nu1).^k, 'r');
-xlabel('t'); ylabel('diff diff');
-title(['min=' num2str(min(w_vec))]);
-figure; plot(t_vec, tcdf(h+t_vec, nu2).^k,  'b'); hold on;
-plot(t_vec, tcdf(h+t_vec, nu1).^k, 'r');
-
-
-% Look at G_nu^k(h+t)+G_nu^k(h-t) as function of t for h>0, t>0
-nu1=1; nu2=5;  k=4; h=4.5;
-u_vec = tcdf(h+t_vec2, nu2).^k + tcdf(h-t_vec2, nu1).^k;
-figure; plot(t_vec2, u_vec);
-xlabel('t'); ylabel('sum');
-title(['min=' num2str(min(u_vec))]);
-
-figure; plot(t_vec, tcdf(t_vec-h, nu1), 'b'); hold on;
-plot(t_vec, tcdf(t_vec-h, nu2), 'b--');
-plot(t_vec, k .* tcdf(t_vec, nu1).^(k-1) .* tpdf(t_vec, nu1), 'r');
-
+    % % %     [h_k_rinott, h_k_dalal, h_k_rinott_approx, h_k_dalal_approx] = compute_h_k_matrices(pcs_vec, nu_vec, k_vec);
+    % % %     save('h1_h2_best_h', 'h_k_dalal', 'h_k_rinott', 'h_k_dalal_approx', 'h_k_rinott_approx', 'k_vec', 'nu_vec', 'pcs_vec');
+    % % % %load('h1_h2_best_h');
+    % % %
+    % % %
+    % % %     figure; % Plot figure for
+    % % %     for i_k = 1:length(k_vec)
+    % % %         subplot(3,2,i_k);
+    % % %         for i_pcs = 1:length(pcs_vec)
+    % % %             semilogy(nu_vec, h_k_dalal(i_pcs,:, i_k), [color_vec(i_pcs) '--'], 'linewidth', 2); hold on;
+    % % %         end
+    % % %         for i_pcs = 1:length(pcs_vec)
+    % % %             semilogy(nu_vec, h_k_dalal_approx(i_pcs,:, i_k), color_vec(i_pcs), 'linewidth', 2); hold on;
+    % % %         end
+    % % %         title(['k=' num2str(k_vec(i_k))]);
+    % % %         xlabel('$\nu$', 'interpreter', 'latex'); ylabel('$h_k^1(\nu)$', 'interpreter', 'latex');
+    % % %         if(i_k == 1)
+    % % %             legend(legend_vec, 'location', 'northeast', 'interpreter', 'latex'); legend('boxoff');
+    % % %         end
+    % % %     end
+    
