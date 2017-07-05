@@ -33,6 +33,6 @@ for i= k_vec %  0:n % loop on allele frequencies
 end
 
 if(cond_poly_flag) % compute probability conditional on allelel polymorphic
-    sample_p_vec = sample_p_vec ./ (1 - sum( exp(n .* log(max(eps,1-x_vec)) + log(p_vec)) ) - sum( exp(n .* log(max(eps,x_vec)) + log(p_vec)) ) );
+    sample_p_vec = sample_p_vec ./ (sum(p_vec) - sum( exp(n .* log(max(eps,1-x_vec)) + log(p_vec)) ) - sum( exp(n .* log(max(eps,x_vec)) + log(p_vec)) ) );
     sample_p_vec(k_vec==0) = 0; sample_p_vec(k_vec == n) = 0; 
 end

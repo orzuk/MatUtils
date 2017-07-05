@@ -146,8 +146,9 @@ N_vec_hat = demographic_parameters_to_n_vec(D, D.index);
 % 'fastNeutrino'; % ...; % generate running command
 % end
 
-% Internal function for filtering out obviously unrealistic demographic models
-%
+
+% Internal function for filtering out obviously unrealistic demographic models.
+% Models with N_vec too large or with too many generations are filtered out
 % Input:
 % N_vec - vector of population sizes
 %
@@ -156,10 +157,10 @@ N_vec_hat = demographic_parameters_to_n_vec(D, D.index);
 %
 function filter_flag = filter_N_vec_internal(N_vec)    % Filter first unreasonable models !!!
 filter_flag=0;
-if(max(N_vec) > 10^9) % 1 billion
+if(max(N_vec) > 10^9) % over 1 billion individuals 
     filter_flag=1;
 end
-if(max(N_vec > 10^4 * N_vec(1))) % don't allow too big expansion
+if(max(N_vec) > 10^4 * N_vec(1)) % don't allow too big expansion
     filter_flag=1;
 end
 if(length(N_vec) > 4000) % we model maximum of 4000 generations

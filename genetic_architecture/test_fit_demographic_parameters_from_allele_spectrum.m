@@ -21,7 +21,7 @@ N_vec = demographic_parameters_to_n_vec(D, 1);
 
 mu = mu_per_site * 100000; % take effective mutation rate in a region
 D.mu=mu;
-run_test=0;
+run_test=1;
 if(run_test)
     
     % Simulate data:
@@ -46,7 +46,6 @@ if(run_test)
     % N_vec_hat = demographic_parameters_to_n_vec(D_hat, 1);
     
     
-    demographic_model_plot({D, D_hat}, [D.index D_hat.index], log_like_mat, k_vec, n_vec); % plot
     % figure;  % Compare demographic model
     % semilogy(N_vec, 'linewidth', 2); hold on; semilogy(N_vec_hat, 'r', 'linewidth', 2);
     % xlabel('Time (generations)'); ylabel('Population size');
@@ -67,6 +66,7 @@ if(run_test)
 else
     load('DebugRVASDemography.mat');
 end
+demographic_model_plot({D, D_hat}, [D.index D_hat.index], log_like_mat, k_vec, n_vec); % plot
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
