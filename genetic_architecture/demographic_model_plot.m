@@ -11,7 +11,7 @@ function demographic_model_plot(D_cell, index, log_like_mat, k_vec, n_vec)
 
 AssignGeneralConstants; AssignRVASConstants;
 num_D = length(D_cell);
-
+pseudo_count = 1; 
 
 figure;  % Plot demographic models
 legend_vec = cell(num_D, 1);
@@ -20,7 +20,7 @@ for i=1:num_D
     semilogy(N_vec, 'linewidth', 2, 'color', color_vec(i)); hold on; % semilogy(N_vec_hat, 'r', 'linewidth', 2);
     legend_vec{i} = D_cell{i}.name;
 end
-xlabel('Time (generations)'); ylabel('Population size'); title(['Best similar model: loglike=' num2str(log_like_mat(index(2)))]);
+xlabel('Time (generations)'); ylabel('Population size'); title(['Best model: LL=' num2str(log_like_mat(index(2)), 5)]);
 legend(legend_vec, 'fontsize', 14); legend('boxoff');
 
 print_all_models = 1; % print all possible models
@@ -36,10 +36,12 @@ if(print_all_models)
     
     [min_demographic_dist, min_I] = min(demographic_dist);
     % Print the minimum with it's log-likelihood
-    figure; semilogy(N_vec, 'linewidth', 2, 'color', color_vec(1)); hold on; % semilogy(N_vec_hat, 'r', 'linewidth', 2);
-    semilogy(N_vec_cell{min_I}, 'linewidth', 2, 'color', color_vec(2));
-    xlabel('Time (generations)'); ylabel('Population size'); title(['Most similar model: loglike=' num2str(log_like_mat(min_I))]);
-    legend(legend_vec, 'fontsize', 14); legend('boxoff');
+%    figure; semilogy(N_vec, 'linewidth', 2, 'color', color_vec(1)); hold on; % semilogy(N_vec_hat, 'r', 'linewidth', 2);
+    semilogy(N_vec_cell{min_I}, 'linewidth', 2, 'color', color_vec(3)); % add new 
+    xlabel('Time (generations)'); ylabel('Population size'); 
+    cur_title = get(gca, 'title'); 
+    title([cur_title.String '; Similar model: LL=' num2str(log_like_mat(min_I), 5)]);
+    legend([legend_vec' 'Fitted-Similar'] , 'fontsize', 14); legend('boxoff');
     
     D_cell{end+1} = D_cell{end}; index(end+1) = min_I; D_cell{end}.index = min_I; % Add closest demography to true demography
     legend_vec{end+1} = 'closest-demography';
@@ -65,33 +67,56 @@ if(plot_sfs) % plot neutral sfs for demographic model
     end
     
     figure;  % Plot population SFS
+    subplot(2,2,1); 
     for i=1:length(D_cell)
         LL_legend_vec{i} = [legend_vec{i} ', LL=' num2str(round(log_like_mat_again{i}, 2))];
         N_vec = demographic_parameters_to_n_vec(D_cell{i}, index(i));
         [x_vec_hat{i}, p_vec_hat{i}, L_correction_factor_hat, ~, k_vec_hat{i}, n_vec_hat{i}, weights_vec_hat]  = ... % Compare neutral allele-freq distribution for different demographies
             compute_allele_freq_spectrum_from_demographic_model(D_cell{i}, 0, 'simulation', n_sample, mu_per_site); % simulate from neutral model
         %        semilogx(x_vec ./ (2*N_vec(end-1)), p_vec); hold on;
-        semilogx(x_vec_hat{i} ./ (2*N_vec(end-1)), p_vec_hat{i}, color_vec(i)); hold on;
+        semilogx(x_vec_hat{i} ./ (2*N_vec(end-1)), p_vec_hat{i}, color_vec(i), 'linewidth', 2); hold on;
     end % loop on models
     [unique_k_vec, h_k_vec] = unique_with_counts(k_vec);
-    semilogx(unique_k_vec ./ n_sample, h_k_vec ./ length(k_vec), 'm');  % PLOT ALSO DATA 
-    xlabel('f (allele freq. population)'); ylabel('Psi(f) population');
+    semilogx(unique_k_vec ./ n_sample, h_k_vec ./ length(k_vec), 'm', 'linewidth', 2);  % PLOT ALSO DATA 
+    xlabel('$f$ (population)', 'interpreter', 'latex'); ylabel('$\Psi(f)$ population', 'interpreter', 'latex');
+    title('Population Frequencies'); 
     legend([LL_legend_vec' 'Data'], 'fontsize', 14); legend('boxoff');
-    figure; % Plot sample SFS
+    subplot(2,2,2);  % Plot sample SFS
+    legend_with_LL = [LL_legend_vec' 'Data'];
     for i=1:length(D_cell)
         [unique_k_vec_hat{i}, h_k_vec_hat{i}] = unique_with_counts(k_vec_hat{i});
-        semilogx(unique_k_vec_hat{i} ./ n_vec_hat{i}(1), h_k_vec_hat{i} ./ length(k_vec_hat{i}), color_vec(i)); hold on;
-        log_like_mat_direct(i) = sum(h_k_vec_hat{i} .* log( h_k_vec_hat{i} ./ length(k_vec_hat{i}) ) ); 
+        semilogx(unique_k_vec_hat{i} ./ n_vec_hat{i}(1), h_k_vec_hat{i} ./ length(k_vec_hat{i}), ...
+            color_vec(i), 'linewidth', 2); hold on;
+%        log_like_mat_direct(i) = sum(h_k_vec_hat{i} .* log( h_k_vec_hat{i} ./ length(k_vec_hat{i}) ) );         
+        % New: Compute again likelihood for data given the ploted likelihoods: 
+        log_like_mat_direct(i) = relative_entropy_hist(unique_k_vec, h_k_vec, unique_k_vec_hat{i},  h_k_vec_hat{i}, 0, [1 1]); % compute LL. Add pseudo counts 
+        legend_with_LL{i} = [legend_with_LL{i} ' ; direct-LL=' num2str(log_like_mat_direct(i), 4)]; 
     end
-    semilogx(unique_k_vec ./ n_sample, h_k_vec ./ length(k_vec), 'm');  % PLOT ALSO DATA 
-    xlabel('f (allele freq. sample)'); ylabel('Psi(f) sample');
-    legend([LL_legend_vec' 'Data'], 'fontsize', 14); legend('boxoff');
-    figure;
-    for i=1:length(D_cell)
-        plot(unique(k_vec(k_vec>0)), cumsum(P_poly_again{i}.LL_vec(2:end)), ['*' color_vec(i)]); hold on; % plot likelihood contribution for polymorphic alleles 
+    semilogx(unique_k_vec ./ n_sample, h_k_vec ./ length(k_vec), 'm', 'linewidth', 2);  % PLOT ALSO DATA 
+    xlabel('$f$ (sample)', 'interpreter', 'latex'); ylabel('$\Psi(f)$ sample', 'interpreter', 'latex');
+    legend(legend_with_LL, 'fontsize', 14); legend('boxoff');
+    title('Sample Frequencies'); 
+    subplot(2,2,3);  hold off; % figure; % What is this figure?? is it empirical log-likelihood as function of derived allele count?? show also data on same plot!!! 
+    for i=1:length(D_cell) % loop on models 
+        plot(unique(k_vec(k_vec>0)), cumsum(P_poly_again{i}.LL_vec(2:end-1)), ['*' color_vec(i)]); hold on; % plot likelihood contribution for polymorphic alleles 
     end
+%    plot(unique_k_vec, log(h_k_vec ./ length(k_vec)), 'm*', 'linewidth', 2);  % PLOT ALSO DATA
     xlabel('k (sample allele count.)'); ylabel('LogLike');
-    legend(LL_legend_vec, 'fontsize', 14); legend('boxoff');
+    legend(LL_legend_vec', 'fontsize', 14); legend('boxoff'); %  'Data']
+    for i=1:length(D_cell) % loop on models 
+        plot(unique_k_vec(2:end), cumsum((h_k_vec(2:end)'+pseudo_count) .* log(P_poly_again{i}.sample_p_vec(2:end-1) + pseudo_count/length(k_vec))), ['--' color_vec(i)]); hold on; % plot likelihood contribution for polymorphic alleles 
+    end
+    
+    subplot(2,2,4); hold off;
+    legend_with_LL = [LL_legend_vec' 'Data'];
+     for i=1:length(D_cell)
+         semilogx(unique_k_vec(2:end) ./ n_sample, P_poly_again{i}.sample_p_vec(2:end-1) ./ sum(P_poly_again{i}.sample_p_vec(2:end-1))  , color_vec(i), 'linewidth', 2); hold on;
+         log_like_mat_direct(i) = length(k_vec) * relative_entropy_hist( ...
+             unique_k_vec, h_k_vec, unique_k_vec,  P_poly_again{i}.sample_p_vec .* length(k_vec), 0, [1 1]); % compute LL. Add pseudo counts 
+        legend_with_LL{i} = [legend_with_LL{i} ' ; direct-LL=' num2str(log_like_mat_direct(i), 4)]; % compute again 
+     end
+     semilogx(unique_k_vec(2:end) ./ n_sample, h_k_vec(2:end) ./ sum(h_k_vec(2:end)), 'm', 'linewidth', 2);  % PLOT ALSO DATA  % / length(k_vec)
+     legend(legend_with_LL, 'fontsize', 14); legend('boxoff');
 end % if plot_sfs
 
 

@@ -17,7 +17,6 @@ KL_mat = zeros(max_N, iters);
 
 % First check random points
 switch rand_flag
-
     case 0 % both points random
         for N=2:max_N
             P = -log(rand(iters,2^N)); P = P ./ repmat(sum(P,2),1,2^N);
@@ -66,7 +65,7 @@ switch rand_flag
         for N=2:max_N
             P = -log(rand(iters,2^N)); P = P ./ repmat(sum(P,2),1,2^N);
             %%%%            [G MI_mat KL_mat(N,:)] = random_Tree_to_point(P); % closest_DAG_to_point(P, 1);
-            [G1 G2 MI_mat KL_mat{1}(N,:) KL_mat{2}(N,:)]= closest_and_random_Trees_to_point(P);
+            [G1, G2, MI_mat, KL_mat{1}(N,:), KL_mat{2}(N,:)]= closest_and_random_Trees_to_point(P);
 
 
             % % %             dags = create_bounded_degree_DAG(N, 1, iters); % Create random DAGs
@@ -80,7 +79,7 @@ switch rand_flag
         KL_mat(2:end,:) = KL_mat(2:end,:) + 9999999999;
         for N=2:max_N
             P = -log(rand(iters,2^N)); P = P ./ repmat(sum(P,2),1,2^N);
-            [G MI_mat KL_mat(N,:)] = closest_Tree_to_point(P); % closest_DAG_to_point(P, 1);
+            [G, MI_mat, KL_mat(N,:)] = closest_Tree_to_point(P); % closest_DAG_to_point(P, 1);
         end
 
 
@@ -102,7 +101,7 @@ switch rand_flag
                 RandTree = uniform_spanning_tree(N,0); Tree = B{j}.dag + B{j}.dag';
                 KL_mat{1}(N,j) = sum(sum(MI_mats(:,:,j) .* (Tree - RandTree)));  % Get the random KL difference
                 KL_mat{3}(N,j) = sum(sum(MI_mats(:,:,j) .* Tree));  % Get the random KL difference, no rand tree
-                [NextTree KL_mat{2}(N,j)] = NextBestTree(MI_mats(:,:,j), Tree);
+                [NextTree, KL_mat{2}(N,j)] = NextBestTree(MI_mats(:,:,j), Tree);
                 
             end
             Trees_time = cputime - ttt

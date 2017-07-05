@@ -3,8 +3,8 @@
 % Input:
 % x1 - x values for first histogram
 % p1 - probablilites for first histogram
-% x1 - x values for first histogram
-% p1 - probablilites for first histogram
+% x2 - x values for second histogram
+% p2 - probablilites for second histogram
 % scale_factor - resolution increase in output histogram
 % normalize_flag - whether to normalize the input&output distributions (optional. Defauly: YES).
 %
