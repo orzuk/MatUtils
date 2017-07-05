@@ -13,7 +13,7 @@ AssignGeneralConstants; AssignRVASConstants;
 num_D = length(D_cell);
 pseudo_count = 1; 
 
-figure;  % Plot demographic models
+figure;  subplot(2,1,1);  % Plot demographic models
 legend_vec = cell(num_D, 1);
 for i=1:num_D
     N_vec = demographic_parameters_to_n_vec(D_cell{i}, index(i));
@@ -26,18 +26,23 @@ legend(legend_vec, 'fontsize', 14); legend('boxoff');
 print_all_models = 1; % print all possible models
 if(print_all_models)
     N_vec = demographic_parameters_to_n_vec(D_cell{1}, index(1));
-    N_vec_cell = cell(D_cell{2}.num_params, 1); demographic_dist = zeros(D_cell{2}.num_params, 1);
+    N_vec_cell = cell(D_cell{2}.num_params, 1); demographic_dist = zeros(D_cell{2}.num_params, 1); demographic_dist_mat = zeros(D_cell{2}.num_params); 
     for i=1:D_cell{2}.num_params  % loop on all models of first
         N_vec_cell{i} = demographic_parameters_to_n_vec(D_cell{2}, i);
+    end
         
-        % find which one is most similar to the true model
-        demographic_dist(i) = demographic_models_distance(N_vec, N_vec_cell{i});
+    for i=1:D_cell{2}.num_params  % loop on all models of first
+        comp_dist = i 
+        demographic_dist(i) = demographic_models_distance(N_vec, N_vec_cell{i});         % find which one is most similar to the true model
+        for j=2:D_cell{2}.num_params % compute all pairwise distances between models 
+                    demographic_dist_mat(i,j) = demographic_models_distance(N_vec_cell{i}, N_vec_cell{j});         % find which one is most similar to the true model
+        end
     end
     
     [min_demographic_dist, min_I] = min(demographic_dist);
     % Print the minimum with it's log-likelihood
 %    figure; semilogy(N_vec, 'linewidth', 2, 'color', color_vec(1)); hold on; % semilogy(N_vec_hat, 'r', 'linewidth', 2);
-    semilogy(N_vec_cell{min_I}, 'linewidth', 2, 'color', color_vec(3)); % add new 
+     semilogy(N_vec_cell{min_I}, 'linewidth', 2, 'color', color_vec(3)); % add new 
     xlabel('Time (generations)'); ylabel('Population size'); 
     cur_title = get(gca, 'title'); 
     title([cur_title.String '; Similar model: LL=' num2str(log_like_mat(min_I), 5)]);
@@ -45,6 +50,16 @@ if(print_all_models)
     
     D_cell{end+1} = D_cell{end}; index(end+1) = min_I; D_cell{end}.index = min_I; % Add closest demography to true demography
     legend_vec{end+1} = 'closest-demography';
+
+     good_inds = find(abs(log_like_mat) < inf)
+     demographic_dist_mat = demographic_dist_mat+demographic_dist_mat'; % make symmetric
+     demographic_embed = cmdscale(demographic_dist_mat(good_inds, good_inds)); 
+     subplot(2,1,2); hold off;  scatter(demographic_embed(:,1), demographic_embed(:, 2), [], abs(log_like_mat(good_inds))); hold on;
+     plot(demographic_embed(find(good_inds == min_I),1), demographic_embed(find(good_inds == min_I), 2), 'k*'); colorbar; % closest model
+     [~, best_I] = min(abs(log_like_mat));
+     plot(demographic_embed(best_I,1), demographic_embed(best_I, 2), 'r*'); colorbar; % closest model
+     title('All potential demographic models with LL'); 
+
 end % print all models
 
 plot_sfs = 1; % plot sfs for true and fitted model (Should be close)
