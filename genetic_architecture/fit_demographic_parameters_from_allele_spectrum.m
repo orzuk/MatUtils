@@ -102,6 +102,9 @@ good_inds = find( (abs(region_het_moment_mat_all_models - het_moment_mat_data(:,
 
 i_ctr=1; log_like_mat = zeros(D.num_params, 1)-Inf; compute_time=zeros(D.num_params, 1);
 test_model_ctr = 0;
+if(isempty(good_inds))
+    error('Error!! No Demographic Model Fits SFS!!'); 
+end
 for i=vec2row(good_inds) % 1:D.num_params
     D.index = i; % dset index of current model: should allow multiple indices!!! 
     N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
@@ -195,5 +198,5 @@ D.num_params_vec = [length_cell(D.init_pop_size_vec) length_cell(D.generations_v
 D.num_stages = length(D.init_pop_size_vec);
 
 D.num_params = prod(D.num_params_vec); % how many parameters to enumerate
-
+D.use_allele_counts = 0; % new! don't use counts in likelihood computations !!!
 

@@ -21,7 +21,7 @@ N_vec = demographic_parameters_to_n_vec(D, 1);
 
 mu = mu_per_site * 100000; % take effective mutation rate in a region
 D.mu=mu;
-run_test=1;
+run_test=0;
 if(run_test)
     
     % Simulate data:
@@ -66,7 +66,7 @@ if(run_test)
 else
     load('DebugRVASDemography.mat');
 end
-demographic_model_plot({D, D_hat}, [D.index D_hat.index], log_like_mat, k_vec, n_vec); % plot
+demographic_model_plot({D, D_hat}, [D.index D_hat.index], log_like_mat, k_vec, n_vec, 1); % plot
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

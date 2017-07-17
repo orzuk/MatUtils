@@ -15,7 +15,7 @@ read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
 extract_fields_flag=1; % extract ??? fields
 compute_gene_matrices_flag=1; % 1. Compute for each gene ?? flag for parsing ???
 plot_site_frequency_flag = 0; % 1: plot SFS data (this is also part of pre-processing)
-estimate_gene_by_gene = 0; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
+estimate_gene_by_gene = 1; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 plot_gene_by_gene = 0; % make figures for individual genes
 fit_demography = 1;  % NEW! here fit a demographic model using only synonymous SNPs
 aggregate_population_estimators = 0; % NEW! aggregate estimators from different populations
@@ -85,12 +85,25 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
             population{1}, [remove_suffix_from_file_name(remove_dir_from_file_name(exome_struct.spectrum_data_file)) '_' population{1} '.mat']);
         all_A = load(fullfile(spectrum_data_dir, spectrum_population_data_file{i_pop}), 'count_vec', 'f_vec', 'n_vec', 'allele_types');
         all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous 
+        all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!! 
         synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)) % 'synonymous_variant' % 'coding-synonymous'
-        [Demographic_model, max_LL_demographic_model] = ...
-            fit_demographic_parameters_from_allele_spectrum( ...
-            all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, [],  all_A.mu); % PROBLEM HERE!! WORK (my implementation / software)
-        
-        % Save and plot demography 
+        demography_file = [remove_suffix_from_file_name(exons_file) ...
+            '_' population{1} '_Demography.mat']; 
+        demography_file = fullfile(spectrum_data_dir, ...
+            exome_struct.data_str, population{1}, demography_file);
+        if(~exist(demography_file, 'file'))
+            [Demographic_model, max_LL_demographic_model] = ...
+                fit_demographic_parameters_from_allele_spectrum( ...
+                all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, [],  all_A.mu); % PROBLEM HERE!! WORK (my implementation / software)
+            Demographic_model.name = ['Fitted.' population{1}];
+            save(fullfile(spectrum_data_dir, exome_struct.data_str, population{1}, ...
+                demography_file), 'Demographic_model', 'max_LL_demographic_model'); % Save and plot demography
+        else
+            load(demography_file);
+            Demographic_model.name = ['Fitted.' population{1}];
+        end
+        demographic_model_plot({Demographic_model}, Demographic_model.index, max_LL_demographic_model, ...
+            all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, 0);     
     end
     
     i_pop=i_pop+1;

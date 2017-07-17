@@ -37,7 +37,7 @@ D.compute_absorb = 0; % no need for extra computation!!!
 
 N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
 if(~exist('n_sample', 'var') || isempty(n_sample))
-    n_sample =  2*N_vec(end-1);
+    n_sample =  2*N_vec(end-1); % Get last population size 
 end
 weights_vec = 1;
 
