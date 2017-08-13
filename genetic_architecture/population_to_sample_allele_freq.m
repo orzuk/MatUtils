@@ -3,6 +3,7 @@
 % f_vec - frequency of each allele
 % N - population size - total number of CHROMOSOMES !!!!
 % n_vec - number of individual CHROMOSOMES!!! in sample for each allele (usually all the same)
+% return_counts - flag saying to return counts (default) or frequencies 
 %
 % Output:
 % k_vec - number of allele carriers for each allele (drawn at random)
@@ -34,7 +35,7 @@ if(poiss_flag) % might save time
 else
     k_vec = hygernd(N, vec2column(round(f_vec)), n_vec); % Sample without replacement. Can sample together alleles with same frequencies? probably NOT!
 end
-if(~return_counts) % return frequencies rather than counts (counts is defaule)
+if(~return_counts) % return frequencies rather than counts (counts is default)
     k_vec = k_vec ./ n_vec;
 end
 

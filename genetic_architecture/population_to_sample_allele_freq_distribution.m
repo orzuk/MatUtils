@@ -4,13 +4,14 @@
 % p_vec - population probability of being at this frequencies for alleles
 % n - number of individuals in sample
 % k_vec - (optional) evaluate sample SFS only for this set of values 
-% cond_poly_flag - if this flag is on we give conditional probabilities, given that allele is polymorphic
+% cond_poly_flag - if 'on' we give conditional probabilities, given that allele is polymorphic
 %
 % Output:
 % sample_x_vec - sample frequency of alleles
 % sample_p_vec - sample probability of being at this frequencies for alleles
 %
-function [sample_x_vec, sample_p_vec] = population_to_sample_allele_freq_distribution(x_vec, p_vec, n, k_vec, cond_poly_flag) % n_vec, return_counts)
+function [sample_x_vec, sample_p_vec] = population_to_sample_allele_freq_distribution( ...
+    x_vec, p_vec, n, k_vec, cond_poly_flag) % n_vec, return_counts)
 
 if(~exist('k_vec', 'var') || isempty(k_vec))
     k_vec = 0:n;

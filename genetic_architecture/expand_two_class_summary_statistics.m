@@ -34,5 +34,5 @@ switch format_flag
         num_alleles_vec = []; num_null_alleles_vec = []; 
         L = size(X, 1) / 2; % each allele is repeated twice
         num_carriers_vec = X(1:L,:); % here we've got only number of people carrying each allele
-        num_total_individuals_vec = X(L+1:end,:); % total number of individuals? (in case they're different!!) 
+        num_total_individuals_vec = X((L+1):end,:); % total number of individuals? (in case they're different!!) 
 end

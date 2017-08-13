@@ -42,7 +42,7 @@ end
 
 figure; plot(s_vec_x, s_vec_y, '.'); hold on;
 [rho, rho_pval] = corr(s_vec_x, s_vec_y);
-xlabel('$Human-Chimp \quad \hat{s}$', 'interpreter', 'latex', 'fontsize', 14);
+xlabel('$Human\!-\!Chimp \quad \hat{s}$', 'interpreter', 'latex', 'fontsize', 14);
 ylabel('$SFS \quad \hat{s}$', 'interpreter', 'latex', 'fontsize', 14);
 [beta, rho2] = polyfit(s_vec_x, s_vec_y, 1);
 pos_inds = find(s_vec_x > (-4)*10^(-4));

@@ -4,9 +4,9 @@
 % s_null_vec - vector of possible selection coefficients for the null alleles. Should be NEGATIVE for delterious alleles (so fitness is 1+s)
 % alpha_vec - vector of possible fraction of null alleles at birth
 % beta_vec - vector of possible effect size of null alleles
-% rare_cumulative_per_gene - total expected number of rare alleles in gene (related to theta via the following formula: XXX TO COMPLETE !!!)
 % target_size_by_class_vec - NEW! target size for each allele type (used in Poisson model). This is like the above but counts expected number of different alleles, not their frequencies !  %%% NEW! alleles class type vector. This states for each allele if it is neutral, harmfull, or in a mixture (missense) 
-% N - effective population size
+% D - demographic model which controls the allele frequncy distribution
+%       (NEW! Default is constant population size) - need to add parameters to it as well!
 % X - genotype data matrix. THIS IS THE EXOME DATA Format: 
 %       If full_flag=1: A matrix of size (num-individuals)*(num-snps) of
 %       0,1,2 so Xij is #of allelels of individual i for allele j
@@ -17,10 +17,9 @@
 %                prevalence - population frequency of disease for disease trait
 % null_w_vec - (optional) this is the assignment of which alleles are null
 %            and which not. This simplifies the likelihood computation a lot when it is known
-% maximize_parameters - on which parameters to do the maximization. Default is all (s, alpha, beta). Format is [S alpha beta]  (all binary variables)
+% maximize_parameters - on which parameters to do the maximization. Default is all (s, alpha, beta). 
+%                       Format is [S alpha beta]  (all binary variables)
 % full_flag - how is input data (X and y) given. Default is: full_flag = 1.  
-% D - demographic model which controls the allele frequncy distribution
-%       (NEW! Default is constant population size) - need to add parameters to it as well!
 % num_individuals - total number of individuals in sample 
 % implementation_str - how to find minimum (brute-force / Newton's method?)
 % 
@@ -32,8 +31,8 @@
 % NEW! should add also confidence intervals (not implemented yet) (Use Fisher's information matrix)  
 %
 function [max_LL, max_s, max_alpha, max_beta] = ...
-    maximize_two_class_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
-    X, y, trait_struct, null_w_vec, maximize_parameters, full_flag, D, num_individuals, implementation_str)
+    maximize_two_class_likelihood(s_null_vec, alpha_vec, beta_vec, target_size_by_class_vec, D, ...
+    X, y, trait_struct, null_w_vec, maximize_parameters, full_flag, num_individuals, implementation_str)
 
 
 if(~exist('implementation_str', 'var') || isempty(implementation_str))
@@ -81,10 +80,10 @@ switch implementation_str  % choose how to maximize likelihood
         if(~maximize_parameters(3)) % don't loop over beta
             beta_vec = 0; % meaningless
         end
-        % PROBLEM: HERE LOG-LIKELIHOOD IS MONOTONICALLY DECREASING WITH
-        % ALPHA - WHY? 
+        % PROBLEM: HERE LOG-LIKELIHOOD IS MONOTONICALLY DECREASING WITH ALPHA - WHY? 
         log_like_mat = ... % compute likelihood (currently vary only alpha)
-            compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
+            compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, ...
+            target_size_by_class_vec, D, ...
             X, y, trait_struct, null_w_vec, include_phenotype, full_flag, num_individuals);        
         [max_LL, tmp_ind] = max(log_like_mat(:)); % find the maximal grid-point
         [I, J, K] = ind2sub(size(log_like_mat), tmp_ind); 
@@ -101,25 +100,30 @@ switch implementation_str  % choose how to maximize likelihood
     case 'minsearch' % use Matlab's optimization
         if(isempty(null_w_vec) || poisson_model_flag) % here we don't know alpha and the null positions
             [max_s_alpha, max_LL_genotype] = fminsearch(@(s_alpha) ... % use genotypes
-                -compute_two_class_log_likelihood(s_alpha(1), s_alpha(2), [], rare_cumulative_per_gene, target_size_by_class_vec, ...
-                N, X, [], [], null_w_vec, include_phenotype, full_flag, num_individuals, D), ...
+                -compute_two_class_log_likelihood(s_alpha(1), s_alpha(2), [], ...
+                target_size_by_class_vec, D, ...
+                X, [], [], null_w_vec, include_phenotype, full_flag, num_individuals), ...
                 [s_null_vec; alpha_vec]); % here s_null_vec and alpha_vec serve as initial guesses! (should be scalars)
+
+            
+            
+            
             % use phenotypes            
             max_s = max_s_alpha(1); max_alpha = max_s_alpha(2); % We need to check that 0 < alpha < 1
             
         else % here we do know alpha
             [max_s, max_LL_genotype] = fminsearch(@(s_alpha) ... % use genotypes
-                -compute_two_class_log_likelihood(s_alpha, 1, [], rare_cumulative_per_gene, target_size_by_class_vec, N, X, [], ...
+                -compute_two_class_log_likelihood(s_alpha, 1, [], target_size_by_class_vec, D, X, [], ...
                 trait_struct, null_w_vec, include_phenotype, full_flag, num_individuals), s_null_vec); % maximize over genotypes only 
             max_alpha = 1;
                         
             if(maximize_parameters(3)) % optimize also on effect size beta - here we must use phenotype !! (slower)
                 [max_beta, max_LL_phenotype] = fminsearch(@(beta) ... % now optimize only phenotype part
-                    -compute_two_class_log_likelihood(max_s, 1, beta, rare_cumulative_per_gene, target_size_by_class_vec, N, X, y, ...
+                    -compute_two_class_log_likelihood(max_s, 1, beta, target_size_by_class_vec, D, X, y, ...
                     trait_struct, null_w_vec, -1, full_flag), beta_vec);
             else
                 max_LL_phenotype = ... % Compute likelihood for beta=0
-                    compute_two_class_log_likelihood(max_s, 1, 0, rare_cumulative_per_gene, target_size_by_class_vec, N, X, y, ...
+                    compute_two_class_log_likelihood(max_s, 1, 0, target_size_by_class_vec, D, X, y, ...
                     trait_struct, null_w_vec, -1, full_flag);
                 max_beta = 0;
             end

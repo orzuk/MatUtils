@@ -7,20 +7,29 @@
 % GeneStruct - file/structure with genomic information on each gene
 % MutationRateTable - total mutation rate per-gene for different mutation types
 % MutationTypes - strings of each mutation type
+% Demographic_model - model for demography for each popoulation 
 % plot_flag - 1 (default): make plots, 0 - don't plot just save files 
 % gene_prefix - run only on genes matching this prefix (used to divide
 % labor, run parallel ..)
 %
 % Output: None. Figures are saved in directory: output_data_dir
 % There is also a file for each gene saved at: spectrum_data_dir
-% 
+% which contains fitted parameters 
+%
 function parse_site_frequency_gene_by_gene(spectrum_data_dir, spectrum_data_file, output_data_dir, ...
-    GeneStruct, MutationRateTable, MutationTypes, plot_flag, gene_prefix) % Estimate s and alpha for each gene in the genome - how???
+    GeneStruct, MutationRateTable, MutationTypes, Demographic_model, plot_flag, gene_prefix) % Estimate s and alpha for each gene in the genome - how???
 
-Assign24MammalsGlobalConstants;
+Assign24MammalsGlobalConstants; AssignRVASConstants;
+
+if(~exist('plot_flag', 'var') || isempty(plot_flag))
+    plot_flag = 0;
+end
+if(~exist('fit_selection', 'var') || isempty(fit_selection))
+    fit_selection = 1; % fit selection coefficient for each gene
+end
 if(ischar(GeneStruct))
     gene_struct_input_file = GeneStruct;
-    if(~exist([remove_suffix_from_file_name(gene_struct_input_file) '_unique.mat'], 'file')); % Save unique
+    if(~exist([remove_suffix_from_file_name(gene_struct_input_file) '_unique.mat'], 'file')) % Save unique
         GeneStruct = load(GeneStruct, ...
             'chr_vec', 'pos_start_vec', 'pos_end_vec', 'seqs', 'strand', 'gene_names', 'sort_perm');
     end
@@ -36,7 +45,7 @@ end
 num_mutation_types = length(MutationTypes);
 TotalExonicMutationRateVec = sum(MutationRateTable); % Compute total mutation rate for each mutation to get target size
 
-if(~exist([remove_suffix_from_file_name(gene_struct_input_file) '_unique.mat'], 'file')); % Save unique genes
+if(~exist([remove_suffix_from_file_name(gene_struct_input_file) '_unique.mat'], 'file')) % Save unique genes
     [UniqueGeneStruct.gene_names, I, J] = unique(GeneStruct.gene_names);  % Unite exons into genes
     num_genes = length(I); % Get only unique genes
     UniqueMutationRateTable = zeros(num_genes, num_mutation_types);
@@ -128,21 +137,80 @@ end % loop on populations
 %for c = 'A':'Z'  % Make directories
 %    my_mkdir(gene_dir);
 %end
-ExonsGeneStruct = load(gene_struct_input_file, 'chr_vec', 'pos_start_vec', 'pos_end_vec', 'strand', 'gene_names', 'sort_perm'); % load information on genes. 
+ExonsGeneStruct = load(gene_struct_input_file, ...
+    'chr_vec', 'pos_start_vec', 'pos_end_vec', 'strand', 'gene_names', 'sort_perm'); % load information on genes. 
 
-for i=1:num_genes % loop on genes and plot
+for i=1:num_genes % loop on genes and plot / fit selection coefficients 
     sprintf(['Run gene = %d out of %d, ' upper(GeneStruct.gene_names{i})], i, num_genes)
-    if(strmatch(upper(gene_prefix), upper(GeneStruct.gene_names{i})))
+    if(startsWith(upper(GeneStruct.gene_names{i}), upper(gene_prefix)))
         gene_header = upper(GeneStruct.gene_names{i}); % (1:2));  % Print gene name 
         gene_dir = fullfile(output_data_dir, gene_header(1), GeneStruct.gene_names{i}); % here save all information on gene
         my_mkdir(gene_dir);
-        internal_plot_gene_stats(gene_header, i, GeneStruct, ExonsGeneStruct, ...
-            SiteFreqSpecStruct, MutationRateTable, MutationTypes, gene_dir, plot_flag);
-    end
+        if(plot_flag)
+            internal_plot_gene_stats(gene_header, i, GeneStruct, ExonsGeneStruct, ...
+                SiteFreqSpecStruct, MutationRateTable, MutationTypes, gene_dir, plot_flag);
+        end
+        if(fit_selection)
+            alpha_vec = 0.1:0.1:1; % possible values for alpha 
+            s_null_vec = 0 -logspace(-6, -1, 10);
+            rare_cumulative_per_gene = 1; 
+            target_size_by_class_vec = [mu_per_site, mu_per_site, mu_per_site]; % Get target size for gene
+            gene_n_vec = []; gene_k_vec = []; null_w_vec = []; % ???
+            for j= SiteFreqSpecStruct{1}.good_allele_inds{2} % loop on missense
+                gene_k_vec = [gene_k_vec SiteFreqSpecStruct{1}.gene_by_allele_type_freq_list{j,i} .* ...
+                    SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i}];
+                gene_n_vec = [gene_n_vec SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i}]; 
+            end
+            null_w_vec = -ones(size(gene_k_vec)); % all missense
+            for j= SiteFreqSpecStruct{1}.good_allele_inds{3} % loop on stop codons 
+                gene_k_vec = [gene_k_vec SiteFreqSpecStruct{1}.gene_by_allele_type_freq_list{j,i} .* ...
+                    SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i}];
+                gene_n_vec = [gene_n_vec SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i}]; 
+            end
+            X = [gene_k_vec' gene_n_vec']';     
+            null_w_vec((end+1):length(gene_k_vec)) = 1; % all stop
+
+            num_individuals = [];
+            implementation_str = []; 
+            trait_struct = []; % doesn't matter, we only use genotype part 
+            maximize_parameters = [1 1 0]; % maximize over s and alpa 
+            full_flag = 0; 
+            if(~isempty(X)) % for some genes we have no alleles in the relevant population
+                for k=2 % 1:num_populations % load data from all populations
+                    [max_LL_vec(i,k), s_MLE_vec(i,k), alpha_MLE_vec(i,k), beta_MLE_vec(i,k)] = ...
+                        maximize_two_class_likelihood(s_null_vec, alpha_vec, 0, ...
+                        target_size_by_class_vec, Demographic_model{k}, ... % run each time on different population. But counts should be different!!
+                        X, [], trait_struct, null_w_vec, maximize_parameters, full_flag, ...
+                        num_individuals, implementation_str); % fit for each population seperately
+                end % loop on populations
+            end
+        end % if fit selection
+        
+        
+        aggregate_population_estimators = 0; 
+        if(aggregate_population_estimators) % compute an aggregate esitmator for each gene from multiple populations
+        
+        
+        end
+        
+        test_population_differences = 0; 
+        if(test_population_differences) % test for differences in selection coefficient between different populations
+            for population1 = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
+                for population2 = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
+                    
+                    
+                end
+            end
+        end
+        
+        
+        
+            
+    end % filter for genes 
     if(mod(i, 10) == 0) % avoid having too many figures open
         close all;
     end
-end
+end % loop on genes
 
 
 

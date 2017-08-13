@@ -1,9 +1,9 @@
 % Compute allele frequency distribution using Fisher-Wright model with changing population size.
 % Input:
 % D - structure with demographic models
-% s - selection coefficient
+% s - selection coefficient. NOTE: Should be NEGATIVE for deleterious alleles
 % compute_flag - 'simulation' (default) or 'moments' (computation based on moments)
-% n_sample - # of individuals in a SAMPLE (default: = population size at beginning)
+% n_sample - # of individuals in a SAMPLE (default: = population size at END)
 % mu - regional mutation rate (default: mu for one site) 
 %
 % Output:
@@ -17,6 +17,24 @@
 %
 function [x_vec, p_vec, L_correction_factor, compute_time, k_vec, n_vec, weights_vec] = ...
     compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu)
+
+if(~isstring(compute_flag)) % allow for structure of compute parameters
+	smooth_params = compute_flag.smooth;
+	compute_flag = compute_flag.method; 
+end
+
+if(~isscalar(s)) % NEW! allow to fit multipole s values using a surface fitting module
+	s_vec = s; 
+	for i_s = 1:length(s_vec)
+		p_mat = zeros(num_x, num_s); 
+		s=s_vec(s); 
+		[x_vec, p_mat(:,i_s), L_correction_factor, compute_time, k_vec, n_vec, weights_vec] = ...
+		    compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu);		
+	end
+	% Perform smoothing with monotonicity constraints: 
+    %	[zgrid,xgrid,ygrid] = gridfit(x_mat,s_mat, p_mat,  x_grid,s_grid); % fit monotonic surface 				
+end
+
 
 compute_time=cputime;
 if(~exist('compute_flag', 'var') || isempty(compute_flag))
@@ -34,13 +52,11 @@ if(~isfield('iters', D))
 end
 D.num_bins = 100; % used for binning in Fisher Right simulation
 D.compute_absorb = 0; % no need for extra computation!!!
-
 N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
 if(~exist('n_sample', 'var') || isempty(n_sample))
     n_sample =  2*N_vec(end-1); % Get last population size 
 end
 weights_vec = 1;
-
 num_final_generations = length(N_vec)-1; % simulation at the end
 L_correction_factor=[];
 
@@ -53,8 +69,6 @@ switch compute_flag
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
         p_vec = freq_struct.p_vec{end-1};
         L_correction_factor = simulation_struct.L_correction_factor;
-        
-        %        [sample_x_vec, sample_p_vec] = population_to_sample_allele_freq_distribution(x_vec, p_vec, n_sample); % compute distribution at sample (no further sampling here!)
         
         if(nargout > 4) % output k_vec, n_vec ...
             if(~isfield(simulation_struct, 'weights'))
@@ -94,6 +108,14 @@ switch compute_flag
             p_vec = p_vec + lambda_max_ent(k) .* x_vec .^ (k-1);
         end
         p_vec = exp(-p_vec) ./ (x_vec .* (1-x_vec)); % Compute f. How to normalize?
+end
+
+% New! smooth SFS  (should we do it at sample or at population level?)
+if(smooth_params)
+	slm = slmengine(x_vec, p_vec,'plot','on','knots',10,'decreasing','on'); % 'leftslope',0,'rightslope',0);
+	p_vec2 = slmeval(x_vec, slm); 
+
+	% Temp: plot 
 end
 
 compute_time=cputime-compute_time;

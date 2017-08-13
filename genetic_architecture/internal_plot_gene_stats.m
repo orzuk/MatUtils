@@ -230,8 +230,8 @@ switch alpha_s_fit % Temp: Fit alpha crudely for each gene
         % get rid of alleles appearing zero times (they're here since they appear in another population)
         t_max_like = cputime;
         [fitted_LL, fitted_s, fitted_alpha, fitted_beta] = ...
-            maximize_two_class_likelihood(s_null_vec, alpha_vec, beta_vec, rare_cumulative_per_gene, target_size_by_class_vec, N, ...
-            X, y, trait_struct, null_w_vec, maximize_parameters, full_flag, D, num_individuals, 'brute-force'); % get MLE estimator !!!
+            maximize_two_class_likelihood(s_null_vec, alpha_vec, beta_vec, target_size_by_class_vec, D, ...
+            X, y, trait_struct, null_w_vec, maximize_parameters, full_flag, num_individuals, 'brute-force'); % get MLE estimator !!!
         t_max_like = cputime - t_max_like
 end
 R{ctr+8+2*length(SiteFreqSpecStruct{1}.upper_freq_vec),2+num_populations} = fitted_alpha;

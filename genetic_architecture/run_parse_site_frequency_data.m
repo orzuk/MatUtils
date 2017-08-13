@@ -17,17 +17,14 @@ compute_gene_matrices_flag=1; % 1. Compute for each gene ?? flag for parsing ???
 plot_site_frequency_flag = 0; % 1: plot SFS data (this is also part of pre-processing)
 estimate_gene_by_gene = 1; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 plot_gene_by_gene = 0; % make figures for individual genes
-fit_demography = 1;  % NEW! here fit a demographic model using only synonymous SNPs
+fit_demography = 0;  % NEW! here fit a demographic model using only synonymous SNPs
 aggregate_population_estimators = 0; % NEW! aggregate estimators from different populations
 test_population_differences = 0; % NEW! test for different in selection between different populations
 
 queue_str = 'priority'; % for submitting jobs at broad farm
-
 global cumsum_log_vec;
 cumsum_log_vec = cumsum([0 log(1:2*10000)]); % compute log-binomial coefficients to save time
-
-%'rate.matrix.intergenic'; % matrix with codon annotations and mutation rates from Pazik
-
+%'rate.matrix.intergenic'; % matrix with codon annotations and mutation rates from Paz
 exome_struct = get_exome_data_info(exome_data); % get metadata: file names, directories etc.
 
 % for i=4:4 % Loop on datasets. Take only ESP data % length(spectrum_data_files)
@@ -45,7 +42,6 @@ if(parse_site_frequency_flag) % here we parse
             'parse_site_frequency_data(''' vcf_file_names{i} ...
             ''', exome_struct, [], ' num2str(read_to_mat_flag) ', ' num2str(extract_fields_flag) ', ' ...
             num2str(compute_gene_matrices_flag) ');']; %, gene_list
-        
         if(in_matlab_flag)
             eval(job_str);
         else
@@ -61,6 +57,10 @@ end
 %%%%%%%%%%%%%%%%%%
 % Plot SFS Files %
 %%%%%%%%%%%%%%%%%%
+demography_file = [remove_suffix_from_file_name(exons_file) ...
+    '_' 'AllPop' '_Demography.mat'];
+demography_file = fullfile(spectrum_data_dir, ...
+    exome_struct.data_str, 'AllPop', demography_file);
 for population = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
     if(~strcmp(population, 'African')) % temp: work only on one population!
         continue;
@@ -84,26 +84,21 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
         spectrum_population_data_file{i_pop} = fullfile(dir_from_file_name(exome_struct.spectrum_data_file), ...
             population{1}, [remove_suffix_from_file_name(remove_dir_from_file_name(exome_struct.spectrum_data_file)) '_' population{1} '.mat']);
         all_A = load(fullfile(spectrum_data_dir, spectrum_population_data_file{i_pop}), 'count_vec', 'f_vec', 'n_vec', 'allele_types');
-        all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous 
-        all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!! 
+        all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous
+        all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!!
         synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)) % 'synonymous_variant' % 'coding-synonymous'
-        demography_file = [remove_suffix_from_file_name(exons_file) ...
-            '_' population{1} '_Demography.mat']; 
-        demography_file = fullfile(spectrum_data_dir, ...
-            exome_struct.data_str, population{1}, demography_file);
         if(~exist(demography_file, 'file'))
-            [Demographic_model, max_LL_demographic_model] = ...
+            [Demographic_model{i_pop}, max_LL_demographic_model(i_pop)] = ...
                 fit_demographic_parameters_from_allele_spectrum( ...
                 all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, [],  all_A.mu); % PROBLEM HERE!! WORK (my implementation / software)
-            Demographic_model.name = ['Fitted.' population{1}];
-            save(fullfile(spectrum_data_dir, exome_struct.data_str, population{1}, ...
-                demography_file), 'Demographic_model', 'max_LL_demographic_model'); % Save and plot demography
+            Demographic_model{i_pop}.name = ['Fitted.' population{1}];
+            save(demography_file, 'Demographic_model', 'max_LL_demographic_model'); % Save and plot demography
         else
             load(demography_file);
-            Demographic_model.name = ['Fitted.' population{1}];
+            Demographic_model{i_pop}.name = ['Fitted.' population{1}];
         end
-        demographic_model_plot({Demographic_model}, Demographic_model.index, max_LL_demographic_model, ...
-            all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, 0);     
+        demographic_model_plot(Demographic_model, Demographic_model.index, max_LL_demographic_model, ...
+            all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, 0);
     end
     
     i_pop=i_pop+1;
@@ -114,7 +109,20 @@ end % loop on population (temp.)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Use Missense+Stop SNPs to fit selection and tolerance parameters %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+load(demography_file);
 spectrum_data_files_str = [exome_struct.spectrum_data_files_str(1:end-1) '}'];
+
+if(~isfield(Demographic_model{i_pop}, 'SFS')) % add SFS to demographic model
+    s = -0.0001; 
+    Demographic_model{i_pop}.iters = 250; 
+    compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;
+    [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, Demographic_model{i_pop}.SFS.L, SFS_compute_time] = ...
+        compute_allele_freq_spectrum_from_demographic_model( ...
+        Demographic_model{i_pop}, s, compute_flag); 
+    
+    save(demography_file, 'Demographic_model', 'max_LL_demographic_model');
+    
+end
 if(estimate_gene_by_gene) % estimate potential target size for each gene in the genome
     if(~exist(fullfile(mammals_data_dir, genome_version, exons_file), 'file')) % get all sequences
         GeneStruct = ExtractExons(mammals_data_dir, 'hg18', [], exons_file, 0); % Get gene sequences. (Don't get pwms!!!)
@@ -140,8 +148,9 @@ if(estimate_gene_by_gene) % estimate potential target size for each gene in the 
             '''' fullfile(spectrum_data_dir, exome_data, 'GeneByGene') ''', ' ... % 'Tennessen_Science_2012'
             '''' fullfile(mammals_data_dir, genome_version, exons_file) ''' , ' ... % GeneStruct
             '''' fullfile(spectrum_data_dir, mutation_rates_file) ''', ' ...
+            '' '[], Demographic_model' ', ' ...
             num2str(plot_gene_by_gene) ', ' ...
-            '[], ''' gene_prefix{1} ''');'];
+            ' ''' gene_prefix{1} ''');'];
         
         %                 parse_site_frequency_gene_by_gene(spectrum_data_dir, spectrum_data_files{i}, ...
         %                     fullfile(spectrum_data_dir, 'Tennessen_Science_2012', 'GeneByGene'), ...  % assume ESP data
@@ -172,8 +181,7 @@ if(estimate_gene_by_gene) % estimate potential target size for each gene in the 
     % Test for differences for s estimator for each gene from all populations %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if(test_population_differences) % test for differences in selection between different populations for each gene
-        
-        
+     
     end
 end % estimate gene by gene parameters
 

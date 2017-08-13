@@ -7,7 +7,7 @@
 % D - NEW! Demographic model. Contains population size at each generation !!!
 % N - effective population size (either initial number or vector of population sizes at each generation)
 % mu - mutation rate (per site/region per generation)
-% s - selection coefficient. NOTE: Should be NEGATIVE for deletirious alleles
+% s - selection coefficient. NOTE: Should be NEGATIVE for deleterious alleles
 % num_generations - how many generations to run after we establish equilibrium
 % expansion_factor - by how much does the population grow in each generation
 % init_str - initialization of allele frequencies (equilibrium or newly-born alleles)
