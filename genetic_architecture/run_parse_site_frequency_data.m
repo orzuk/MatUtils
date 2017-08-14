@@ -114,11 +114,13 @@ spectrum_data_files_str = [exome_struct.spectrum_data_files_str(1:end-1) '}'];
 
 if(~isfield(Demographic_model{i_pop}, 'SFS')) % add SFS to demographic model
     s = -0.0001; 
-    Demographic_model{i_pop}.iters = 250; 
+    s_vec = [0 -logspace(-6, -2, 4)]; 
+%    s_vec = [0 -logspace(-6, -1, 11)]; 
+    Demographic_model{i_pop}.iters = 50; 
     compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;
     [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, Demographic_model{i_pop}.SFS.L, SFS_compute_time] = ...
         compute_allele_freq_spectrum_from_demographic_model( ...
-        Demographic_model{i_pop}, s, compute_flag); 
+        Demographic_model{i_pop}, s_vec, compute_flag); 
     
     save(demography_file, 'Demographic_model', 'max_LL_demographic_model');
     

@@ -34,7 +34,7 @@
 % Output:
 % log_like_mat - Matrix (3-d) of log-likelihood of data for each parameter choice (s, alpha and beta)
 % P_poly - Structure with computation information. Probability of polymorphic alleles and more information
-% compute_time - total time operation took 
+% compute_time - total time operation took
 %
 function [log_like_mat, P_poly, compute_time] = ...
     compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, ...
@@ -127,21 +127,21 @@ end
 
 n =  max(num_individuals_vec);
 [unique_num_alleles_vec, ~, J_num_alleles] = unique(num_alleles_vec); [unique_num_carriers, I_num_carriers, h_num_carriers] = get_duplicates(num_carriers_vec);
- length(null_w_vec)
-if(min(unique_num_carriers) > 0) % add monomorphic alleles 
-    null_w_vec(end+1) = null_w_vec(1); 
+length(null_w_vec)
+if(min(unique_num_carriers) > 0) % add monomorphic alleles
+    null_w_vec(end+1) = null_w_vec(1);
     unique_num_carriers(end+1) = 0;
     h_num_carriers(end+1) = 0;
     I_num_carriers{end+1} = length(null_w_vec);
 end
-if(max(unique_num_carriers) < n) % add monomorphic alleles 
-    null_w_vec(end+1) = null_w_vec(1); 
+if(max(unique_num_carriers) < n) % add monomorphic alleles
+    null_w_vec(end+1) = null_w_vec(1);
     unique_num_carriers(end+1) = n;
     h_num_carriers(end+1) = 0;
     I_num_carriers{end+1} = length(null_w_vec);
 end
-    
-    
+
+
 
 if(poisson_model_flag) % Compute counts
     num_polymorphic_alleles_observed = zeros(3,1);
@@ -215,7 +215,7 @@ for i_s = 1:num_s % loop on parameters
             if(s_null_vec(i_s) == 0) % neutral. already computed, save time
                 x_vec{NULL_C} = x_vec{NEUTRAL_C}; allele_freq_hist{NULL_C} = allele_freq_hist{NEUTRAL_C};
                 log_x_vec{NULL_C} = log_x_vec{NEUTRAL_C}; log_one_minus_x_vec{NULL_C} = log_one_minus_x_vec{NEUTRAL_C};
-            else % here s not 0 (deleterious alleles). Compute spectrume again !! 
+            else % here s not 0 (deleterious alleles). Compute spectrume again !!
                 [x_vec{NULL_C}, allele_freq_hist{NULL_C}, L_correction_factor(NULL_C), demographic_compute_time] = ...
                     compute_allele_freq_spectrum_from_demographic_model(D, s_null_vec(i_s), compute_flag); % Try a grid of different values
                 sprintf('Compute null spectrum time=%f', demographic_compute_time)
@@ -244,7 +244,7 @@ for i_s = 1:num_s % loop on parameters
         lambda_s(i_s) = 4 * N * D.mu * target_size_by_class_vec(NULL_C) * T_s(i_s);
         lambda_missense(i_s,:) = 4 * N * D.mu * target_size_by_class_vec(MISSENSE_C) .* ( alpha_vec .* T_s(i_s) + (1-alpha_vec) .* T_0 );
     end % if poisson
-        
+    
     for i_alpha = 1:num_alpha
         ttt_one = cputime;
         %        p_null = alpha_vec(i_alpha) * T_s(i_s) / (alpha_vec(i_alpha) * T_s(i_s) + (1-alpha_vec(i_alpha)) * T_0); % compute probability that a given observed polymorphic locus is null
@@ -260,7 +260,7 @@ for i_s = 1:num_s % loop on parameters
                     binopdf(0:unique_num_alleles_vec(i), unique_num_alleles_vec(i), alpha_vec(i_alpha));
             end
         end % if include phenotype
-            
+        
         if(poisson_model_flag && D.use_allele_counts) % compute poisson part of likelihood  (observation of polymorphic alleles)
             log_like_mat(i_s, i_alpha, :) = internal_log_like_count_polymorphic_alleles(target_size_by_class_vec, num_polymorphic_alleles_observed, ...
                 P_poly, use_allele_freq_flag, i_s, i_alpha);
@@ -269,10 +269,10 @@ for i_s = 1:num_s % loop on parameters
         end % if poisson model flag
         for i_beta = 1:num_beta % loop on effect size
             %            tmp_likelihood_one_allele(:) = BIG_NUM; % repmat(BIG_NUM, max(num_individuals_vec), 3);
-            %            time_before_looping_on_alleles = cputime-ttt    
-            P_poly.LL_vec =  h_num_carriers .* log(sample_p_vec{null_w_vec(1)+2}); % TEMP !!!! for DEBUG !!! 
-            P_poly.sample_p_vec = sample_p_vec{null_w_vec(1)+2}; % TEMP !!!! for DEBUG !!! 
-            P_poly.counts_vec = h_num_carriers;  % TEMP: record counts of data 
+            %            time_before_looping_on_alleles = cputime-ttt
+            P_poly.LL_vec =  h_num_carriers .* log(sample_p_vec{null_w_vec(1)+2}); % TEMP !!!! for DEBUG !!!
+            P_poly.sample_p_vec = sample_p_vec{null_w_vec(1)+2}; % TEMP !!!! for DEBUG !!!
+            P_poly.counts_vec = h_num_carriers;  % TEMP: record counts of data
             for j=1:length(unique_num_carriers) % here we go over alleles by frequency. We assume all of the same class (w_null)
                 if((unique_num_carriers(j)==0) || (unique_num_carriers(j)==n))
                     continue;
@@ -342,10 +342,10 @@ compute_time = cputime-ttt;
 % Internal function: return the log-likelihood of data (new one used)
 %
 % Input:
-% target_size_alleles - 
-% num_polymorphic_alleles_observed - 
+% target_size_alleles -
+% num_polymorphic_alleles_observed -
 % P_poly - structure with probability of alleles from different class being polymorphic
-% use_allele_freq_flag - 
+% use_allele_freq_flag -
 % i_s - index of s, selection coefficient
 % i_alpha - index of alpha, frac of missense alleles which are null
 %

@@ -4,13 +4,13 @@
 % s - selection coefficient. NOTE: Should be NEGATIVE for deleterious alleles
 % compute_flag - 'simulation' (default) or 'moments' (computation based on moments)
 % n_sample - # of individuals in a SAMPLE (default: = population size at END)
-% mu - regional mutation rate (default: mu for one site) 
+% mu - regional mutation rate (default: mu for one site)
 %
 % Output:
 % x_vec - vector of x values (allele frequencies) at each generation
 % p_vec - vector of their frequencies at each generation
-% L_correction_factor - correction factor for total mutation rate 
-% compute_time - total time it took to run 
+% L_correction_factor - correction factor for total mutation rate
+% compute_time - total time it took to run
 % k_vec - alleles in sample
 % n_vec - sample sizes
 % weights_vec - weight of each allele (each allele can represent multiple alleles)
@@ -18,21 +18,35 @@
 function [x_vec, p_vec, L_correction_factor, compute_time, k_vec, n_vec, weights_vec] = ...
     compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu)
 
-if(~isstring(compute_flag)) % allow for structure of compute parameters
-	smooth_params = compute_flag.smooth;
-	compute_flag = compute_flag.method; 
+if(~ischar(compute_flag)) % allow for structure of compute parameters
+    smooth_params.smooth = compute_flag.smooth;
+    smooth_params.knots = 10;
+    compute_flag = compute_flag.method;
+else
+    smooth_params = [];
 end
 
 if(~isscalar(s)) % NEW! allow to fit multipole s values using a surface fitting module
-	s_vec = s; 
-	for i_s = 1:length(s_vec)
-		p_mat = zeros(num_x, num_s); 
-		s=s_vec(s); 
-		[x_vec, p_mat(:,i_s), L_correction_factor, compute_time, k_vec, n_vec, weights_vec] = ...
-		    compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu);		
-	end
-	% Perform smoothing with monotonicity constraints: 
-    %	[zgrid,xgrid,ygrid] = gridfit(x_mat,s_mat, p_mat,  x_grid,s_grid); % fit monotonic surface 				
+    s_vec = s; num_s = length(s_vec); 
+    for i_s = 1:length(s_vec)
+        sprintf('Run selection s=%f', s_vec(i_s))
+        s=s_vec(i_s);
+        [x_vec_cell{i_s}, p_vec_cell{i_s}, L_correction_factor, compute_time] = ...
+            compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag); % , n_sample, mu);
+        s_vec_cell{i_s} = repmat(s, length(x_vec_cell{i_s}), 1); 
+    end
+    
+    % Perform smoothing with monotonicity constraints:
+    x_vec = unique( [x_vec_cell{:}] ); num_x = length(x_vec); 
+    p_mat = zeros(num_s, num_x);
+    for i_s = 1:length(s_vec)
+        p_mat(i_s,:) = p_vec_cell{i_s};
+    end
+    p_mat = gridfit([x_vec_cell{:}] ,[s_vec_cell{:}], [p_vec_cell{:}], x_vec, s_vec); % fit surface
+    
+     [x_vec2, s_vec2, p_vec2] = fit_monotonic_surface(x_vec, s_vec, p_mat, params);  % constraints
+    %	
+    return;
 end
 
 
@@ -44,7 +58,7 @@ end
 init_str = 'equilibrium';
 %end
 if(~exist('mu', 'var') || isempty(mu))
-    AssignRVASConstants; 
+    AssignRVASConstants;
     mu = mu_per_site; % set default mutation rate (per-nucleotide per-generation)
 end
 if(~isfield('iters', D))
@@ -54,7 +68,7 @@ D.num_bins = 100; % used for binning in Fisher Right simulation
 D.compute_absorb = 0; % no need for extra computation!!!
 N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
 if(~exist('n_sample', 'var') || isempty(n_sample))
-    n_sample =  2*N_vec(end-1); % Get last population size 
+    n_sample =  2*N_vec(end-1); % Get last population size
 end
 weights_vec = 1;
 num_final_generations = length(N_vec)-1; % simulation at the end
@@ -65,7 +79,7 @@ switch compute_flag
         max_num_alleles = 20000; % set maximum to save time
         [freq_struct, ~, simulation_struct, N_vec, simulation_time] = ... % New: separate output to different structures
             FisherWrightSimulation([], D, mu, s, init_str, D.iters, compute_flag, D.num_bins);
-        fprintf('Fisher-Wright simulation time was %f\n', simulation_time);        
+        fprintf('Fisher-Wright simulation time was %f\n', simulation_time);
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
         p_vec = freq_struct.p_vec{end-1};
         L_correction_factor = simulation_struct.L_correction_factor;
@@ -95,7 +109,7 @@ switch compute_flag
             fprintf('Converted %d alleles to sample freq. time=%f\n', num_alleles, pop_to_sample_t);
             n_vec = repmat(n_sample, num_alleles, 1);
         end % if nargout > 4
-    case 'moments'        
+    case 'moments'
         N_vec = demographic_parameters_to_n_vec(D, 1);
         mu_vec_expansion_analytic = FisherWright_Compute_SFS_Moments(N_vec, 0, max_k); % compute moments with Formulas from Ewens
         
@@ -111,11 +125,79 @@ switch compute_flag
 end
 
 % New! smooth SFS  (should we do it at sample or at population level?)
-if(smooth_params)
-	slm = slmengine(x_vec, p_vec,'plot','on','knots',10,'decreasing','on'); % 'leftslope',0,'rightslope',0);
-	p_vec2 = slmeval(x_vec, slm); 
-
-	% Temp: plot 
+if(~isempty(smooth_params))
+    [x_vec2, p_vec2] = fit_monotonic_curve(log(x_vec(x_vec>0)), p_vec(x_vec>0), smooth_params);
+    x_vec2 = exp(x_vec2);
+    
+    figure; semilogx(x_vec, p_vec, '*'); hold on; % Temp: plot
+    semilogx(x_vec2, p_vec2, 'r');
+    legend({'data', 'fitted'});
 end
 
 compute_time=cputime-compute_time;
+
+
+
+% Internal function - fit monotonic curve to data (slm interface)
+function [x_fit, y_fit] = fit_monotonic_curve(x, y, params)
+% use slm tool - fit a decreasing function
+if(~isfield(params, 'x_fit'))
+    x_fit = x;
+else
+    if(isscalar(params.x_fit)) % number of points - set logarithmic grid
+        x_fit = logspace(log10(min(x)), log10(max(x)), params.x_fit);
+    else % points given
+        x_fit = params.x_fit;
+    end
+end
+slm = slmengine(double(log(x)), y,'plot','off','knots', params.knots, 'decreasing','on'); % 'leftslope',0,'rightslope',0);
+y_fit = slmeval(double(log(x)), slm);
+
+% Internal function - fit monotonic surface to data (slm or gridfit interface - iterative)
+% Constraints (here are very specific - need to generalize them later):
+% z(x, y) decreasing with x for any fixed y
+% \int_{t=0}^x z(t, y)dt decreasing with y for any fixed x
+function [x_fit, y_fit, z_fit] = fit_monotonic_surface(x, y, z, params) % constraints
+
+num_x = length(x);
+num_y = length(y);
+
+if(~isfield(params, 'x_fit'))
+    x_fit = x;
+else
+    if(isscalar(params.x_fit)) % number of points - set logarithmic grid
+        x_fit = logspace(log10(min(x)), log10(max(x)), params.x_fit);
+    else % points given
+        x_fit = params.x_fit;
+    end
+end
+if(~isfield(params, 'y_fit'))
+    y_fit = y;
+else
+    if(isscalar(params.y_fit)) % number of points - set logarithmic grid
+        y_fit = logspace(log10(min(y)), log10(max(y)), params.y_fit);
+    else % points given
+        y_fit = params.y_fit;
+    end
+end
+
+z_fit = zeros(length(x_fit), length(y_fit)); z_fit(1,2)=-1; % crete z grid
+for i=1:num_y % First fit each y seperately monotonically
+    [~, z_fit(:,i)] = fit_monotonic_curve(x, z(:,i), params);
+end
+z_fit_cum = cumsum(z_fit);
+
+while(~(issorted(-z_fit, 'rows') && issorted(-z_fit_cum', 'rows')))
+    for i=1:num_x
+        [~, z_fit_cum(:,i)] = fit_monotonic_curve(y_fit, z_fit_cum(i,:), params);
+    end
+    z_fit = [z_fit_cum(:,1) diff(z_fit_cum)]; % update surface
+    for i=1:num_y % First fit each y seperately monotonically
+        [~, z_fit(:,i)] = fit_monotonic_curve(x_fit, z_fit(:,i), params);
+    end    
+    z_fit_cum = cumsum(z_fit); % get cumulative
+
+
+end % while not sorted
+
+
