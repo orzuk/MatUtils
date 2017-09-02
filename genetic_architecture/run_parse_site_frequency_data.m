@@ -114,17 +114,29 @@ spectrum_data_files_str = [exome_struct.spectrum_data_files_str(1:end-1) '}'];
 
 if(~isfield(Demographic_model{i_pop}, 'SFS')) % add SFS to demographic model
     s = -0.0001; 
-    s_vec = [0 -logspace(-6, -2, 4)]; 
-%    s_vec = [0 -logspace(-6, -1, 11)]; 
+%    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging 
+    s_vec = [0 -logspace(-6, -1, 11)]; % heavier run 
     Demographic_model{i_pop}.iters = 50; 
+    Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
     compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;
     [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, Demographic_model{i_pop}.SFS.L, SFS_compute_time] = ...
         compute_allele_freq_spectrum_from_demographic_model( ...
         Demographic_model{i_pop}, s_vec, compute_flag); 
     
-    save(demography_file, 'Demographic_model', 'max_LL_demographic_model');
+    save(demography_file, 'Demographic_model', 'max_LL_demographic_model');    
+end
+
+% Here plot all demographies: 
+% 1. Plot the population size as function of generations for each demography
+% 2. Plot the SFS for different values of selection coefficient s for each demography
+if(plot_demographies) 
+    % 1. Plot pop. size
+    
+    % 2. plot SFS
     
 end
+
+
 if(estimate_gene_by_gene) % estimate potential target size for each gene in the genome
     if(~exist(fullfile(mammals_data_dir, genome_version, exons_file), 'file')) % get all sequences
         GeneStruct = ExtractExons(mammals_data_dir, 'hg18', [], exons_file, 0); % Get gene sequences. (Don't get pwms!!!)

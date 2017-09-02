@@ -30,21 +30,26 @@ if(~isscalar(s)) % NEW! allow to fit multipole s values using a surface fitting 
     s_vec = s; num_s = length(s_vec); 
     for i_s = 1:length(s_vec)
         sprintf('Run selection s=%f', s_vec(i_s))
-        s=s_vec(i_s);
+        s=s_vec(i_s)
         [x_vec_cell{i_s}, p_vec_cell{i_s}, L_correction_factor, compute_time] = ...
             compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag); % , n_sample, mu);
-        s_vec_cell{i_s} = repmat(s, length(x_vec_cell{i_s}), 1); 
+        s_vec_cell{i_s} = repmat(s, 1, length(x_vec_cell{i_s})); 
     end
-    
+    save('temp_surface.mat', 'x_vec_cell', 's_vec_cell', 'smooth_params', 'D'); 
     % Perform smoothing with monotonicity constraints:
     x_vec = unique( [x_vec_cell{:}] ); num_x = length(x_vec); 
     p_mat = zeros(num_s, num_x);
     for i_s = 1:length(s_vec)
-        p_mat(i_s,:) = p_vec_cell{i_s};
+        [~, I, J] = intersect(x_vec, x_vec_cell{i_s});
+        p_mat(i_s,I) = p_vec_cell{i_s}(J);
     end
-    p_mat = gridfit([x_vec_cell{:}] ,[s_vec_cell{:}], [p_vec_cell{:}], x_vec, s_vec); % fit surface
-    
-     [x_vec2, s_vec2, p_vec2] = fit_monotonic_surface(x_vec, s_vec, p_mat, params);  % constraints
+    %    p_mat = gridfit(double([x_vec_cell{:}]) ,[s_vec_cell{:}], [p_vec_cell{:}], double(x_vec), -s_vec); % fit surface
+    if(isfield(D, 's_grid'))
+        smooth_params.y_fit = abs(D.s_grid);
+    end
+    save('temp_surface.mat', '-append', 'x_vec', 's_vec', 'p_mat', 'smooth_params', 'D'); 
+%    load('temp_surface.mat'); 
+    [x_vec2, s_vec2, p_vec2] = fit_monotonic_surface(x_vec, abs(s_vec), p_mat, smooth_params);  % constraints
     %	
     return;
 end
@@ -136,68 +141,5 @@ end
 
 compute_time=cputime-compute_time;
 
-
-
-% Internal function - fit monotonic curve to data (slm interface)
-function [x_fit, y_fit] = fit_monotonic_curve(x, y, params)
-% use slm tool - fit a decreasing function
-if(~isfield(params, 'x_fit'))
-    x_fit = x;
-else
-    if(isscalar(params.x_fit)) % number of points - set logarithmic grid
-        x_fit = logspace(log10(min(x)), log10(max(x)), params.x_fit);
-    else % points given
-        x_fit = params.x_fit;
-    end
-end
-slm = slmengine(double(log(x)), y,'plot','off','knots', params.knots, 'decreasing','on'); % 'leftslope',0,'rightslope',0);
-y_fit = slmeval(double(log(x)), slm);
-
-% Internal function - fit monotonic surface to data (slm or gridfit interface - iterative)
-% Constraints (here are very specific - need to generalize them later):
-% z(x, y) decreasing with x for any fixed y
-% \int_{t=0}^x z(t, y)dt decreasing with y for any fixed x
-function [x_fit, y_fit, z_fit] = fit_monotonic_surface(x, y, z, params) % constraints
-
-num_x = length(x);
-num_y = length(y);
-
-if(~isfield(params, 'x_fit'))
-    x_fit = x;
-else
-    if(isscalar(params.x_fit)) % number of points - set logarithmic grid
-        x_fit = logspace(log10(min(x)), log10(max(x)), params.x_fit);
-    else % points given
-        x_fit = params.x_fit;
-    end
-end
-if(~isfield(params, 'y_fit'))
-    y_fit = y;
-else
-    if(isscalar(params.y_fit)) % number of points - set logarithmic grid
-        y_fit = logspace(log10(min(y)), log10(max(y)), params.y_fit);
-    else % points given
-        y_fit = params.y_fit;
-    end
-end
-
-z_fit = zeros(length(x_fit), length(y_fit)); z_fit(1,2)=-1; % crete z grid
-for i=1:num_y % First fit each y seperately monotonically
-    [~, z_fit(:,i)] = fit_monotonic_curve(x, z(:,i), params);
-end
-z_fit_cum = cumsum(z_fit);
-
-while(~(issorted(-z_fit, 'rows') && issorted(-z_fit_cum', 'rows')))
-    for i=1:num_x
-        [~, z_fit_cum(:,i)] = fit_monotonic_curve(y_fit, z_fit_cum(i,:), params);
-    end
-    z_fit = [z_fit_cum(:,1) diff(z_fit_cum)]; % update surface
-    for i=1:num_y % First fit each y seperately monotonically
-        [~, z_fit(:,i)] = fit_monotonic_curve(x_fit, z_fit(:,i), params);
-    end    
-    z_fit_cum = cumsum(z_fit); % get cumulative
-
-
-end % while not sorted
 
 
