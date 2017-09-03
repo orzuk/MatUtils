@@ -140,7 +140,10 @@ switch compute_flag
         x_vec{NEUTRAL_C} = (1:2*N-1) ./ (2*N); % vector of allele frequencies
         allele_freq_hist{NEUTRAL_C} = exp(allele_freq_spectrum(x_vec{NEUTRAL_C}, 0, N, 0, 'log')); % allele freq. distribution for neutral alleles. NOT Normalized!
     case 'simulation'
-        N_vec = demographic_parameters_to_n_vec(D, D.index); N=N_vec(1);
+        if(~isfield(D, 'N_vec'))
+            D.N_vec = demographic_parameters_to_n_vec(D, D.index); 
+        end
+        N=D.N_vec(1);
         if(isfield(D, 'SFS')) % here specrum already computed
             allele_freq_hist{NEUTRAL_C} = D.SFS.p_vec(1,:); % take neutral
             x_vec{NEUTRAL_C} = D.SFS.x_vec; % copy x vec
@@ -150,13 +153,13 @@ switch compute_flag
                 compute_allele_freq_spectrum_from_demographic_model(D, 0, compute_flag); % Try a grid of different values
             sprintf('Compute neutral spectrum time=%f', demographic_compute_time)
         end
-        x_vec{NEUTRAL_C} = x_vec{NEUTRAL_C} ./ (2*N_vec(end-1)); % normalize: from counts to allele freq.
+        x_vec{NEUTRAL_C} = x_vec{NEUTRAL_C} ./ (2*D.N_vec(end-1)); % normalize: from counts to allele freq.
         
         % NEW: can use moments !!! (so analytic but for non-constant population size)
 end
 sum_allele_freq_hist(NEUTRAL_C) = sum(allele_freq_hist{NEUTRAL_C});
 [sample_x_vec{NEUTRAL_C}, sample_p_vec{NEUTRAL_C}] = population_to_sample_allele_freq_distribution( ...
-    x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}, max(num_individuals_vec), unique_num_carriers', 1);
+    x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}, max(num_individuals_vec), round(unique_num_carriers)', 1);
 
 prob_null_given_x = zeros(L,1); % conditional probability of allele being null when we know the frequency
 T_0 = sum(allele_freq_hist{NEUTRAL_C}) * (x_vec{NEUTRAL_C}(2)-x_vec{NEUTRAL_C}(1)); %T_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot! %%% T_0 = integral_hist(x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}); %%% T_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq');
@@ -211,12 +214,12 @@ for i_s = 1:num_s % loop on parameters
                         compute_allele_freq_spectrum_from_demographic_model(D, s_null_vec(i_s), compute_flag); % Try a grid of different values
                     sprintf('Compute null spectrum time=%f', demographic_compute_time)
                 end
-                x_vec{NULL_C} = x_vec{NULL_C} ./ (2*N_vec(end-1)); % normalize: from counts to allele freq.
+                x_vec{NULL_C} = x_vec{NULL_C} ./ (2*D.N_vec(end-1)); % normalize: from counts to allele freq.
                 log_x_vec{NULL_C} = log(x_vec{NULL_C}); log_one_minus_x_vec{NULL_C} = log(1-x_vec{NULL_C});
             end % if s==0
     end
     [sample_x_vec{NULL_C}, sample_p_vec{NULL_C}] = population_to_sample_allele_freq_distribution( ...
-        x_vec{NULL_C}, allele_freq_hist{NULL_C}, max(num_individuals_vec), unique_num_carriers', 1);
+        x_vec{NULL_C}, allele_freq_hist{NULL_C}, max(num_individuals_vec), round(unique_num_carriers)', 1);
     sum_allele_freq_hist(NULL_C) = sum(allele_freq_hist{NULL_C});
     T_s(i_s) = sum(allele_freq_hist{NULL_C}) * (x_vec{NULL_C}(2)-x_vec{NULL_C}(1));     %%    T_s(i_s) = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot!     %    T_s = integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C}); %%% T_s = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq'); % sure we need to use 'freq' here ???
     

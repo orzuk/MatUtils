@@ -162,6 +162,8 @@ for i=1:num_genes % loop on genes and plot / fit selection coefficients
                         target_size_by_class_vec, Demographic_model{k}, ... % run each time on different population. But counts should be different!!
                         X, [], trait_struct, null_w_vec, maximize_parameters, full_flag, ...
                         num_individuals, implementation_str); % fit for each population seperately
+             sprintf('s = %f, alpha=%f, LL=%f, run-time (sec.)=%f, ', ...
+                 s_MLE_vec(i,k), alpha_MLE_vec(i,k), max_LL_vec(i,k), max_compute_time(i,k))
                 end % loop on populations
             end
         end % if fit selection
