@@ -42,6 +42,9 @@ s_null = -0.05; % 0000000000000001; % take very low s to be close to neutral
 alpha = 0.5; % 0.00000000000001; % 0.49999999999; % 0499999; % 000999999999999999; % 0.899999999999; %8333; % 0.99999999999; % 333333333; % 0.999999999999; % 0.9999999; % fraction of null variants
 beta = 2; % effect size of null variants
 
+loglike_params = struct('null_w_vec', [], 'include_phenotype', 0, ...
+    'full_flag', 1, 'num_individuals', []);
+
 if(test_likelihood_sum_to_one)    % New: just test that the total likelihood summing up over all genotypes X's is one
     small_n = 3; % # of individuals
     small_L=2; % # of loci
@@ -54,20 +57,23 @@ if(test_likelihood_sum_to_one)    % New: just test that the total likelihood sum
             else
                 X = [my_dec2base(x_vec, 2, small_n)' my_dec2base(x2_vec, 2, small_n)'];
             end
+            
             total_prob(x_vec+1,x2_vec+1) = exp(compute_two_class_log_likelihood( ...
                 s_null, 0.99999999999999999, [], target_size_by_class_vec, N, X, [], ...
-                trait_struct, [], 0, 1)); % compute only genotype part
+                trait_struct, loglike_params)); %  [], 0, 1)); % compute only genotype part
             
             for y_vec = 0:2^small_n-1 % now sum also on y,
                 Y = my_dec2base(y_vec, 2, small_n);
+                loglike_params.include_phenotype=1;
                 total_prob_with_phenotype(x_vec+1,x2_vec+1, y_vec+1) = ...
                     exp(compute_two_class_log_likelihood( ...
                     s_null, 0.99999999999999999, beta, target_size_by_class_vec, N, X, Y, ...
-                    trait_struct,  beta, 1, 1)); % include also phenotype
+                    trait_struct, loglike_params)); % beta, 1, 1)); % include also phenotype
+                loglike_params.include_phenotype=-1;
                 total_prob_phenotype_only(x_vec+1,x2_vec+1, y_vec+1) = ...
                     exp(compute_two_class_log_likelihood( ...
                     s_null, 0.99999999999999999, beta, target_size_by_class_vec, N, X, Y, ...
-                    trait_struct,  beta, -1, 1)); % compute ONLY phenotype part
+                    trait_struct, loglike_params)); % compute ONLY phenotype part
             end % loop on phenotype
         end
     end
@@ -165,9 +171,12 @@ if(test_s || test_alpha)
         else
             cur_is_null_vec = s_null_mat(:,i);
         end
+        loglike_params = struct('null_w_vec', cur_is_null_vec, 'include_phenotype', 0, ...
+    'full_flag', full_flag, 'num_individuals', num_individuals);
         [log_like_mat_change_alpha_or_s P_poly] = ... % compute likelihood (here vary only alpha)
             compute_two_class_log_likelihood(run_s_vec, run_alpha_vec, beta, target_size_by_class_vec, N, ...
-            X([1:L_vec(i)  end-L_vec(i)+1:end],i)   , y(:,i), [], cur_is_null_vec, 0, full_flag, num_individuals); % don't include phenotype !!
+            X([1:L_vec(i)  end-L_vec(i)+1:end],i), y(:,i), [],  loglike_params); % 
+        % cur_is_null_vec, 0, full_flag, num_individuals); % don't include phenotype !!
         if(i == 1)
             Q_poly = P_poly;
         else
@@ -180,7 +189,7 @@ if(test_s || test_alpha)
             end
         end % if i==1
         
-        [MAX_LL MAX_I] = max(log_like_mat_change_alpha_or_s);
+        [MAX_LL, MAX_I] = max(log_like_mat_change_alpha_or_s);
         max_likelihood_alpha_or_s(i) = alpha_or_s_vec(MAX_I);
     end % loop on iters
     
@@ -266,9 +275,11 @@ if(test_s || test_alpha)
 end % test alpha
 
 if(test_beta)% Debug: Test only beta. All alleles are almost neutral, and they're all functional
+    loglike_params = struct('null_w_vec', [], 'include_phenotype', [], ...
+    'full_flag', full_flag, 'num_individuals', []);
     log_like_mat_change_beta = ... % compute likelihood (here vary only alpha)
         compute_two_class_log_likelihood(s_null, alpha, beta_vec, N, ...
-        first_X, y(:,1), [], [], [], full_flag);
+        first_X, y(:,1), [], loglike_params); %  [], [], full_flag);
     
     figure; hold on; plot(beta_vec, reshape(log_like_mat_change_beta, length(beta_vec), 1), '*');
     line([beta, beta], [min(log_like_mat_change_beta(:))-1, max(log_like_mat_change_beta(:))+1], 'color', 'k', 'linewidth', 2);
@@ -282,12 +293,11 @@ end % test beta
 
 
 if(test_alpha_beta)
+    loglike_params.include_phenotype = 1;
     log_like_mat_change_alpha_beta = ... % compute likelihood (here vary only alpha)
         compute_two_class_log_likelihood(s_null, alpha_vec, beta_vec, N, ...
-        first_X, y(:,1), [], [], 1, full_flag);
+        first_X, y(:,1), [], loglike_params); % [], 1, full_flag);
     figure; hold on; plot3(alpha_vec, beta_vec, log_like_mat_change_alpha_beta);
-    
-    
 end
 
 if(simulate_genotypes_phenotypes)

@@ -25,16 +25,17 @@
 % 
 % Output:
 % max_LL - maximum of log-likelihood of data
-% max_alpha - value of alpha attaining maximum
-% max_beta - value of beta attaining maximum (what is this parameter?)
 % max_s - value of s attaining maximum
+% max_alpha - value of alpha attaining maximum
+% max_beta - value of beta attaining maximum (only when optimizing over phenotypes)
+% max_compute_time - return computation time 
 % NEW! should add also confidence intervals (not implemented yet) (Use Fisher's information matrix)  
 %
-function [max_LL, max_s, max_alpha, max_beta] = ...
+function [max_LL, max_s, max_alpha, max_beta, max_compute_time] = ...
     maximize_two_class_likelihood(s_null_vec, alpha_vec, beta_vec, target_size_by_class_vec, D, ...
     X, y, trait_struct, null_w_vec, maximize_parameters, full_flag, num_individuals, implementation_str)
 
-
+max_compute_time=cputime;
 if(~exist('implementation_str', 'var') || isempty(implementation_str))
     implementation_str = 'minsearch'; % 'brute-force'; % how to find optimum 
 end
@@ -74,17 +75,21 @@ else  % We get a vector of genotype values
         L = length(null_w_vec); % get number of alleles 
     end
 end
-
+max_beta = []; 
+ loglike_params = struct('null_w_vec', null_w_vec, 'include_phenotype', include_phenotype, ...
+            'full_flag', full_flag, 'num_individuals', num_individuals);    
 switch implementation_str  % choose how to maximize likelihood
     case 'brute-force'  % here simply enumerate grid-points and find point with ML
         if(~maximize_parameters(3)) % don't loop over beta
             beta_vec = 0; % meaningless
         end
         % PROBLEM: HERE LOG-LIKELIHOOD IS MONOTONICALLY DECREASING WITH ALPHA - WHY? 
+            
         log_like_mat = ... % compute likelihood (currently vary only alpha)
             compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, ...
             target_size_by_class_vec, D, ...
-            X, y, trait_struct, null_w_vec, include_phenotype, full_flag, num_individuals);        
+            X, y, trait_struct, loglike_params); %         null_w_vec, include_phenotype, full_flag, num_individuals);        
+
         [max_LL, tmp_ind] = max(log_like_mat(:)); % find the maximal grid-point
         [I, J, K] = ind2sub(size(log_like_mat), tmp_ind); 
         max_s = s_null_vec(I); 
@@ -102,33 +107,35 @@ switch implementation_str  % choose how to maximize likelihood
             [max_s_alpha, max_LL_genotype] = fminsearch(@(s_alpha) ... % use genotypes
                 -compute_two_class_log_likelihood(s_alpha(1), s_alpha(2), [], ...
                 target_size_by_class_vec, D, ...
-                X, [], [], null_w_vec, include_phenotype, full_flag, num_individuals), ...
+                X, [], [], loglike_params), ...  % null_w_vec, include_phenotype, full_flag, num_individuals), ...
                 [s_null_vec; alpha_vec]); % here s_null_vec and alpha_vec serve as initial guesses! (should be scalars)
 
             
             
-            
+            max_LL = max_LL_genotype; % maximum just of genotype part 
             % use phenotypes            
             max_s = max_s_alpha(1); max_alpha = max_s_alpha(2); % We need to check that 0 < alpha < 1
             
         else % here we do know alpha
             [max_s, max_LL_genotype] = fminsearch(@(s_alpha) ... % use genotypes
                 -compute_two_class_log_likelihood(s_alpha, 1, [], target_size_by_class_vec, D, X, [], ...
-                trait_struct, null_w_vec, include_phenotype, full_flag, num_individuals), s_null_vec); % maximize over genotypes only 
+                trait_struct, loglike_params), s_null_vec); % maximize over genotypes only 
             max_alpha = 1;
                         
             if(maximize_parameters(3)) % optimize also on effect size beta - here we must use phenotype !! (slower)
                 [max_beta, max_LL_phenotype] = fminsearch(@(beta) ... % now optimize only phenotype part
                     -compute_two_class_log_likelihood(max_s, 1, beta, target_size_by_class_vec, D, X, y, ...
-                    trait_struct, null_w_vec, -1, full_flag), beta_vec);
+                    trait_struct, loglike_params), beta_vec);
             else
+                loglike_params.include_phenotype=-1;
                 max_LL_phenotype = ... % Compute likelihood for beta=0
                     compute_two_class_log_likelihood(max_s, 1, 0, target_size_by_class_vec, D, X, y, ...
-                    trait_struct, null_w_vec, -1, full_flag);
+                    trait_struct, loglike_params); %   null_w_vec, -1, full_flag);
                 max_beta = 0;
             end
             max_LL = max_LL_genotype + max_LL_phenotype;            
         end % if null_w_vec is empty (i.e. we don't know alpha)         
 end % switch method of MLE estimation
 
+max_compute_time=cputime-max_compute_time;
 

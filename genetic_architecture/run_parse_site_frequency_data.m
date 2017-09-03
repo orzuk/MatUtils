@@ -18,6 +18,7 @@ plot_site_frequency_flag = 0; % 1: plot SFS data (this is also part of pre-proce
 estimate_gene_by_gene = 1; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
 plot_gene_by_gene = 0; % make figures for individual genes
 fit_demography = 0;  % NEW! here fit a demographic model using only synonymous SNPs
+plot_demographies = 0; % summary plots for demographic models 
 aggregate_population_estimators = 0; % NEW! aggregate estimators from different populations
 test_population_differences = 0; % NEW! test for different in selection between different populations
 

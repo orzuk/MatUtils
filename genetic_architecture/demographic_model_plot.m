@@ -82,12 +82,14 @@ if(plot_sfs) % plot neutral sfs for demographic model
     n_sample = 200; % this should be determined in input
     LL_legend_vec = legend_vec;
     
+    
+     loglike_params = struct('null_w_vec', null_w_vec, 'include_phenotype', 0, ...
+            'full_flag', full_flag, 'num_individuals', []);    % set parameters
     for i=1:length(D_cell)
         D_cell{i}.use_allele_counts=0;
         [log_like_mat_again{i}, P_poly_again{i}]  = ... % compute likelihood (here vary only alpha)
             compute_two_class_log_likelihood(0, 0, [], target_size_by_class_vec, D_cell{i}, ...
-            X, [], [], null_w_vec, ...
-            0, full_flag, []); % don't include phenotype !!
+            X, [], [], loglike_params); % null_w_vec, 0, full_flag, []); % don't include phenotype !!
     end
     
     figure;  % Plot population SFS

@@ -14,10 +14,10 @@
 % max_LL - log-likelihood of data for spectrum
 % N_vec_hat - best demographic model (MLE)
 %
-function [D, max_LL, N_vec_hat, log_like_mat] = fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, weights_vec, mu, ...
-    L_correction_factor, D_opt)
+function [D, max_LL, N_vec_hat, log_like_mat] = fit_demographic_parameters_from_allele_spectrum( ...
+    k_vec, n_vec, weights_vec, mu, L_correction_factor, D_opt)
 
-AssignGeneralConstants;    AssignRVASConstants;
+AssignGeneralConstants; AssignRVASConstants;
 
 if(~exist('weights_vec', 'var') || isempty(weights_vec))
     weights_vec = 1;
@@ -119,10 +119,12 @@ for i=vec2row(good_inds) % 1:D.num_params
     target_size_by_class_vec = [mu, mu, mu]; % [neutral, null, missense]
     full_flag = 0; % use summary statistics
     null_w_vec = 1; % NULL_C % assume all alleles are 'null' (but s=0 so actually neutral)
+    
+    loglike_params = struct('null_w_vec', null_w_vec, 'include_phenotype', 0, ...
+            'full_flag', full_flag, 'num_individuals', []);    
     [log_like_mat(i), ~, compute_time(i)] = ... % compute likelihood (here vary only alpha)
         compute_two_class_log_likelihood(s, alpha, beta, target_size_by_class_vec, D, ...
-        X, [], [], null_w_vec, ...
-        0, full_flag, []); % don't include phenotype !!
+        X, [], [], loglike_parmas); % null_w_vec, 0, full_flag, []); % don't include phenotype !!
     fprintf('run good ind %ld out of %ld, ', i_ctr, length(good_inds));
     fprintf(' Loglike=%f, cur-time=%f, total-time=%f\n', log_like_mat(i), compute_time(i), sum(compute_time(1:i)));
     

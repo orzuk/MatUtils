@@ -137,17 +137,17 @@ for i=1:num_genes % loop on genes and plot / fit selection coefficients
             target_size_by_class_vec = [mu_per_site, mu_per_site, mu_per_site]; % Get target size for gene
             gene_n_vec = []; gene_k_vec = []; null_w_vec = []; % ???
             for j= SiteFreqSpecStruct{1}.good_allele_inds{2} % loop on missense
-                gene_k_vec = [gene_k_vec SiteFreqSpecStruct{1}.gene_by_allele_type_freq_list{j,i} .* ...
-                    SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i}];
-                gene_n_vec = [gene_n_vec SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i}]; 
+                gene_k_vec = [gene_k_vec (SiteFreqSpecStruct{1}.gene_by_allele_type_freq_list{j,i} .* ...
+                    SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i})'];
+                gene_n_vec = [gene_n_vec SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i}']; 
             end
             null_w_vec = -ones(size(gene_k_vec)); % all missense
             for j= SiteFreqSpecStruct{1}.good_allele_inds{3} % loop on stop codons 
-                gene_k_vec = [gene_k_vec SiteFreqSpecStruct{1}.gene_by_allele_type_freq_list{j,i} .* ...
-                    SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i}];
-                gene_n_vec = [gene_n_vec SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i}]; 
+                gene_k_vec = [gene_k_vec (SiteFreqSpecStruct{1}.gene_by_allele_type_freq_list{j,i} .* ...
+                    SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i})'];
+                gene_n_vec = [gene_n_vec SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i}']; 
             end
-            X = [gene_k_vec' gene_n_vec']';     
+            X = [gene_k_vec gene_n_vec]';     
             null_w_vec((end+1):length(gene_k_vec)) = 1; % all stop
 
             num_individuals = [];
@@ -157,7 +157,7 @@ for i=1:num_genes % loop on genes and plot / fit selection coefficients
             full_flag = 0; 
             if(~isempty(X)) % for some genes we have no alleles in the relevant population
                 for k=2 % 1:num_populations % load data from all populations
-                    [max_LL_vec(i,k), s_MLE_vec(i,k), alpha_MLE_vec(i,k), beta_MLE_vec(i,k)] = ...
+                    [max_LL_vec(i,k), s_MLE_vec(i,k), alpha_MLE_vec(i,k), ~, max_compute_time(i,k)] = ... % don't fit  beta_MLE_vec(i,k)] = ...
                         maximize_two_class_likelihood(s_null_vec, alpha_vec, 0, ...
                         target_size_by_class_vec, Demographic_model{k}, ... % run each time on different population. But counts should be different!!
                         X, [], trait_struct, null_w_vec, maximize_parameters, full_flag, ...
