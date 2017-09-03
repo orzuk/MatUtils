@@ -9,12 +9,12 @@
 % MutationTypes - strings of each mutation type
 % Demographic_model - model for demography for each popoulation 
 % plot_flag - 1 (default): make plots, 0 - don't plot just save files 
-% gene_prefix - run only on genes matching this prefix (used to divide
-% labor, run parallel ..)
+% gene_prefix - run only on genes matching this prefix (used to divide labor, run parallel jobs)
 %
-% Output: None. Figures are saved in directory: output_data_dir
-% There is also a file for each gene saved at: spectrum_data_dir
-% which contains fitted parameters 
+% Output: None. 
+%               Figures are saved in directory: output_data_dir
+%               There is also a file for each gene saved at: spectrum_data_dir
+%               which contains fitted parameters 
 %
 function parse_site_frequency_gene_by_gene(spectrum_data_dir, spectrum_data_file, output_data_dir, ...
     GeneStruct, MutationRateTable, MutationTypes, Demographic_model, plot_flag, gene_prefix) % Estimate s and alpha for each gene in the genome - how???
@@ -114,29 +114,9 @@ for k=1:num_populations % load data from all populations
         save('-append', fullfile(spectrum_data_dir, spectrum_data_file{k}), 'gene_by_allele_type_het_list');
 %        clear gene_by_allele_type_freq_list;
     end
-    
-%    SiteFreqSpecStruct{k}.good_allele_inds = sort(SiteFreqSpecStruct{k}.good_allele_inds); % sort to fix mutation types ordering
-%    SiteFreqSpecStruct{k}.unique_genes = upper(SiteFreqSpecStruct{k}.unique_genes);
-%     SiteFreqSpecStruct{k}.allele_types_ind = zeros(size(SiteFreqSpecStruct{k}.allele_types));
-%     [~, I, J] = my_intersect(genome_types, vec2row(lower(strrep_cell(SiteFreqSpecStruct{k}.allele_types, '-', '_'))));
-%     setdiff( lower(strrep_cell(SiteFreqSpecStruct{k}.allele_types, '-', '_')), lower(empty_cell_to_empty_str(genome_types)) )
-%     for i=1:length(genome_types_synonyms)
-%         [~, tmp_I, tmp_J] = intersect(genome_types_synonyms{i}, lower(strrep_cell(SiteFreqSpecStruct{k}.allele_types, '-', '_')));
-%         if(~isempty(tmp_I))
-%             J = [J tmp_J];
-%             I = [I repmat(i, length(tmp_J), 1)];
-%         end
-%     end
-%     [J, UJ] = unique(J); I = I(UJ); % get rid of multiplicities
-%     SiteFreqSpecStruct{k}.allele_types_ind(J) = I;
-%    allele_types_ind = SiteFreqSpecStruct{k}.allele_types_ind;     
-%    save(fullfile(spectrum_data_dir, spectrum_data_file{k}), '-append', 'allele_types_ind'); % Save new values into file 
-    
+        
 end % loop on populations
 
-%for c = 'A':'Z'  % Make directories
-%    my_mkdir(gene_dir);
-%end
 ExonsGeneStruct = load(gene_struct_input_file, ...
     'chr_vec', 'pos_start_vec', 'pos_end_vec', 'strand', 'gene_names', 'sort_perm'); % load information on genes. 
 
@@ -186,13 +166,11 @@ for i=1:num_genes % loop on genes and plot / fit selection coefficients
             end
         end % if fit selection
         
-        
         aggregate_population_estimators = 0; 
         if(aggregate_population_estimators) % compute an aggregate esitmator for each gene from multiple populations
         
         
         end
-        
         test_population_differences = 0; 
         if(test_population_differences) % test for differences in selection coefficient between different populations
             for population1 = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
@@ -202,9 +180,6 @@ for i=1:num_genes % loop on genes and plot / fit selection coefficients
                 end
             end
         end
-        
-        
-        
             
     end % filter for genes 
     if(mod(i, 10) == 0) % avoid having too many figures open

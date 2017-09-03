@@ -65,10 +65,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     if(~strcmp(population, 'African')) % temp: work only on one population!
         continue;
     end
-    if(old_run)
-        old_run_parse_site_frequency_data;
-    end
-    if(plot_site_frequency_flag)
+    if(plot_site_frequency_flag) % Here we plot SFS for DATA !! 
         plot_site_frequency_data(fullfile(spectrum_data_dir, exome_struct.data_str, ...
             [exome_struct.prefix, '*.mat']), ... %  exome_struct.spectrum_data_file)  '.mat']), ... % '_' population{1}% _unique
             fullfile(mammals_data_dir, genome_version, [remove_suffix_from_file_name(exons_file) '_unique.mat']),  ... % GeneStruct
@@ -112,14 +109,14 @@ end % loop on population (temp.)
 load(demography_file);
 spectrum_data_files_str = [exome_struct.spectrum_data_files_str(1:end-1) '}'];
 
-if(~isfield(Demographic_model{i_pop}, 'SFS')) % add SFS to demographic model
-    s = -0.0001; 
+if(~isfield(Demographic_model{i_pop}, 'SFS')) % add SFS to demographic mode
 %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging 
     s_vec = [0 -logspace(-6, -1, 11)]; % heavier run 
     Demographic_model{i_pop}.iters = 50; 
     Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
     compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;
-    [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, Demographic_model{i_pop}.SFS.L, SFS_compute_time] = ...
+    [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, ...
+        Demographic_model{i_pop}.SFS.L, SFS_compute_time] = ...
         compute_allele_freq_spectrum_from_demographic_model( ...
         Demographic_model{i_pop}, s_vec, compute_flag); 
     
@@ -136,7 +133,9 @@ if(plot_demographies)
     
 end
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% fit gene-specific selection and tolerance parameters             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if(estimate_gene_by_gene) % estimate potential target size for each gene in the genome
     if(~exist(fullfile(mammals_data_dir, genome_version, exons_file), 'file')) % get all sequences
         GeneStruct = ExtractExons(mammals_data_dir, 'hg18', [], exons_file, 0); % Get gene sequences. (Don't get pwms!!!)
@@ -148,7 +147,7 @@ if(estimate_gene_by_gene) % estimate potential target size for each gene in the 
     
     if(~exist(fullfile(spectrum_data_dir, mutation_rates_file), 'file')) % get estimated mutation rate per gene
         TripletsMutationTable = load(fullfile(spectrum_data_dir, 'mutation_rates', triplet_mutations_file)); % read 64x64 table
-        [MutationRateTable MutationTypes] = ComputeGeneMutationRates(TripletsMutationTable, ...
+        [MutationRateTable, MutationTypes] = ComputeGeneMutationRates(TripletsMutationTable, ...
             fullfile(mammals_data_dir, genome_version, exons_file)); % Compute table of mutation rates for all genes
         save(fullfile(spectrum_data_dir, mutation_rates_file), 'MutationRateTable', 'MutationTypes');
     else
@@ -164,8 +163,7 @@ if(estimate_gene_by_gene) % estimate potential target size for each gene in the 
             '''' fullfile(spectrum_data_dir, mutation_rates_file) ''', ' ...
             '' '[], Demographic_model' ', ' ...
             num2str(plot_gene_by_gene) ', ' ...
-            ' ''' gene_prefix{1} ''');'];
-        
+            ' ''' gene_prefix{1} ''');'];        
         %                 parse_site_frequency_gene_by_gene(spectrum_data_dir, spectrum_data_files{i}, ...
         %                     fullfile(spectrum_data_dir, 'Tennessen_Science_2012', 'GeneByGene'), ...  % assume ESP data
         %                     fullfile(mammals_data_dir, genome_version, exons_file), ... % GeneStruct
@@ -175,13 +173,12 @@ if(estimate_gene_by_gene) % estimate potential target size for each gene in the 
         else
             SubmitMatlabJobToFarm(job_str, ...
                 fullfile('out', ['run_genes_prefix_' gene_prefix{1} '.out']), queue_str);
-            %                        fullfile(spectrum_data_dir, 'Tennessen_Science_2012', 'GeneByGene', 'out', ['run_genes_prefix_' gene_prefix '.out']), ...
-            %                        queue_str);
         end
         
     end % loop on prefix
     
     
+    % Next two are already in previous gene-by-gene script? 
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Aggregate s estimator for each gene from all populations %

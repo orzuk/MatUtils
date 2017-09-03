@@ -49,13 +49,14 @@ if(~isscalar(s)) % NEW! allow to fit multipole s values using a surface fitting 
     end
     save('temp_surface.mat', '-append', 'x_vec', 's_vec', 'p_mat', 'smooth_params', 'D'); 
 %    load('temp_surface.mat'); 
-    [x_vec2, s_vec2, p_vec2] = fit_monotonic_surface(x_vec, abs(s_vec), p_mat, smooth_params);  % constraints
+    [x_vec, s_vec, p_vec] = fit_monotonic_surface(x_vec, abs(s_vec), p_mat, smooth_params);  % constraints
     %	
+    compute_time=cputime
     return;
-end
+end% if s is not scalar 
 
 
-compute_time=cputime;
+compute_time=cputime
 if(~exist('compute_flag', 'var') || isempty(compute_flag))
     compute_flag = 'simulation';
 end
