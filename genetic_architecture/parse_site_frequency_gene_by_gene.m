@@ -78,6 +78,9 @@ end
 num_genes = length(GeneStruct.gene_names); % get total # of genes
 
 num_populations = length(spectrum_data_file);
+new_spectrum_data_files = dir(spectrum_data_file); % here for all files in chunks 
+num_files = length(new_spectrum_data_files); 
+
 SiteFreqSpecStruct = cell(num_populations, 1);
 for k=1:num_populations % load data from all populations
     load_fields = {'unique_genes', 'n_vec', 'count_vec', 'f_vec', 'allele_types', ...
@@ -92,14 +95,6 @@ for k=1:num_populations % load data from all populations
     load_str = ['SiteFreqSpecStruct{' num2str(k) '} = load(''' fullfile(spectrum_data_dir, spectrum_data_file{k}) ...
         ''', ''' load_fields_str ''');'];
     eval(load_str);
-    %    SiteFreqSpecStruct{k} = load(fullfile(spectrum_data_dir, spectrum_data_file{k}), load_fields);
-    % % % %         'unique_genes', 'n_vec', 'count_vec', 'f_vec', 'allele_types', ...
-    % % % %         'num_allele_types', 'num_alleles_per_gene_mat', 'total_freq_per_gene_mat', 'total_heterozygosity_per_gene_mat', ...
-    % % % %         'gene_by_allele_type_freq_list', 'gene_by_allele_type_n_list', ...
-    % % % %         'gene_by_allele_type_het_list', 'gene_by_allele_type_pos_list', 'gene_by_allele_type_inds_list', ...
-    % % % %         'good_allele_inds', 'upper_freq_vec', ...
-    % % % %         'REF', 'ALT', 'aminoAcidChange'); %
-    %        'het_vec', 'het_var_vec', 'variants', 'carriers', 'singletons', 'heterozygosity'); % load sequencing input data from file
     if(~isfield(SiteFreqSpecStruct{k}, 'population_str'))
         SiteFreqSpecStruct{k}.population_str = ...
             str2word('_', remove_suffix_from_file_name(remove_dir_from_file_name(spectrum_data_file{k})), 'end');
@@ -115,17 +110,19 @@ for k=1:num_populations % load data from all populations
         gene_by_allele_type_het_list = SiteFreqSpecStruct{k}.gene_by_allele_type_freq_list;
         save('-append', fullfile(spectrum_data_dir, spectrum_data_file{k}), 'gene_by_allele_type_het_list');
         %        clear gene_by_allele_type_freq_list;
-    end
-    
+    end    
 end % loop on populations
 
 ExonsGeneStruct = load(gene_struct_input_file, ...
     'chr_vec', 'pos_start_vec', 'pos_end_vec', 'strand', 'gene_names', 'sort_perm'); % load information on genes.
 
-
 [GeneStruct.s_MLE_vec, GeneStruct.s_MLE_vec, GeneStruct.alpha_MLE_vec, GeneStruct.max_compute_time] = ...
     deal(zeros(num_genes, num_populations)); 
-for i=1:num_genes % loop on genes and plot / fit selection coefficients
+
+[fit_genes, fit_genes_I, fit_genes_J] = ...
+    intersect( upper(GeneStruct.gene_names), upper(SiteFreqSpecStruct{1}.unique_genes));
+ctr=1;
+for i=vec2row(fit_genes_I) % 1:num_genes % loop on genes and plot / fit selection coefficients
     sprintf(['Run gene = %d out of %d, ' upper(GeneStruct.gene_names{i})], i, num_genes)
     if(startsWith(upper(GeneStruct.gene_names{i}), upper(gene_prefix)))
         gene_header = upper(GeneStruct.gene_names{i}); % (1:2));  % Print gene name
@@ -137,10 +134,10 @@ for i=1:num_genes % loop on genes and plot / fit selection coefficients
         end
         if(fit_selection)
             % find gene's SFS 
-            i_sfs = strmatch(gene_header, SiteFreqSpecStruct{1}.unique_genes, 'exact');
-            if(isempty(i_sfs)) % can't find gene in this chunk 
-                continue; 
-            end
+            i_sfs = fit_genes_J(ctr); ctr=ctr+1; %  strmatch(gene_header, SiteFreqSpecStruct{1}.unique_genes, 'exact');
+%            if(isempty(i_sfs)) % can't find gene in this chunk 
+%                continue; 
+%            end
             alpha_vec = 0.1:0.1:1; % possible values for alpha
             s_null_vec = 0 -logspace(-6, -1, 10);
             rare_cumulative_per_gene = 1;
@@ -203,7 +200,7 @@ for i=1:num_genes % loop on genes and plot / fit selection coefficients
     end
 end % loop on genes
 
-internal_save_gene_stats(GeneStruct, ExonsGeneStruct, output_data_dir, gene_struct_input_file, exome_struct);   % save fitted values to .mat and .txt files 
+internal_save_gene_stats(GeneStruct, ExonsGeneStruct, output_data_dir, gene_struct_input_file, exome_struct, fit_genes_I);   % save fitted values to .mat and .txt files 
 
     
     
