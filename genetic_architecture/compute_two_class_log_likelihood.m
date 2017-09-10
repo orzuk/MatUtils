@@ -106,18 +106,18 @@ if(isscalar(params.null_w_vec)) % all alleles with same class
     params.null_w_vec = repmat(params.null_w_vec, L, 1);
 end
 
-n =  max(num_individuals_vec);
+n =  max(num_individuals_vec); num_carriers_vec = round(num_carriers_vec); 
 [unique_num_alleles_vec, ~, J_num_alleles] = unique(num_alleles_vec); 
 [unique_num_carriers, I_num_carriers, h_num_carriers] = get_duplicates(num_carriers_vec);
-if(min(unique_num_carriers) > 0) % add monomorphic alleles
+if(min(unique_num_carriers) > 0) % add monomorphic ancestral alleles
     params.null_w_vec(end+1) = params.null_w_vec(1);
-    unique_num_carriers(end+1) = 0;
+    unique_num_carriers(end+1) = 0; num_carriers_vec(end+1) = 0; num_individuals_vec(end+1)=n;
     h_num_carriers(end+1) = 0;
     I_num_carriers{end+1} = length(params.null_w_vec);
 end
-if(max(unique_num_carriers) < n) % add monomorphic alleles
+if(max(unique_num_carriers) < n) % add monomorphic derived alleles
     params.null_w_vec(end+1) = params.null_w_vec(1);
-    unique_num_carriers(end+1) = n;
+    unique_num_carriers(end+1) = n; num_carriers_vec(end+1) = n; num_individuals_vec(end+1)=n;
     h_num_carriers(end+1) = 0;
     I_num_carriers{end+1} = length(params.null_w_vec);
 end
@@ -125,7 +125,8 @@ end
 if(poisson_model_flag) % Compute counts
     num_polymorphic_alleles_observed = zeros(3,1);
     for i=1:num_classes % loop on 3 classes
-        num_polymorphic_alleles_observed(i) = sum(X(params.null_w_vec+2 == i,:)>0); % polymorphic in SAMPLE for each classs
+        num_polymorphic_alleles_observed(i) = ...
+            sum((num_carriers_vec(params.null_w_vec+2 == i)>0) & (num_carriers_vec(params.null_w_vec+2 == i)<n)); % polymorphic in SAMPLE for each classs
     end
     P_poly = [];
     [P_poly.population, P_poly.sample] = deal(zeros(num_s, num_classes));
@@ -159,7 +160,7 @@ switch compute_flag
 end
 sum_allele_freq_hist(NEUTRAL_C) = sum(allele_freq_hist{NEUTRAL_C});
 [sample_x_vec{NEUTRAL_C}, sample_p_vec{NEUTRAL_C}] = population_to_sample_allele_freq_distribution( ...
-    x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}, max(num_individuals_vec), round(unique_num_carriers)', 1);
+    x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}, max(num_individuals_vec), vec2row(unique_num_carriers), 1);
 
 prob_null_given_x = zeros(L,1); % conditional probability of allele being null when we know the frequency
 T_0 = sum(allele_freq_hist{NEUTRAL_C}) * (x_vec{NEUTRAL_C}(2)-x_vec{NEUTRAL_C}(1)); %T_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot! %%% T_0 = integral_hist(x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C}); %%% T_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq');
@@ -219,7 +220,7 @@ for i_s = 1:num_s % loop on parameters
             end % if s==0
     end
     [sample_x_vec{NULL_C}, sample_p_vec{NULL_C}] = population_to_sample_allele_freq_distribution( ...
-        x_vec{NULL_C}, allele_freq_hist{NULL_C}, max(num_individuals_vec), round(unique_num_carriers)', 1);
+        x_vec{NULL_C}, allele_freq_hist{NULL_C}, max(num_individuals_vec), vec2row(unique_num_carriers), 1);
     sum_allele_freq_hist(NULL_C) = sum(allele_freq_hist{NULL_C});
     T_s(i_s) = sum(allele_freq_hist{NULL_C}) * (x_vec{NULL_C}(2)-x_vec{NULL_C}(1));     %%    T_s(i_s) = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot!     %    T_s = integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C}); %%% T_s = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq'); % sure we need to use 'freq' here ???
     
@@ -247,7 +248,7 @@ for i_s = 1:num_s % loop on parameters
         [x_vec{MISSENSE_C}, allele_freq_hist{MISSENSE_C}] = sum_hist(x_vec{NULL_C}, alpha_vec(i_alpha) .* allele_freq_hist{NULL_C}, ...
             x_vec{NEUTRAL_C}, (1-alpha_vec(i_alpha)) .* allele_freq_hist{NEUTRAL_C}, 1, 2); % add histograms (with different x values. Normalize to keep histogram sums)
         [sample_x_vec{MISSENSE_C}, sample_p_vec{MISSENSE_C}] = population_to_sample_allele_freq_distribution( ...
-            x_vec{MISSENSE_C}, allele_freq_hist{MISSENSE_C}, max(num_individuals_vec), unique_num_carriers', 1);
+            x_vec{MISSENSE_C}, allele_freq_hist{MISSENSE_C}, max(num_individuals_vec), vec2row(unique_num_carriers), 1);
         sum_allele_freq_hist(MISSENSE_C) = sum(allele_freq_hist{MISSENSE_C});
         if(params.include_phenotype && params.optimize_alpha) % prepare binomial tables
             for i=1:length(unique_num_alleles_vec)
@@ -277,34 +278,6 @@ for i_s = 1:num_s % loop on parameters
                         params.null_w_vec(I_num_carriers{j}(1)) * h_num_carriers(j) * log(sample_p_vec{params.null_w_vec(I_num_carriers{j}(1))+2}(j)); % why + 2? 1 -> NULL_C=3
                 end
             end
-            %            for j=1:L    % Compute genotype part. Loop on loci. Compute for each # of carriers only once
-            %                if( (num_carriers_vec(j) == 0) || (null_w_vec(j) == 0) )% loop only on polymorphic non-synonmous alleles
-            %                    continue;
-            %                end
-            %
-            %                num_carriers_ind = find(num_carriers_vec(j) == unique_num_carriers);
-            %                if(include_genotype) %  || optimize_alpha)
-            %                    %                    if(tmp_likelihood_one_allele(num_carriers_vec(j), null_w_vec(j)+2 ) == BIG_NUM) % this means we've already computed for this frequency
-            %                    %                        if(include_genotype)
-            %                    %                            tmp_likelihood_one_allele(num_carriers_vec(j), null_w_vec(j)+2) = ...
-            %                    %                                log( max(10^(-100), sum(allele_freq_hist{null_w_vec(j)+2}(pos_tmp_z_inds{num_carriers_ind, null_w_vec(j)+2}) .* ...
-            %                    %                                tmp_z_vec{null_w_vec(j)+2}(num_carriers_ind, pos_tmp_z_inds{num_carriers_ind, null_w_vec(j)+2})) / sum_allele_freq_hist(null_w_vec(j)+2)) );
-            %                    %                        end
-            %                    %                    end % already computed likelihood
-            %                    log_like_mat(i_s,i_alpha,i_beta) = log_like_mat(i_s,i_alpha,i_beta) + ...
-            %                        log(sample_p_vec{null_w_vec(j)+2}(num_carriers_ind));
-            %                    %                tmp_likelihood_one_allele(num_carriers_vec(j), null_w_vec(j)+2);
-            %                end % include genotypes or optimize alpha
-            %                if(mod(j, 1000) == 0)
-            %                    run_locus = j
-            %                end
-            %                if(include_phenotype && optimize_alpha)  % compute conditional probability of allele being null given frequency x.
-            %                    prob_null_given_x(j) = p_null * integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C} .* tmp_z_vec{null_w_vec(j)+2});
-            %                    prob_null_given_x(j) = prob_null_given_x(j) / (prob_null_given_x(j) + ...
-            %                        (1-p_null) * integral_hist(x_vec{NEUTRAL_C}, allele_freq_hist{NEUTRAL_C} .* tmp_z_vec{null_w_vec(j)+2}));
-            %                end
-            %    end % loop on loci
-            %            ttt_loop_on_loci = cputime - ttt
             if(params.include_genotype) % here add genotype part of log-likelihood
                 %                log_like_mat(i_s,i_alpha,i_beta) = log_like_mat(i_s,i_alpha,i_beta) + 0 * sum(log_like_correction); % add correction. Just a constant (who cares)
                 if(poisson_model_flag) % here include all alleles classes

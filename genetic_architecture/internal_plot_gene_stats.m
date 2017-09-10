@@ -1,4 +1,4 @@
-% Plot site-freq. specturm for a specific gene (This is temporariliy located in in it's own function)
+% Plot site-freq. spectrum for a specific gene (This is temporariliy located in in it's own function file)
 %
 % Input:
 % gene_header - header representing master directory for dir

@@ -106,17 +106,24 @@ switch implementation_str  % choose how to maximize likelihood
         
     case 'minsearch' % use Matlab's optimization
         if(isempty(null_w_vec) || poisson_model_flag) % here we don't know alpha and the null positions
-            [max_s_alpha, max_LL_genotype] = fminsearch(@(s_alpha) ... % use genotypes
-                -compute_two_class_log_likelihood(s_alpha(1), s_alpha(2), [], ...
+            % first evaluate to see if we've got infinity !! 
+            max_LL = compute_two_class_log_likelihood(0, 0.5, [], ...
                 target_size_by_class_vec, D, ...
-                X, [], [], loglike_params), ...  % null_w_vec, include_phenotype, full_flag, num_individuals), ...
-                [s_null_vec; alpha_vec]); % here s_null_vec and alpha_vec serve as initial guesses! (should be scalars)
-            
-            
-            
-            max_LL = max_LL_genotype; % maximum just of genotype part
-            % use phenotypes
-            max_s = max_s_alpha(1); max_alpha = max_s_alpha(2); % We need to check that 0 < alpha < 1
+                X, [], [], loglike_params); 
+            if(isinf(max_LL))
+                max_s = 0; max_alpha = 0.5;
+            else
+                [max_s_alpha, max_LL_genotype, ~, opt_struct] = fmincon(@(s_alpha) ... % use genotypes
+                    -compute_two_class_log_likelihood(s_alpha(1), s_alpha(2), [], ...
+                    target_size_by_class_vec, D, ...
+                    X, [], [], loglike_params), ...  % null_w_vec, include_phenotype, full_flag, num_individuals), ...
+                    [0; 0.5], [0 1; 0 -1; 1 0; -1 0], [1, 0, 0, 1]); % here s_null_vec and alpha_vec serve as initial guesses! (should be scalars)
+                
+                num_evaluations= opt_struct.funcCount
+                max_LL = max_LL_genotype; % maximum just of genotype part
+                % use phenotypes
+                max_s = max_s_alpha(1); max_alpha = max_s_alpha(2); % We need to check that 0 < alpha < 1
+            end
             
         else % here we do know alpha
             [max_s, max_LL_genotype] = fminsearch(@(s_alpha) ... % use genotypes
