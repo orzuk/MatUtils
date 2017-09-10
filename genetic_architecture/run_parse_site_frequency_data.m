@@ -146,11 +146,11 @@ if(estimate_gene_by_gene) % estimate potential target size for each gene in the 
             'chr_vec', 'pos_start_vec', 'pos_end_vec', 'seqs', 'strand', 'gene_names', 'sort_perm'); % don't load sequences?
     end
     
-    if(~exist(fullfile(spectrum_data_dir, mutation_rates_file), 'file')) % get estimated mutation rate per gene
+    if(~exist(fullfile(spectrum_data_dir, 'mutation_rates', mutation_rates_file), 'file')) % get estimated mutation rate per gene
         TripletsMutationTable = load(fullfile(spectrum_data_dir, 'mutation_rates', triplet_mutations_file)); % read 64x64 table
         [MutationRateTable, MutationTypes] = ComputeGeneMutationRates(TripletsMutationTable, ...
             fullfile(mammals_data_dir, genome_version, exons_file)); % Compute table of mutation rates for all genes
-        save(fullfile(spectrum_data_dir, mutation_rates_file), 'MutationRateTable', 'MutationTypes');
+        save(fullfile(spectrum_data_dir, 'mutation_rates', mutation_rates_file), 'MutationRateTable', 'MutationTypes');
     else
         %                load(fullfile(spectrum_data_dir, mutation_rates_file), 'MutationRateTable', 'MutationTypes');
     end
@@ -162,7 +162,7 @@ if(estimate_gene_by_gene) % estimate potential target size for each gene in the 
         job_str = ['parse_site_frequency_gene_by_gene(''' spectrum_data_dir ''', ' spectrum_data_files_str ', ' ... % spectrum_data_files{i}
             '''' fullfile(spectrum_data_dir, exome_data, 'GeneByGene') ''', ' ... % 'Tennessen_Science_2012'
             '''' fullfile(mammals_data_dir, genome_version, exons_file) ''' , ' ... % GeneStruct
-            '''' fullfile(spectrum_data_dir, mutation_rates_file) ''', ' ...
+            '''' fullfile(spectrum_data_dir, 'mutation_rates', mutation_rates_file) ''', ' ...
             '' '[], Demographic_model' ', ' ...
             num2str(plot_gene_by_gene) ', ' ...
             ' ''' gene_prefix{1} ''');'];        
