@@ -19,6 +19,8 @@
 function parse_site_frequency_gene_by_gene(spectrum_data_dir, spectrum_data_file, output_data_dir, ...
     GeneStruct, MutationRateTable, MutationTypes, Demographic_model, plot_flag, gene_prefix) % Estimate s and alpha for each gene in the genome - how???
 
+exome_data = str2word('\', spectrum_data_file, 1); exome_struct = get_exome_data_info(exome_data{1});
+
 Assign24MammalsGlobalConstants; AssignRVASConstants;
 
 if(~exist('plot_flag', 'var') || isempty(plot_flag))
@@ -120,6 +122,9 @@ end % loop on populations
 ExonsGeneStruct = load(gene_struct_input_file, ...
     'chr_vec', 'pos_start_vec', 'pos_end_vec', 'strand', 'gene_names', 'sort_perm'); % load information on genes.
 
+
+[GeneStruct.s_MLE_vec, GeneStruct.s_MLE_vec, GeneStruct.alpha_MLE_vec, GeneStruct.max_compute_time] = ...
+    deal(zeros(num_genes, num_populations)); 
 for i=1:num_genes % loop on genes and plot / fit selection coefficients
     sprintf(['Run gene = %d out of %d, ' upper(GeneStruct.gene_names{i})], i, num_genes)
     if(startsWith(upper(GeneStruct.gene_names{i}), upper(gene_prefix)))
@@ -171,7 +176,8 @@ for i=1:num_genes % loop on genes and plot / fit selection coefficients
                         X, [], trait_struct, null_w_vec, maximize_parameters, full_flag, ...
                         num_individuals, implementation_str); % fit for each population seperately
                     sprintf('s = %f, alpha=%f, LL=%f, run-time (sec.)=%f, ', ...
-                        s_MLE_vec(i,k), alpha_MLE_vec(i,k), max_LL_vec(i,k), max_compute_time(i,k))
+                        GeneStruct.s_MLE_vec(i,k), GeneStruct.alpha_MLE_vec(i,k), ...
+                        GeneStruct.max_LL_vec(i,k), GeneStruct.max_compute_time(i,k))
                 end % loop on populations
             end
         end % if fit selection
@@ -197,36 +203,8 @@ for i=1:num_genes % loop on genes and plot / fit selection coefficients
     end
 end % loop on genes
 
-internal_save_gene_stats(GeneStruct, ExonsGeneStruct, output_data_dir);   % save fitted values to .mat and .txt files 
+internal_save_gene_stats(GeneStruct, ExonsGeneStruct, output_data_dir, gene_struct_input_file, exome_struct);   % save fitted values to .mat and .txt files 
 
-% save fitted gene-specific statistics to file 
-% 
-% Input: 
-% GeneStruct - structure with original and fitted gene parameters
-% output_data_dir - where to save output
-% 
-% Output: 
-% None - output is saved to files
-% 
-function internal_save_gene_stats(GeneStruct, ExonsGeneStruct, output_data_dir)
- 
-save(fullfile(output_data_dir, ...
-    [remove_suffix_from_file_name(gene_struct_input_file) '_fitted_stats.mat']), '-struct', 'GeneStruct'); % save .mat file 
-
-R_header = ['Gene' population_str population_str]; 
-
-
-% R = cell(GeneStruct.num_genes, 10); 
-R = [GeneStruct.gene_names GeneStruct.s_MLE_vec GeneStruct.alpha_MLE_vec];
-R = [R_header' R']'; 
-
-%R = [GeneStruct.gene_names GeneStruct.s_MLE_vec
-%for i_pop=1:num_poulations
-%    R = [R num2str(GeneStruct.s_MLE_vec(:,i_pop))]; 
-%end
-
-savecellfile(R, fullfile(output_data_dir, ...
-    [remove_suffix_from_file_name(gene_struct_input_file) '_fitted_stats.txt'])); % save .txt file
     
     
 

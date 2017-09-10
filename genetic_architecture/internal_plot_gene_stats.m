@@ -103,6 +103,10 @@ end % if plot_flag
 save_gene_summary_statistics_internal(SiteFreqSpecStruct, GeneStruct, ExonsGeneStruct, MutationTypes, MutationRateTable, J, ...
     alpha_s_fit, genome_types, num_populations, gene_dir, gene_name, gene_ind);
 
+
+% Create a 'report-card' for each gene with all alleles and other important
+% parameters, for easy browsing 
+% 
 function save_gene_summary_statistics_internal(SiteFreqSpecStruct, GeneStruct, ExonsGeneStruct, MutationTypes, MutationRateTable, J, ...
     alpha_s_fit, genome_types, num_populations, gene_dir, gene_name, gene_ind)
 
