@@ -49,7 +49,7 @@ exome_struct.exons_file = 'hg18_exons.mat'; % where to save exons
 switch exome_data
     case 'ExAC'
         exome_struct.spectrum_data_files_str = ...
-            ['{''' fullfile(exome_data, 'AllPop', 'ExAC.chunks000_AllPop.mat') '''}'];  % File with exome data
+            ['{''' fullfile(exome_data, 'AllPop', 'ExAC.chunks000_AllPop.mat') '''}'];  % File with exome data (but only one chunk!!)
     otherwise
         exome_struct.spectrum_data_files_str = '{';  % File with exome data
 end
