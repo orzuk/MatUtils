@@ -108,7 +108,7 @@ end % loop on population (temp.)
 % Use Missense+Stop SNPs to fit selection and tolerance parameters %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 load(demography_file);
-spectrum_data_files_str = [exome_struct.spectrum_data_files_str(1:end-1) '}'];
+%spectrum_data_files_str = [exome_struct.spectrum_data_files_str(1:end-1) '}'];
 
 if(~isfield(Demographic_model{i_pop}, 'SFS')) % add SFS to demographic mode
 %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging 
@@ -159,7 +159,7 @@ if(estimate_gene_by_gene) % estimate potential target size for each gene in the 
     
     % Need to loop here also on chunks !! 
     for gene_prefix = {''} % {'ABCG1'} % for chrom 21 {'ANGPTL'} % for chrom 1 %%%% (num2cell(['A':'Z' '0':'9']'))'  %% {'ANKRD20A3'} %%  %% {'ANGP'} %% (mat2cell(['A':'Z' '0':'9']', ones(36,1), 1))' % enable also weird genes starting with a number
-        job_str = ['parse_site_frequency_gene_by_gene(''' spectrum_data_dir ''', ' spectrum_data_files_str ', ' ... % spectrum_data_files{i}
+        job_str = ['parse_site_frequency_gene_by_gene(''' spectrum_data_dir ''', ''' exome_struct.spectrum_data_files_str ''', ' ... % spectrum_data_files{i}
             '''' fullfile(spectrum_data_dir, exome_data, 'GeneByGene') ''', ' ... % 'Tennessen_Science_2012'
             '''' fullfile(mammals_data_dir, genome_version, exons_file) ''' , ' ... % GeneStruct
             '''' fullfile(spectrum_data_dir, 'mutation_rates', mutation_rates_file) ''', ' ...

@@ -19,7 +19,13 @@
 function parse_site_frequency_gene_by_gene(spectrum_data_dir, spectrum_data_file, output_data_dir, ...
     GeneStruct, MutationRateTable, MutationTypes, Demographic_model, plot_flag, gene_prefix) % Estimate s and alpha for each gene in the genome - how???
 
-exome_data = str2word('\', spectrum_data_file, 1); exome_struct = get_exome_data_info(exome_data{1});
+if(ischar(spectrum_data_file))
+    spectrum_data_file = strcat(dir_from_file_name(spectrum_data_file), ...
+        GetFileNames(fullfile(spectrum_data_dir, spectrum_data_file))); % here for all files in chunks
+end
+num_files = length(spectrum_data_file);
+
+exome_data = str2word('\', spectrum_data_file(1), 1); exome_struct = get_exome_data_info(exome_data{1});
 Assign24MammalsGlobalConstants; AssignRVASConstants;
 if(~exist('plot_flag', 'var') || isempty(plot_flag))
     plot_flag = 0;
@@ -76,8 +82,6 @@ end
 num_genes = length(GeneStruct.gene_names); % get total # of genes
 
 num_populations = length(exome_struct.pop_str);
-new_spectrum_data_files = dir(spectrum_data_file); % here for all files in chunks
-num_files = length(new_spectrum_data_files);
 
 SiteFreqSpecStruct = cell(num_files, 1);
 %for k=1:num_populations % load data from all populations%
@@ -122,7 +126,7 @@ for k=1:num_files % loop on different chunks
     
     [fit_genes, fit_genes_I, fit_genes_J] = ...
         intersect( upper(GeneStruct.gene_names), upper(SiteFreqSpecStruct{k}.unique_genes));
-    all_fit_genes_I = [all_fit_genes_I fit_genes_I]; 
+    all_fit_genes_I = [all_fit_genes_I fit_genes_I']; 
     ctr=1;
     for i=vec2row(fit_genes_I) % 1:num_genes % loop on genes and plot / fit selection coefficients
         sprintf(['Run gene = %d out of %d, ' upper(GeneStruct.gene_names{i})], i, num_genes)
