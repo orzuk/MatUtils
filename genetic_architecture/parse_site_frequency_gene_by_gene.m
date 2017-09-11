@@ -130,6 +130,9 @@ for k=1:num_files % loop on different chunks
     ctr=1;
     for i=vec2row(fit_genes_I) % 1:num_genes % loop on genes and plot / fit selection coefficients
         sprintf(['Run gene = %d out of %d, ' upper(GeneStruct.gene_names{i})], i, num_genes)
+        if(i == 15239) % tmp! debug error
+           TTT = 1234234 
+        end
         if(startsWith(upper(GeneStruct.gene_names{i}), upper(gene_prefix)))
             gene_header = upper(GeneStruct.gene_names{i}); % (1:2));  % Print gene name
             gene_dir = fullfile(output_data_dir, gene_header(1), GeneStruct.gene_names{i}); % here save all information on gene
@@ -146,16 +149,16 @@ for k=1:num_files % loop on different chunks
                 rare_cumulative_per_gene = 1;
                 target_size_by_class_vec = [mu_per_site, mu_per_site, mu_per_site]; % Get target size for gene
                 gene_n_vec = []; gene_k_vec = []; null_w_vec = []; % ???
-                for j= SiteFreqSpecStruct{1}.good_allele_inds{2} % loop on missense
-                    gene_k_vec = [gene_k_vec (SiteFreqSpecStruct{1}.gene_by_allele_type_freq_list{j,i_sfs} .* ...
-                        SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i_sfs})'];
-                    gene_n_vec = [gene_n_vec SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i_sfs}'];
+                for j= SiteFreqSpecStruct{k}.good_allele_inds{2} % loop on missense
+                    gene_k_vec = [gene_k_vec (SiteFreqSpecStruct{k}.gene_by_allele_type_freq_list{j,i_sfs} .* ...
+                        SiteFreqSpecStruct{k}.gene_by_allele_type_n_list{j,i_sfs})'];
+                    gene_n_vec = [gene_n_vec SiteFreqSpecStruct{k}.gene_by_allele_type_n_list{j,i_sfs}'];
                 end
                 null_w_vec = -ones(size(gene_k_vec)); % all missense
-                for j= SiteFreqSpecStruct{1}.good_allele_inds{3} % loop on stop codons
-                    gene_k_vec = [gene_k_vec (SiteFreqSpecStruct{1}.gene_by_allele_type_freq_list{j,i_sfs} .* ...
-                        SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i_sfs})'];
-                    gene_n_vec = [gene_n_vec SiteFreqSpecStruct{1}.gene_by_allele_type_n_list{j,i_sfs}'];
+                for j= SiteFreqSpecStruct{k}.good_allele_inds{3} % loop on stop codons
+                    gene_k_vec = [gene_k_vec (SiteFreqSpecStruct{k}.gene_by_allele_type_freq_list{j,i_sfs} .* ...
+                        SiteFreqSpecStruct{k}.gene_by_allele_type_n_list{j,i_sfs})'];
+                    gene_n_vec = [gene_n_vec SiteFreqSpecStruct{k}.gene_by_allele_type_n_list{j,i_sfs}'];
                 end
                 null_w_vec((end+1):length(gene_k_vec)) = 1; % all stop
                 null_w_vec = null_w_vec(~isnan(gene_k_vec));
@@ -169,15 +172,15 @@ for k=1:num_files % loop on different chunks
                 maximize_parameters = [1 1 0]; % maximize over s and alpa
                 full_flag = 0;
                 if(~isempty(X)) % for some genes we have no alleles in the relevant population
-                    for k=2 % 1:num_populations % load data from all populations
-                        [GeneStruct.max_LL_vec(i,k), GeneStruct.s_MLE_vec(i,k), GeneStruct.alpha_MLE_vec(i,k), ~, GeneStruct.max_compute_time(i,k)] = ... % don't fit  beta_MLE_vec(i,k)] = ...
+                    for i_pop=2 % 1:num_populations % load data from all populations
+                        [GeneStruct.max_LL_vec(i,i_pop), GeneStruct.s_MLE_vec(i,i_pop), GeneStruct.alpha_MLE_vec(i,i_pop), ~, GeneStruct.max_compute_time(i,i_pop)] = ... % don't fit  beta_MLE_vec(i,i_pop)] = ...
                             maximize_two_class_likelihood(s_null_vec, alpha_vec, 0, ...
-                            target_size_by_class_vec, Demographic_model{k}, ... % run each time on different population. But counts should be different!!
+                            target_size_by_class_vec, Demographic_model{i_pop}, ... % run each time on different population. But counts should be different!!
                             X, [], trait_struct, null_w_vec, maximize_parameters, full_flag, ...
                             num_individuals, implementation_str); % fit for each population seperately
                         sprintf('s = %f, alpha=%f, LL=%f, run-time (sec.)=%f, ', ...
-                            GeneStruct.s_MLE_vec(i,k), GeneStruct.alpha_MLE_vec(i,k), ...
-                            GeneStruct.max_LL_vec(i,k), GeneStruct.max_compute_time(i,k))
+                            GeneStruct.s_MLE_vec(i,i_pop), GeneStruct.alpha_MLE_vec(i,i_pop), ...
+                            GeneStruct.max_LL_vec(i,i_pop), GeneStruct.max_compute_time(i,i_pop))
                     end % loop on populations
                 end
             end % if fit selection

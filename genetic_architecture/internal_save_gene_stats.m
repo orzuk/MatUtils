@@ -11,7 +11,7 @@
 % 
 function internal_save_gene_stats(GeneStruct, ExonsGeneStruct, output_data_dir, gene_struct_input_file, exome_struct, fit_genes_I)
 
-GeneStruct.gene_fit_I = gene_fit_I; 
+GeneStruct.fit_genes_I = fit_genes_I; 
 save(fullfile(output_data_dir, ...
     [remove_suffix_from_file_name(remove_dir_from_file_name(gene_struct_input_file)) '_fitted_stats.mat']), '-struct', 'GeneStruct'); % save .mat file 
 
