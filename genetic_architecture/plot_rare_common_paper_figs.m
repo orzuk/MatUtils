@@ -84,6 +84,7 @@ if(~exist('w_x_null_mat', 'var'))  % no need to run again and again
             compute_two_class_model_parameters(s_null_vec, ...
             f_rare_vec, full_enrichment_alpha_vec(j), rare_cumulative_per_gene, N, two_class_output_file);
     end
+    my_mkdir(dir_from_file_name(two_class_output_file));
     save(two_class_output_file, 'two_class_stat_struct', ...
         'w_x_null_mat', 'w_x_harmless', 'w_all', 'c_cumulative', 'frac_null_by_freq_cumulative');
     
