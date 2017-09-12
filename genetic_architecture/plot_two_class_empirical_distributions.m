@@ -14,7 +14,6 @@ eric_color_vec = 'kbgyr'; % Conenstion for selection coefficients (we don't have
 my_symbol_vec = {'--', '-'}; % flip ordering (set integer powers as solid lines)
 selection_color_vec = {'k', 'b', 'g', orange, 'r'}; % replace yellow with orange
 
-
 x_vec = ReadDataFile(allele_freq_file); x_vec = x_vec.derived_freq; % Note: allele freq. is in logarithmic coordinates.
 % s_vec =  [10.^(-1:-0.5:-5) 0]; % , s=10^-1.5, s=10^-2, ... s=10^-5, s=0); % hard-coded selection based on Steve's mail. (discrapancy: 11 or 10 s?)
 
@@ -42,8 +41,7 @@ for i=1:length(TwoClassFiles) % go over each file
     for j=1:num_iters(i)
         median_ind = find(s_cumulative(j,:) >= 0.5*s_cumulative(j,end), 1);
         median_vec{i}(j) = x_vec(median_ind); % NEW! Compute also median allele frequency !!!
-    end
-    
+    end    
     median_vec_non_zero(i) = x_vec( find(f_null_vec{i}>=0.5, 1) ); % NEW! take median of just non-zero frequencies
 end
 s_vec(s_vec == 1) = 0; % format exception: 0 is denoted 0.0.
@@ -114,7 +112,7 @@ for figure_type = 1:4 % New: plot median values just from the data
             R_freq{j+1, pop_ctr+1} = num2str(save_freq(s_J(j)), 3);
         end
         pop_ctr=pop_ctr+1;
-    end
+    end % loop on population str 
     xlabel('Selection coefficient s', 'fontsize', 14);
     switch figure_type % ALWAYS add legend !!!
         case 1 % CAF
@@ -153,7 +151,6 @@ s_vec = s_vec(good_inds); pop_vec = pop_vec(good_inds);
 p_vec = p_vec(good_inds); n_hist_vec = n_hist_vec(good_inds); mean_vec = mean_vec(good_inds);
 num_files = length(good_inds);
 
-
 s_vec_str = cellstr([repmat('10^{', num_files, 1) num2str(log10(vec2column(s_vec)), 2) repmat('}', num_files, 1)]);
 for i=find(s_vec == 0)
     s_vec_str{i} = '0';
@@ -168,7 +165,6 @@ for i=1:num_files
     legend_vec{i} = [legend_vec{i} ' \sigma=' num2str(std_vec(i), 3)];
     s_ind = strfind(legend_vec{i}, 's=')
     mu_ind = strfind(legend_vec{i}, '\mu');
-    %     legend_vec{i} =
     
     legend_vec_no_s{i} = [legend_vec{i}(1:s_ind-1) ' ' legend_vec{i}(mu_ind:end)];
     legend_vec_no_s{i} = strrep(legend_vec_no_s{i}, 'n1', 'n'); % don't need 1
@@ -193,7 +189,6 @@ end
 for i_d = 1:num_models % Loop on models and plot separately for each population
     model_inds = strmatch(unique_pop_vec{i_d}, pop_vec);
     model_str = get_nice_population_names(unique_pop_vec{i_d});
-    
     
     R_model = []; s_null_vec = [0 logspace(-5, -1, 9)];
     R_model{1,1} = 's'; R_model{2,1} = '0';
@@ -230,10 +225,8 @@ for i_d = 1:num_models % Loop on models and plot separately for each population
     R_model_latex{2} = strrep(strrep(strrep(strrep(R_model_latex{2}, '10^', '$10^'), '(', '{'), '}', '}$'), '10^{-6}', '0');
     savecellfile(R_model_latex, fullfile(figs_dir, 'different_models/variation', ...
         [unique_pop_vec{i_d} '_quantiles_tab_latex.txt'] ), [], 1);
-    
-    
-    % Selection coefficient
-    
+        
+    % Selection coefficient    
     for plot_type = {'inverse_cumulative_normalized'} % inverse_cumulative_normalized'} % 'CAF_cumulative_log', 'inverse_cumulative_normalized', 's_confidence_interval', 'CAF_cumulative_log'} % , 'alpha_confidence_interval'} % , 'density', 'median_allele_frequency', 's_estimator_variance'}
         switch plot_type{1}
             case 'CAF_cumulative_log'
@@ -292,7 +285,7 @@ for i_d = 1:num_models % Loop on models and plot separately for each population
                         plot_x_vec = sort(n_vec{model_inds(j)}) ./ mean(n_vec{model_inds(j)}); % Plot normalized variation
                         plot_p_vec = (num_iters(i):-1:1) ./ num_iters(i);  cum_str = ' (inverse cumulative)'; % get cumulatives normalized
                         plot(plot_x_vec, plot_p_vec, 'color', main_selection_color_vec{tmp_color_ind}, ...
-                            'linestyle', my_symbol_vec{mod_max(j,2)}, 'linewidth', 2);             hold on;
+                            'linestyle', my_symbol_vec{mod_max(j,2)}, 'linewidth', 2); hold on;
                     end
                 end
                 %                plot(repmat(1, 101, 1), 0:0.01:1, 'k', 'linewidth', 2);
@@ -309,7 +302,6 @@ for i_d = 1:num_models % Loop on models and plot separately for each population
                 end
                 xlim([0 30]); ylim([0 0.1]); %  at what fold-increase to stop? 10? 20?
                 if(~SI_flag)
-                    
                     if(i_d == 3) % Expansion1
                         h_leg = legend(cellstr(legend_vec_only_s(show_model_inds([1 end:-1:2]))')); % , 'WestOutside');
                         set(h_leg,'Xcolor',[0.8 0.8 0.8],'Ycolor',[0.8 0.8 0.8]);
@@ -321,9 +313,7 @@ for i_d = 1:num_models % Loop on models and plot separately for each population
             case 'CAF_cumulative_log'
                 show_s_vals = [0 logspace(-5, -1, 9)]; % [0 logspace(-3, -1, 5)]; % New: plot only some values of s % logspace(-4, -1, 7)
                 show_model_inds = intersect(model_inds, find(ismember(s_vec, show_s_vals)));
-                
                 output_plot_file_name = '_CAF_cumulative_log';
-                
                 for j=[1 length(model_inds):-1:2]
                     if(ismember(model_inds(j), show_model_inds))
                         s_log = -log10(s_vec(model_inds(j)));
@@ -349,7 +339,6 @@ for i_d = 1:num_models % Loop on models and plot separately for each population
                 title(model_str, 'interpreter', 'latex'); % , 'fontsize', 14, 'fontweight', 'bold'); % 'Variation in f_{null}. ' %   Mean=' num2str(mean(f_null)) '. St.d.=' num2str(std(f_null))]);
                 %                text(0.82, -0.0025, '1');
                 
-                
             case 'median_allele_frequency'
                 output_plot_file_name = '_median_IAF_cumulative';
                 for j=[1 length(model_inds):-1:2]
@@ -373,7 +362,7 @@ for i_d = 1:num_models % Loop on models and plot separately for each population
                 %
                 %                 errorbar(plot_x_vec, plot_y_vec, std_vec);  % NEED TO MODIFY HERE !!! (NOT NEWEST VERSION!)
                 
-            case 's_confidence_interval' % show variation in estimateds: \hat{s} = \mu / f_C
+            case 's_confidence_interval' % show variation in estimated s: \hat{s} = \mu / f_C
                 output_plot_file_name = '_s_confidence_interval';
                 mu = 10^(-5); % rate used for simulations per gene
                 
@@ -411,7 +400,6 @@ for i_d = 1:num_models % Loop on models and plot separately for each population
         if((i_d == 6) || (~strcmp(plot_type{1}, 'coefficient_of_variation')))
             add_faint_grid(0.5);
         end
-        
         switch plot_type{1}
             case {'CAF_cumulative_log', 'coefficient_of_variation'}
                 one_plot_flag = 1;
@@ -426,8 +414,7 @@ for i_d = 1:num_models % Loop on models and plot separately for each population
         end
         
         if(one_plot_flag)
-            if(i_d == 6) % Expansion1
-                
+            if(i_d == 6) % Expansion1                
                 switch plot_type{1}
                     case 'coefficient_of_variation'
                         h_leg = legend(pop_legend_vec, 2); % 'eastoutside'); % legend('boxoff'); % just legend
@@ -437,13 +424,11 @@ for i_d = 1:num_models % Loop on models and plot separately for each population
                         pos_leg = get(h_leg, 'position'); set(h_leg, 'position', [pos_leg(1)+0.15 pos_leg(2)+0.21 pos_leg(3) pos_leg(4)]); % 275, -015
                         %                    set(h_leg,'Xcolor',[0.8 0.8 0.8],'Ycolor',[0.8 0.8 0.8]);
                         legend('boxoff'); % remove completely on side
-                end
-                
+                end                
                 orient landscape;
                 my_saveas(gcf, fullfile(figs_dir, 'different_models/variation', ...
                     ['all_six_populations'  output_plot_file_name] ), {'epsc', 'pdf', 'jpg'});
             end
-            
         else
             my_saveas(gcf, fullfile(figs_dir, 'different_models/ALL_variation', ...
                 [unique_pop_vec{i_d}  output_plot_file_name] ), {'epsc', 'pdf', 'jpg'});
@@ -526,7 +511,6 @@ for i_s = 1:length(unique_s_vec) % Loop on s and plot separately for each s and 
     my_saveas(gcf, fullfile(figs_dir, 'boxplot', ...
         ['num_alleles_boxplot_s_' strrep(strrep(strrep(s_vec_str{s_inds(1)}, '^', '_'), '{', ''), '}', '_')] ), {'epsc', 'pdf'});
     
-    
     % New: plot quantiles as 'my boxplots'
     figure;
     quantiles_vec = [0.01 0.05 0.1 0.25 0.5 0.75 0.9 0.95 0.99];
@@ -572,10 +556,6 @@ for i_s = 1:length(unique_s_vec) % Loop on s and plot separately for each s and 
     % % %         ['num_alleles_cumulative_s_' strrep(strrep(strrep(s_vec_str{s_inds(1)}, '^', '_'), '{', ''), '}', '_')] ), {'epsc', 'pdf'});
         
 end % loop on s
-
-
-% New: make
-
 
 % New: make quantile plots for each model, for different values of s
 for pop_groups = { {'equil', 'expan1', 'expan2', '2phase'}, {'europ', 'ice', 'finn1', 'finn2'} } % , {'varsel1', 'varsel2'}, ...

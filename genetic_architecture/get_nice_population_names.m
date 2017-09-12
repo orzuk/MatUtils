@@ -9,7 +9,6 @@
 function nice_pop_str = get_nice_population_names(input_pop_str)
 
 if(iscell(input_pop_str))
-   
     nice_pop_str = cell(size(input_pop_str));
     for i=1:length(input_pop_str)
         nice_pop_str{i} = get_nice_population_names(input_pop_str{i});
@@ -41,6 +40,5 @@ switch input_pop_str
     case 'ice-nobneck'
         nice_pop_str = 'Iceland-NoBottleneck';        
     otherwise
-        nice_pop_str = 'not-assigned'; 
-        
+        nice_pop_str = 'not-assigned';         
 end

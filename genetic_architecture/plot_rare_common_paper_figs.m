@@ -63,7 +63,6 @@ max_f_rare_vec = [0.001 0.01]; % thresholds for being considered rare
 demographic_models_struct = [];
 demographic_models_struct.file_names = GetFileNames(fullfile(demographic_sims_dir, 'cumul*.mat'), 1);  % NEW! add before/after bottle-neck
 
-
 for i=1:length(demographic_models_struct.file_names)
     demographic_models_struct.model_str{i} = ...
         strdiff(strdiff(remove_suffix_from_file_name(remove_dir_from_file_name(demographic_models_struct.file_names{i})), ...
@@ -86,8 +85,7 @@ if(~exist('w_x_null_mat', 'var'))  % no need to run again and again
     end
     my_mkdir(dir_from_file_name(two_class_output_file));
     save(two_class_output_file, 'two_class_stat_struct', ...
-        'w_x_null_mat', 'w_x_harmless', 'w_all', 'c_cumulative', 'frac_null_by_freq_cumulative');
-    
+        'w_x_null_mat', 'w_x_harmless', 'w_all', 'c_cumulative', 'frac_null_by_freq_cumulative');    
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -104,9 +102,6 @@ for i=figure_inds % create main figures
                 N, show_s_null, show_s_null_ind, s_null_vec, rare_cumulative_per_gene, alpha_vec, prevalence, ...
                 title_str, figs_dir, figs_dir, plot_bayes_factor, figs_for_paper_flag, ...
                 demographic_models_struct, equilibrium_parameters_output_file); % Plot properties of distribution - this should also be part of the figures for paper
-
-            
-            
             
         case 2 % Figure 2: number of alleles as function of s 
             
@@ -142,8 +137,6 @@ for i=table_inds % create tables
             savecellfile(R, fullfile(tables_dir, 'table1.txt')); % save table to file
     end % switch which table to generate
 end % loop on table inds
-
-
 
 s = 0.001;  max_f = 0.999;
 Z_disease = phi_s_integral(max_f, -4*N*s, 'disease', 1) - ...

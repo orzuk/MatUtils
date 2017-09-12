@@ -89,7 +89,7 @@ for i_d = 1:demographic_models_struct.num_models
     
     R_med{R_ctr,1} = get_nice_population_names(str2title(demographic_models_struct.model_str{i_d}));
     for j=1:length(show_s_null)
-        [median_val median_ind] = min(abs( demographic_models_struct.data{i_d}.p_vec(j,:) - demographic_models_struct.data{1}.p_vec(j,end)/2) );
+        [median_val, median_ind] = min(abs( demographic_models_struct.data{i_d}.p_vec(j,:) - demographic_models_struct.data{1}.p_vec(j,end)/2) );
         demographic_models_struct.data{i_d}.median_vec(j) = demographic_models_struct.data{1}.x_vec(median_ind);
         R_med{R_ctr, length(show_s_null)-j+2} = num2str(demographic_models_struct.data{i_d}.median_vec(j), 2);
     end

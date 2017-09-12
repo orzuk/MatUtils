@@ -21,6 +21,8 @@ fit_demography = 1;  % NEW! here fit a demographic model using only synonymous S
 plot_demography = 1; % summary plots for demographic models
 aggregate_population_estimators = 0; % NEW! aggregate estimators from different populations
 test_population_differences = 0; % NEW! test for different in selection between different populations
+s_vec = [0 -logspace(-6, -1, 11)]; % set s-values for plotting and fitting
+
 
 queue_str = 'priority'; % for submitting jobs at broad farm
 global cumsum_log_vec;
@@ -72,7 +74,7 @@ if(plot_site_frequency_flag) % Here we plot SFS for DATA !! for all populations 
         fullfile(spectrum_data_dir, 'out', exome_struct.data_str, exome_struct.prefix)); %   remove_suffix_from_file_name(exome_struct.spectrum_data_file)));
 end
 
-i_pop=0;
+i_pop=0; 
 for population = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
     i_pop=i_pop+1;
     if(~strcmp(population, 'African')) % temp: work only on one population!
@@ -113,7 +115,6 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     load(demography_file);
     if(~isfield(Demographic_model{i_pop}, 'SFS')) % add SFS to demographic mode
         %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
-        s_vec = [0 -logspace(-6, -1, 11)]; % heavier run
         Demographic_model{i_pop}.iters = 50;
         Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
         compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;
@@ -125,7 +126,10 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     end
     
 end % loop on populations (temp.)
-
+% Temp: plot all populations together (should be part of plotting function
+plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir; 
+plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1;  % plot cumulative weighted allele frequency distribution
+plot_allele_freq(s_vec, Demographic_model, plot_params)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
