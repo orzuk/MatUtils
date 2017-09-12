@@ -6,17 +6,12 @@ demographic_sims_dir = '../../common_disease_model/data/schaffner_simulations/Eu
 equilibrium_parameters_output_file =  '../../common_disease_model/figs/EyreWalker/new_eric/equilibrium/two_class_equilibrium_parameters';
 power_figs_dir = fullfile(figs_dir, 'power');
 
-
-
 two_class_output_file = fullfile(figs_dir, 'figs_data_two_class_model.mat');
 figure_inds = [1 2 3 4 5]; % which figures do we want to display
 supp_figure_inds = []; % [1 2 3 4 5]; % which supp. figs. we want to display
 table_inds = [1 2 3]; % which tables to save
 
 figs_for_paper_flag = 0; % 1;
-
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set Parameters:
@@ -64,7 +59,6 @@ max_f_rare_vec = [0.001 0.01]; % thresholds for being considered rare
 %n = 2000; % number of individuals
 % prevalence = 0.1; % disease prevalence for disease traits
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 demographic_models_struct = [];
 demographic_models_struct.file_names = GetFileNames(fullfile(demographic_sims_dir, 'cumul*.mat'), 1);  % NEW! add before/after bottle-neck
@@ -75,8 +69,6 @@ for i=1:length(demographic_models_struct.file_names)
         strdiff(strdiff(remove_suffix_from_file_name(remove_dir_from_file_name(demographic_models_struct.file_names{i})), ...
         'cumul_'), '_all');
 end
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if(exist(two_class_output_file, 'file')) % first look if data already computed
@@ -97,13 +89,11 @@ if(~exist('w_x_null_mat', 'var'))  % no need to run again and again
     
 end
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for i=figure_inds % create main figures
     switch i        
         case 1 % Figure 1: distribution of rare alleles.
-            plot_bayes_factor = 0; % display plots independently of mixture coefficients
-            
+            plot_bayes_factor = 0; % display plots independently of mixture coefficients            
             title_str = ['Detect. power rare. \alpha=' num2str(alpha_vec*100,3) '%' ...
                 ' functional, f^*=' num2str(f_rare*100,2) '%, c=' ...
                 num2str(rare_cumulative_per_gene*100,3) '% cum. freq., p-val cutoff = ' num2str(p_val_cutoff, 3)];

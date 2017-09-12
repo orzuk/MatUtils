@@ -15,7 +15,7 @@ GeneStruct.fit_genes_I = fit_genes_I;
 save(fullfile(output_data_dir, ...
     [remove_suffix_from_file_name(remove_dir_from_file_name(gene_struct_input_file)) '_fitted_stats.mat']), '-struct', 'GeneStruct'); % save .mat file 
 
-R_header = ['Gene' strcat('s_MLE.', exome_struct.pop_str(1:2)) strcat('alpha_MLE.', exome_struct.pop_str(1:2))]; % TMP! remove last one 
+R_header = ['Gene' strcat('s_MLE.', exome_struct.pop_str) strcat('alpha_MLE.', exome_struct.pop_str)]; % TMP! remove last one 
 R = [GeneStruct.gene_names(fit_genes_I) num2str_cell(num2cell(GeneStruct.s_MLE_vec(fit_genes_I,:))) num2str_cell(num2cell(GeneStruct.alpha_MLE_vec(fit_genes_I,:)))];
 R = [R_header' R']'; 
 savecellfile(R, fullfile(output_data_dir, ...

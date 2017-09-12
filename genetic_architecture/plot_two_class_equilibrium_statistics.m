@@ -33,7 +33,6 @@ AssignGeneralConstants;
 eric_color_vec = 'kbgyr'; % Conenstion for selection coefficients (we don't have orange. Use yellow)
 my_symbol_vec = {'--', '-'}; % dashed for s=0 and 1/2 powers of 10, solid for whole powers of 10
 
-
 if(~exist('plot_bayes_factor', 'var') || isempty(plot_bayes_factor))
     plot_bayes_factor = 0; % plot independent of mixture coefficient
 end
@@ -144,11 +143,6 @@ fig_files_to_ppt = plot_mean_num_alleles_and_het_vs_s_internal(demographic_model
     two_class_stat_struct, s_null_vec, N, mu_per_gene, show_s_null, ...
     color_vec, new_figs_dir);    % Plot mean number of alleles present in a single chromosome
 
-
-
-
-
-
 for pop_groups = { {'equil'}, {'europ'}, ... % NEW: one main figure !!!
         {'equil', 'expan1', '2phase', 'europ', 'ice', 'finn1'}, ... % NEW: one figure for the paper for all 6 populations
         {'equil', 'expan1', 'expan2', '2phase'}, {'europ', 'ice', 'finn1', 'finn2'}, {'varsel1', 'varsel2'}, ...
@@ -187,8 +181,6 @@ for pop_groups = { {'equil'}, {'europ'}, ... % NEW: one main figure !!!
     fig_files_to_ppt = union(fig_files_to_ppt, tmp_fig_files_to_ppt);
 end % loop on pop. groups
 
-
-
 close all;
 plot_frac_null_and_harmless_all_populations_internal(demographic_models_struct, ...
     show_s_null_ind, xi_prob_leq_f, frac_null_by_freq_cumulative,  eric_color_vec, my_symbol_vec, legend_vec, title_str, ...,
@@ -207,7 +199,6 @@ end % optional plots
 
 close all;
 
-
 if(~figs_for_paper_flag)
     % Plot isolines for variance explained with effect size and s on the two axis
     % %     GRR_vec = 1:0.01:8; % genetic relative risk
@@ -225,14 +216,9 @@ if(~figs_for_paper_flag)
         legend_vec, figs_dir);  % Plot power (what is proxy for power?)
     
     
-    
-    
 end % if figs_for_paper
 
 %%%%%%%%%%%%%%%%%%%%%% Figure 2: Plot things as function of s, the selection coefficient %%%%%%%%%%%%%%%%%%%%%%
-
-
-
 
 
 close all;
@@ -328,7 +314,7 @@ for plot_type = [0 2] % 0:0 % 1 % 0 - frac. which are null. 1 - frac. which are 
             
             if(~strcmp(pop_str, 'all_models'))
                 plot_model_ctr = model_ctr;
-            else  % change horzontal to vertical orderput xlabel only at bottom
+            else  % change horozontal to vertical order. Put xlabel only at bottom
                 switch model_ctr
                     case 1
                         plot_model_ctr=1;
@@ -344,8 +330,6 @@ for plot_type = [0 2] % 0:0 % 1 % 0 - frac. which are null. 1 - frac. which are 
                         plot_model_ctr=6;
                 end
             end
-            
-            
             
             switch plot_type
                 case 0  % fraction which are null, rho
@@ -373,7 +357,6 @@ for plot_type = [0 2] % 0:0 % 1 % 0 - frac. which are null. 1 - frac. which are 
                                 %                                 y_vec_finite_sample = frac_null_conditional_on_freq_less_f(  ... % NOT working yet !!
                                 %                                     0.001, [], alpha_vec, demographic_models_struct.data{i_d}.x_vec, ...
                                 %                                     demographic_models_struct, demographic_models_struct.model_str{i_d}, 100) % use new function - finite sample
-                                
                         end
                         y_str = 'Proportion of null alleles, \rho_s(f)';
                     end

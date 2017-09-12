@@ -1,7 +1,7 @@
 % Plot details of demographic model
 %
 % Input:
-% D_cell - cell array with demographic models
+% D_cell - cell array with different demographic models
 % index - representing the correct model chosen
 % log_like_mat - log-likelihood of each model
 % k_vec - data (number of derived allele carriers)
@@ -29,7 +29,6 @@ if(num_D > 1)
     title(['Best model: LL=' num2str(log_like_mat(index(2)), 5)]);
 end
 legend(legend_vec, 'fontsize', 14); legend('boxoff');
-
 
 if(print_all_models)
     N_vec = demographic_parameters_to_n_vec(D_cell{1}, index(1));
@@ -97,10 +96,20 @@ if(plot_sfs) % plot neutral sfs for demographic model
     for i=1:length(D_cell)
         LL_legend_vec{i} = [legend_vec{i} ', LL=' num2str(round(log_like_mat_again{i}, 2))];
         N_vec = demographic_parameters_to_n_vec(D_cell{i}, index(i));
-        [x_vec_hat{i}, p_vec_hat{i}, L_correction_factor_hat, ~, k_vec_hat{i}, n_vec_hat{i}, weights_vec_hat]  = ... % Compare neutral allele-freq distribution for different demographies
-            compute_allele_freq_spectrum_from_demographic_model(D_cell{i}, 0, 'simulation', n_sample, mu_per_site); % simulate from neutral model
+        
+        if(~isfield(D_cell{i}, 'SFS'))
+            [D_cell{i}.SFS.x_vec, D_cell{i}.SFS.p_vec, D_cell{i}.SFS.L, ~, k_vec_hat{i}, n_vec_hat{i}]  = ... % Compare neutral allele-freq distribution for different demographies
+                compute_allele_freq_spectrum_from_demographic_model(D_cell{i}, 0, 'simulation', n_sample, mu_per_site); % simulate from neutral model
+        else  % here compute only k_vec, n_vec
+            max_num_alleles = 20000; num_alleles = max_num_alleles;
+            p_vec_counts = round(D_cell{i}.SFS.p_vec(1,:) .* num_alleles);  allele_freq_vec = hist_to_vals(D_cell{i}.SFS.x_vec, p_vec_counts);
+            k_vec_hat{i} = population_to_sample_allele_freq(allele_freq_vec, 2*N_vec(end-1), n_sample); % simulate a sample from population
+            n_vec_hat{i} = repmat(n_sample, num_alleles, 1);
+        end
+            
+        
         %        semilogx(x_vec ./ (2*N_vec(end-1)), p_vec); hold on;
-        semilogx(x_vec_hat{i} ./ (2*N_vec(end-1)), p_vec_hat{i}, color_vec(i), 'linewidth', 2); hold on;
+        semilogx(D_cell{i}.SFS.x_vec ./ (2*N_vec(end-1)), D_cell{i}.SFS.p_vec(1,:), color_vec(i), 'linewidth', 2); hold on;
     end % loop on models
     [unique_k_vec, h_k_vec] = unique_with_counts(k_vec);
     semilogx(unique_k_vec ./ n_sample, h_k_vec ./ length(k_vec), 'm', 'linewidth', 2);  % PLOT ALSO DATA
@@ -145,15 +154,17 @@ if(plot_sfs) % plot neutral sfs for demographic model
     end
     semilogx(unique_k_vec_poly ./ n_sample, h_k_vec_poly ./ sum(h_k_vec_poly), 'm', 'linewidth', 2);  % PLOT ALSO DATA  % / length(k_vec)
     legend(legend_with_LL, 'fontsize', 14); legend('boxoff');
+     xlabel('k (sample allele count.)'); ylabel('$\psi(f)$ sample', 'interpreter', 'latex');
     
-    debug_SFS = 1;
+    debug_SFS = 0;
     if(debug_SFS)
         x_vec1 = unique_k_vec_hat{i}(2:end-1) ./ n_vec_hat{i}(1);
         y_vec1 = h_k_vec_hat{i}(2:end-1) ./ length(k_vec_hat{i}); y_vec1 = y_vec1 ./ sum(y_vec1);
         x_vec2 = unique_k_vec_poly ./ n_sample;
         y_vec2 = P_poly_again{i}.sample_p_vec(2:end-1) ./ sum(P_poly_again{i}.sample_p_vec(2:end-1));
         figure; semilogx(x_vec1, y_vec1); hold on;
-        semilogx(x_vec2, y_vec2, 'r'); hold on;
+        semilogx(x_vec2, y_vec2, 'r'); hold on; 
+        xlabel('f (allele freq.)'); ylabel('P(f) ???'); 
     end
 end % if plot_sfs
 
@@ -169,7 +180,7 @@ end % if plot_sfs
 %     0, full_flag, []); % don't include phenotype !!
 
 
-% Now compare:
+% Now compare two models:
 if(length(log_like_mat_again)>1)
     best_model_loglike = log_like_mat_again{2}
 end

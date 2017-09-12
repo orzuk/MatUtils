@@ -136,7 +136,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% Save also data as tab-delimited text %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-R = internal_compute_SFS_table(A, MutationRateTable, MutationTypes, output_file_name);
+R = internal_compute_SFS_table(A, MutationRateTable, MutationTypes, exome_struct, output_file_name);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure_type_vec = ...
@@ -293,7 +293,7 @@ end % loop on figure types
 % Output:
 % R - cell array with alleles information 
 % 
-function R = internal_compute_SFS_table(A, MutationRateTable, MutationTypes, output_file_name)
+function R = internal_compute_SFS_table(A, MutationRateTable, MutationTypes, exome_struct, output_file_name)
 
 Assign24MammalsGlobalConstants;
 
@@ -333,7 +333,8 @@ for j=1:length(MutationTypes) % loop on diffferent allele types
     end
 end
 
-savecellfile(R, fullfile(output_file_dir, 'ESP_exome_statistics.txt'));
+my_mkdir(output_file_dir); 
+savecellfile(R, fullfile(output_file_dir, [exome_struct.data_str '_exome_statistics.txt']));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

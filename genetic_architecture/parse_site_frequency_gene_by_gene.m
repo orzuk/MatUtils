@@ -98,11 +98,11 @@ load_fields = {'unique_genes', 'n_vec', 'count_vec', 'f_vec', 'allele_types', ..
     'gene_by_allele_type_freq_list', 'gene_by_allele_type_n_list', ...
     'gene_by_allele_type_het_list', ...
     'good_allele_inds', 'upper_freq_vec'};
-all_fit_genes_I = []; 
-for k=1:num_files % loop on different chunks
-    if(k == 1)  % first population
+%    if(k == 1)  % first population
         load_fields = [load_fields {'REF', 'ALT', 'aminoAcidChange', 'gene_by_allele_type_pos_list', 'gene_by_allele_type_inds_list', 'allele_types_ind'}];
-    end
+%    end
+all_fit_genes_I = []; 
+for k= 10 % TMP DEBUG !!! 1:num_files % loop on different chunks
     load_fields_str = cell2vec(load_fields, ''', ''');
     load_str = ['SiteFreqSpecStruct{' num2str(k) '} = load(''' fullfile(spectrum_data_dir, spectrum_data_file{k}) ...
         ''', ''' load_fields_str ''');'];
@@ -130,7 +130,7 @@ for k=1:num_files % loop on different chunks
     ctr=1;
     for i=vec2row(fit_genes_I) % 1:num_genes % loop on genes and plot / fit selection coefficients
         sprintf(['Run gene = %d out of %d, ' upper(GeneStruct.gene_names{i})], i, num_genes)
-        if(i == 15239) % tmp! debug error
+        if(i == 10733) % tmp! debug error
            TTT = 1234234 
         end
         if(startsWith(upper(GeneStruct.gene_names{i}), upper(gene_prefix)))

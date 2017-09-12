@@ -84,7 +84,7 @@ for i=1:num_s
             if(S(i) ~= 0)
                 T(i,:) = theta .* ( Ei(-S(i).*(x-1)) - log(1-x) ) ./ (1 - exp(S(i))); % compute analytic solution
                 if(isnan(T(i))) % here S is too big. Use asymptotics 
-                    T(i,:) = -theta .* ( exp(-S(i).*x_max) ./ (1-x_max) ) ./ S(i);
+                    T(i,:) = -theta .* ( exp(-S(i).*x) ./ (1-x) ) ./ S(i);
                 end
             else % integral at s=0 is equal to z
                 T(i,:) = theta .* x; 

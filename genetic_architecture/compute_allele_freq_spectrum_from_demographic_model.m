@@ -130,15 +130,15 @@ switch compute_flag
         p_vec = exp(-p_vec) ./ (x_vec .* (1-x_vec)); % Compute f. How to normalize?
 end
 
-% New! smooth SFS  (should we do it at sample or at population level?)
-if(~isempty(smooth_params))
-    [x_vec2, p_vec2] = fit_monotonic_curve(log(x_vec(x_vec>0)), p_vec(x_vec>0), smooth_params);
-    x_vec2 = exp(x_vec2);
-    
-    figure; semilogx(x_vec, p_vec, '*'); hold on; % Temp: plot
-    semilogx(x_vec2, p_vec2, 'r');
-    legend({'data', 'fitted'});
-end
+% % % % New! smooth SFS  (should we do it at sample or at population level?)
+% % % if(~isempty(smooth_params))
+% % %     [x_vec2, p_vec2] = fit_monotonic_curve(log(x_vec(x_vec>0)), p_vec(x_vec>0), smooth_params);
+% % %     x_vec2 = exp(x_vec2);
+% % %     
+% % %     figure; semilogx(x_vec, p_vec, '*'); hold on; % Temp: plot
+% % %     semilogx(x_vec2, p_vec2, 'r');
+% % %     legend({'data', 'fitted'});
+% % % end
 
 compute_time=cputime-compute_time;
 

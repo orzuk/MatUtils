@@ -1,5 +1,10 @@
 % Plot distribution of # allele, not just means
 %
+% Input: 
+% two_class_data_dir - directories with data for distributions
+% allele_freq_file - file name with data 
+% figs_dir - where to save figures 
+%
 function plot_two_class_empirical_distributions(two_class_data_dir, allele_freq_file, figs_dir)
 
 AssignGeneralConstants;
@@ -85,8 +90,8 @@ for figure_type = 1:4 % New: plot median values just from the data
         R_freq{1,pop_ctr+1} = pop_legend_vec{pop_ctr};
         model_inds = strmatch(population_str{1}, TwoClassFiles);
         cur_s_vec = max(10^(-6), s_vec(model_inds));
-        [cur_s_vec sort_perm] = sort(cur_s_vec);
-        [intersect_s s_I s_J] = intersect(show_s_vals, s_vec(model_inds));
+        [cur_s_vec, sort_perm] = sort(cur_s_vec);
+        [intersect_s, s_I, s_J] = intersect(show_s_vals, s_vec(model_inds));
         
         switch figure_type
             case 1
@@ -108,12 +113,9 @@ for figure_type = 1:4 % New: plot median values just from the data
         for j=1:length(show_s_vals)
             R_freq{j+1, pop_ctr+1} = num2str(save_freq(s_J(j)), 3);
         end
-        
         pop_ctr=pop_ctr+1;
     end
-    
     xlabel('Selection coefficient s', 'fontsize', 14);
-    
     switch figure_type % ALWAYS add legend !!!
         case 1 % CAF
             ylabel('Combined allele frequency f_s', 'fontsize', 14);
@@ -525,9 +527,6 @@ for i_s = 1:length(unique_s_vec) % Loop on s and plot separately for each s and 
         ['num_alleles_boxplot_s_' strrep(strrep(strrep(s_vec_str{s_inds(1)}, '^', '_'), '{', ''), '}', '_')] ), {'epsc', 'pdf'});
     
     
-    
-    
-    
     % New: plot quantiles as 'my boxplots'
     figure;
     quantiles_vec = [0.01 0.05 0.1 0.25 0.5 0.75 0.9 0.95 0.99];
@@ -571,8 +570,7 @@ for i_s = 1:length(unique_s_vec) % Loop on s and plot separately for each s and 
     % % %     xlabel('f_{null}'); ylabel('Cumulative frequency');
     % % %     my_saveas(gcf, fullfile(figs_dir, 'boxplot', ...
     % % %         ['num_alleles_cumulative_s_' strrep(strrep(strrep(s_vec_str{s_inds(1)}, '^', '_'), '{', ''), '}', '_')] ), {'epsc', 'pdf'});
-    
-    
+        
 end % loop on s
 
 
@@ -631,7 +629,6 @@ for pop_groups = { {'equil', 'expan1', 'expan2', '2phase'}, {'europ', 'ice', 'fi
 end % loop on pop-groups
 
 
-XXX = 234234;
 
 
 
