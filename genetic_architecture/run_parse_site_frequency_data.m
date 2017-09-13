@@ -115,7 +115,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     load(demography_file);
     if(~isfield(Demographic_model{i_pop}, 'SFS')) % add SFS to demographic mode
         %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
-        Demographic_model{i_pop}.iters = 50;
+        Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !! 
         Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
         compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;
         [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, ...

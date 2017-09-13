@@ -48,7 +48,8 @@ my_symbol_vec = {'--', '-'}; % flip ordering (set integer powers as solid lines)
 s_legend_vec = s_vec_to_legend(s_vec);
 
 for i_s = 1:length(s_vec)
-    tmp_color_ind = mod_max(6-floor(mod(i_s, 10)/2), 5);
+%    tmp_color_ind = mod_max(6-floor(mod(i_s, 10)/2), 5);
+    tmp_color_ind = mod_max(ceil(i_s/2), 5);
     
     [~, i_s2] = min(abs(D.s_grid-s_vec(i_s)));
     plot_x_vec = D.SFS.x_vec ./ D.SFS.x_vec(end); plot_p_vec = D.SFS.p_vec(i_s2,:);
@@ -62,24 +63,23 @@ for i_s = 1:length(s_vec)
     end
     if(plot_params.cum) % plot cumulative 
         plot_p_vec = cumsum(plot_p_vec); 
-    end
-    
+    end    
     semilogx(plot_x_vec, plot_p_vec, 'color', selection_color_vec{tmp_color_ind}, ...
         'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
 end
-
 ylabel(plot_params.ylabel_str, 'fontsize', 14); xlabel('f'); % tmp
 title(D.name, 'fontsize', 14); % need to conver to nice name later  
 %add_faint_grid(0.5);
 h_leg = legend(s_legend_vec, 'location', 'eastoutside'); % just legend
+xlim(plot_params.xlim);
+
 %set(gca,'Xcolor',[0.8 0.8 0.8],'Ycolor',[0.8 0.8 0.8]); %ylim([10^(-6) 1]);
+% PRoblem: legends appear twice - need to re-arrange order of grids to make
+% them appear only once !! 
 
 
-
-
-
-
-function plot_params  = internal_set_default_params(plot_params); 
+% Internal function for setting defaults: density un-weighted 
+function plot_params  = internal_set_default_params(plot_params)
 
 if(~isfield(plot_params, 'normalize')) % normalize distribution 
     plot_params.normalize = 0; 
@@ -93,6 +93,10 @@ end
 if(~isfield(plot_params, 'weighted')) % plot log-log
     plot_params.weighted = 0; 
 end
+if(~isfield(plot_params, 'xlim')) % plot lim 
+    plot_params.xlim = [10^(-4) 1];
+end
+
 
 
 

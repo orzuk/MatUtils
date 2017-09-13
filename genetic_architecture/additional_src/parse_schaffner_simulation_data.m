@@ -4,8 +4,6 @@
 %demographic_sims_dir = '../../common_disease_model/data/schaffner_simulations/files_var_eric'; % New Version !!
 demographic_sims_dir = '../../common_disease_model/data/schaffner_simulations/EuropeFixed/files_europe_fixed/files_var_eric'; % New Version !! Europe fixed
 
-
-
 figs_dir = '../../common_disease_model/figs/EyreWalker/new_eric/all_models/empirical_distribution';
 allele_freq_file = fullfile(demographic_sims_dir, 'fbin.txt');
 
@@ -19,7 +17,6 @@ if(parse_mean)
         GetFileNames(fullfile(demographic_sims_dir, '*.old')));
     sims_files = union(sims_files, GetFileNames(fullfile(demographic_sims_dir, '*.new')));
     sims_files = union(sims_files, GetFileNames(fullfile(demographic_sims_dir, '*.*bneck')));
-    
     
     x_vec = ReadDataFile(allele_freq_file); x_vec = x_vec.derived_freq; % Note: allele freq. is in logarithmic coordinates.
     s_vec =  [10.^(-1:-0.5:-5) 0]; % , s=10^-1.5, s=10^-2, ... s=10^-5, s=0); % hard-coded selection based on Steve's mail. (discrapancy: 11 or 10 s?)
