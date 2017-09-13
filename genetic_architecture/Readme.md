@@ -5,11 +5,11 @@ This package is a sub-package of the MatUtils general package,
 and contains functions for simulation and analysis of genetic architectures of complex traits. 
 It acompanies the papers: 
 
-[1] "The Mystery of Missing Heritability: Genetic Interactions Create Phantom Heritability" 
+[1] [“The Mystery of Missing Heritability: Genetic Interactions Create Phantom Heritability“](http://www.pnas.org/content/109/4/1193.abstract)
 O. Zuk, E. Hechter, S. Sunyaev and E.S. Lander 
 Proceedings of the National Academy of Sciences, 109(4): 1193-1198  (2012) 
 
-[2] "Searching for Missing Heritability:  Designing Rare Variants Association Studies"
+[2] [“Searching for Missing Heritability:  Designing Rare Variants Association Studies“](http://www.pnas.org/content/111/4/E455)
 O. Zuk, S. Schaffner, K. Samocha, R. Do, E. Hechter, S. Katherisan, M. Daly, B. Neale, S.R. Sunyaev and E.S. Lander
 Proceedings of the National Academy of Sciences, doi: 10.1073/pnas.1322563111 (2014) 
 
@@ -34,18 +34,18 @@ Please look at the following files for the different applications:
 and phenotypes, with phenotypes being a non-linear noisy function of genotypes. Then, we estimate narrow-sense heritability by regressing phenotypic correlation 
 on IBD sharing and compare to the true narrow-sense heritability.
 
-(2) compute_k_of_N_liabilities_statistics.m - computing all relevant genetic epidemiological parameters for a generalized Limiting-Pathway genetic architecture.
+(2) **compute_k_of_N_liabilities_statistics.m** - computing all relevant genetic epidemiological parameters for a generalized Limiting-Pathway genetic architecture.
 
-(3) test_estimate_heritability_using_IBD.m - Simulate genotypes for a population with common founders (shared IBD blocks), simulate phenotypes,
+(3) **test_estimate_heritability_using_IBD.m** - Simulate genotypes for a population with common founders (shared IBD blocks), simulate phenotypes,
  and estimated heritability by estimating of IBD sharing between pairs of individuals (used for heritability calculations).
 
-(4) compute_association_power.m - Power calculations for different tests (e.g. marginal effect/epistasis/pathway-epistasis tests) and different genetic architectures. 
+(4) **compute_association_power.m** - Power calculations for different tests (e.g. marginal effect/epistasis/pathway-epistasis tests) and different genetic architectures. 
 
-(5) RVAS_power_calculator.m - Power calculation for aggregate tests for rare variants. Can also compute power as function of population genetics parameters (e.g. selection)
+(5) **RVAS_power_calculator.m** - Power calculation for aggregate tests for rare variants. Can also compute power as function of population genetics parameters (e.g. selection)
 
-(6) plot_two_class_equilibrium_statistics.m, plot_two_class_empirical_distributions.m - compute and plot several statistics of the allelic frequency spectrum as function of population genetics parameters 
+(6) **plot_two_class_equilibrium_statistics.m**, plot_two_class_empirical_distributions.m - compute and plot several statistics of the allelic frequency spectrum as function of population genetics parameters 
 
-(7) plot_RVAS_paper_figs.m - Plot several of the figures appearing in [2]. 
+(7) **plot_RVAS_paper_figs.m** - Plot several of the figures appearing in [2]. 
 
 
 (*) The package was not used to perform forward simulations for populations which appeared in [2] to get simulated allelic data. Such simulations were performed by Steven Schaffner (sfs@broadinstitute.org)
