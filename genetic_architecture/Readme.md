@@ -1,5 +1,5 @@
 Genetic Architecture 
-=====================
+====================
 
 This package is a sub-package of the MatUtils general package, 
 and contains functions for simulation and analysis of genetic architectures of complex traits. 
@@ -15,7 +15,12 @@ Proceedings of the National Academy of Sciences, doi: 10.1073/pnas.1322563111 (2
 
 Please cite these papers if you're using the package. 
 
+The package replaces and extends upon the old 'heritability calculator' (hc) package available at http://software.broadinstitute.org/mpg/hc/. 
+Please don't use the hc package as it is obsolete.
+
+
 Details: 
+--------
 
 The package enables heritability calculations using different mehotds and for many differnet disease models (genetic architectures)
 
@@ -25,7 +30,7 @@ One may also enter real allele counts collected in pooled experiments and recons
 
 Please look at the following files for the different applications:
 
-(1) test_estimate_heritability_using_IBD.m - A script testing heritability estimation by local-regression on IBD. The script simulates IBD structure, genotypes 
+(1) **test_estimate_heritability_using_IBD.m** - A script testing heritability estimation by local-regression on IBD. The script simulates IBD structure, genotypes 
 and phenotypes, with phenotypes being a non-linear noisy function of genotypes. Then, we estimate narrow-sense heritability by regressing phenotypic correlation 
 on IBD sharing and compare to the true narrow-sense heritability.
 
