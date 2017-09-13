@@ -71,7 +71,6 @@ if(~isfield(D, 'add_new_alleles')) % generate new alleles in each generation
     D.add_new_alleles = 1;
 end
 
-
 % Extract all infromation from Demographic model
 N_vec = demographic_parameters_to_n_vec(D, D.index);  % compute population size at each generation
 N = N_vec(1); num_generations = length(N_vec)-1; max_N = max(N_vec);
@@ -93,8 +92,7 @@ switch compute_mode
             D, s, mu, two_side_flag, iters, num_generations, init_str);
         frac_polymorphic_vec = 1-num_absorptions_by_generation_vec ./ iters;
         %        num_effective_iters = sum(p_vec{end}(2:end-1)) % total number of single-generation single-allele steps performed (?)
-        
-        
+                
     case 'numeric' % here compute everything by matrix multiplications
         [x_vec, p_vec, total_het_at_each_generation_vec, num_absorptions, num_fixations, ...
             num_absorptions_by_generation_vec, count_vec, ...
@@ -142,8 +140,6 @@ switch compute_mode
         %        figure; plot( het_moments_mat(:,1)  .* prob_site_polymorphic_at_end ./ (mu_vec_analytic(1,1:num_generations)')); title('Ratio (should be constant)');
         %        figure; plot( het_moments_mat(:,1)  .* prob_site_polymorphic_at_end ./ (N_vec(1:num_generations) .* mu_vec_analytic(1,1:num_generations)')); title('Ratio (should be constant)');
 end
-
-
 
 all_new_p_vec = []; all_new_x_vec = [];
 switch init_str % unite distributions into one

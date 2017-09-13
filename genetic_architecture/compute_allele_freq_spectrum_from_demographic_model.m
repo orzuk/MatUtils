@@ -35,7 +35,7 @@ if(~isscalar(s)) % NEW! allow to fit multipole s values using a surface fitting 
             compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag); % , n_sample, mu);
         s_vec_cell{i_s} = repmat(s, 1, length(x_vec_cell{i_s})); 
     end
-    save('temp_surface.mat', 'x_vec_cell', 's_vec_cell', 'smooth_params', 'D'); 
+    save('temp_surface3.mat', 'x_vec_cell', 's_vec_cell', 'p_vec_cell', 'smooth_params', 'D'); 
     % Perform smoothing with monotonicity constraints:
     x_vec = unique( [x_vec_cell{:}] ); num_x = length(x_vec); 
     p_mat = zeros(num_s, num_x);
@@ -47,7 +47,7 @@ if(~isscalar(s)) % NEW! allow to fit multipole s values using a surface fitting 
     if(isfield(D, 's_grid'))
         smooth_params.y_fit = abs(D.s_grid);
     end
-    save('temp_surface.mat', '-append', 'x_vec', 's_vec', 'p_mat', 'smooth_params', 'D'); 
+    save('temp_surface3.mat', '-append', 'x_vec', 's_vec', 'p_mat', 'smooth_params', 'D'); 
 %    load('temp_surface.mat'); 
     [x_vec, s_vec, p_vec] = fit_monotonic_surface(x_vec, abs(s_vec), p_mat, smooth_params);  % constraints
     %	

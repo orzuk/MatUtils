@@ -52,7 +52,16 @@ for i_s = 1:length(s_vec)
     tmp_color_ind = mod_max(ceil(i_s/2), 5);
     
     [~, i_s2] = min(abs(D.s_grid-s_vec(i_s)));
-    plot_x_vec = D.SFS.x_vec ./ D.SFS.x_vec(end); plot_p_vec = D.SFS.p_vec(i_s2,:);
+    if(iscell(D.SFS.x_vec))
+        plot_x_vec = D.SFS.x_vec{i_s2} ./ D.SFS.x_vec{i_s2}(end); 
+    else 
+        plot_x_vec = D.SFS.x_vec ./ D.SFS.x_vec(end); 
+    end
+    if(iscell(D.SFS.p_vec))
+        plot_p_vec = D.SFS.p_vec{i_s2};
+    else
+        plot_p_vec = D.SFS.p_vec(i_s2,:);
+    end        
 
     if(plot_params.weighted) % weight by allele frequency 
         plot_p_vec = plot_p_vec .* plot_x_vec; 
