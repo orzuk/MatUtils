@@ -51,7 +51,7 @@ for i_s = 1:length(s_vec)
 %    tmp_color_ind = mod_max(6-floor(mod(i_s, 10)/2), 5);
     tmp_color_ind = mod_max(ceil(i_s/2), 5);
     
-    [~, i_s2] = min(abs(D.s_grid-s_vec(i_s)));
+    [~, i_s2] = min(abs(abs(D.s_grid)-abs(s_vec(i_s))));
     if(iscell(D.SFS.x_vec))
         plot_x_vec = D.SFS.x_vec{i_s2} ./ D.SFS.x_vec{i_s2}(end); 
     else 
@@ -73,6 +73,7 @@ for i_s = 1:length(s_vec)
     if(plot_params.cum) % plot cumulative 
         plot_p_vec = cumsum(plot_p_vec); 
     end    
+ %   max_diff_should_be_negative = max(diff(plot_p_vec))
     semilogx(plot_x_vec, plot_p_vec, 'color', selection_color_vec{tmp_color_ind}, ...
         'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
 end
