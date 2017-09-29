@@ -62,7 +62,7 @@ for i=1:num_y % First fit each y seperately monotonically
  %       [~, z_fit0(i,:)] = fit_monotonic_curve(x(I), z(I), params); 
         [~, z_fit0(i,:)] = fit_monotonic_curve(x(I), z(I) .* double(max(1,x(I))), params); 
         z_fit0(i,:) = z_fit0(i,:) ./ double(max(1,params.x_fit));      % normalize
-        max_ind = find(z(I)>0, 1, 'last'); max_val = x(I(max_ind)) % find last value 
+        max_ind = find(z(I)>0, 1, 'last'); max_val = x(I(max_ind)); % find last value 
         fit_again = 1; 
         if(fit_again)
             max_ind = min(find(params.x_fit > max_val, 1), size(z_fit0, 2)-1); 
@@ -103,7 +103,14 @@ params.x_fit = x_fit; % get back to x
 z_fit = max(0, [z_fit_cum(:,1) diff(z_fit_cum, [], 2)]); % update surface
 z_fit = normalize(z_fit, 2); % set to sum to one
 
-return;  % up to here simple fitting - no row-column joint information. Fitting looks good but non-monotonic in s
+% Add monotonicity in s: 
+z_fit_cum = cumsum(z_fit, 2); % get cumulative of ROWs
+z_fit_cum  = cummax(z_fit_cum, 1); % enforce monotonicity with s
+
+z_fit = max(0, [z_fit_cum(:,1) diff(z_fit_cum, [], 2)]); % update surface
+z_fit = normalize(z_fit, 2); % set to sum to one
+
+return;  % up to here simple fitting - no row-column joint information. Fitting looks good (?)
 
 [num_y, num_x] = size(z_fit); % update size
 tol=10e-6; ctr=1;
