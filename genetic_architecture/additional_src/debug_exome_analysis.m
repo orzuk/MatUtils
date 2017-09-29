@@ -1,18 +1,74 @@
 %function debug_exome_analysis()
 Assign24MammalsGlobalConstants; AssignGeneralConstants; AssignStatsConstants; AssignRVASConstants;
-X = load('temp_surface2.mat');
+X = load('temp_surface.Fitted.African.mat'); %X = load('temp_surface2.mat');
+X.N_vec = demographic_parameters_to_n_vec(X.D, X.D.index); 
+
 
 X.D.SFS.x_vec = X.x_vec_cell; X.D.SFS.p_vec = X.p_vec_cell; X.D.s_grid = X.s_vec; % overwrite SFS with UN-smoothed simulated results 
 plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir; 
 plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1;  plot_params.xlim = [10^(-6) 1]; % plot cumulative weighted allele frequency distribution
+Y = load('temp_surface3.mat'); Y.smooth_params.knots = 10; Y.smooth_params.y_fit = [0 logspace(-6, -1, 100)]; 
+num_s = length(Y.s_vec); x_vec = unique( [X.D.SFS.x_vec{:}] ); num_x = length(x_vec); p_mat = zeros(num_s, num_x);
+for i_s = 1:length(Y.s_vec)
+    [~, I, J] = intersect(x_vec, Y.x_vec_cell{i_s});
+    p_mat(i_s,I) = Y.p_vec_cell{i_s}(J);
+end
+Y.smooth_params.plot_flag=1;
+% new: fit with cell array 
+X.D.SFS.y_vec = rude(length_cell(X.D.SFS.x_vec), X.D.s_grid);
+
+
+SM.name = 'Fitted.African-smoothed'; SM.s_grid = Y.smooth_params.y_fit; % s_vec; 
+plot_params.weighted = 1; plot_params.cum = 1;  plot_params.log=0; plot_params.xlim = [10^(-6) 1];
+plot_allele_freq(X.s_vec, {X.D}, plot_params); % plot once without producing histogram 
+
+
+num_bins = min(X.N_vec(end), 1000); % Make histogram of p_vec 
+x_bins = [0 unique(round(logspace(0, log10(2*X.N_vec(end)), num_bins)))];
+x_bins2 = 0.5 * (x_bins + [x_bins(2:end)-1 x_bins(end)]);
+for i=1:num_s
+    X.D.SFS.save_p_vec{i} = X.D.SFS.p_vec{i};
+    X.D.SFS.save_x_vec{i} = X.D.SFS.x_vec{i};
+    X.D.SFS.p_vec{i} = weighted_hist(double(X.D.SFS.x_vec{i}), X.D.SFS.p_vec{i}, x_bins);
+    X.D.SFS.p_vec{i} = X.D.SFS.p_vec{i} ./ [1 diff(x_bins)];
+    X.D.SFS.x_vec{i} = x_bins2;
+end
+s_mesh = abs(mat2vec(repmat(X.s_vec, length(x_bins), 1)')); % figure; semilogx(x_bins, x_vals); 
+%[SM.SFS.x_vec, SM.s_grid, SM.SFS.p_vec] = fit_monotonic_surface([X.D.SFS.x_vec{:}], abs(X.D.SFS.y_vec), [X.D.SFS.p_vec{:}], Y.smooth_params);  % constraints
+[SM.SFS.x_vec, SM.s_grid, SM.SFS.p_vec] = fit_monotonic_surface([X.D.SFS.x_vec{:}], s_mesh, [X.D.SFS.p_vec{:}], Y.smooth_params);  % constraints
+
+%[SM.SFS.x_vec, SM.s_grid, SM.SFS.p_vec] = fit_monotonic_surface(x_vec, abs(double(Y.s_vec)), p_mat, Y.smooth_params);  % constraints
+SM.name = 'Fitted.African-smoothed'; SM.s_grid = Y.smooth_params.y_fit; % s_vec; 
+plot_params.weighted = 1; plot_params.cum = 1;  plot_params.log=0; plot_params.xlim = [10^(-6) 1]; plot_params.hist = 1; 
 plot_allele_freq(X.s_vec, {X.D}, plot_params); 
+plot_allele_freq(Y.s_vec, {SM}, plot_params);  %title('SMOOTHED EQUILIBRIUM AGAIN');
+plot_params.weighted = 0; plot_params.cum = 0; plot_params.log=1; % Plot density (unweighted)
+plot_allele_freq(X.s_vec, {X.D}, plot_params); 
+plot_allele_freq(Y.s_vec, {SM}, plot_params);  %title('SMOOTHED EQUILIBRIUM AGAIN');
+plot_params.weighted = 1; plot_params.cum = 0; plot_params.log=1; % Plot density (unweighted)
+plot_allele_freq(X.s_vec, {X.D}, plot_params); 
+plot_allele_freq(Y.s_vec, {SM}, plot_params); % title('SMOOTHED EQUILIBRIUM AGAIN');
+
+
+figure; loglog(X.D.SFS.save_x_vec{1}, (X.D.SFS.save_p_vec{1})); hold on;
+loglog(X.D.SFS.x_vec{1}, (X.D.SFS.p_vec{1}), 'r'); legend('simulated', 'histogram');
+
+return;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %plot_allele_freq(X.s_vec([1 4:end]), {X.D}, plot_params); 
 
 X = load('temp_surface2.mat');
 [X.D.SFS.x_vec, X.D.SFS.p_vec, ...
     X.D.SFS.L, X.D.SFS.compute_time] = ...
     compute_allele_freq_spectrum_from_demographic_model( ...
-    X.D, s_vec, compute_flag); % run again fitted expansion model (takes ~15 minutes)
+    X.D, Y.s_vec, compute_flag); % run again fitted expansion model (takes ~15 minutes)
 plot_allele_freq(X.s_vec, {X.D}, plot_params); 
 
 s_vec = [0 -logspace(-5, -1, 9)]; % set s-values for plotting and fitting
@@ -28,22 +84,23 @@ compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;
     X.E.SFS.L, X.E.SFS.compute_time] = ...
     compute_allele_freq_spectrum_from_demographic_model( ...
     X.E, s_vec, compute_flag);
-plot_params.xlim = [10^(-4) 1]; plot_allele_freq(s_vec, {X.E}, plot_params); title('SMOOTHED EQUILIBRIUM'); 
-Y = load('temp_surface3.mat'); X.E.SFS.x_vec = Y.x_vec_cell; X.E.SFS.p_vec = Y.p_vec_cell; X.E.s_grid = Y.s_vec; % overwrite SFS with UN-smoothed simulated results 
-plot_params.weighted = 1; plot_params.cum = 1;  plot_params.xlim = [10^(-4) 1]; plot_allele_freq(s_vec, {X.E}, plot_params);  title('UN-SMOOTHED EQUILIBRIUM');
+Y = load('temp_surface3.mat'); 
+plot_params.xlim = [10^(-4) 1]; plot_allele_freq(Y.s_vec, {X.E}, plot_params); title('SMOOTHED EQUILIBRIUM'); 
+X.E.SFS.x_vec = Y.x_vec_cell; X.E.SFS.p_vec = Y.p_vec_cell; X.E.s_grid = Y.s_vec; % overwrite SFS with UN-smoothed simulated results 
+plot_params.weighted = 1; plot_params.cum = 1;  plot_params.xlim = [10^(-4) 1]; plot_allele_freq(Y.s_vec, {X.E}, plot_params);  title('UN-SMOOTHED EQUILIBRIUM');
 
 % Perform smoothing again (outside):
-num_s = length(s_vec); x_vec = unique( [Y.x_vec_cell{:}] ); num_x = length(x_vec); p_mat = zeros(num_s, num_x);
-for i_s = 1:length(s_vec)
+num_s = length(Y.s_vec); x_vec = unique( [Y.x_vec_cell{:}] ); num_x = length(x_vec); p_mat = zeros(num_s, num_x);
+for i_s = 1:length(Y.s_vec)
     [~, I, J] = intersect(x_vec, Y.x_vec_cell{i_s});
     p_mat(i_s,I) = Y.p_vec_cell{i_s}(J);
 end
  Z = load('temp_surface2.mat'); Y.smooth_params.y_fit = abs(Z.D.s_grid); 
 % Y.smooth_params.y_fit = abs(X.E.s_grid); 
-Y.smooth_params.y_fit = [0 -logspace(-6, -1, 101)];
-[SM.SFS.x_vec, SM.s_grid, SM.SFS.p_vec] = fit_monotonic_surface(x_vec, abs(s_vec), p_mat, Y.smooth_params);  % constraints
+Y.smooth_params.y_fit = abs([0 -logspace(-6, -1, 101)]);
+[SM.SFS.x_vec, SM.s_grid, SM.SFS.p_vec] = fit_monotonic_surface(x_vec, abs(Y.s_vec), p_mat, Y.smooth_params);  % constraints
 SM.name = 'equilibrium-smoothed'; SM.s_grid = Y.smooth_params.y_fit; % s_vec; 
-plot_params.weighted = 1; plot_params.cum = 1; plot_params.xlim = [10^(-4) 1];  plot_allele_freq(s_vec, {SM}, plot_params);  title('SMOOTHED EQUILIBRIUM AGAIN');
+plot_params.weighted = 1; plot_params.cum = 1; plot_params.xlim = [10^(-4) 1];  plot_allele_freq(Y.s_vec, {SM}, plot_params);  title('SMOOTHED EQUILIBRIUM AGAIN');
 %plot_params.weighted = 1; plot_params.cum = 0;  plot_allele_freq(s_vec, {SM}, plot_params);  title('SMOOTHED EQUILIBRIUM DENSITY AGAIN');
 
 save_p_vec = SM.SFS.p_vec(10,:);
@@ -73,3 +130,21 @@ if(~isfield(Demographic_model{i_pop}, 'SFS')) % add SFS to demographic mode
         Demographic_model{i_pop}, s_vec, compute_flag);
     save(demography_file, 'Demographic_model', 'max_LL_demographic_model');
 end
+
+
+
+
+
+%%%%%%%%%%% Power calculations %%%%%%%%%%%
+% % a_vec = [0.05 2.5*10^(-6)];
+% % b_vec = [0.01 0.05 0.1 0.5 0.9 0.95 0.99]; 
+% % nu_mat = zeros(length(a_vec), length(b_vec)); 
+% % for iii = 1:2
+% %     for jjj = 1:length(b_vec)
+% %         nu_mat(iii, jjj) = two_types_errors_to_non_centrality_parameter(a_vec(iii), b_vec(jjj));
+% %     end
+% % end
+% % R_nu_mat = [ ['b \ a' num2cell(a_vec)]'  [num2cell(b_vec') num2cell(nu_mat')]' ]'
+% % R_nu_mat = num2str_cell(R_nu_mat, 5);
+% % savecellfile(R_nu_mat, 'nu_mat_tab.txt')
+% % sprintf(R_nu_mat)

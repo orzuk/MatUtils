@@ -10,5 +10,10 @@
 %
 function c = cumsum_hist(x, p)
 
-c = 0.5 .* cumsum(diff(x) .* (p(1:end-1) +  p(2:end))); 
+%c = 0.5 .* cumsum(diff(x) .* (p(1:end-1) +  p(2:end))); 
+
+d = diff(x); 
+
+c = cumsum(p .* 0.5 .* ([d 0] + [0 d])); % give edges smaller weight (half) 
+
 

@@ -7,14 +7,20 @@
 % x - vector of x coordinates
 % y - vector of y coordinates
 % z - vector of function of x and y: z(x,y)
+% params - structure with smoothing parameters, indluding x_fit, y_fit
+%
+% Output:
+% x_fit - vector of fitted x coordinates
+% y_fit - vector of fitted y coordinates
+% z_fit - matrix of function of x and y: z(x,y)
 %
 function [x_fit, y_fit, z_fit] = fit_monotonic_surface(x, y, z, params) % constraints
 
-num_x = length(x);
-num_y = length(y);
+num_x = length(x); num_y = length(y); num_z = length(z);
 
-if(~isfield(params, 'plot')) 
-    params.plot = 0; 
+
+if(~isfield(params, 'plot'))
+    params.plot = 0;
 end
 
 if(~isfield(params, 'x_fit'))
@@ -36,48 +42,89 @@ else
     end
 end
 
-z_fit = zeros(length(y_fit), length(x_fit)); z_fit(2,1)=-1; % create z grid for fitted data
-z_fit0 = zeros(size(z));
-for i=1:num_y % First fit each y seperately monotonically
-    [~, z_fit0(i,:)] = fit_monotonic_curve(x, z(i,:), params);
+if((num_z == num_x) && min(size(z))==1)% here we're given vectors of x,y,z of the same size
+    x_unique = unique(x); num_x = length(x_unique);
+    y_unique = unique(y); num_y = length(y_unique);
+    z_fit0 = zeros(num_y, num_x);
+    params.x_fit = x_unique; x_fit = x_unique;
+    one_vec = 1;
+else
+    z_fit0 = zeros(size(z));
+    one_vec = 0;
 end
+
+
+%z_fit = zeros(length(y_fit), length(x_fit)); % z_fit(2,1)=-1; % create z grid for fitted data
+for i=1:num_y % First fit each y seperately monotonically
+    if(one_vec) % here we're given vectors of x,y,z of the same size
+        I = find(y == y_unique(i)); % get indices
+        params.cum = 0; params.fit_log = [1 0]; params.min = 0; parms.RightMinValue = 0;  params.direction = 'down'; % params.direction = 'up'; 
+ %       [~, z_fit0(i,:)] = fit_monotonic_curve(x(I), z(I), params); 
+        [~, z_fit0(i,:)] = fit_monotonic_curve(x(I), z(I) .* double(max(1,x(I))), params); 
+        z_fit0(i,:) = z_fit0(i,:) ./ double(max(1,params.x_fit));      % normalize
+        max_ind = find(z(I)>0, 1, 'last'); max_val = x(I(max_ind)) % find last value 
+        fit_again = 1; 
+        if(fit_again)
+            max_ind = min(find(params.x_fit > max_val, 1), size(z_fit0, 2)-1); 
+            params.cum = 0; params.direction = 'down'; params.min = 0; params.fit_log = [1 1]; params.RightMinValue = 0; x_fit = params.x_fit; params.x_fit = params.x_fit(max_ind:end);
+%            [~, z_fit0(i,max_ind:end)] = fit_monotonic_curve(x_fit(2:end), z_fit0(i,2:end), params);  % fit again       % force z to be monotonic
+            ppp = polyfit(log(x_fit(2:max_ind)), log(z_fit0(i,2:max_ind)), 2); % fit quadratic
+            z_fit0(i,max_ind:end) = exp(ppp(3) + ppp(2) .* log(params.x_fit) + ppp(1) .* log(params.x_fit).^2 );
+            params.x_fit = x_fit; % return back 
+        end % fit again
+        %        z_fit0(i,2:end) = cummin(z_fit0(i,2:end));
+        if(params.plot_flag)
+            figure; semilogx(x(I) ./ max(x), cumsum(z(I) .* double(max(1,x(I)))));
+            hold on; semilogx(params.x_fit ./ max(params.x_fit), cumsum(z_fit0(i,:) .* double(max(1,params.x_fit))), 'r--');
+            legend({['original, s=' num2str(y_unique(i))], ['fitted, s=' num2str(y_unique(i))]}, 'location', 'southeast');
+        end
+    else
+        %    [~, z_fit0(i,:)] = fit_monotonic_curve(x, z(i,:), params);
+        [~, z_fit0(i,:)] = fit_monotonic_curve(x, z(i,:) .* double(max(1,x)), params); 
+        z_fit0(i,:) = z_fit0(i,:) ./ double(max(1,x));
+        if(params.plot_flag)
+            figure; semilogx(x, cumsum(z(i,:) .* double(max(1,x))));
+            hold on; semilogx(x, cumsum(z_fit0(i,:) .* double(max(1,x))), 'r--');
+            legend(['original, s=' num2str(y(i))], ['fitted, s=' num2str(y(i))]);
+        end
+    end
+end % loop on y 
 z_fit0 = normalize(z_fit0, 2); % set to sum to one
 z_fit_cum0 = cumsum(z_fit0, 2); % here take cumsum of ROWs
 %z_fit_cum = z_fit;
 params.x_fit = y_fit; % switch roles
 [x_mesh, y_mesh] = meshgrid(x_fit, y_fit);
-z_fit_cum = interp2(double(x), y, z_fit_cum0, double(x_mesh), y_mesh);
-%for i=1:num_x % First fit each y seperately monotonically
-%    if(mod(i, 100)==0)
-%        run_i = i
-%    end
-%    [~, z_fit_cum(:,i)] = fit_monotonic_curve(y, -z_fit_cum0(:,i), params);
-%end
-%z_fit_cum=-z_fit_cum;
+if(one_vec)
+    z_fit_cum = interp2(double(x_unique), y_unique, z_fit_cum0, double(x_mesh), y_mesh);
+else
+    z_fit_cum = interp2(double(x), y, z_fit_cum0, double(x_mesh), y_mesh);
+end
 params.x_fit = x_fit; % get back to x
 z_fit = max(0, [z_fit_cum(:,1) diff(z_fit_cum, [], 2)]); % update surface
 z_fit = normalize(z_fit, 2); % set to sum to one
 
-%issortedtol(x, tol, direction)
+return;  % up to here simple fitting - no row-column joint information. Fitting looks good but non-monotonic in s
+
 [num_y, num_x] = size(z_fit); % update size
-tol=10e-6;
+tol=10e-6; ctr=1;
 while(~(issortedtol(z_fit, tol, 'decreasing') && issortedtol(z_fit_cum', tol)))  % add tolerance
     params.x_fit = x_fit; % switch roles
     for i=1:num_y % First fit each y seperately monotonically
-        [~, z_fit(i,:)] = fit_monotonic_curve(x_fit, z_fit(i,:), params);
+        [~, z_fit(i,:)] = fit_monotonic_curve(x_fit, z_fit(i,:) .* double(max(1,x_fit)), params); z_fit(i,:) = z_fit(i,:) ./ double(max(1,x_fit)); % NEW! force f*psi(f) to be monotonic
+        %        [~, z_fit(i,:)] = fit_monotonic_curve(x_fit, z_fit(i,:), params);
     end
+    z_fit = normalize(max(0, z_fit), 2); % set to sum to one
+    
+    %   return;
     z_fit_cum = cumsum(z_fit, 2); % get cumulative of ROWs
-    z_fit_cum  = cummax(z_fit_cum, 1);
-    %     params.x_fit = y_fit; % switch roles
-    %     for i=1:num_x % next fit for each x seperately monotonically
-    %         if(mod(i, 100)==0)
-    %             run_i = i
-    %         end
-    %         [~, z_fit_cum(:,i)] = fit_monotonic_curve(y_fit, -z_fit_cum(:,i), params);
-    %     end
-    %     z_fit_cum=-z_fit_cum;
+    z_fit_cum  = cummax(z_fit_cum, 1); % enforce monotonicity with s
+    
     z_fit = max(0, [z_fit_cum(:,1) diff(z_fit_cum, [], 2)]); % update surface
     z_fit = normalize(z_fit, 2); % set to sum to one
+    
+    %   return % finish before iterative procedure !!
+    run_iter = ctr
+    ctr=ctr+1;
 end % while not sorted
 params.x_fit = x_fit; % get back to x
 

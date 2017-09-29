@@ -9,7 +9,7 @@ num_populations = length(Demographic_models);
 num_s = length(s_vec);
 [num_h, num_w] = num_to_height_width(num_populations);
 
-plot_params  = internal_set_default_params(plot_params); 
+plot_params  = internal_set_default_params(plot_params);
 
 figure;
 switch plot_params.figure_type % ALWAYS add legend !!!
@@ -22,7 +22,7 @@ switch plot_params.figure_type % ALWAYS add legend !!!
     case 3 % mean of median allele frequency
         plot_params.ylabel_str = 'Mean of median allele frequency f_s';
         save_file = 'MeanMedian_IAF_different_populations';
-    case 4 % again median ?? for non-zeros 
+    case 4 % again median ?? for non-zeros
         plot_params.ylabel_str = 'Median allele frequency f_s';
         save_file = 'Median_nonzero_IAF_different_populations';
 end % switch figure type
@@ -33,7 +33,7 @@ for i_pop = 1:num_populations % loop on populations
     end
 end
 if(isfield(plot_params, 'figs_dir')) % save plot
-    my_saveas(gcf, fullfile(plot_params.figs_dir, save_file), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert    
+    my_saveas(gcf, fullfile(plot_params.figs_dir, save_file), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
 end
 
 
@@ -48,63 +48,78 @@ my_symbol_vec = {'--', '-'}; % flip ordering (set integer powers as solid lines)
 s_legend_vec = s_vec_to_legend(s_vec);
 
 for i_s = 1:length(s_vec)
-%    tmp_color_ind = mod_max(6-floor(mod(i_s, 10)/2), 5);
+    %    tmp_color_ind = mod_max(6-floor(mod(i_s, 10)/2), 5);
     tmp_color_ind = mod_max(ceil(i_s/2), 5);
     
     [~, i_s2] = min(abs(abs(D.s_grid)-abs(s_vec(i_s))));
     if(iscell(D.SFS.x_vec))
-        plot_x_vec = D.SFS.x_vec{i_s2} ./ D.SFS.x_vec{i_s2}(end); 
-    else 
-        plot_x_vec = D.SFS.x_vec ./ D.SFS.x_vec(end); 
+        plot_x_vec = D.SFS.x_vec{i_s2} ./ D.SFS.x_vec{i_s2}(end);
+    else
+        plot_x_vec = D.SFS.x_vec ./ D.SFS.x_vec(end);
     end
     if(iscell(D.SFS.p_vec))
         plot_p_vec = D.SFS.p_vec{i_s2};
     else
         plot_p_vec = D.SFS.p_vec(i_s2,:);
-    end        
-
-    if(plot_params.weighted) % weight by allele frequency 
-        plot_p_vec = plot_p_vec .* plot_x_vec; 
+    end
+    
+    if(plot_params.weighted) % weight by allele frequency
+        plot_p_vec = plot_p_vec .* plot_x_vec;
     end
     
     if(plot_params.normalize) % normalize distirbution
-        plot_p_vec = plot_p_vec ./ sum(plot_p_vec); 
+        plot_p_vec = plot_p_vec ./ sum(plot_p_vec);
     end
-    if(plot_params.cum) % plot cumulative 
-        plot_p_vec = cumsum(plot_p_vec); 
-    end    
- %   max_diff_should_be_negative = max(diff(plot_p_vec))
-    semilogx(plot_x_vec, plot_p_vec, 'color', selection_color_vec{tmp_color_ind}, ...
-        'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
-end
+    if(plot_params.cum) % plot cumulative
+        if(plot_params.hist)
+            plot_p_vec = cumsum_hist(plot_x_vec, plot_p_vec); % take histogram accounting for bins sizes. Need different normalization !!! 
+            if(plot_params.normalize)
+                plot_p_vec = plot_p_vec ./ plot_p_vec(end); 
+            end
+        else            
+            plot_p_vec = cumsum(plot_p_vec);
+        end
+    end
+    %   max_diff_should_be_negative = max(diff(plot_p_vec))
+    if(plot_params.log)
+        loglog(plot_x_vec, plot_p_vec, 'color', selection_color_vec{tmp_color_ind}, ...
+            'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
+    else
+        semilogx(plot_x_vec, plot_p_vec, 'color', selection_color_vec{tmp_color_ind}, ...
+            'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
+    end
+end % loop on i_s 
 ylabel(plot_params.ylabel_str, 'fontsize', 14); xlabel('f'); % tmp
-title(D.name, 'fontsize', 14); % need to conver to nice name later  
+title(D.name, 'fontsize', 14); % need to conver to nice name later
 %add_faint_grid(0.5);
 h_leg = legend(s_legend_vec, 'location', 'eastoutside'); % just legend
-xlim(plot_params.xlim);
+xlim(plot_params.xlim); ylim([min(plot_p_vec)*0.99, max(plot_p_vec)*1.01]);
 
 %set(gca,'Xcolor',[0.8 0.8 0.8],'Ycolor',[0.8 0.8 0.8]); %ylim([10^(-6) 1]);
 % PRoblem: legends appear twice - need to re-arrange order of grids to make
-% them appear only once !! 
+% them appear only once !!
 
 
-% Internal function for setting defaults: density un-weighted 
+% Internal function for setting defaults: density un-weighted
 function plot_params  = internal_set_default_params(plot_params)
 
-if(~isfield(plot_params, 'normalize')) % normalize distribution 
-    plot_params.normalize = 0; 
+if(~isfield(plot_params, 'normalize')) % normalize distribution
+    plot_params.normalize = 0;
 end
-if(~isfield(plot_params, 'cum')) % cumulative 
-    plot_params.cum = 0; 
+if(~isfield(plot_params, 'cum')) % cumulative
+    plot_params.cum = 0;
 end
 if(~isfield(plot_params, 'log')) % plot log-log
-    plot_params.log = 0; 
+    plot_params.log = 0;
 end
 if(~isfield(plot_params, 'weighted')) % plot log-log
-    plot_params.weighted = 0; 
+    plot_params.weighted = 0;
 end
-if(~isfield(plot_params, 'xlim')) % plot lim 
+if(~isfield(plot_params, 'xlim')) % plot lim
     plot_params.xlim = [10^(-4) 1];
+end
+if(~isfield(plot_params, 'hist')) % hold distribution as histgoram
+    plot_params.hist = 0;
 end
 
 

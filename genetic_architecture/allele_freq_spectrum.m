@@ -8,7 +8,7 @@
 % x - allele frequency
 % s - selection coefficient (this is little s). Should be NEGATIVE for delterious alleles (so fitness is 1+s)
 % N - population size
-% two_side_flag - return Derived (0) between 0 and 1 or Minor Allele Freq. (1) between 0 and 0.5
+% two_side_flag - return Derived (0) between 0 and 1 or Minor Allele Freq. (1) between 0 and 0.5 (Default: 1)
 % scale_mode - return results on linear or log scale (latter to avoid underflow). Default is linear
 % var_explained_flag - if this is 'ON', we compute var explained distribution instead
 %                      (multiply by x*(1-x)). Default is 'OFF'.

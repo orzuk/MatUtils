@@ -26,7 +26,7 @@ end
 epsilon = 0.00000000000001;
 if(length(bins) == 1) % input is number of bins
     [~, bins] = hist(vals, bins);
-    bins = [min(vals)-epsilon bins max(vals)+epsilon];
+    bins = [min(vals)-epsilon bins max(vals)+epsilon]; % make sure all are represented 
 end
 [~, bin_inds] = histc(vals,bins);
 missing_bins = setdiff((1:length(bins)-1), unique(bin_inds));
