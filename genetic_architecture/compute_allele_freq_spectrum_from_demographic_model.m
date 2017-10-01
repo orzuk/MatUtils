@@ -20,11 +20,11 @@ function [x_vec, p_vec, L_correction_factor, compute_time, k_vec, n_vec, weights
 
 if(~ischar(compute_flag)) % allow for structure of compute parameters
     smooth_params.smooth = compute_flag.smooth;
-    smooth_params.knots = 10; smooth_params.plot = 0; 
     compute_flag = compute_flag.method;
 else
     smooth_params = [];
 end
+smooth_params.knots = 10; smooth_params.plot = 0;
 
 if(~isscalar(s)) % NEW! allow to fit multipole s values using a surface fitting module
     s_vec = s; num_s = length(s_vec);  [x_vec_cell, p_vec_cell, s_vec_cell] = deal(cell(num_s, 1)); 
