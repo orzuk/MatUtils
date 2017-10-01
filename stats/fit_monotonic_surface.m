@@ -42,7 +42,10 @@ else
     end
 end
 
-if((num_z == num_x) && min(size(z))==1)% here we're given vectors of x,y,z of the same size
+if((num_z == num_x) && min(size(z))==1) % here we're given vectors of x,y,z of the same size
+    if(isscalar(y))
+        y = repmat(y, size(x));
+    end
     x_unique = unique(x); num_x = length(x_unique);
     y_unique = unique(y); num_y = length(y_unique);
     z_fit0 = zeros(num_y, num_x);
@@ -73,7 +76,7 @@ for i=1:num_y % First fit each y seperately monotonically
             params.x_fit = x_fit; % return back 
         end % fit again
         %        z_fit0(i,2:end) = cummin(z_fit0(i,2:end));
-        if(params.plot_flag)
+        if(params.plot)
             figure; semilogx(x(I) ./ max(x), cumsum(z(I) .* double(max(1,x(I)))));
             hold on; semilogx(params.x_fit ./ max(params.x_fit), cumsum(z_fit0(i,:) .* double(max(1,params.x_fit))), 'r--');
             legend({['original, s=' num2str(y_unique(i))], ['fitted, s=' num2str(y_unique(i))]}, 'location', 'southeast');
@@ -82,7 +85,7 @@ for i=1:num_y % First fit each y seperately monotonically
         %    [~, z_fit0(i,:)] = fit_monotonic_curve(x, z(i,:), params);
         [~, z_fit0(i,:)] = fit_monotonic_curve(x, z(i,:) .* double(max(1,x)), params); 
         z_fit0(i,:) = z_fit0(i,:) ./ double(max(1,x));
-        if(params.plot_flag)
+        if(params.plot)
             figure; semilogx(x, cumsum(z(i,:) .* double(max(1,x))));
             hold on; semilogx(x, cumsum(z_fit0(i,:) .* double(max(1,x))), 'r--');
             legend(['original, s=' num2str(y(i))], ['fitted, s=' num2str(y(i))]);
@@ -95,7 +98,11 @@ z_fit_cum0 = cumsum(z_fit0, 2); % here take cumsum of ROWs
 params.x_fit = y_fit; % switch roles
 [x_mesh, y_mesh] = meshgrid(x_fit, y_fit);
 if(one_vec)
-    z_fit_cum = interp2(double(x_unique), y_unique, z_fit_cum0, double(x_mesh), y_mesh);
+    if(size(y_unique)>1)
+        z_fit_cum = interp2(double(x_unique), y_unique, z_fit_cum0, double(x_mesh), y_mesh);    
+    else
+        z_fit_cum = z_fit_cum0;
+    end
 else
     z_fit_cum = interp2(double(x), y, z_fit_cum0, double(x_mesh), y_mesh);
 end

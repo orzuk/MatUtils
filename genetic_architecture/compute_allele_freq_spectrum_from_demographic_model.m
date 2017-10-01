@@ -20,7 +20,7 @@ function [x_vec, p_vec, L_correction_factor, compute_time, k_vec, n_vec, weights
 
 if(~ischar(compute_flag)) % allow for structure of compute parameters
     smooth_params.smooth = compute_flag.smooth;
-    smooth_params.knots = 10;
+    smooth_params.knots = 10; smooth_params.plot = 0; 
     compute_flag = compute_flag.method;
 else
     smooth_params = [];
@@ -49,10 +49,12 @@ if(~isscalar(s)) % NEW! allow to fit multipole s values using a surface fitting 
     end
     save(['temp_surface.' D.name '.mat'], '-append', 'x_vec', 's_vec', 'p_mat', 'smooth_params', 'D'); 
 %    load('temp_surface.mat'); 
-    [x_vec, s_vec, p_vec] = fit_monotonic_surface(x_vec, abs(s_vec), p_mat, smooth_params);  % constraints
+    [x_vec, ~, p_vec] = fit_monotonic_surface(x_vec, abs(s_vec), p_mat, smooth_params);  % constraints
     %	
     compute_time=cputime
     return;
+else    
+    smooth_params.y_fit = s; % fit one s
 end% if s is not scalar 
 
 
@@ -89,6 +91,9 @@ switch compute_flag
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
         p_vec = freq_struct.p_vec{end-1};
         L_correction_factor = simulation_struct.L_correction_factor;
+        
+        [x_vec, ~, p_vec] = fit_monotonic_surface(x_vec, abs(s), p_vec, smooth_params);  % constraints
+
         
         if(nargout > 4) % output k_vec, n_vec ...
             if(~isfield(simulation_struct, 'weights'))

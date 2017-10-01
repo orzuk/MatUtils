@@ -124,7 +124,7 @@ for i=vec2row(good_inds) % 1:D.num_params
             'full_flag', full_flag, 'num_individuals', []);    
     [log_like_mat(i), ~, compute_time(i)] = ... % compute likelihood (here vary only alpha)
         compute_two_class_log_likelihood(s, alpha, beta, target_size_by_class_vec, D, ...
-        X, [], [], loglike_parmas); % null_w_vec, 0, full_flag, []); % don't include phenotype !!
+        X, [], [], loglike_params); % null_w_vec, 0, full_flag, []); % don't include phenotype !!
     fprintf('run good ind %ld out of %ld, ', i_ctr, length(good_inds));
     fprintf(' Loglike=%f, cur-time=%f, total-time=%f\n', log_like_mat(i), compute_time(i), sum(compute_time(1:i)));
     

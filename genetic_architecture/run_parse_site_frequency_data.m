@@ -12,7 +12,7 @@ parse_site_frequency_flag = 0; % parse original datafile (different between diff
 read_vcf_flag=0; % read vcf files for exome data
 unite_flag=0; % 0: parse ESP data. 1: unite all data to one chromosome
 read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
-extract_fields_flag=1; % extract ??? fields
+extract_fields_flag=1; % extract fields ??? 
 compute_gene_matrices_flag=1; % 1. Compute for each gene ?? flag for parsing ???
 plot_site_frequency_flag = 0; % 1: plot SFS data (this is also part of pre-processing)
 estimate_gene_by_gene = 1; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!
@@ -22,7 +22,6 @@ plot_demography = 1; % summary plots for demographic models
 aggregate_population_estimators = 0; % NEW! aggregate estimators from different populations
 test_population_differences = 0; % NEW! test for different in selection between different populations
 s_vec = [0 -logspace(-6, -1, 11)]; % set s-values for plotting and fitting
-
 
 queue_str = 'priority'; % for submitting jobs at broad farm
 global cumsum_log_vec;
@@ -90,10 +89,10 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
         all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous
         all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!!
         synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)) % 'synonymous_variant' % 'coding-synonymous'
-        if(~exist(demography_file, 'file'))
+        if(~exist(demography_file, 'file') || (1 == 1))
             [Demographic_model{i_pop}, max_LL_demographic_model(i_pop)] = ...
                 fit_demographic_parameters_from_allele_spectrum( ...
-                all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, [],  all_A.mu); % PROBLEM HERE!! WORK (my implementation / software)
+                all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, [],  all_A.mu); % fit demography
             Demographic_model{i_pop}.name = ['Fitted.' population{1}];
             save(demography_file, 'Demographic_model', 'max_LL_demographic_model'); % Save and plot demography
         else
@@ -113,7 +112,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     end % if fit demographies
     
     load(demography_file);
-    if(~isfield(Demographic_model{i_pop}, 'SFS')) % add SFS to demographic mode
+    if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 1)) % add SFS to demographic mode
         %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
         Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !! 
         Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
