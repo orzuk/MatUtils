@@ -46,7 +46,7 @@ ttt=cputime;
 use_allele_freq_flag=2; % should be 2. (temp for debugging - allow computing only partial likelihoods)
 AssignGeneralConstants; AssignRVASConstants;
 
-params = internal_set_params(params);
+params = internal_set_parmas(params);
 
 if(~isfield(trait_struct, 'type'))
     trait_struct.type = 'quantitative';
@@ -493,7 +493,7 @@ switch trait_struct.type
 end
 
 % Inernal function for setting parameters 
-function params = internal_set_params(params)
+function params = internal_set_parmas(params)
 
 
 if(~isfield(params, 'include_phenotype') || isempty(params.include_phenotype))

@@ -8,12 +8,12 @@ X.D.SFS.x_vec = X.x_vec_cell; X.D.SFS.p_vec = X.p_vec_cell; X.D.s_grid = X.s_vec
 plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir; 
 plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1;  plot_params.xlim = [10^(-6) 1]; % plot cumulative weighted allele frequency distribution
 Y = load('temp_surface3.mat'); Y.smooth_params.knots = 10; Y.smooth_params.y_fit = [0 logspace(-6, -1, 100)]; 
-num_s = length(Y.s_vec); x_vec = unique( [X.D.SFS.x_vec{:}] ); num_x = length(x_vec); p_mat = zeros(num_s, num_x);
+num_s = length(X.s_vec); x_vec = unique( [X.D.SFS.x_vec{:}] ); num_x = length(x_vec); p_mat = zeros(num_s, num_x);
 for i_s = 1:length(Y.s_vec)
     [~, I, J] = intersect(x_vec, Y.x_vec_cell{i_s});
     p_mat(i_s,I) = Y.p_vec_cell{i_s}(J);
 end
-Y.smooth_params.plot_flag=1;
+Y.smooth_params.plot=0;
 % new: fit with cell array 
 X.D.SFS.y_vec = rude(length_cell(X.D.SFS.x_vec), X.D.s_grid);
 
@@ -41,13 +41,13 @@ s_mesh = abs(mat2vec(repmat(X.s_vec, length(x_bins), 1)')); % figure; semilogx(x
 SM.name = 'Fitted.African-smoothed'; SM.s_grid = Y.smooth_params.y_fit; % s_vec; 
 plot_params.weighted = 1; plot_params.cum = 1;  plot_params.log=0; plot_params.xlim = [10^(-6) 1]; plot_params.hist = 1; 
 plot_allele_freq(X.s_vec, {X.D}, plot_params); 
-plot_allele_freq(Y.s_vec, {SM}, plot_params);  %title('SMOOTHED EQUILIBRIUM AGAIN');
+plot_allele_freq(X.s_vec, {SM}, plot_params);  %title('SMOOTHED EQUILIBRIUM AGAIN');
 plot_params.weighted = 0; plot_params.cum = 0; plot_params.log=1; % Plot density (unweighted)
 plot_allele_freq(X.s_vec, {X.D}, plot_params); 
-plot_allele_freq(Y.s_vec, {SM}, plot_params);  %title('SMOOTHED EQUILIBRIUM AGAIN');
+plot_allele_freq(X.s_vec, {SM}, plot_params);  %title('SMOOTHED EQUILIBRIUM AGAIN');
 plot_params.weighted = 1; plot_params.cum = 0; plot_params.log=1; % Plot density (unweighted)
 plot_allele_freq(X.s_vec, {X.D}, plot_params); 
-plot_allele_freq(Y.s_vec, {SM}, plot_params); % title('SMOOTHED EQUILIBRIUM AGAIN');
+plot_allele_freq(X.s_vec, {SM}, plot_params); % title('SMOOTHED EQUILIBRIUM AGAIN');
 
 
 figure; loglog(X.D.SFS.save_x_vec{1}, (X.D.SFS.save_p_vec{1})); hold on;
