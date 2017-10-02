@@ -59,47 +59,50 @@ end
 
 %z_fit = zeros(length(y_fit), length(x_fit)); % z_fit(2,1)=-1; % create z grid for fitted data
 for i=1:num_y % First fit each y seperately monotonically
+    params.cum = 0; params.fit_log = [1 0]; params.min = 0; params.RightMinValue = 0;  params.direction = 'down'; % params.direction = 'up';
     if(one_vec) % here we're given vectors of x,y,z of the same size
         I = find(y == y_unique(i)); % get indices
-        params.cum = 0; params.fit_log = [1 0]; params.min = 0; parms.RightMinValue = 0;  params.direction = 'down'; % params.direction = 'up'; 
- %       [~, z_fit0(i,:)] = fit_monotonic_curve(x(I), z(I), params); 
-        [~, z_fit0(i,:)] = fit_monotonic_curve(x(I), z(I) .* double(max(1,x(I))), params); 
-        z_fit0(i,:) = z_fit0(i,:) ./ double(max(1,params.x_fit));      % normalize
-        max_ind = find(z(I)>0, 1, 'last'); max_val = x(I(max_ind)); % find last value 
-        fit_again = 1; 
-        if(fit_again)
-            max_ind = min(find(params.x_fit > max_val, 1), size(z_fit0, 2)-1); 
-            params.cum = 0; params.direction = 'down'; params.min = 0; params.fit_log = [1 1]; params.RightMinValue = 0; x_fit = params.x_fit; params.x_fit = params.x_fit(max_ind:end);
-%            [~, z_fit0(i,max_ind:end)] = fit_monotonic_curve(x_fit(2:end), z_fit0(i,2:end), params);  % fit again       % force z to be monotonic
-            ppp = polyfit(log(x_fit(2:max_ind)), log(z_fit0(i,2:max_ind)), 2); % fit quadratic
-            z_fit0(i,max_ind:end) = exp(ppp(3) + ppp(2) .* log(params.x_fit) + ppp(1) .* log(params.x_fit).^2 );
-            params.x_fit = x_fit; % return back 
-        end % fit again
-        %        z_fit0(i,2:end) = cummin(z_fit0(i,2:end));
-        if(params.plot)
-            figure; semilogx(x(I) ./ max(x), cumsum(z(I) .* double(max(1,x(I)))));
-            hold on; semilogx(params.x_fit ./ max(params.x_fit), cumsum(z_fit0(i,:) .* double(max(1,params.x_fit))), 'r--');
-            legend({['original, s=' num2str(y_unique(i))], ['fitted, s=' num2str(y_unique(i))]}, 'location', 'southeast');
-        end
+        fit_x_vec = x(I); fit_z_vec = z(I) .* double(max(1,x(I))); 
     else
-        %    [~, z_fit0(i,:)] = fit_monotonic_curve(x, z(i,:), params);
-        [~, z_fit0(i,:)] = fit_monotonic_curve(x, z(i,:) .* double(max(1,x)), params); 
-        z_fit0(i,:) = z_fit0(i,:) ./ double(max(1,x));
-        if(params.plot)
-            figure; semilogx(x, cumsum(z(i,:) .* double(max(1,x))));
-            hold on; semilogx(x, cumsum(z_fit0(i,:) .* double(max(1,x))), 'r--');
-            legend(['original, s=' num2str(y(i))], ['fitted, s=' num2str(y(i))]);
-        end
+        fit_x_vec = x; fit_z_vec = z(i,:) .* double(max(1,x));
     end
-end % loop on y 
+    %       [~, z_fit0(i,:)] = fit_monotonic_curve(x(I), z(I), params);
+    [~, z_fit0(i,:)] = fit_monotonic_curve(fit_x_vec, fit_z_vec, params);
+    z_fit0(i,:) = z_fit0(i,:) ./ double(max(1,params.x_fit));      % normalize
+    max_ind = find(z(I)>0, 1, 'last'); max_val = x(I(max_ind)); % find last value
+    fit_again = 1;
+    if(fit_again)
+        max_ind = min(find(params.x_fit > max_val, 1), size(z_fit0, 2)-1);
+        params.cum = 0; params.direction = 'down'; params.min = 0; params.fit_log = [1 1]; params.RightMinValue = 0; x_fit = params.x_fit; params.x_fit = params.x_fit(max_ind:end);
+        %            [~, z_fit0(i,max_ind:end)] = fit_monotonic_curve(x_fit(2:end), z_fit0(i,2:end), params);  % fit again       % force z to be monotonic
+        ppp = polyfit(log(x_fit(2:max_ind)), log(z_fit0(i,2:max_ind)), 2); % fit quadratic
+        z_fit0(i,max_ind:end) = exp(ppp(3) + ppp(2) .* log(params.x_fit) + ppp(1) .* log(params.x_fit).^2 );
+        params.x_fit = x_fit; % return back
+    end % fit again
+    if(params.plot)
+        figure; semilogx(fit_x_vec ./ max(x), cumsum(fit_z_vec));
+        hold on; semilogx(params.x_fit ./ max(params.x_fit), cumsum(z_fit0(i,:) .* double(max(1,params.x_fit))), 'r--');
+        legend({['original, s=' num2str(y_unique(i))], ['fitted, s=' num2str(y_unique(i))]}, 'location', 'southeast');
+    end
+    % % %     else
+    % % %         %    [~, z_fit0(i,:)] = fit_monotonic_curve(x, z(i,:), params);
+    % % %         [~, z_fit0(i,:)] = fit_monotonic_curve(x, z(i,:) .* double(max(1,x)), params);
+    % % %         z_fit0(i,:) = z_fit0(i,:) ./ double(max(1,x));
+    % % %         if(params.plot)
+    % % %             figure; semilogx(x, cumsum(z(i,:) .* double(max(1,x))));
+    % % %             hold on; semilogx(x, cumsum(z_fit0(i,:) .* double(max(1,x))), 'r--');
+    % % %             legend(['original, s=' num2str(y(i))], ['fitted, s=' num2str(y(i))]);
+    % % %         end
+    % % %     end
+end % loop on y
 z_fit0 = normalize(z_fit0, 2); % set to sum to one
 z_fit_cum0 = cumsum(z_fit0, 2); % here take cumsum of ROWs
 %z_fit_cum = z_fit;
 params.x_fit = y_fit; % switch roles
 [x_mesh, y_mesh] = meshgrid(x_fit, y_fit);
 if(one_vec)
-    if(size(y_unique)>1)
-        z_fit_cum = interp2(double(x_unique), y_unique, z_fit_cum0, double(x_mesh), y_mesh);    
+    if(length(y_unique)>1)
+        z_fit_cum = interp2(double(x_unique), y_unique, z_fit_cum0, double(x_mesh), y_mesh);
     else
         z_fit_cum = z_fit_cum0;
     end
@@ -110,7 +113,7 @@ params.x_fit = x_fit; % get back to x
 z_fit = max(0, [z_fit_cum(:,1) diff(z_fit_cum, [], 2)]); % update surface
 z_fit = normalize(z_fit, 2); % set to sum to one
 
-% Add monotonicity in s: 
+% Add monotonicity in s:
 z_fit_cum = cumsum(z_fit, 2); % get cumulative of ROWs
 z_fit_cum  = cummax(z_fit_cum, 1); % enforce monotonicity with s
 

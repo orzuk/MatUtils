@@ -11,7 +11,7 @@ Proceedings of the National Academy of Sciences, 109(4): 1193-1198  (2012)
 
 [2] [“Searching for Missing Heritability:  Designing Rare Variants Association Studies“](http://www.pnas.org/content/111/4/E455)
 O. Zuk, S. Schaffner, K. Samocha, R. Do, E. Hechter, S. Katherisan, M. Daly, B. Neale, S.R. Sunyaev and E.S. Lander
-Proceedings of the National Academy of Sciences, doi: 10.1073/pnas.1322563111 (2014) 
+Proceedings of the National Academy of Sciences,  111(4):E455–E464 (2014) 
 
 Please cite these papers if you're using the package. 
 
