@@ -26,7 +26,7 @@ else
 end
 smooth_params.knots = 10; smooth_params.plot = 0;
 
-if(~isscalar(s)) % NEW! allow to fit multipole s values using a surface fitting module
+if(~isscalar(s)) % NEW! allow to fit multiple s values using a surface fitting module
     s_vec = s; num_s = length(s_vec);  [x_vec_cell, p_vec_cell, s_vec_cell] = deal(cell(num_s, 1)); 
     for i_s = 1:num_s
         sprintf('Run selection s=%f', s_vec(i_s))
@@ -69,7 +69,7 @@ if(~exist('mu', 'var') || isempty(mu))
     AssignRVASConstants;
     mu = mu_per_site; % set default mutation rate (per-nucleotide per-generation)
 end
-if(~isfield('iters', D))
+if(~isfield(D, 'iters'))
     D.iters = 1000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
 end
 D.num_bins = 100; % used for binning in Fisher Right simulation
