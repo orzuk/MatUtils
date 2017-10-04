@@ -18,7 +18,7 @@ exome_data_figs_dir = ['C:\Users\' user_str '\Dropbox\rare_alleles_paper\RVAS_Ge
 switch machine % Get directory of data 
     case UNIX        
         spectrum_data_dir = '/seq/orzuk/common_disease_model/data/SiteFrequencySpectra/'; % broad
-        if(~exist(specturm_data_dir, 'dir'))
+        if(~exist(spectrum_data_dir, 'dir'))
             spectrum_data_dir = '/cs/cbio/orzuk/projects/RVAS/data/SiteFrequencySpectrum'; % huji
         end
         if(~exist('in_matlab_flag', 'var'))

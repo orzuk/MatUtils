@@ -6,7 +6,7 @@ else
 end
 
 if(~SetPathFlag)     % Add all function paths to matlab path
-    Assign24MammalsGlobalConstants;
+    Assign24MammalsGlobalConstants; AssignGeneralConstants;
     
     % Add many programs to matlab path - works for PC for now
     if(isempty(strmatch('/seq/orzuk/24mammals/src', pwd)))
