@@ -70,7 +70,7 @@ for i=1:num_y % First fit each y seperately monotonically
     [~, z_fit0(i,:)] = fit_monotonic_curve(fit_x_vec, fit_z_vec, params);
     z_fit0(i,:) = z_fit0(i,:) ./ double(max(1,params.x_fit));      % normalize
     max_ind = find(fit_z_vec_unweighted>0, 1, 'last'); max_val = fit_x_vec(max_ind); % x(I(max_ind)); % find last value
-    fit_again = 1;
+    fit_again = 0;
     if(fit_again)
         max_ind = min(find(params.x_fit > max_val, 1), size(z_fit0, 2)-1);
         if(~isempty(max_ind))
