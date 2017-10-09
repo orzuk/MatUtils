@@ -60,9 +60,9 @@ end
 i_pop=0; 
 for population = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
     i_pop=i_pop+1;
-    if(~strcmp(population, 'African')) % temp: work only on one population!
-        continue;
-    end
+%     if(~strcmp(population, 'African')) % temp: work only on one population!
+%         continue;
+%     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Use Synonymous SNPs to fit demographic model %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -73,7 +73,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
         all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous
         all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!!
         synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)) % 'synonymous_variant' % 'coding-synonymous'
-        if(~exist(demography_file, 'file') || (1 == 0)) % here fit new model (computationally heavy)
+        if(~exist(demography_file, 'file') || (1 == 1)) % here fit new model (computationally heavy)
             [Demographic_model{i_pop}, max_LL_demographic_model(i_pop)] = ...
                 fit_demographic_parameters_from_allele_spectrum( ...
                 all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, [],  all_A.mu); % fit demography
@@ -96,7 +96,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     end % if fit demographies
     
     load(demography_file);
-    if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 0)) % add SFS to demographic mode
+    if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 1)) % add SFS to demographic mode
         %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
         Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !! 
         Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation

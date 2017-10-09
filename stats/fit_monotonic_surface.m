@@ -59,7 +59,7 @@ end
 
 %z_fit = zeros(length(y_fit), length(x_fit)); % z_fit(2,1)=-1; % create z grid for fitted data
 for i=1:num_y % First fit each y seperately monotonically
-    params.cum = 0; params.fit_log = [1 0]; params.min = 0; params.RightMinValue = 0;  params.direction = 'down'; % params.direction = 'up';
+    params.cum = 0; params.fit_log = [1 0]; params.min = 0; params.RightMinValue = 0;  % should we give up direction constraint? params.direction = 'down'; % params.direction = 'up';
     if(one_vec) % here we're given vectors of x,y,z of the same size
         I = find(y == y_unique(i)); % get indices
         fit_x_vec = x(I); fit_z_vec = z(I) .* double(max(1,x(I))); fit_z_vec_unweighted = z(I);
@@ -70,15 +70,44 @@ for i=1:num_y % First fit each y seperately monotonically
     [~, z_fit0(i,:)] = fit_monotonic_curve(fit_x_vec, fit_z_vec, params);
     z_fit0(i,:) = z_fit0(i,:) ./ double(max(1,params.x_fit));      % normalize
     max_ind = find(fit_z_vec_unweighted>0, 1, 'last'); max_val = fit_x_vec(max_ind); % x(I(max_ind)); % find last value
-    fit_again = 0;
+    fit_again = 1;
     if(fit_again)
         max_ind = min(find(params.x_fit > max_val, 1), size(z_fit0, 2)-1);
+        max_ind2 = find(diff(z_fit0(i,2:end))>0, 1);
+        if(~isempty(max_ind2))
+            if(isempty(max_ind))
+                max_ind = max_ind2; 
+            else
+                max_ind = min(max_ind, max_ind2);
+            end
+        end        
         if(~isempty(max_ind))
             params.cum = 0; params.direction = 'down'; params.min = 0; params.fit_log = [1 1]; params.RightMinValue = 0; x_fit = params.x_fit; params.x_fit = params.x_fit(max_ind:end);
             %            [~, z_fit0(i,max_ind:end)] = fit_monotonic_curve(x_fit(2:end), z_fit0(i,2:end), params);  % fit again       % force z to be monotonic
-            ppp = polyfit(log(x_fit(2:max_ind)), log(z_fit0(i,2:max_ind)), 2); % fit quadratic
-            z_fit0(i,max_ind:end) = exp(ppp(3) + ppp(2) .* log(params.x_fit) + ppp(1) .* log(params.x_fit).^2 );
-            params.x_fit = x_fit; % return back
+            deg = 5;
+            ppp = polyfit(log(x_fit(2:max_ind)), log(z_fit0(i,2:max_ind)), deg); % fit quadratic
+%             figure;
+%             loglog(fit_x_vec ./ max(x), (fit_z_vec_unweighted)); hold on;
+%             loglog(x_fit ./ max(x_fit), z_fit0(i,:), 'r', 'linewidth', 2);
+
+            z_fit0(i,max_ind:end) = 0; zz1 = zeros(size(x_fit)); 
+            for jj=0:deg
+                z_fit0(i,max_ind:end) = z_fit0(i,max_ind:end) + ppp(deg+1-jj) .* log(params.x_fit).^jj;
+                zz1 = zz1 + ppp(deg+1-jj) .* log(x_fit).^jj;
+            end
+            z_fit0(i,max_ind:end) = exp(z_fit0(i,max_ind:end)); zz1 = exp(zz1); 
+%                exp(ppp(3) + ppp(2) .* log(params.x_fit) + ppp(1) .* log(params.x_fit).^2 );
+            
+            % new fit 
+%             gaussEqn = 'a*exp(b*x)+d*x^c' % +f*x^g'
+%             p_fit = fit(log(x_fit(2:max_ind))', log(z_fit0(i,2:max_ind))', gaussEqn); 
+%             z_fit00 = exp(feval(p_fit, log(params.x_fit))); 
+%             loglog(params.x_fit ./ max(params.x_fit), z_fit00, 'r--');  hold on; 
+             params.x_fit = x_fit; % return back
+% %              loglog(params.x_fit ./ max(params.x_fit), zz1, 'g--', 'linewidth', 2);
+% %              title(['s = ' num2str(y_unique(i))]); legend('data', 'fit0', 'fit1'); 
+% %              loglog(fit_x_vec(max_ind) ./ max(x), max(fit_z_vec_unweighted(max_ind), min(zz1(zz1>0))), '*k'); 
+% %              loglog(params.x_fit ./ max(params.x_fit), z_fit0(i,:), 'm-.', 'linewidth', 2);
         end
     end % fit again
     if(params.plot)
@@ -105,22 +134,23 @@ params.x_fit = y_fit; % switch roles
 if(one_vec)
     if(length(y_unique)>1)
         z_fit_cum = interp2(double(x_unique), y_unique, z_fit_cum0, double(x_mesh), y_mesh);
+        z_fit = interp2(double(x_unique), y_unique, z_fit0, double(x_mesh), y_mesh);
     else
-        z_fit_cum = z_fit_cum0;
+        z_fit_cum = z_fit_cum0; z_fit = z_fit0; 
     end
 else
     z_fit_cum = interp2(double(x), y, z_fit_cum0, double(x_mesh), y_mesh);
+    z_fit = interp2(double(x), y, z_fit0, double(x_mesh), y_mesh);
 end
 params.x_fit = x_fit; % get back to x
-z_fit = max(0, [z_fit_cum(:,1) diff(z_fit_cum, [], 2)]); % update surface
+%z_fit = max(0, [z_fit_cum(:,1) diff(z_fit_cum, [], 2)]); % update surface
 z_fit = normalize(z_fit, 2); % set to sum to one
-
+z_fit = max(z_fit, realmin); 
 % Add monotonicity in s:
-z_fit_cum = cumsum(z_fit, 2); % get cumulative of ROWs
-z_fit_cum  = cummax(z_fit_cum, 1); % enforce monotonicity with s
-
-z_fit = max(0, [z_fit_cum(:,1) diff(z_fit_cum, [], 2)]); % update surface
-z_fit = normalize(z_fit, 2); % set to sum to one
+% z_fit_cum = cumsum(z_fit, 2); % get cumulative of ROWs
+% z_fit_cum  = cummax(z_fit_cum, 1); % enforce monotonicity with s
+% z_fit = max(0, [z_fit_cum(:,1) diff(z_fit_cum, [], 2)]); % update surface
+% z_fit = normalize(z_fit, 2); % set to sum to one
 
 return;  % up to here simple fitting - no row-column joint information. Fitting looks good (?)
 

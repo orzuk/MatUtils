@@ -10,13 +10,12 @@
 % N - effective population size
 % x_min - minimal allele frequency (default is ~0, or 1/2N)
 % x_max - maximal allele frequency (default is ~1, or 1-1/2N)
-% weight_flag - how do we weight different allele frequencies.
+% weight_flag - how do we weight different allele frequencies. (default: 0, no weighting)
 %
 % Output:
 % T - mean time until absorption
 %
 function T = absorption_time_by_selection(s, theta, N, x_min, x_max, weight_flag)
-
 
 if(length(N) > 1) % allow vector input for N
     T = zeros(size(N)); 

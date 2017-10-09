@@ -1,17 +1,20 @@
 % Plot allele frequency distributions for different models
 % Input:
+% s_vec - vector of selection coefficients
+% Demographic_models - structure with demographic information
+% plot_params - parameters for plotting
 %
 function plot_allele_freq(s_vec, Demographic_models, plot_params) % N, two_side_flag, log_flag, cum_flag, scale_mode, weight_flag)
 
 AssignGeneralConstants; AssignRVASConstants;
-eric_color_vec = 'kbgyr'; % Conenstion for selection coefficients (we don't have orange. Use yellow)
 num_populations = length(Demographic_models);
 num_s = length(s_vec);
 [num_h, num_w] = num_to_height_width(num_populations);
 
 plot_params  = internal_set_default_params(plot_params);
-
-figure;
+if(plot_params.new_fig)
+    figure;
+end
 switch plot_params.figure_type % ALWAYS add legend !!!
     case 1 % CAF
         plot_params.ylabel_str = 'Combined allele frequency f_s';
@@ -37,7 +40,6 @@ if(isfield(plot_params, 'figs_dir')) % save plot
 end
 
 
-
 % Internal plot
 function internal_plot_allele_freq(s_vec, D, plot_params)
 
@@ -47,12 +49,15 @@ if(num_s <= 10)
     selection_color_vec = {'k', 'b', 'g', orange, 'r'}; % replace yellow with orange
 else
     selection_color_vec = {'k', 'c', 'b', 'g', orange, 'r'}; % replace yellow with orange
-end    
+end
 my_symbol_vec = {'--', '-'}; % flip ordering (set integer powers as solid lines)
 
 s_legend_vec = s_vec_to_legend(s_vec);
 
+y_lim = [0 0];
+
 for i_s = 1:num_s
+    run_i = i_s
     %    tmp_color_ind = mod_max(6-floor(mod(i_s, 10)/2), 5);
     tmp_color_ind = mod_max(ceil(i_s/2), ceil(num_s/2));
     
@@ -69,35 +74,52 @@ for i_s = 1:num_s
     end
     
     if(plot_params.weighted) % weight by allele frequency
+        if(i_s == 1)
+            D.name = [D.name ' (weighted)'];
+        end
         plot_p_vec = plot_p_vec .* plot_x_vec;
-    end    
+    end
     if(plot_params.normalize) % normalize distirbution
         plot_p_vec = plot_p_vec ./ sum(plot_p_vec);
     end
     if(plot_params.cum) % plot cumulative
+        if(i_s == 1)
+            D.name = [D.name ' (cum.)'];
+        end
         if(plot_params.hist)
-            plot_p_vec = cumsum_hist(plot_x_vec, plot_p_vec); % take histogram accounting for bins sizes. Need different normalization !!! 
+            plot_p_vec = cumsum_hist(plot_x_vec, plot_p_vec); % take histogram accounting for bins sizes. Need different normalization !!!
             if(plot_params.normalize)
-                plot_p_vec = plot_p_vec ./ plot_p_vec(end); 
+                plot_p_vec = plot_p_vec ./ plot_p_vec(end);
             end
-        else            
+        else
             plot_p_vec = cumsum(plot_p_vec);
         end
     end
     %   max_diff_should_be_negative = max(diff(plot_p_vec))
-    if(plot_params.log)
-        loglog(plot_x_vec, plot_p_vec, 'color', selection_color_vec{tmp_color_ind}, ...
-            'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
-    else
-        semilogx(plot_x_vec, plot_p_vec, 'color', selection_color_vec{tmp_color_ind}, ...
-            'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
-    end
-end % loop on i_s 
+    if(plot_params.log(1)) % log x
+        if(plot_params.log(2)) % log y
+            loglog(plot_x_vec, plot_p_vec, 'color', selection_color_vec{tmp_color_ind}, ...
+                'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
+        else
+            semilogx(plot_x_vec, plot_p_vec, 'color', selection_color_vec{tmp_color_ind}, ...
+                'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
+        end
+    else % no log on x
+        if(plot_params.log(2)) % log y
+            semilogy(plot_x_vec, plot_p_vec, 'color', selection_color_vec{tmp_color_ind}, ...
+                'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
+        else
+            plot(plot_x_vec, plot_p_vec, 'color', selection_color_vec{tmp_color_ind}, ...
+                'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
+        end
+    end % log x
+    y_lim(1) = min(y_lim(1), min(plot_p_vec)); y_lim(2) = max(y_lim(2), max(plot_p_vec));
+end % loop on i_s
 ylabel(plot_params.ylabel_str, 'fontsize', 14); xlabel('f'); % tmp
 title(D.name, 'fontsize', 14); % need to conver to nice name later
 %add_faint_grid(0.5);
 h_leg = legend(s_legend_vec, 'location', 'eastoutside'); % just legend
-xlim(plot_params.xlim); ylim([min(plot_p_vec)*0.99, max(plot_p_vec)*1.01]);
+xlim(plot_params.xlim); ylim([y_lim(1)*0.99, y_lim(2)*1.01]);
 
 %set(gca,'Xcolor',[0.8 0.8 0.8],'Ycolor',[0.8 0.8 0.8]); %ylim([10^(-6) 1]);
 % PRoblem: legends appear twice - need to re-arrange order of grids to make
@@ -106,16 +128,24 @@ xlim(plot_params.xlim); ylim([min(plot_p_vec)*0.99, max(plot_p_vec)*1.01]);
 
 % Internal function for setting defaults: density un-weighted
 function plot_params  = internal_set_default_params(plot_params)
-
+if(~isfield(plot_params, 'new_fig')) % normalize distribution
+    plot_params.new_fig = 1;
+end
 if(~isfield(plot_params, 'normalize')) % normalize distribution
     plot_params.normalize = 0;
 end
 if(~isfield(plot_params, 'cum')) % cumulative
     plot_params.cum = 0;
 end
-if(~isfield(plot_params, 'log')) % plot log-log
-    plot_params.log = 0;
+if(~isfield(plot_params, 'log')) % default: plot semilogx
+    plot_params.log = [1 0];
 end
+if(isscalar(plot_params.log))
+    plot_params.log = [plot_params.log plot_params.log];
+end
+
+        
+    
 if(~isfield(plot_params, 'weighted')) % plot log-log
     plot_params.weighted = 0;
 end

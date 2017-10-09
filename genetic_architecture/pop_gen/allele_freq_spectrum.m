@@ -30,19 +30,21 @@ end
 S = 4.*N.*s; % small s to big S
 switch scale_mode
     case 'linear'
-        if(two_side_flag) % collapse x and 1-x
-            g = allele_freq_spectrum(x, s, N, 0, scale_mode, var_explained_flag) + ...
-                allele_freq_spectrum(1-x, s, N, 0, scale_mode, var_explained_flag);
-            return;
-        end                
-        if(isscalar(S) && (S == 0))
-            g = 1 ./ x;
-        else
-            g = (exp(S.*x) - exp(S)) ./ (x.*(1-x).*(1-exp(S))); % prevent overflow for large s!
-        end                
-        if(var_explained_flag)
-            g = g .* x .* (1-x);
-        end        
+        % NEW! just take log part
+        g = exp(allele_freq_spectrum(x, s, N, two_side_flag, 'log', var_explained_flag)); 
+% % %         if(two_side_flag) % collapse x and 1-x
+% % %             g = allele_freq_spectrum(x, s, N, 0, scale_mode, var_explained_flag) + ...
+% % %                 allele_freq_spectrum(1-x, s, N, 0, scale_mode, var_explained_flag);
+% % %             return;
+% % %         end                
+% % %         if(isscalar(S) && (S == 0))
+% % %             g = 1 ./ x;
+% % %         else
+% % %             g = (exp(S.*x) - exp(S)) ./ (x.*(1-x).*(1-exp(S))); % prevent overflow for large s!
+% % %         end                
+% % %         if(var_explained_flag)
+% % %             g = g .* x .* (1-x);
+% % %         end        
     case 'log' % compute log of allele frequency density
         if(two_side_flag) % collapse x and 1-x
             g = sum_log(allele_freq_spectrum(x, s, N, 0, scale_mode, var_explained_flag), ...
