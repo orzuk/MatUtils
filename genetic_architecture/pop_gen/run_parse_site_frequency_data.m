@@ -2,11 +2,8 @@
 % datasets and plot allele-frequencies and other results
 Assign24MammalsGlobalConstants; AssignGeneralConstants; AssignStatsConstants; AssignRVASConstants;
 num_bins = 0:0.01:1; % bins for what?
-
 params = ReadParametersFile(fullfile(github_dir, 'MatUtils', 'genetic_architecture', 'data', 'ExomeParsingParameters.txt'));
-
 s_vec = [0 -logspace(-6, -1, 11)]; % set s-values for plotting and fitting
-
 queue_str = 'priority'; % for submitting jobs at broad farm
 global cumsum_log_vec;
 cumsum_log_vec = cumsum([0 log(1:2*10000)]); % compute log-binomial coefficients to save time
@@ -35,9 +32,6 @@ if(params.parse_site_frequency_flag) % here we parse
     end
 end
 
-% return;
-
-
 %%%%%%%%%%%%%%%%%%
 % Plot SFS Files %
 %%%%%%%%%%%%%%%%%%
@@ -45,8 +39,6 @@ demography_file = [remove_suffix_from_file_name(exons_file) ...
     '_' 'AllPop' '_Demography.mat'];
 demography_file = fullfile(spectrum_data_dir, ...
     exome_struct.data_str, 'AllPop', demography_file);
-
-
 if(params.plot_site_frequency_flag) % Here we plot SFS for DATA !! for all populations !!!
     plot_site_frequency_data(fullfile(spectrum_data_dir, exome_struct.data_str, ...
         [exome_struct.prefix, '*.mat']), ... %  exome_struct.spectrum_data_file)  '.mat']), ... % '_' population{1}% _unique
@@ -88,8 +80,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
         % 2. Plot the SFS for different values of selection coefficient s for each demography
         if(params.plot_demography)
             % 1. Plot pop. size as function of time V 
-            % 2. plot SFS
-            
+            % 2. plot SFS            
             demographic_model_plot(Demographic_model(i_pop), Demographic_model{i_pop}.index, max_LL_demographic_model, ...
                 all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, 0);  % plot properties of fitted demography: pop. size and SFS
         end % if plot
@@ -106,8 +97,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
             compute_allele_freq_spectrum_from_demographic_model( ...
             Demographic_model{i_pop}, s_vec([1 5 10]), compute_flag);
         save(demography_file, 'Demographic_model', 'max_LL_demographic_model');
-    end
-    
+    end    
 end % loop on populations (temp.)
 % Temp: plot all populations together (should be part of plotting function
 plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir; 
@@ -118,7 +108,6 @@ plot_allele_freq(s_vec, Demographic_model, plot_params)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Use Missense+Stop SNPs to fit selection and tolerance parameters %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % fit gene-specific selection and tolerance parameters             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -138,10 +127,7 @@ if(params.estimate_gene_by_gene) % estimate potential target size for each gene 
         save(fullfile(spectrum_data_dir, 'mutation_rates', mutation_rates_file), 'MutationRateTable', 'MutationTypes');
     else
         %                load(fullfile(spectrum_data_dir, mutation_rates_file), 'MutationRateTable', 'MutationTypes');
-    end
-    
-    %            for gene_prefix = {'APOA5'} % mat2cell(['A':'Z' '0':'9']', ones(36,1), 1) % enable also weird genes starting with a number
-    
+    end    
     % Need to loop here also on chunks !!
     for gene_prefix = {''} % {'ABCG1'} % for chrom 21 {'ANGPTL'} % for chrom 1 %%%% (num2cell(['A':'Z' '0':'9']'))'  %% {'ANKRD20A3'} %%  %% {'ANGP'} %% (mat2cell(['A':'Z' '0':'9']', ones(36,1), 1))' % enable also weird genes starting with a number
         job_str = ['parse_site_frequency_gene_by_gene(''' spectrum_data_dir ''', ''' exome_struct.spectrum_data_files_str ''', ' ... % spectrum_data_files{i}
@@ -151,40 +137,36 @@ if(params.estimate_gene_by_gene) % estimate potential target size for each gene 
             '' '[], Demographic_model' ', ' ...
             num2str(params.plot_gene_by_gene) ', ' ...
             ' ''' gene_prefix{1} ''');'];
-        %                 parse_site_frequency_gene_by_gene(spectrum_data_dir, spectrum_data_files{i}, ...
-        %                     fullfile(spectrum_data_dir, 'Tennessen_Science_2012', 'GeneByGene'), ...  % assume ESP data
-        %                     fullfile(mammals_data_dir, genome_version, exons_file), ... % GeneStruct
-        %                     fullfile(spectrum_data_dir, mutation_rates_file), [], gene_prefix); % Estimate s and alpha for each gene in the genome - how???
         if(in_matlab_flag)
             eval(job_str);
         else
             SubmitMatlabJobToFarm(job_str, ...
                 fullfile('out', ['run_genes_prefix_' gene_prefix{1} '.out']), queue_str);
-        end
-        
-    end % loop on prefix
-    
-    
-    % Next two are already in previous gene-by-gene script?
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Aggregate s estimator for each gene from all populations %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if(params.aggregate_population_estimators) % compute an aggregate esitmator for each gene from multiple populations
-        
-        
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Test for differences for s estimator for each gene from all populations %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if(params.test_population_differences) % test for differences in selection between different populations for each gene
-        
-    end
+        end        
+    end % loop on prefix        
 end % estimate gene by gene parameters
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-% end % loop on SFS data type (currently use ESP)
+
+
+
+
+
+% % Next two are already in previous gene-by-gene script?
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % Aggregate s estimator for each gene from all populations %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% if(params.aggregate_population_estimators) % compute an aggregate esitmator for each gene from multiple populations
+% end
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % Test for differences for s estimator for each gene from all populations %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% if(params.test_population_differences) % test for differences in selection between different populations for each gene
+% end
+
 
 
 
