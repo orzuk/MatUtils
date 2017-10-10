@@ -1,5 +1,6 @@
 % Master script for parsing data for site-frequency spectrum from multiple
 % datasets and plot allele-frequencies and other results
+SetPathScript; % for running as executable 
 Assign24MammalsGlobalConstants; AssignGeneralConstants; AssignStatsConstants; AssignRVASConstants;
 num_bins = 0:0.01:1; % bins for what?
 params = ReadParametersFile(fullfile(github_dir, 'MatUtils', 'genetic_architecture', 'data', 'ExomeParsingParameters.txt'));
