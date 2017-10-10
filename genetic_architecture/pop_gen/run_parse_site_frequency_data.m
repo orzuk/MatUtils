@@ -49,12 +49,12 @@ if(params.plot_site_frequency_flag) % Here we plot SFS for DATA !! for all popul
         fullfile(spectrum_data_dir, 'out', exome_struct.data_str, exome_struct.prefix)); %   remove_suffix_from_file_name(exome_struct.spectrum_data_file)));
 end
 
-i_pop=0; 
+i_pop=0;
 for population = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
     i_pop=i_pop+1;
-%     if(~strcmp(population, 'African')) % temp: work only on one population!
-%         continue;
-%     end
+    %     if(~strcmp(population, 'African')) % temp: work only on one population!
+    %         continue;
+    %     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Use Synonymous SNPs to fit demographic model %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -65,31 +65,40 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
         all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous
         all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!!
         synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)) % 'synonymous_variant' % 'coding-synonymous'
-        if(~exist(demography_file, 'file') || (1 == 1)) % here fit new model (computationally heavy)
+        
+        fit_demography = 0;
+        if(~exist(demography_file, 'file') || (1 == 0)) % here fit new model (computationally heavy)
+            fit_demography = 1;
+        else  % load model
+            load(demography_file);
+            if((length(Demographic_model) < i_pop) || isempty(Demographic_model{i_pop}))
+                fit_demography=1;
+            end
+            Demographic_model{i_pop}.name = ['Fitted.' population{1}];
+        end
+        if(fit_demography)
             [Demographic_model{i_pop}, max_LL_demographic_model(i_pop)] = ...
                 fit_demographic_parameters_from_allele_spectrum( ...
                 all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, [],  all_A.mu); % fit demography
             Demographic_model{i_pop}.name = ['Fitted.' population{1}];
             save(demography_file, 'Demographic_model', 'max_LL_demographic_model'); % Save and plot demography
-        else  % load model
-            load(demography_file);
-            Demographic_model{i_pop}.name = ['Fitted.' population{1}];
         end
+            
         % Here plot all demographies:
         % 1. Plot the population size as function of generations for each demography
         % 2. Plot the SFS for different values of selection coefficient s for each demography
         if(params.plot_demography)
-            % 1. Plot pop. size as function of time V 
-            % 2. plot SFS            
+            % 1. Plot pop. size as function of time V
+            % 2. plot SFS
             demographic_model_plot(Demographic_model(i_pop), Demographic_model{i_pop}.index, max_LL_demographic_model, ...
                 all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, 0);  % plot properties of fitted demography: pop. size and SFS
         end % if plot
     end % if fit demographies
     
     load(demography_file);
-    if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 1)) % add SFS to demographic mode
+    if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 0)) % add SFS to demographic mode
         %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
-        Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !! 
+        Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !!
         Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
         compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;
         [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, ...
@@ -97,10 +106,10 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
             compute_allele_freq_spectrum_from_demographic_model( ...
             Demographic_model{i_pop}, s_vec([1 5 10]), compute_flag);
         save(demography_file, 'Demographic_model', 'max_LL_demographic_model');
-    end    
+    end
 end % loop on populations (temp.)
 % Temp: plot all populations together (should be part of plotting function
-plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir; 
+plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir;
 plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1;  % plot cumulative weighted allele frequency distribution
 plot_allele_freq(s_vec, Demographic_model, plot_params)
 
@@ -127,7 +136,7 @@ if(params.estimate_gene_by_gene) % estimate potential target size for each gene 
         save(fullfile(spectrum_data_dir, 'mutation_rates', mutation_rates_file), 'MutationRateTable', 'MutationTypes');
     else
         %                load(fullfile(spectrum_data_dir, mutation_rates_file), 'MutationRateTable', 'MutationTypes');
-    end    
+    end
     % Need to loop here also on chunks !!
     for gene_prefix = {''} % {'ABCG1'} % for chrom 21 {'ANGPTL'} % for chrom 1 %%%% (num2cell(['A':'Z' '0':'9']'))'  %% {'ANKRD20A3'} %%  %% {'ANGP'} %% (mat2cell(['A':'Z' '0':'9']', ones(36,1), 1))' % enable also weird genes starting with a number
         job_str = ['parse_site_frequency_gene_by_gene(''' spectrum_data_dir ''', ''' exome_struct.spectrum_data_files_str ''', ' ... % spectrum_data_files{i}
@@ -142,8 +151,8 @@ if(params.estimate_gene_by_gene) % estimate potential target size for each gene 
         else
             SubmitMatlabJobToFarm(job_str, ...
                 fullfile('out', ['run_genes_prefix_' gene_prefix{1} '.out']), queue_str);
-        end        
-    end % loop on prefix        
+        end
+    end % loop on prefix
 end % estimate gene by gene parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -170,19 +179,19 @@ end % estimate gene by gene parameters
 
 
 
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-% % % % % % % % % % % % % % % Constants moved to parameters file: 
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% % % % % % % % % % % % % % % Constants moved to parameters file:
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % % % % % % % % % % % % % % % exome_data = 'ExAC'; % 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!!
 % % % % % % % % % % % % % % % % Need to add also gnomad data !
-% % % % % % % % % % % % % % % 
+% % % % % % % % % % % % % % %
 % % % % % % % % % % % % % % % old_run=0;
 % % % % % % % % % % % % % % % % Set of flags determining which analysis to perform
 % % % % % % % % % % % % % % % parse_site_frequency_flag = 0; % parse original datafile (different between different datasets)
 % % % % % % % % % % % % % % % read_vcf_flag=0; % read vcf files for exome data
 % % % % % % % % % % % % % % % unite_flag=0; % 0: parse ESP data. 1: unite all data to one chromosome
 % % % % % % % % % % % % % % % read_to_mat_flag=0; % convert vcf (?) or other files to .mat format
-% % % % % % % % % % % % % % % extract_fields_flag=1; % extract fields ??? 
+% % % % % % % % % % % % % % % extract_fields_flag=1; % extract fields ???
 % % % % % % % % % % % % % % % compute_gene_matrices_flag=1; % 1. Compute for each gene ?? flag for parsing ???
 % % % % % % % % % % % % % % % plot_site_frequency_flag = 0; % 1: plot SFS data (this is also part of pre-processing)
 % % % % % % % % % % % % % % % estimate_gene_by_gene = 1; % 1: analyze each gene seperately - estimate target size for each gene. This is what we want now!!!

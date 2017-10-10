@@ -295,10 +295,10 @@ end % loop on figure types
 % 
 % Output: 
 % 
-function internal_plot_SFS_by_gene_position(f_vec)
+function internal_plot_SFS_by_gene_position(gene_position_vec, s_missense_vec)
 
 % Extract gene position: 
-gene_position_vec = p[]; 
+gene_position_vec = []; 
 s_missense_vec = []; 
 
 figure; hold on; plot(gene_position_vec, s_missense_vec); 

@@ -103,7 +103,7 @@ good_inds = find( (abs(region_het_moment_mat_all_models - het_moment_mat_data(:,
 i_ctr=1; log_like_mat = zeros(D.num_params, 1)-Inf; compute_time=zeros(D.num_params, 1);
 test_model_ctr = 0;
 if(isempty(good_inds))
-    error('Error!! No Demographic Model Fits SFS!!'); 
+    error('Error!! No Demographic Model Fits SFS Moments!!'); 
 end
 for i=vec2row(good_inds) % 1:D.num_params
     D.index = i; % dset index of current model: should allow multiple indices!!! 
