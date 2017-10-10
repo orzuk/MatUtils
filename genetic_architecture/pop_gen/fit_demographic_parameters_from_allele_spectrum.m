@@ -22,6 +22,11 @@ AssignGeneralConstants; AssignRVASConstants;
 if(~exist('weights_vec', 'var') || isempty(weights_vec))
     weights_vec = 1;
 end
+if(length(weights_vec) == length(n_vec))
+    weights_vec = weights_vec(n_vec>0); 
+end
+k_vec = k_vec(n_vec>0); n_vec = n_vec(n_vec>0); % take only polymorphic alleles 
+
 if(~exist('mu', 'var') || isempty(mu))
     mu = mu_per_site; % default mutation rate (per-nucleotide per-generation)
 end
