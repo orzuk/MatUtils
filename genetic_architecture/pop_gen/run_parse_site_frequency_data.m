@@ -100,7 +100,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     end % if fit demographies
     
     load(demography_file);
-    if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 0)) % add SFS to demographic mode
+    if(~isfield(Demographic_model{i_pop}, 'SFS') || ~isreal(Demographic_model{i_pop}.SFS.p_vec)) % add SFS to demographic mode
         %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
         Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !!
         Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
@@ -108,7 +108,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
         [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, ...
             Demographic_model{i_pop}.SFS.L, SFS_compute_time] = ...
             compute_allele_freq_spectrum_from_demographic_model( ...
-            Demographic_model{i_pop}, s_vec([1 5 10]), compute_flag);
+            Demographic_model{i_pop}, s_vec, compute_flag); %  s_vec([1 5 10])
         save(demography_file, 'Demographic_model', 'max_LL_demographic_model');
     end
 end % loop on populations (temp.)

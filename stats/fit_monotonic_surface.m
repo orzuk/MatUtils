@@ -59,7 +59,7 @@ end
 
 %z_fit = zeros(length(y_fit), length(x_fit)); % z_fit(2,1)=-1; % create z grid for fitted data
 for i=1:num_y % First fit each y seperately monotonically
-    params.cum = 0; params.fit_log = [1 0]; params.min = 0; params.RightMinValue = 0;  % should we give up direction constraint? params.direction = 'down'; % params.direction = 'up';
+    params.cum = 0; params.fit_log = [1 0]; params.min = realmin; params.RightMinValue = realmin;  % should we give up direction constraint? params.direction = 'down'; % params.direction = 'up';
     if(one_vec) % here we're given vectors of x,y,z of the same size
         I = find(y == y_unique(i)); % get indices
         fit_x_vec = x(I); fit_z_vec = z(I) .* double(max(1,x(I))); fit_z_vec_unweighted = z(I);
@@ -68,7 +68,7 @@ for i=1:num_y % First fit each y seperately monotonically
     end
     %       [~, z_fit0(i,:)] = fit_monotonic_curve(x(I), z(I), params);
     [~, z_fit0(i,:)] = fit_monotonic_curve(fit_x_vec, fit_z_vec, params);
-    z_fit0(i,:) = z_fit0(i,:) ./ double(max(1,params.x_fit));      % normalize
+    z_fit0(i,:) = max(realmin,  z_fit0(i,:) ./ double(max(1,params.x_fit)));      % normalize
     max_ind = find(fit_z_vec_unweighted>0, 1, 'last'); max_val = fit_x_vec(max_ind); % x(I(max_ind)); % find last value
     fit_again = 1;
     if(fit_again)
