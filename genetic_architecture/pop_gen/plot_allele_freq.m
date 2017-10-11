@@ -31,11 +31,22 @@ switch plot_params.figure_type % ALWAYS add legend !!!
 end % switch figure type
 for i_pop = 1:num_populations % loop on populations
     if(~isempty(Demographic_models{i_pop}))
-        subplot(num_h, num_w, i_pop);
+        plot_params.legend = {};
+        subplot(num_h, num_w, i_pop); [i_w, i_h] = ind2sub([num_w, num_h], i_pop); 
+        if(i_h == num_h)
+            plot_params.legend = [plot_params.legend 'xlabel'];
+        end
+        if((i_w == 1) && (i_h == ceil(num_h/2))) % num_w)
+            plot_params.legend = [plot_params.legend 'ylabel'];
+        end
+        if((i_w == num_w) && (i_h == ceil(num_h/2)))
+            plot_params.legend = [plot_params.legend 'legend'];
+        end
         internal_plot_allele_freq(s_vec, Demographic_models{i_pop}, plot_params);
     end
 end
 if(isfield(plot_params, 'figs_dir')) % save plot
+    %orient landscape;    
     my_saveas(gcf, fullfile(plot_params.figs_dir, save_file), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
 end
 
@@ -51,16 +62,12 @@ else
     selection_color_vec = {'k', 'c', 'b', 'g', orange, 'r'}; % replace yellow with orange
 end
 my_symbol_vec = {'--', '-'}; % flip ordering (set integer powers as solid lines)
-
 s_legend_vec = s_vec_to_legend(s_vec);
-
 y_lim = [0 0];
 
-for i_s = 1:num_s
-    run_i = i_s
+for i_s = 1:num_s   
     %    tmp_color_ind = mod_max(6-floor(mod(i_s, 10)/2), 5);
     tmp_color_ind = mod_max(ceil(i_s/2), ceil(num_s/2));
-    
     [~, i_s2] = min(abs(abs(D.s_grid)-abs(s_vec(i_s))));
     if(iscell(D.SFS.x_vec))
         plot_x_vec = D.SFS.x_vec{i_s2} ./ D.SFS.x_vec{i_s2}(end);
@@ -72,10 +79,9 @@ for i_s = 1:num_s
     else
         plot_p_vec = D.SFS.p_vec(i_s2,:);
     end
-    
     if(plot_params.weighted) % weight by allele frequency
         if(i_s == 1)
-            D.name = [D.name ' (weighted)'];
+            plot_params.ylabel_str = [plot_params.ylabel_str ' (weighted)'];
         end
         plot_p_vec = plot_p_vec .* plot_x_vec;
     end
@@ -84,7 +90,7 @@ for i_s = 1:num_s
     end
     if(plot_params.cum) % plot cumulative
         if(i_s == 1)
-            D.name = [D.name ' (cum.)'];
+            plot_params.ylabel_str = [plot_params.ylabel_str ' (cum.)'];
         end
         if(plot_params.hist)
             plot_p_vec = cumsum_hist(plot_x_vec, plot_p_vec); % take histogram accounting for bins sizes. Need different normalization !!!
@@ -115,16 +121,31 @@ for i_s = 1:num_s
     end % log x
     y_lim(1) = min(y_lim(1), min(plot_p_vec)); y_lim(2) = max(y_lim(2), max(plot_p_vec));
 end % loop on i_s
-ylabel(plot_params.ylabel_str, 'fontsize', 14); xlabel('f'); % tmp
-title(D.name, 'fontsize', 14); % need to conver to nice name later
-%add_faint_grid(0.5);
-h_leg = legend(s_legend_vec, 'location', 'eastoutside'); % just legend
+
+title(D.name, 'fontsize', plot_params.font_size); % need to conver to nice name later
 xlim(plot_params.xlim); ylim([y_lim(1)*0.99, y_lim(2)*1.01]);
-
-%set(gca,'Xcolor',[0.8 0.8 0.8],'Ycolor',[0.8 0.8 0.8]); %ylim([10^(-6) 1]);
-% PRoblem: legends appear twice - need to re-arrange order of grids to make
-% them appear only once !!
-
+if(strmatch('ylabel', plot_params.legend))
+    ylabel(plot_params.ylabel_str, 'fontsize', plot_params.font_size); 
+end
+if(strmatch('xlabel', plot_params.legend))
+    xlabel('f'); % tmp
+end
+if(strmatch('legend', plot_params.legend))
+    [h_leg,h_l] = legend(s_legend_vec, 'location', 'eastoutside', 'fontsize', plot_params.font_size-4); legend('boxoff'); % just legend
+    h_line=findobj(h_l,'type','line'); 
+    lineXData = get(h_line, 'XData');  
+    for j=1:2:length(lineXData) 
+        lineXData{j}(2) = 0.65; lineXData{j}(1) = 0.3; 
+        set(h_line(j), 'XData', lineXData{j});
+    end
+    % set(h_line, 'XData', lineXData);
+    
+    set(gca, 'xcolor', [0.8 0.8 0.8], 'ycolor', [0.8 0.8 0.8]); % make legend invisible    
+    pos_l = get(h_leg, 'position'); set(h_leg, 'position', [pos_l(1)+0.11 pos_l(2)-0.015 pos_l(3) pos_l(4)]);
+end
+%%%add_faint_grid(0.5);
+% orient landscape;
+% Problem: legends appear twice - need to re-arrange order of grids to make them appear only once !!
 
 % Internal function for setting defaults: density un-weighted
 function plot_params  = internal_set_default_params(plot_params)
@@ -143,9 +164,6 @@ end
 if(isscalar(plot_params.log))
     plot_params.log = [plot_params.log plot_params.log];
 end
-
-        
-    
 if(~isfield(plot_params, 'weighted')) % plot log-log
     plot_params.weighted = 0;
 end
@@ -155,8 +173,9 @@ end
 if(~isfield(plot_params, 'hist')) % hold distribution as histgoram
     plot_params.hist = 0;
 end
-
-
+if(~isfield(plot_params, 'font_size')) % set default font size 
+    plot_params.font_size = 14;
+end
 
 
 

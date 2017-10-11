@@ -403,8 +403,7 @@ for plot_type = [0 2] % 0:0 % 1 % 0 - frac. which are null. 1 - frac. which are 
                     if(num_models_to_plot > 1)
                         subplot(num_plots_x,2, plot_model_ctr); %  figure;     % New plot separately and on log scale
                     end
-                    %%            if( (figs_for_paper_flag && log_x_flag) ) %  && (~log_y_flag) )
-                    
+                    %%            if( (figs_for_paper_flag && log_x_flag) ) %  && (~log_y_flag) )                    
                     %%            else
                     %%                subplot(2,2, log_x_flag + 2*log_y_flag+1);
                     %%            end
@@ -458,8 +457,7 @@ for plot_type = [0 2] % 0:0 % 1 % 0 - frac. which are null. 1 - frac. which are 
                     else
                         ylim([0 1.05]);
                     end
-                    title(get_nice_population_names(str2title(demographic_models_struct.model_str{i_d}))); % no title !!
-                    
+                    title(get_nice_population_names(str2title(demographic_models_struct.model_str{i_d}))); % no title !!                    
                     %    ylim([0 1.01*max(max(frac_null_by_freq_cumulative(show_s_null_ind,:)))]);
                     if(figs_for_paper_flag)
                         switch plot_type
@@ -493,8 +491,7 @@ for plot_type = [0 2] % 0:0 % 1 % 0 - frac. which are null. 1 - frac. which are 
                     end
                     %            if(~figs_for_paper_flag)
                     %            end
-                    add_faint_grid(0.5);
-                    
+                    add_faint_grid(0.5);                    
                     %%                    my_saveas(gcf, fullfile(new_figs_dir, output_fig_file), {'epsc', 'pdf'});
                 end % loop on log-y
             end % loop on log-x

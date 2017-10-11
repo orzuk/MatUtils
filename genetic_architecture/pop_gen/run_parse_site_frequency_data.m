@@ -74,6 +74,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
         if(~exist(demography_file, 'file') || (1 == 0)) % here fit new model (computationally heavy)
             fit_demography = 1;
         else  % load model
+            Demographic_model = cell(length(exome_struct.populations), 1); % temp allocate space 
             load(demography_file);
             if((length(Demographic_model) < i_pop) || isempty(Demographic_model{i_pop}))
                 fit_demography=1;
@@ -100,7 +101,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     end % if fit demographies
     
     load(demography_file);
-    if(~isfield(Demographic_model{i_pop}, 'SFS') || ~isreal(Demographic_model{i_pop}.SFS.p_vec)) % add SFS to demographic mode
+    if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 1)) %  ~isreal(Demographic_model{i_pop}.SFS.p_vec)) % add SFS to demographic mode
         %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
         Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !!
         Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
@@ -114,8 +115,8 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
 end % loop on populations (temp.)
 % Temp: plot all populations together (should be part of plotting function
 plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir;
-plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1;  % plot cumulative weighted allele frequency distribution
-plot_allele_freq(s_vec, Demographic_model, plot_params)
+plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1; plot_params.font_size=8; % plot cumulative weighted allele frequency distribution
+plot_allele_freq(s_vec, Demographic_model(1:6), plot_params)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
