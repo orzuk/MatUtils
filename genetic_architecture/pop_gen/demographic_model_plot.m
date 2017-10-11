@@ -132,8 +132,8 @@ if(plot_sfs) % plot neutral sfs for demographic model
     legend(legend_with_LL, 'fontsize', 14); legend('boxoff');
     title('Sample Frequencies');
     subplot(2,2,3);  hold off; % figure; % What is this figure?? is it empirical log-likelihood as function of derived allele count?? show also data on same plot!!!
-    for i=1:length(D_cell) % loop on models
-        plot(unique(k_vec((k_vec>0) & (k_vec < n_vec))), cumsum(P_poly_again{i}.LL_vec(2:end-1)), ['*' color_vec(i)]); hold on; % plot likelihood contribution for polymorphic alleles
+    for i=1:length(D_cell) % loop on models. Here we consider polymorphic if smaller than MAX(n_vec) (should be modified to compare each allele to it's own n)
+        plot(unique(k_vec((k_vec>0) & (k_vec < max(n_vec)))), cumsum(P_poly_again{i}.LL_vec(2:end-1)), ['*' color_vec(i)]); hold on; % plot likelihood contribution for polymorphic alleles
     end
     %    plot(unique_k_vec, log(h_k_vec ./ length(k_vec)), 'm*', 'linewidth', 2);  % PLOT ALSO DATA
     xlabel('k (sample allele count.)'); ylabel('LogLike');
