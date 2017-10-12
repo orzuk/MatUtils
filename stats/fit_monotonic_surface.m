@@ -84,7 +84,7 @@ for i=1:num_y % First fit each y seperately monotonically
         if(~isempty(max_ind))
             params.cum = 0; params.direction = 'down'; params.min = 0; params.fit_log = [1 1]; params.RightMinValue = 0; x_fit = params.x_fit; params.x_fit = params.x_fit(max_ind:end);
             %            [~, z_fit0(i,max_ind:end)] = fit_monotonic_curve(x_fit(2:end), z_fit0(i,2:end), params);  % fit again       % force z to be monotonic
-            deg = 5;
+            deg = 3;
             ppp = polyfit(log(x_fit(2:max_ind)), log(z_fit0(i,2:max_ind)), deg); % fit quadratic
 %             figure;
 %             loglog(fit_x_vec ./ max(x), (fit_z_vec_unweighted)); hold on;
@@ -96,6 +96,7 @@ for i=1:num_y % First fit each y seperately monotonically
                 zz1 = zz1 + ppp(deg+1-jj) .* log(x_fit).^jj;
             end
             z_fit0(i,max_ind:end) = exp(z_fit0(i,max_ind:end)); zz1 = exp(zz1); 
+            z_fit0(i,2:end) = cummin(z_fit0(i,2:end)); % force monotonic decreasing
 %                exp(ppp(3) + ppp(2) .* log(params.x_fit) + ppp(1) .* log(params.x_fit).^2 );
             
             % new fit 
