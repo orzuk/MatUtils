@@ -68,7 +68,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
         all_A = load(fullfile(spectrum_data_dir, spectrum_population_data_file{i_pop}), 'count_vec', 'f_vec', 'n_vec', 'allele_types');
         all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous
         all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!!
-        synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)) % 'synonymous_variant' % 'coding-synonymous'
+        synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)); % 'synonymous_variant' % 'coding-synonymous'
         
         fit_demography = 0;
         if(~exist(demography_file, 'file') || (1 == 0)) % here fit new model (computationally heavy)
@@ -101,7 +101,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     end % if fit demographies
     
     load(demography_file);
-    if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 1)) %  ~isreal(Demographic_model{i_pop}.SFS.p_vec)) % add SFS to demographic mode
+    if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 0)) %  ~isreal(Demographic_model{i_pop}.SFS.p_vec)) % add SFS to demographic mode
         %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
         Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !!
         Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
@@ -114,10 +114,9 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     end
 end % loop on populations (temp.)
 % Temp: plot all populations together (should be part of plotting function
-plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir;
+plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir; plot_params.hist = 1; plot_params.xlim = [10^(-6) 1];
 plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1; plot_params.font_size=8; % plot cumulative weighted allele frequency distribution
 plot_allele_freq(s_vec, Demographic_model(1:6), plot_params)
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Use Missense+Stop SNPs to fit selection and tolerance parameters %

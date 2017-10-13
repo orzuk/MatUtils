@@ -12,7 +12,6 @@ if(iscell(format))
         my_saveas(x, file_name, format{i});
     end
 else
-    
     my_mkdir(dir_from_file_name([file_name '.']));  % why mkdir here?
     saving_figure_file = file_name
     saving_format = format
