@@ -102,7 +102,7 @@ load_fields = {'unique_genes', 'n_vec', 'count_vec', 'f_vec', 'allele_types', ..
         load_fields = [load_fields {'REF', 'ALT', 'aminoAcidChange', 'gene_by_allele_type_pos_list', 'gene_by_allele_type_inds_list', 'allele_types_ind'}];
 %    end
 all_fit_genes_I = []; 
-for k= 10 % TMP DEBUG !!! 1:num_files % loop on different chunks
+for k=1:num_files % loop on different chunks
     load_fields_str = cell2vec(load_fields, ''', ''');
     load_str = ['SiteFreqSpecStruct{' num2str(k) '} = load(''' fullfile(spectrum_data_dir, spectrum_data_file{k}) ...
         ''', ''' load_fields_str ''');'];

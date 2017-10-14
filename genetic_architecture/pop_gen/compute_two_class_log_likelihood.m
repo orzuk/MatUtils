@@ -206,7 +206,7 @@ for i_s = 1:num_s % loop on parameters
                 log_x_vec{NULL_C} = log_x_vec{NEUTRAL_C}; log_one_minus_x_vec{NULL_C} = log_one_minus_x_vec{NEUTRAL_C};
             else % here s not 0 (deleterious alleles). Compute spectrume again !!
                 if(isfield(D, 'SFS')) % here specrum already computed
-                    [~, j_s] = min(abs(s_null_vec(i_s)) - abs(D.s_grid));
+                    [~, j_s] = min(abs(abs(s_null_vec(i_s)) - abs(D.s_grid)));
                     allele_freq_hist{NULL_C} = D.SFS.p_vec(j_s,:); % take neutral
                     x_vec{NULL_C} = D.SFS.x_vec; % copy x vec
                     L_correction_factor(NULL_C) = D.SFS.L; % take target size
@@ -220,7 +220,7 @@ for i_s = 1:num_s % loop on parameters
             end % if s==0
     end
     [sample_x_vec{NULL_C}, sample_p_vec{NULL_C}] = population_to_sample_allele_freq_distribution( ...
-        x_vec{NULL_C}, allele_freq_hist{NULL_C}, max(num_individuals_vec), vec2row(unique_num_carriers), 1);
+        double(x_vec{NULL_C}), allele_freq_hist{NULL_C}, max(num_individuals_vec), vec2row(unique_num_carriers), 1);
     sum_allele_freq_hist(NULL_C) = sum(allele_freq_hist{NULL_C});
     T_s(i_s) = sum(allele_freq_hist{NULL_C}) * (x_vec{NULL_C}(2)-x_vec{NULL_C}(1));     %%    T_s(i_s) = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot!     %    T_s = integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C}); %%% T_s = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq'); % sure we need to use 'freq' here ???
     
@@ -295,10 +295,14 @@ for i_s = 1:num_s % loop on parameters
             end % if to include phenotypes
             %%%%%%%%%%%%%%%%%%%%%%%%%%%% End if include phenotypes %%%%%%%%%%%%
             if(params.print_flag)
-                if( (mod(i_alpha, 50) == 0) || mod(i_s, 50) == 0)
+%                if( (mod(i_alpha, 50) == 0) || mod(i_s, 50) == 0)
                     run_index_s_alpha_beta = [i_s i_alpha i_beta]
+                    s_is = s_null_vec(i_s)
+                    alpha_is = alpha_vec(i_alpha)
+                    beta_is = beta_vec(i_beta)
+                    loglike_is = log_like_mat(i_s,i_alpha,i_beta)
                     time_one_likelihood = cputime-ttt_one
-                end
+%                end
             end
         end % loop on effect size beta
     end % loop on mixture coefficient alpha
