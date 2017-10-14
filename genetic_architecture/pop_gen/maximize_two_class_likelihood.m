@@ -85,25 +85,20 @@ switch implementation_str  % choose how to maximize likelihood
         if(~maximize_parameters(3)) % don't loop over beta
             beta_vec = 0; % meaningless
         end
-        % PROBLEM: HERE LOG-LIKELIHOOD IS MONOTONICALLY DECREASING WITH ALPHA - WHY?
-        
+        % PROBLEM: HERE LOG-LIKELIHOOD IS MONOTONICALLY DECREASING WITH ALPHA - WHY?        
         log_like_mat = ... % compute likelihood (currently vary only alpha)
             compute_two_class_log_likelihood(s_null_vec, alpha_vec, beta_vec, ...
             target_size_by_class_vec, D, ...
-            X, y, trait_struct, loglike_params); %         null_w_vec, include_phenotype, full_flag, num_individuals);
-        
+            X, y, trait_struct, loglike_params); %         null_w_vec, include_phenotype, full_flag, num_individuals);        
         [max_LL, tmp_ind] = max(log_like_mat(:)); % find the maximal grid-point
         [I, J, K] = ind2sub(size(log_like_mat), tmp_ind);
         max_s = s_null_vec(I);
         max_alpha = alpha_vec(J);
-        max_beta = beta_vec(K);
-        
+        max_beta = beta_vec(K);        
     case 'gradient' % use gradient-descent algorithm (??)
         % use gradient descent. First optimize only s and alpha using
         % genotypes. Then optimize beta using phenotype
         iters = 1000; % number of gradient iterations
-        
-        
     case 'minsearch' % use Matlab's optimization
         if(isempty(null_w_vec) || poisson_model_flag) % here we don't know alpha and the null positions
             % first evaluate to see if we've got infinity !! 
@@ -117,14 +112,12 @@ switch implementation_str  % choose how to maximize likelihood
                     -compute_two_class_log_likelihood(s_alpha(1), s_alpha(2), [], ...
                     target_size_by_class_vec, D, ...
                     X, [], [], loglike_params), ...  % null_w_vec, include_phenotype, full_flag, num_individuals), ...
-                    [0; 0.5], [0 1; 0 -1; 1 0; -1 0], [1, 0, 0, 1]); % here s_null_vec and alpha_vec serve as initial guesses! (should be scalars)
-                
+                    [0; 0.5], [0 1; 0 -1; 1 0; -1 0], [1, 0, 0, 1]); % here s_null_vec and alpha_vec serve as initial guesses! (should be scalars)                
                 num_evaluations= opt_struct.funcCount
                 max_LL = max_LL_genotype; % maximum just of genotype part
                 % use phenotypes
                 max_s = max_s_alpha(1); max_alpha = max_s_alpha(2); % We need to check that 0 < alpha < 1
-            end
-            
+            end            
         else % here we do know alpha
             [max_s, max_LL_genotype] = fminsearch(@(s_alpha) ... % use genotypes
                 -compute_two_class_log_likelihood(s_alpha, 1, [], target_size_by_class_vec, D, X, [], ...

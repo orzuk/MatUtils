@@ -172,7 +172,7 @@ for k=1:num_files % loop on different chunks
                 maximize_parameters = [1 1 0]; % maximize over s and alpa
                 full_flag = 0;
                 if(~isempty(X)) % for some genes we have no alleles in the relevant population
-                    for i_pop=2 % 1:num_populations % load data from all populations
+                    for i_pop=1:num_populations % load data from all populations
                         [GeneStruct.max_LL_vec(i,i_pop), GeneStruct.s_MLE_vec(i,i_pop), GeneStruct.alpha_MLE_vec(i,i_pop), ~, GeneStruct.max_compute_time(i,i_pop)] = ... % don't fit  beta_MLE_vec(i,i_pop)] = ...
                             maximize_two_class_likelihood(s_null_vec, alpha_vec, 0, ...
                             target_size_by_class_vec, Demographic_model{i_pop}, ... % run each time on different population. But counts should be different!!
