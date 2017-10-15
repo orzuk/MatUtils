@@ -7,7 +7,7 @@ https://github.com/orzuk/MatUtils
 
 The package was used in the paper: 
 
-[1] On The Asymptotic Efficiency of Selection Procedures for Independent Gaussian Populations 
+[1] [On The Asymptotic Efficiency of Selection Procedures for Independent Gaussian Populations] (https://arxiv.org/abs/1707.00314) 
 R. Jacobovic and O. Zuk. 
 Submitted (2017) 
 
