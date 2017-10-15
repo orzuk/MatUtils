@@ -21,7 +21,6 @@ S = [];
 Assign24MammalsGlobalConstants; % get some constants needed
 populations_vec = {''}; % {'_European', '_African'};
 compute_frac_carriers = 1; % compute how many carriers of alleles below a certain frequency
-compute_selection = 0; % fit selection coefficient.
 
 if(~compute_gene_matrices_flag) % NEW! don't return if computing matrices!!! This should be done only once on the united file!!
     if(  (~exist(site_frequency_file_name, 'file')) && (~exist(file_name_to_mat(site_frequency_file_name), 'file')) )

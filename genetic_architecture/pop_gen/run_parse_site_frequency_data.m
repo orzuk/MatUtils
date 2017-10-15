@@ -22,7 +22,7 @@ exome_struct = get_exome_data_info(params.exome_data); % get metadata: file name
 if(params.parse_site_frequency_flag) % here we parse
     %    if(read_to_mat_flag)
     vcf_file_names =  GetFileNames(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, [exome_struct.prefix, '*.vcf']), 1);
-    for i=1:10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG. length(vcf_file_names) % loop on all chunks (By chromosomes or otherwise)
+    for i=1:length(vcf_file_names) % 10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG. length(vcf_file_names) % loop on all chunks (By chromosomes or otherwise)
         job_str = ['[A] =' ... % , n_vec, count_vec, f_vec, allele_types] = ' ...
             'parse_site_frequency_data(''' vcf_file_names{i} ...
             ''', exome_struct, [], ' num2str(params.read_to_mat_flag) ', ' num2str(params.extract_fields_flag) ', ' ...
@@ -68,8 +68,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
         all_A = load(fullfile(spectrum_data_dir, spectrum_population_data_file{i_pop}), 'count_vec', 'f_vec', 'n_vec', 'allele_types');
         all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous
         all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!!
-        synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)); % 'synonymous_variant' % 'coding-synonymous'
-        
+        synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)); % 'synonymous_variant' % 'coding-synonymous'        
         fit_demography = 0;
         if(~exist(demography_file, 'file') || (1 == 0)) % here fit new model (computationally heavy)
             fit_demography = 1;
@@ -158,6 +157,12 @@ if(params.estimate_gene_by_gene) % estimate potential target size for each gene 
         end
     end % loop on prefix
 end % estimate gene by gene parameters
+
+% New! plot results of fitting : compare between populations, compare to human-chimp etc. 
+if( params.estimate_gene_by_gene)
+
+end    
+    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
