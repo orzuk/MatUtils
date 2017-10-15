@@ -26,17 +26,19 @@ if(length(x_vec) == size(data,2))
     x_tics = 1:size(data,2);
     set(gca, 'xtick', x_tics);
 end
-if(exist('x_vec', 'var') && ~isempty(x_vec))    
+if(exist('x_vec', 'var') && ~isempty(x_vec))
     x_labels = num2str_cell(vec2column(x_vec(x_tics)));
-    
-    horz_flag = 0;
-    if(horz_flag) % horizonal labels
-        set(gca,'xtickLabel',x_labels);
+    %    horz_flag = 0;
+    set(gca,'xtickLabel',x_labels);
+    %    if(~horz_flag) % horizonal labels
+    if(x_N == 0)
+        set(gca, 'XTickLabelRotation', 270);
     else
         for i=1:length(x_labels)
             text(i, x_N, x_labels{i}, 'rotation', 90, 'linewidth', 2);
         end
     end
+    %    end
 end
 if(exist('y_vec', 'var') && ~isempty(y_vec))
     y_tics = get(gca, 'ytick');
