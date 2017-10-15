@@ -18,7 +18,7 @@ spectrum_data_files = {'/Nelson_Science_2012/Nelson_Science_data_table_S2.txt', 
     []}; % NEW: add gnomad dataset  % Data file with exome sequencing results %  '/Tennessen_Science_2012/ESP6500.chr19.snps.vcf', []}; % S3
 
 spectrum_files_prefix = {'Nelson', 'all_chr_ESP6500', 'all_chr_ESP6500.small_gene_list', ...
-    'ESP6500', 'ExAC.chunks'}; % 'ESP6500*.chr', 'ExAC'};
+    'ESP6500', 'ExAC.chunks'}; % 'ExAC.chunks (zero temporary added) % 'ESP6500*.chr', 'ExAC'};
 
 
 populations_vec = cell(num_datasets, 1); pop_str_vec = cell(num_datasets, 1);
@@ -48,7 +48,7 @@ exome_struct.exons_file = 'hg18_exons.mat'; % where to save exons
 % New: set file with exome data (should fit ExAC dataset)
 switch exome_data
     case 'ExAC'
-        exome_struct.spectrum_data_files_str = fullfile(exome_data, 'AllPop', 'ExAC.chunks00*_AllPop.mat'); % ...
+        exome_struct.spectrum_data_files_str = fullfile(exome_data, 'AllPop', 'ExAC.chunks0*_AllPop.mat'); % run on first 100 files  ...
 %            ['{''' fullfile(exome_data, 'AllPop', 'ExAC.chunks00*_AllPop.mat') '''}'];  % File with exome data (but only one chunk!!)
     otherwise
         exome_struct.spectrum_data_files_str = '{';  % File with exome data

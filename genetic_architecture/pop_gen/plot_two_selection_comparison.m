@@ -7,7 +7,6 @@
 % 
 function plot_two_selection_comparison(HumanChimp, HumanExome, sfs_figs_dir)
 
-
 % Intersect list with the list of selection coefficients from human-exome studies
 [common_genes, I, J] = intersect(upper(HumanChimp.Symbol), upper(HumanExome.gene));
 
@@ -23,16 +22,13 @@ if(isfield(HumanExome, 'mis_z'))
 else
     quant_norm = 0;
 end
-
 if(quant_norm)
     [~, sort_perm] = sort(HumanExome.mis_z(J));
     quant_norm_mis_z = sort(HumanChimp.s(I));
-    quant_norm_mis_z = quant_norm_mis_z(inv_perm(sort_perm));
-    
+    quant_norm_mis_z = quant_norm_mis_z(inv_perm(sort_perm));    
     figure; plot(HumanExome.mis_z(J), quant_norm_mis_z, '.')
     s_vec_y = normcdf(-HumanExome.mis_z(J)) - 0.1 * HumanExome.mis_z(J);
-    s_vec_y = s_vec_y * 2*10^(-4) - 2*10^(-4);
-    
+    s_vec_y = s_vec_y * 2*10^(-4) - 2*10^(-4);    
     s_vec_x = HumanChimp.s(I);
 else % just take selection coefficients
     s_vec_x = HumanChimp.s(I); 
@@ -54,8 +50,7 @@ legend({'data', ['fit (\rho-' num2str(rho, 3) ')']}, 'location', 'northwest', ..
     'fontsize', 14); legend('boxoff');
 my_saveas(gcf, fullfile(sfs_figs_dir, 'inter_intra_species_s_hat'), {'epsc', 'pdf', 'jpg'});
 
-
-% Finally, plot the scatter of the two:
+% Finally, scatter-plot of the two coefficients vectors:
 figure;
 loglog(-s_vec_x, -s_vec_y, '.'); hold on; % make a scatter plot of s inferred from exome data and from human-chimp comparison
 %loglog(min(-s_vec_x):10^(-6):max(-s_vec_x), min(-s_vec_x):10^(-6):max(-s_vec_x), 'r'); % ploy y=x line 
@@ -71,14 +66,9 @@ loglog(-s_vec_x(special_inds2), -s_vec_y(special_inds2), 'g*');
 my_saveas(gcf, fullfile(sfs_figs_dir, 'inter_intra_species_s_hat_log'), {'epsc', 'pdf', 'jpg'});
 
 
-
-
-
-
 % HERE plot ONLY exomes. Take all (not just intersection!)
 s_vec_y = -HumanExome.s_het; % take ALL genes !!
 s_vec_y_95 = HumanExome.s_het_upper95-HumanExome.s_het_lower95;
-
 
 % Plot confidence intervals 
 figure; loglog(-s_vec_y, s_vec_y_95 ./ 4, '.'); xlabel('$\hat{s}_{D}$', 'interpreter', 'latex', 'fontsize', 14, 'fontweight', 'bold'); 
@@ -88,10 +78,7 @@ my_saveas(gcf, fullfile(sfs_figs_dir, 'PTV_s_hat_vs_std'), {'epsc', 'pdf', 'jpg'
 
 % plot histogram 
 figure; hist(-s_vec_y, 100); xlabel('SFS $\hat{s}_D$', 'interpreter', 'latex'); ylabel('counts'); 
-
 figure; semilogx(sort(-s_vec_y), (1:length(s_vec_y)) ./ length(s_vec_y));  xlabel('SFS $\hat{s}_{D}$', 'interpreter', 'latex'); ylabel('cumulative counts '); % plot cumulative
-
-
 
 [h_s, bins_s] = hist(-s_vec_y, 250); 
 figure; semilogx(bins_s, smooth(h_s, 5)); xlabel('SFS $\hat{s}_{D}$', 'interpreter', 'latex'); ylabel('density counts '); % plot cumulative
