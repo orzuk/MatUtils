@@ -1,17 +1,15 @@
 % Script for runnin sfs_code forward simulator for Fisher-Wright Model
 
-AssignGeneralConstants;
+AssignGeneralConstants; AssignRVASConstants;
 orange = [1 0.6 0.1];
 population_color_vec = {'k', orange, 'r', 'g', 'b', 'c'};
 % eric_color_vec = 'kbgyr'; % Conenstion for selection coefficients (we don't have orange. Use yellow)
 eric_color_vec = {'k', 'b', 'g', orange, 'r'}; % Conenstion for selection coefficients (we don't have orange. Use yellow)
-
 my_symbol_vec = {'--', '-', ':', '-.'}; % flip ordering (set integer powers as solid lines)
 selection_color_vec = {'k', 'b', 'g', orange, 'r'}; % replace yellow with orange
 model_str = 'equilibrium';
 two_side_flag = 0; % 0 - use derived allele frequency, 1 - use minor allele frequency
-sim_flag = 'mine'   % sfs , schaffner
-
+sim_flag = 'mine'   % sfs , schaffner % choose how to simulate SFS
 
 if(machine == UNIX) % set sfs_code path
     % sfs_code_dir = 'c/Users/user/Downloads/sfscode';
@@ -31,9 +29,7 @@ for i=1:length(s_vec_str)
     
     sfs_output_gazava{i} = fullfile(sfs_code_dir, 'scripts', 'Tennenssen.out'); % update here according to s 
 end
-
 sfs_sims_dir = '../../common_disease_model/data/schaffner_simulations/EuropeFixed/files_europe_fixed/files_var_eric'; % New Version !! Europe fixed
-sfs_figs_dir = ['C:\Users\' user_str '\Dropbox\rare_alleles_paper\JamesZou\figs'];
 
 % set demoraphic model: convention:
 iters = 1000; % number of iterations
@@ -46,17 +42,14 @@ mu = 10^(-5); % mutation rate
 expansion_factor = 1; % no expansion
 cum_flag = 'weighted';
 
-
 % Create models for dempgraphy
 % Set also other demographic_models
 N_vec_gazava = create_demographic_model('gazava');
 
-
 % Simulations ! takes a long time
 for i=1:length(s_vec) % loop on selection
     run_s = s_vec(i)
-    num_generations_gazava =  length(N_vec_gazava)-1;
-    
+    num_generations_gazava =  length(N_vec_gazava)-1;    
     switch lower(sim_flag)
         case 'mine'  % run simulations using own Matlab program
             [freq_struct_gazava{i}, absorption_struct_gazava{i}, simulation_struct_gazava{i}, ...
@@ -73,10 +66,8 @@ for i=1:length(s_vec) % loop on selection
             x_vec_gazava{i} = freq_struct_gazava{i}.freq_vec;
             y_vec_gazava = cumsum(x_vec_gazava{i});
             y_vec_gazava{i} = y_vec_gazava{i} ./ y_vec_gazava{i}(end);  % normalize
-            y_vec_not_weighted_gazava{i}
-            
-        case 'schaffner' % run simulations using Schaffner's program 
-            
+            y_vec_not_weighted_gazava{i}            
+        case 'schaffner' % run simulations using Schaffner's program             
     end % switch sim_flag    
 end % loop on selection coefficient s 
 
@@ -103,13 +94,10 @@ i_N = 4; % set N=10,000
 final_x_vec = (1:2*N_vec(i_N)-1) ./ (2*N_vec(i_N)); % set new coordinates
 for i=1:length(s_vec) % loop on selection
     tmp_p_vec_equlibrium_analytic{i} = exp( allele_freq_spectrum([0 final_x_vec 1], -s_vec(i), N_vec(i_N), two_side_flag, 'log', 1) ); % compute analytic approxiamtion (valid only for constant population size)
-    tmp_p_vec_equlibrium_analytic2{i} = phi_s_integral([0 final_x_vec 1], -s_vec(i)*4*N_vec(i_N), -1 ); % compute analytic approxiamtion (valid only for constant population size)
-    
-    tmp_p_vec_equlibrium_analytic{i} = normalize_hist(final_x_vec, tmp_p_vec_equlibrium_analytic{i}(2:end-1)); % normalized
-    
+    tmp_p_vec_equlibrium_analytic2{i} = phi_s_integral([0 final_x_vec 1], -s_vec(i)*4*N_vec(i_N), -1 ); % compute analytic approxiamtion (valid only for constant population size)    
+    tmp_p_vec_equlibrium_analytic{i} = normalize_hist(final_x_vec, tmp_p_vec_equlibrium_analytic{i}(2:end-1)); % normalized    
     mean_weighted_freq(i) = absorption_time_by_selection(s_vec(i), theta, N_vec(1), 1/(2*N_vec(i_N)), 1- 1/(2*N_vec(i_N)), 2) / ...
-        absorption_time_by_selection(s_vec(i), theta, N_vec(i_N), 1/(2*N_vec(1)), 1- 1/(2*N_vec(i_N)), 1);
-    
+        absorption_time_by_selection(s_vec(i), theta, N_vec(i_N), 1/(2*N_vec(1)), 1- 1/(2*N_vec(i_N)), 1);    
     tmp_median_equilibrium_analytic(i) = final_x_vec(find(cumsum(tmp_p_vec_equlibrium_analytic{i}) / ...
         sum(tmp_p_vec_equlibrium_analytic{i}) >= 0.5, 1));
 end
@@ -129,15 +117,13 @@ for plot_simulations = 2 % 0:2
                 sim_str = '_expansion_gazava';
                 semilogx(x_vec_gazava{i}, y_vec_gazava{i}, ...
                     'color', eric_color_vec{tmp_color_ind}, ...
-                    'linestyle', my_symbol_vec{0+mod_max(i-1,2)}, 'linewidth', 2); hold on;  % plot analytic
-                
+                    'linestyle', my_symbol_vec{0+mod_max(i-1,2)}, 'linewidth', 2); hold on;  % plot analytic                
             case 1  % simulation equilibrium
                 model_str = 'equilibrium';
                 sim_str = '_and_simulations';
                 semilogx(x_vec{i,i_N}, y_vec{i,i_N}, ...
                     'color', eric_color_vec{tmp_color_ind}, ...
-                    'linestyle', my_symbol_vec{0+mod_max(i-1,2)}, 'linewidth', 2); hold on;  % plot analytic
-                
+                    'linestyle', my_symbol_vec{0+mod_max(i-1,2)}, 'linewidth', 2); hold on;  % plot analytic                
             case 0
                 model_str = 'equilibrium';
                 semilogx(final_x_vec, cumsum(tmp_p_vec_equlibrium_analytic{i})/sum(tmp_p_vec_equlibrium_analytic{i}), ...
@@ -161,11 +147,9 @@ for plot_simulations = 2 % 0:2
     my_saveas(gcf, fullfile(sfs_figs_dir, ['cumulative_freq_' model_str  sim_str]), {'epsc', 'pdf'}); % save file
 end % loop on plot simulations
 
-
 % Just check that resulting medians make sense
 %figure; semilogx(s_vec, mean_weighted_freq); xlabel('s'); ylabel('mean-weighted-freq'); title('Mean Weighted Frequency');
 figure; semilogx(s_vec, tmp_median_equilibrium_analytic); xlabel('s'); ylabel('meadin-weighted-freq'); title('Median Weighted Frequency');
-
 
 % Compute mean and median for each s
 s_null_vec = [10.^(-1:-0.01:-5) 0]; % , s=10^-1.5, s=10^-2, ... s=10^-5, s=0);

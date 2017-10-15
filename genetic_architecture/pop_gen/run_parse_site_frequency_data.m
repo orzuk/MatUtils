@@ -159,8 +159,9 @@ if(params.estimate_gene_by_gene) % estimate potential target size for each gene 
 end % estimate gene by gene parameters
 
 % New! plot results of fitting : compare between populations, compare to human-chimp etc. 
-if( params.estimate_gene_by_gene)
-
+if(params.plot_gene_by_gene)
+    plot_fitted_selection_parameters(fullfile(spectrum_data_dir, exome_data, 'GeneByGene', ...
+        [remove_suffix_from_file_name(exons_file), '_fitted_stats.mat']), exome_struct, exome_data_figs_dir);
 end    
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

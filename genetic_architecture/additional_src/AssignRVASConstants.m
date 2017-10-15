@@ -10,7 +10,6 @@ else % PC
     sfs_code_dir = ['C:/Users/' user_str '/Downloads/sfscode'];
 end
 sfs_figs_dir = ['C:\Users\' user_str '\Dropbox\rare_alleles_paper\JamesZou\figs'];
-
 exome_data_figs_dir = ['C:\Users\' user_str '\Dropbox\rare_alleles_paper\RVAS_GeneSpecific\figs\' exome_data];
 
 
