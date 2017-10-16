@@ -113,7 +113,7 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
     end
 end % loop on populations (temp.)
 % Temp: plot all populations together (should be part of plotting function
-plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir; plot_params.hist = 1; plot_params.xlim = [10^(-6) 1];
+plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir; plot_params.hist = 1; plot_params.xlim = [10^(-4) 1];
 plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1; plot_params.font_size=8; % plot cumulative weighted allele frequency distribution
 plot_allele_freq(s_vec, Demographic_model(1:6), plot_params)
 

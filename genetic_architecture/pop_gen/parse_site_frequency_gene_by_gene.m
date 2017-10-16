@@ -24,7 +24,6 @@ if(ischar(spectrum_data_file))
         GetFileNames(fullfile(spectrum_data_dir, spectrum_data_file))); % here for all files in chunks
 end
 num_files = length(spectrum_data_file);
-
 exome_data = str2word('\', spectrum_data_file(1), 1); exome_struct = get_exome_data_info(exome_data{1});
 Assign24MammalsGlobalConstants; AssignRVASConstants;
 if(~exist('plot_flag', 'var') || isempty(plot_flag))

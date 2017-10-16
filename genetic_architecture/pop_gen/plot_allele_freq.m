@@ -13,20 +13,22 @@ num_s = length(s_vec);
 
 plot_params  = internal_set_default_params(plot_params);
 if(plot_params.new_fig)
-    figure;
+    figure;  
 end
+set(0, 'defaultFigureRenderer', 'painters'); % set render to show dots 
+
 switch plot_params.figure_type % ALWAYS add legend !!!
     case 1 % CAF
-        plot_params.ylabel_str = 'Combined allele frequency f_s';
+        plot_params.ylabel_str = 'Combined allele frequency $f_s$';
         save_file = 'CAF_different_populations';
     case 2 % median of median allele frequency
         plot_params.ylabel_str = 'Median allele frequency';
         save_file = 'Median_IAF_different_populations';
     case 3 % mean of median allele frequency
-        plot_params.ylabel_str = 'Mean of median allele frequency f_s';
+        plot_params.ylabel_str = 'Mean of median allele frequency $f_s$';
         save_file = 'MeanMedian_IAF_different_populations';
     case 4 % again median ?? for non-zeros
-        plot_params.ylabel_str = 'Median allele frequency f_s';
+        plot_params.ylabel_str = 'Median allele frequency $f_s$';
         save_file = 'Median_nonzero_IAF_different_populations';
 end % switch figure type
 for i_pop = 1:num_populations % loop on populations
@@ -45,6 +47,8 @@ for i_pop = 1:num_populations % loop on populations
         internal_plot_allele_freq(s_vec, Demographic_models{i_pop}, plot_params);
     end
 end
+%orient landscape;
+
 if(isfield(plot_params, 'figs_dir')) % save plot
     %orient landscape;    
     my_saveas(gcf, fullfile(plot_params.figs_dir, save_file), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
@@ -101,6 +105,8 @@ for i_s = 1:num_s
             plot_p_vec = cumsum(plot_p_vec);
         end
     end
+    y_lim(1) = min(y_lim(1), min(plot_p_vec)); y_lim(2) = max(y_lim(2), max(plot_p_vec));
+    
     %   max_diff_should_be_negative = max(diff(plot_p_vec))
     if(plot_params.log(1)) % log x
         if(plot_params.log(2)) % log y
@@ -119,33 +125,32 @@ for i_s = 1:num_s
                 'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
         end
     end % log x
-    y_lim(1) = min(y_lim(1), min(plot_p_vec)); y_lim(2) = max(y_lim(2), max(plot_p_vec));
 end % loop on i_s
 
-title(D.name, 'fontsize', plot_params.font_size); % need to conver to nice name later
 xlim(plot_params.xlim); ylim([y_lim(1)*0.99, y_lim(2)*1.01]);
+set(gca, 'XTick', logspace(log10(plot_params.xlim(1)), log10(plot_params.xlim(2)), log10(plot_params.xlim(2)) - log10(plot_params.xlim(1)) +1)); % change ticks
+add_faint_grid(0.5, 0);
+
+
 if(strmatch('ylabel', plot_params.legend))
-    ylabel(plot_params.ylabel_str, 'fontsize', plot_params.font_size); 
+    ylabel(plot_params.ylabel_str, 'fontsize', plot_params.font_size, 'interpreter', 'latex'); 
 end
 if(strmatch('xlabel', plot_params.legend))
-    xlabel('f'); % tmp
+    xlabel('$f$', 'interpreter', 'latex'); % tmp
 end
+title(strdiff(D.name, 'Fitted.'), 'fontsize', plot_params.font_size, 'interpreter', 'latex'); % need to conver to nice name later
 if(strmatch('legend', plot_params.legend))
-    [h_leg,h_l] = legend(s_legend_vec, 'location', 'eastoutside', 'fontsize', plot_params.font_size-4); legend('boxoff'); % just legend
+    [h_leg, h_l] = legend(s_legend_vec, 'location', 'eastoutside', 'fontsize', plot_params.font_size-4); legend('boxoff'); % just legend
     h_line=findobj(h_l,'type','line'); 
     lineXData = get(h_line, 'XData');  
     for j=1:2:length(lineXData) 
         lineXData{j}(2) = 0.65; lineXData{j}(1) = 0.3; 
         set(h_line(j), 'XData', lineXData{j});
     end
-    % set(h_line, 'XData', lineXData);
-    
-    set(gca, 'xcolor', [0.8 0.8 0.8], 'ycolor', [0.8 0.8 0.8]); % make legend invisible    
+    % set(h_line, 'XData', lineXData);    
+ %   set(h_leg, 'xcolor', [0.8 0.8 0.8], 'ycolor', [0.8 0.8 0.8]); % make legend invisible    
     pos_l = get(h_leg, 'position'); set(h_leg, 'position', [pos_l(1)+0.11 pos_l(2)-0.015 pos_l(3) pos_l(4)]);
 end
-%%%add_faint_grid(0.5);
-% orient landscape;
-% Problem: legends appear twice - need to re-arrange order of grids to make them appear only once !!
 
 % Internal function for setting defaults: density un-weighted
 function plot_params  = internal_set_default_params(plot_params)
