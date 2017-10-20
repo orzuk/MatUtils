@@ -39,7 +39,6 @@ end % if read_to_mat_flag
 %%%%%%%%%%%%% END Stage 1: Convert to .mat file.         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%% Stage 2: Extract All Info Fields to Population file %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -422,9 +421,6 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
         WriteDataFile(S_NEW, file_name_to_txt(add_pop_to_file_name(site_frequency_file_name, population{1})));
     end
 end % loop on population again
-
-
-
 
 % Internal function: Get cumulative freq. of all alleles below a certain threshold
 %

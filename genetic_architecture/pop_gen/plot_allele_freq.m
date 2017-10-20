@@ -126,7 +126,6 @@ for i_s = 1:num_s
         end
     end % log x
 end % loop on i_s
-
 xlim(plot_params.xlim); ylim([y_lim(1)*0.99, y_lim(2)*1.01]);
 set(gca, 'XTick', logspace(log10(plot_params.xlim(1)), log10(plot_params.xlim(2)), log10(plot_params.xlim(2)) - log10(plot_params.xlim(1)) +1)); % change ticks
 add_faint_grid(0.5, 0);

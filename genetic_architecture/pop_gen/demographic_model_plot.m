@@ -9,6 +9,10 @@
 %
 function demographic_model_plot(D_cell, index, log_like_mat, k_vec, n_vec, print_all_models)
 
+AssignRVASConstants;
+
+plot_params.font_size=10;
+
 if(~exist('print_all_models', 'var') || isempty(print_all_models))
     print_all_models = 1; % print all possible models
 end
@@ -17,18 +21,21 @@ AssignGeneralConstants; AssignRVASConstants;
 num_D = length(D_cell);
 pseudo_count = 1;
 
-figure;  subplot(1,2,1);  % Plot demographic models
+figure; % subplot(1,2,1);  % Plot demographic models
 legend_vec = cell(num_D, 1);
 for i=1:num_D
     N_vec = demographic_parameters_to_n_vec(D_cell{i}, index(i));
     semilogy(N_vec, 'linewidth', 2, 'color', color_vec(i)); hold on; % semilogy(N_vec_hat, 'r', 'linewidth', 2);
-    legend_vec{i} = D_cell{i}.name;
+    legend_vec{i} = strdiff(D_cell{i}.name, 'Fitted.');
 end
 xlabel('Time (generations)'); ylabel('Population size');
-if(num_D > 1)
+if((num_D > 1) && print_all_models)
     title(['Best model: LL=' num2str(log_like_mat(index(2)), 5)]);
 end
-legend(legend_vec, 'fontsize', 14); legend('boxoff');
+legend(legend_vec, 'fontsize', plot_params.font_size, 'location', 'southeast'); legend('boxoff');
+add_faint_grid(0.5);
+my_saveas(gcf, fullfile(exome_data_figs_dir, 'fitted_demographies'), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
+
 
 if(print_all_models)
     N_vec = demographic_parameters_to_n_vec(D_cell{1}, index(1));
@@ -52,7 +59,7 @@ if(print_all_models)
     xlabel('Time (generations)'); ylabel('Population size');
     cur_title = get(gca, 'title');
     title([cur_title.String '; Similar model: LL=' num2str(log_like_mat(min_I), 5)]);
-    legend([legend_vec' 'Fitted-Similar'] , 'fontsize', 14); legend('boxoff');
+    legend([legend_vec' 'Fitted-Similar'] , 'fontsize', plot_params.font_size); legend('boxoff');
     
     D_cell{end+1} = D_cell{end}; index(end+1) = min_I; D_cell{end}.index = min_I; % Add closest demography to true demography
     legend_vec{end+1} = 'closest-demography';
@@ -80,10 +87,8 @@ if(plot_sfs) % plot neutral sfs for demographic model
     
     n_sample = 200; % this should be determined in input
     LL_legend_vec = legend_vec;
-    
-    
-     loglike_params = struct('null_w_vec', null_w_vec, 'include_phenotype', 0, ...
-            'full_flag', full_flag, 'num_individuals', []);    % set parameters
+    loglike_params = struct('null_w_vec', null_w_vec, 'include_phenotype', 0, ...
+        'full_flag', full_flag, 'num_individuals', []);    % set parameters
     for i=1:length(D_cell)
         D_cell{i}.use_allele_counts=0;
         [log_like_mat_again{i}, P_poly_again{i}]  = ... % compute likelihood (here vary only alpha)
@@ -106,16 +111,14 @@ if(plot_sfs) % plot neutral sfs for demographic model
             k_vec_hat{i} = population_to_sample_allele_freq(allele_freq_vec, 2*N_vec(end-1), n_sample); % simulate a sample from population
             n_vec_hat{i} = repmat(n_sample, num_alleles, 1);
         end
-            
-        
         %        semilogx(x_vec ./ (2*N_vec(end-1)), p_vec); hold on;
         semilogx(D_cell{i}.SFS.x_vec ./ (2*N_vec(end-1)), D_cell{i}.SFS.p_vec(1,:), color_vec(i), 'linewidth', 2); hold on;
     end % loop on models
     [unique_k_vec, h_k_vec] = unique_with_counts(k_vec);
     semilogx(unique_k_vec ./ n_sample, h_k_vec ./ length(k_vec), 'm', 'linewidth', 2);  % PLOT ALSO DATA
     xlabel('$f$ (population)', 'interpreter', 'latex'); ylabel('$\Psi(f)$ population', 'interpreter', 'latex');
-    title('Population Frequencies');
-    legend([LL_legend_vec' 'Data'], 'fontsize', 14); legend('boxoff');
+    title('Population Frequencies', 'interpreter', 'latex');
+    legend([LL_legend_vec' 'Data'], 'fontsize', plot_params.font_size); legend('boxoff');
     subplot(2,2,2);  % Plot sample SFS
     legend_with_LL = [LL_legend_vec' 'Data'];
     for i=1:length(D_cell)
@@ -129,15 +132,15 @@ if(plot_sfs) % plot neutral sfs for demographic model
     end
     semilogx(unique_k_vec ./ n_sample, h_k_vec ./ length(k_vec), 'm', 'linewidth', 2);  % PLOT ALSO DATA
     xlabel('$f$ (sample)', 'interpreter', 'latex'); ylabel('$\Psi(f)$ sample', 'interpreter', 'latex');
-    legend(legend_with_LL, 'fontsize', 14); legend('boxoff');
-    title('Sample Frequencies');
+    legend(legend_with_LL, 'fontsize', plot_params.font_size); legend('boxoff');
+    title('Sample Frequencies', 'interpreter', 'latex');
     subplot(2,2,3);  hold off; % figure; % What is this figure?? is it empirical log-likelihood as function of derived allele count?? show also data on same plot!!!
     for i=1:length(D_cell) % loop on models. Here we consider polymorphic if smaller than MAX(n_vec) (should be modified to compare each allele to it's own n)
         plot(unique(k_vec((k_vec>0) & (k_vec < max(n_vec)))), cumsum(P_poly_again{i}.LL_vec(2:end-1)), ['*' color_vec(i)]); hold on; % plot likelihood contribution for polymorphic alleles
     end
     %    plot(unique_k_vec, log(h_k_vec ./ length(k_vec)), 'm*', 'linewidth', 2);  % PLOT ALSO DATA
     xlabel('k (sample allele count.)'); ylabel('LogLike');
-    legend(LL_legend_vec', 'fontsize', 14); legend('boxoff'); %  'Data']
+    legend(LL_legend_vec', 'fontsize', plot_params.font_size); legend('boxoff'); %  'Data']
     unique_k_vec_poly = unique_k_vec((unique_k_vec>0) & (unique_k_vec<max(n_vec)));
     h_k_vec_poly = h_k_vec((unique_k_vec>0) & (unique_k_vec<max(n_vec)));
     for i=1:length(D_cell) % loop on models
@@ -153,8 +156,10 @@ if(plot_sfs) % plot neutral sfs for demographic model
         legend_with_LL{i} = [legend_with_LL{i} ' ; direct-LL=' num2str(log_like_mat_direct(i), 4)]; % compute again
     end
     semilogx(unique_k_vec_poly ./ n_sample, h_k_vec_poly ./ sum(h_k_vec_poly), 'm', 'linewidth', 2);  % PLOT ALSO DATA  % / length(k_vec)
-    legend(legend_with_LL, 'fontsize', 14); legend('boxoff');
-     xlabel('k (sample allele count.)'); ylabel('$\psi(f)$ sample', 'interpreter', 'latex');
+    legend(legend_with_LL, 'fontsize', plot_params.font_size); legend('boxoff');
+    xlabel('k (sample allele count.)', 'interpreter', 'latex'); ylabel('$\psi(f)$ sample', 'interpreter', 'latex');
+    my_saveas(gcf, fullfile(exome_data_figs_dir, 'fitted_sfs'), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
+    
     
     debug_SFS = 0;
     if(debug_SFS)
@@ -163,8 +168,8 @@ if(plot_sfs) % plot neutral sfs for demographic model
         x_vec2 = unique_k_vec_poly ./ n_sample;
         y_vec2 = P_poly_again{i}.sample_p_vec(2:end-1) ./ sum(P_poly_again{i}.sample_p_vec(2:end-1));
         figure; semilogx(x_vec1, y_vec1); hold on;
-        semilogx(x_vec2, y_vec2, 'r'); hold on; 
-        xlabel('f (allele freq.)'); ylabel('P(f) ???'); 
+        semilogx(x_vec2, y_vec2, 'r'); hold on;
+        xlabel('f (allele freq.)'); ylabel('P(f) ???');
     end
 end % if plot_sfs
 

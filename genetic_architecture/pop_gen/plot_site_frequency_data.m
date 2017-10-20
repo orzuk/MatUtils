@@ -34,7 +34,7 @@ if(ischar(A)) % load input data from file
     unite_field_names = {'XXX_FEATURE_', 'GENE', 'XXX_CHROM', 'POS',  'ALLELE_FREQ',   'GENE_INDS', 'unique_genes'}; % list of fields to take in union    
     for i=1:num_populations
         sfs_file_names =  GetFileNames(add_pop_to_file_name(spectrum_data_file, exome_struct.populations{i}), 1);
-        for i_c=1:10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG. length(sfs_file_names) % loop on all chunks (By chromosomes or otherwise)  % NEW! let many populations !!
+        for i_c=1:length(sfs_file_names) % 10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG.  % loop on all chunks (By chromosomes or otherwise)  % NEW! let many populations !!
             spectrum_population_data_file{i,i_c} = sfs_file_names{i_c}; % [remove_suffix_from_file_name(spectrum_data_file) '_' exome_struct.populations{i} '.mat'];
             cur_A = load(spectrum_population_data_file{i,i_c}, 'XXX_REF_ALLELE_COUNT_', 'XXX_VARIANT_COUNT_', 'num_genes', 'unique_genes', ... % 'GENE', ...
                 'num_allele_types', 'num_alleles_per_gene_mat', 'total_heterozygosity_per_gene_mat', ...
@@ -132,7 +132,6 @@ for j=1:num_populations
         ( ratio_vec2(A{j}.good_allele_inds{5}(1)) - ratio_vec2(A{j}.good_allele_inds{5}(3)) ); % fraction of missense which are roughly 'lethal'
     % alpha_fit = alpha_fit_by_freq;
 end
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% Save also data as tab-delimited text %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -505,7 +504,6 @@ for i=vec2row(A{1}.good_allele_inds{5}) % loop on different allele types 1:min(6
                     [missense_fit_bins, missense_fit_hist, stop_hist_interp, synonymous_hist_interp] = ...
                         sum_hist(stop_f_vec, alpha_fit(j).*stop_hist, ...
                         synonymous_f_vec, (1-alpha_fit(j)).*synonymous_hist, 10, 0);
-                    
                     fit_inds = intersect( find(missense_fit_bins < min( max(stop_f_vec), max(synonymous_f_vec) )), ...
                         find(missense_fit_bins > max( min(stop_f_vec), min(synonymous_f_vec) )) );
                     missense_fit_bins = missense_fit_bins(fit_inds); missense_fit_hist = missense_fit_hist(fit_inds);
@@ -516,8 +514,6 @@ for i=vec2row(A{1}.good_allele_inds{5}) % loop on different allele types 1:min(6
             ', het.=' num2str(new_A{j}.heterozygosity.per_gene(i),2)];
 %         num_points = length(plot_x_vec); num_pos_points = sum(plot_x_vec > 0);
 %         legend_vec{ctr} = [legend_vec{ctr} '(' num2str(num_pos_points) ', ' num2str(num_points) ')']; % add #points to legend
-        
-        
         ctr=ctr+1;
     end % loop on different populations
 end % loop on different allele types
@@ -529,7 +525,6 @@ end % loop on different allele types
 %stop_ind = find(A{1}.allele_types_ind == STOP); %target_stop_ind = find(MutationTypes == STOP);
 missense_ind = find(A{1}.allele_types_ind == MISSENSE); %target_missense_ind = (MutationTypes == MISSENSE);
 synonymous_ind = find(A{1}.allele_types_ind == SYNONYMOUS); %target_synonymous_ind = (MutationTypes == SYNONYMOUS); % Get different mutation types
-
 [~, I_genes, J_genes] = intersect(A{1}.unique_genes, GeneStruct.gene_names);
 
 additional_plot_x_vec = []; additional_plot_y_vec = [];
