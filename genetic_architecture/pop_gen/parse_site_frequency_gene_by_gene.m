@@ -79,7 +79,6 @@ if(exist('UniqueMutationRateTable', 'var'))
     MutationRateTable = UniqueMutationRateTable;
 end
 num_genes = length(GeneStruct.gene_names); % get total # of genes
-
 num_populations = length(exome_struct.pop_str);
 
 SiteFreqSpecStruct = cell(num_files, 1);

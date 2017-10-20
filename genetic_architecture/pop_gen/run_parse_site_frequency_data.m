@@ -1,8 +1,8 @@
 % Master script for parsing data for site-frequency spectrum from multiple
 % datasets and plot allele-frequencies and other results
 if(isdeployed) % run as executable
-    cd('/cs/cbio/orzuk/software/Code/Matlab'); 
-    SetPathScript; % for running as executable 
+    cd('/cs/cbio/orzuk/software/Code/Matlab');
+    SetPathScript; % for running as executable
 end
 Assign24MammalsGlobalConstants; AssignGeneralConstants; AssignStatsConstants; AssignRVASConstants;
 num_bins = 0:0.01:1; % bins for what?
@@ -53,17 +53,11 @@ if(params.plot_site_frequency_flag) % Here we plot SFS for DATA !! for all popul
         fullfile(spectrum_data_dir, 'out', exome_struct.data_str, exome_struct.prefix)); %   remove_suffix_from_file_name(exome_struct.spectrum_data_file)));
 end
 
-i_pop=0;
-for population = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
-    i_pop=i_pop+1;
-    %     if(~strcmp(population, 'African')) % temp: work only on one population!
-    %         continue;
-    %     end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Use Synonymous SNPs to fit demographic model %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if(params.fit_demography)
-        all_A = [];
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Use Synonymous SNPs to fit demographic model %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if(params.fit_demography)
+    if(~exist(fullfile(dir_from_file_name(spectrum_population_data_file), [exome_struct.prefix '_AllPop.mat']), 'file'))
         for i=1:length(vcf_file_names) % loop on files to get a distribution from all chunks !!!
             iii = i
             spectrum_population_data_file = fullfile(dir_from_file_name(vcf_file_names{i}), ...
@@ -75,19 +69,22 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
                 all_A = union_SFS_structs(all_A, A);
             end
         end
-            
-            fullfile(dir_from_file_name(exome_struct.spectrum_data_file), ...
-                population{1}, [remove_suffix_from_file_name(remove_dir_from_file_name(exome_struct.spectrum_data_file)) '_' population{1} '.mat']);
-            
-           
-        all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous
-        all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!!
-        synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)); % 'synonymous_variant' % 'coding-synonymous'        
+        save(fullfile(dir_from_file_name(spectrum_population_data_file), [exome_struct.prefix '_AllPop.mat']), '-stuct', 'all_A');
+    else
+        all_A = load(fullfile(dir_from_file_name(spectrum_population_data_file), [exome_struct.prefix '_AllPop.mat']));
+    end
+    all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous
+    all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!!
+    synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)); % 'synonymous_variant' % 'coding-synonymous'
+    
+    i_pop=0;
+    for population = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
+        i_pop=i_pop+1;
         fit_demography = 0;
         if(~exist(demography_file, 'file') || (1 == 0)) % here fit new model (computationally heavy)
             fit_demography = 1;
         else  % load model
-            Demographic_model = cell(length(exome_struct.populations), 1); % temp allocate space 
+            Demographic_model = cell(length(exome_struct.populations), 1); % temp allocate space
             load(demography_file);
             if((length(Demographic_model) < i_pop) || isempty(Demographic_model{i_pop}))
                 fit_demography=1;
@@ -101,26 +98,26 @@ for population = exome_struct.populations %  {'African'} % , 'African'} % Europe
             Demographic_model{i_pop}.name = ['Fitted.' population{1}];
             save(demography_file, 'Demographic_model', 'max_LL_demographic_model'); % Save and plot demography
         end
-            
+        
         % Here plot all demographies:
         % 1. Plot the population size as function of generations for each demography
         % 2. Plot the SFS for different values of selection coefficient s for each demography
-    end % if fit demographies
-    
-    load(demography_file);
-    if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 1)) %  ~isreal(Demographic_model{i_pop}.SFS.p_vec)) % add SFS to demographic mode
-        %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
-        Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !!
-        Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
-        compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;
-        [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, ...
-            Demographic_model{i_pop}.SFS.L, SFS_compute_time] = ...
-            compute_allele_freq_spectrum_from_demographic_model( ...
-            Demographic_model{i_pop}, s_vec, compute_flag); %  s_vec([1 5 10])
-        save(demography_file, 'Demographic_model', 'max_LL_demographic_model');
-    end
-    index_vec(i_pop) = Demographic_model{i_pop}.index;
-end % loop on populations (temp.)
+        
+        load(demography_file);
+        if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 1)) %  ~isreal(Demographic_model{i_pop}.SFS.p_vec)) % add SFS to demographic mode
+            %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
+            Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !!
+            Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
+            compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;
+            [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, ...
+                Demographic_model{i_pop}.SFS.L, SFS_compute_time] = ...
+                compute_allele_freq_spectrum_from_demographic_model( ...
+                Demographic_model{i_pop}, s_vec, compute_flag); %  s_vec([1 5 10])
+            save(demography_file, 'Demographic_model', 'max_LL_demographic_model');
+        end
+        index_vec(i_pop) = Demographic_model{i_pop}.index;
+    end % loop on populations (temp.)
+end % if fit demographies
 
 if(params.plot_demography)
     % 1. Plot pop. size as function of time V
@@ -177,32 +174,32 @@ if(params.estimate_gene_by_gene) % estimate potential target size for each gene 
     end % loop on prefix
 end % estimate gene by gene parameters
 
-% New! plot results of fitting : compare between populations, compare to human-chimp etc. 
+% New! plot results of fitting : compare between populations, compare to human-chimp etc.
 if(params.plot_gene_by_gene)
     plot_fitted_selection_parameters(fullfile(spectrum_data_dir, exome_data, 'GeneByGene', ...
         [remove_suffix_from_file_name(exons_file), '_fitted_stats.mat']), exome_struct, exome_data_figs_dir);
-end    
-    
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % debug problems in generated SFS
 if(debug_sfs)
-     load('temp_surface.Fitted.European.mat'); 
-     SFS = load('temp_surface.Fitted.European.mat'); 
-     figure;     selection_color_vec = {'k', 'c', 'b', 'g', orange, 'r'}; % replace yellow with orange
-     my_symbol_vec = {'--', '-'}; % flip ordering (set integer powers as solid lines)
-     num_s = length(SFS.s_vec);
-     for i_s=1:length(SFS.s_vec)
-         tmp_color_ind = mod_max(ceil(i_s/2), ceil(num_s/2));
-         y_vec = cumsum_hist(SFS.x_vec, SFS.x_vec .* SFS.p_mat(i_s,:)); y_vec = y_vec ./ max(y_vec); 
-         semilogx(SFS.x_vec ./ max(SFS.x_vec), y_vec, 'color', selection_color_vec{tmp_color_ind}, ...
-                'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
-            xlim([10^(-4) 1]);
-     end    
-     legend(s_vec_to_legend(SFS.s_vec));
-
+    load('temp_surface.Fitted.European.mat');
+    SFS = load('temp_surface.Fitted.European.mat');
+    figure;     selection_color_vec = {'k', 'c', 'b', 'g', orange, 'r'}; % replace yellow with orange
+    my_symbol_vec = {'--', '-'}; % flip ordering (set integer powers as solid lines)
+    num_s = length(SFS.s_vec);
+    for i_s=1:length(SFS.s_vec)
+        tmp_color_ind = mod_max(ceil(i_s/2), ceil(num_s/2));
+        y_vec = cumsum_hist(SFS.x_vec, SFS.x_vec .* SFS.p_mat(i_s,:)); y_vec = y_vec ./ max(y_vec);
+        semilogx(SFS.x_vec ./ max(SFS.x_vec), y_vec, 'color', selection_color_vec{tmp_color_ind}, ...
+            'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
+        xlim([10^(-4) 1]);
+    end
+    legend(s_vec_to_legend(SFS.s_vec));
+end
 
 
 % % Next two are already in previous gene-by-gene script?

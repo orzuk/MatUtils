@@ -18,7 +18,7 @@ function [S, n_vec, count_vec, f_vec] = parse_site_frequency_data(site_frequency
     read_to_mat_flag, extract_fields_flag, compute_gene_matrices_flag)
 
 S = [];
-Assign24MammalsGlobalConstants; % get some constants needed
+Assign24MammalsGlobalConstants; AssignRVASConstants; % get some constants needed
 populations_vec = {''}; % {'_European', '_African'};
 compute_frac_carriers = 1; % compute how many carriers of alleles below a certain frequency
 
@@ -31,7 +31,6 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%  Stage 1: Convert to .mat file.           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-return_flag=0
 if(read_to_mat_flag) % convert vcf to mat files
     S = internal_read_to_mat(site_frequency_file_name);
 end % if read_to_mat_flag
@@ -43,13 +42,6 @@ end % if read_to_mat_flag
 %%%%%%%%%%%%% Stage 2: Extract All Info Fields to Population file %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 compute_snp_info=1
-if( strcmp(suffix_from_file_name(site_frequency_file_name), 'mat') )
-    %    populations_vec = {''};
-    populations_vec = {'_European', '_African'}; % special for ESP populations
-else
-    populations_vec = {'_European', '_African'};
-    return_flag = 1
-end
 populations_vec = exome_struct.populations;
 for i=1:length(populations_vec)
     if(populations_vec{i}(1) ~= '_')
@@ -76,11 +68,13 @@ end % if compute_gene_matrices_flag
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%% End Stage 3: Compute Gene-Specific Matrices          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%if(isempty(S)) % load data
-%    S = load([remove_suffix_from_file_name(site_frequency_file_name) populations_vec{1} '.mat']);
-%end
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%% Ended Main function. Start internal functions    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
@@ -213,7 +207,6 @@ my_mkdir( fullfile(dir_from_file_name(site_frequency_file_name), strdiff('_AllPo
 save(add_pop_to_file_name(site_frequency_file_name, '_AllPop'), '-struct', 'S');  % add new fields% remove fields to reduce memory
 % save(add_pop_to_file_name(site_frequency_file_name, population{1}), '-struct', 'S'); % add new fields% remove fields to reduce memory
 S.INFO = tmp_INFO; clear tmp_INFO;
-return_flag=1 % only convert to .mat
 % end % loop on population
 
 
@@ -242,8 +235,8 @@ return_flag=1 % only convert to .mat
 % 
 % Output: 
 % S - structure with .. 
-% n_vec - vector of counts for each allele 
-% count_vec -  
+% n_vec - vector of number of individuals for each allele 
+% count_vec - vector of derived allele counts for each allele
 % f_vec - vector of allele frequencies for each allele 
 % 
 function  [S, n_vec, count_vec, f_vec]  = ...
@@ -316,14 +309,9 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
         %        end
         allele_type_inds = strmatch(lower(S.allele_types{i}), lower(S.XXX_FEATURE_), 'exact'); % find current alleles (require exact match!)
         
-        n_vec{i} =  S.XXX_REF_ALLELE_COUNT_(allele_type_inds) +  S.XXX_VARIANT_COUNT_(allele_type_inds);
-        count_vec{i} =   S.XXX_VARIANT_COUNT_(allele_type_inds);
-        f_vec{i} = S.XXX_VARIANT_COUNT_(allele_type_inds) ./ max(n_vec{i}, 1); % TEMP!!! set to zero frequencies when total (ref+altnerative) counts are zero!!! 
-        
-        if(any(isnan(f_vec{i})))
-            problem_NAN = 12142314
-        end
-        
+        n_vec{i} =  S.XXX_REF_ALLELE_COUNT_(allele_type_inds,:) +  S.XXX_VARIANT_COUNT_(allele_type_inds,:);
+        count_vec{i} =   S.XXX_VARIANT_COUNT_(allele_type_inds,:);
+        f_vec{i} = S.XXX_VARIANT_COUNT_(allele_type_inds,:) ./ max(n_vec{i}, 1); % TEMP!!! set to zero frequencies when total (ref+altnerative) counts are zero!!! 
         
         [tmp_genes, ~, tmp_J] = unique(upper(S.GENE(allele_type_inds)) ); % get gene indices
         [~, ~, gene_inds{i}] = intersect(tmp_genes, S.unique_genes); % S.GENE(allele_type_inds), S.unique_genes);
