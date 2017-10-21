@@ -19,9 +19,9 @@ exome_struct = get_exome_data_info(params.exome_data); % get metadata: file name
 %%%%%%%%%%%%%%%%%%%
 % Parse SFS Files %
 %%%%%%%%%%%%%%%%%%%
+vcf_file_names =  GetFileNames(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, [exome_struct.prefix, '*.vcf']), 1);
 if(params.parse_site_frequency_flag) % here we parse
     %    if(read_to_mat_flag)
-    vcf_file_names =  GetFileNames(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, [exome_struct.prefix, '*.vcf']), 1);
     for i=1:length(vcf_file_names) % 10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG. length(vcf_file_names) % loop on all chunks (By chromosomes or otherwise)
         job_str = ['[A] =' ... % , n_vec, count_vec, f_vec, allele_types] = ' ...
             'parse_site_frequency_data(''' vcf_file_names{i} ...
@@ -57,7 +57,7 @@ end
 % Use Synonymous SNPs to fit demographic model %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if(params.fit_demography)
-    if(~exist(fullfile(dir_from_file_name(spectrum_population_data_file), [exome_struct.prefix '_AllPop.mat']), 'file'))
+    if(~exist(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, 'AllPop', [exome_struct.prefix '_AllPop.mat']), 'file'))
         for i=1:length(vcf_file_names) % loop on files to get a distribution from all chunks !!!
             iii = i
             spectrum_population_data_file = fullfile(dir_from_file_name(vcf_file_names{i}), ...
@@ -69,9 +69,9 @@ if(params.fit_demography)
                 all_A = union_SFS_structs(all_A, A);
             end
         end
-        save(fullfile(dir_from_file_name(spectrum_population_data_file), [exome_struct.prefix '_AllPop.mat']), '-stuct', 'all_A');
+        save(fullfile(dir_from_file_name(spectrum_population_data_file), [exome_struct.prefix '_AllPop.mat']), '-struct', 'all_A');
     else
-        all_A = load(fullfile(dir_from_file_name(spectrum_population_data_file), [exome_struct.prefix '_AllPop.mat']));
+        all_A = load(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, 'AllPop', [exome_struct.prefix '_AllPop.mat']));
     end
     all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous
     all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!!
@@ -94,7 +94,7 @@ if(params.fit_demography)
         if(fit_demography)
             [Demographic_model{i_pop}, max_LL_demographic_model(i_pop)] = ...
                 fit_demographic_parameters_from_allele_spectrum( ...
-                all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, [],  all_A.mu); % fit demography
+                all_A.count_vec{synonymous_ind}(:,i_pop), all_A.n_vec{synonymous_ind}(:,i_pop), [],  all_A.mu); % fit demography
             Demographic_model{i_pop}.name = ['Fitted.' population{1}];
             save(demography_file, 'Demographic_model', 'max_LL_demographic_model'); % Save and plot demography
         end
@@ -104,7 +104,7 @@ if(params.fit_demography)
         % 2. Plot the SFS for different values of selection coefficient s for each demography
         
         load(demography_file);
-        if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 1)) %  ~isreal(Demographic_model{i_pop}.SFS.p_vec)) % add SFS to demographic mode
+        if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 0)) %  ~isreal(Demographic_model{i_pop}.SFS.p_vec)) % add SFS to demographic mode
             %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
             Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !!
             Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
@@ -125,8 +125,6 @@ if(params.plot_demography)
     demographic_model_plot(Demographic_model, index_vec, max_LL_demographic_model, ...
         all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, 0);  % plot properties of fitted demography: pop. size and SFS
 end % if plot
-
-
 
 % Temp: plot all populations together (should be part of plotting function
 plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir; plot_params.hist = 1; plot_params.xlim = [10^(-4) 1];
