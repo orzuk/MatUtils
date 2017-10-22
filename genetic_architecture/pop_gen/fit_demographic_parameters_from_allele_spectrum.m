@@ -86,18 +86,13 @@ if(filter_by_moments)
         end
     end
     moments_time=cputime - moments_time
-end
-
+end % if filter by moments 
 
 % need to convert sample to population!
-[~, p_vec] = unique_with_counts(k_vec ./ n_vec); % get an empirical distribution
-total_sum = sum(p_vec);
-p_vec = p_vec ./ sum(p_vec); % normalize
-
-het_moment_mat_data = sum ( (k_vec./n_vec) .* (1-k_vec./n_vec) ) * L_correction_factor;  % compute empirical heterozygosity (corrected)
-
+%[~, p_vec] = unique_with_counts(k_vec ./ n_vec); % get an empirical distribution
+%p_vec = p_vec ./ sum(p_vec); % normalize
 % het_moment_mat_data = moment_hist(x_vec, x_vec .* (1-x_vec) .* p_vec, 0, 0, 0) .* L_correction_factor;
-
+het_moment_mat_data = sum ( (k_vec./n_vec) .* (1-k_vec./n_vec) ) * L_correction_factor;  % compute empirical heterozygosity (corrected)
 if(~isfield(D_opt, 'moments_epsilon'))
     D_opt.moments_epsilon = 0.1; % allow error in moments
 end

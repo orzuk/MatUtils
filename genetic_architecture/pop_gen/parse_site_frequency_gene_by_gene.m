@@ -97,9 +97,9 @@ load_fields = {'unique_genes', 'n_vec', 'count_vec', 'f_vec', 'allele_types', ..
     'gene_by_allele_type_het_list', ...
     'good_allele_inds', 'upper_freq_vec'};
 %    if(k == 1)  % first population
-        load_fields = [load_fields {'REF', 'ALT', 'aminoAcidChange', 'gene_by_allele_type_pos_list', 'gene_by_allele_type_inds_list', 'allele_types_ind'}];
+load_fields = [load_fields {'REF', 'ALT', 'aminoAcidChange', 'gene_by_allele_type_pos_list', 'gene_by_allele_type_inds_list', 'allele_types_ind'}];
 %    end
-all_fit_genes_I = []; 
+all_fit_genes_I = [];
 for k=1:num_files % loop on different chunks
     load_fields_str = cell2vec(load_fields, ''', ''');
     load_str = ['SiteFreqSpecStruct{' num2str(k) '} = load(''' fullfile(spectrum_data_dir, spectrum_data_file{k}) ...
@@ -120,16 +120,16 @@ for k=1:num_files % loop on different chunks
         gene_by_allele_type_het_list = SiteFreqSpecStruct{k}.gene_by_allele_type_freq_list;
         save('-append', fullfile(spectrum_data_dir, spectrum_data_file{k}), 'gene_by_allele_type_het_list');
         %        clear gene_by_allele_type_freq_list;
-    end   % finished loading SFS 
+    end   % finished loading SFS
     
     [fit_genes, fit_genes_I, fit_genes_J] = ...
         intersect( upper(GeneStruct.gene_names), upper(SiteFreqSpecStruct{k}.unique_genes));
-    all_fit_genes_I = [all_fit_genes_I fit_genes_I']; 
+    all_fit_genes_I = [all_fit_genes_I fit_genes_I'];
     ctr=1;
     for i=vec2row(fit_genes_I) % 1:num_genes % loop on genes and plot / fit selection coefficients
         sprintf(['Run gene = %d out of %d, ' upper(GeneStruct.gene_names{i})], i, num_genes)
         if(i == 10733) % tmp! debug error
-           TTT = 1234234 
+            TTT = 1234234
         end
         if(startsWith(upper(GeneStruct.gene_names{i}), upper(gene_prefix)))
             gene_header = upper(GeneStruct.gene_names{i}); % (1:2));  % Print gene name
@@ -141,7 +141,7 @@ for k=1:num_files % loop on different chunks
             end
             if(fit_selection)
                 % find gene's SFS
-                i_sfs = fit_genes_J(ctr); ctr=ctr+1;                 
+                i_sfs = fit_genes_J(ctr); ctr=ctr+1;
                 alpha_vec = 0.1:0.1:1; % possible values for alpha
                 s_null_vec = 0 -logspace(-6, -1, 10);
                 rare_cumulative_per_gene = 1;
@@ -182,7 +182,7 @@ for k=1:num_files % loop on different chunks
                     end % loop on populations
                 end
             end % if fit selection
-            % Below add combining and testing for different populations 
+            % Below add combining and testing for different populations
             aggregate_population_estimators = 0;
             if(aggregate_population_estimators) % compute an aggregate esitmator for each gene from multiple populations
             end
@@ -192,21 +192,11 @@ for k=1:num_files % loop on different chunks
                     for population2 = exome_struct.populations %  {'African'} % , 'African'} % European'} % ,
                     end
                 end
-            end            
+            end
         end % filter for genes
         if(mod(i, 10) == 0) % avoid having too many figures open
             close all;
         end
     end % loop on genes in chunk (file)
-    
 end % loop on chunks (different files)
-
 internal_save_gene_stats(GeneStruct, ExonsGeneStruct, output_data_dir, gene_struct_input_file, exome_struct, all_fit_genes_I);   % save fitted values to .mat and .txt files
-
-
-
-
-
-
-
-

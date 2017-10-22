@@ -12,8 +12,6 @@ end
 sfs_figs_dir = ['C:\Users\' user_str '\Dropbox\rare_alleles_paper\JamesZou\figs'];
 exome_data_figs_dir = ['C:\Users\' user_str '\Dropbox\rare_alleles_paper\RVAS_GeneSpecific\figs\' exome_data];
 
-
-
 switch machine % Get directory of data 
     case UNIX        
         spectrum_data_dir = '/seq/orzuk/common_disease_model/data/SiteFrequencySpectra/'; % broad
@@ -37,6 +35,7 @@ end
 exons_file = 'hg18_exons.mat'; % where to save exons
 triplet_mutations_file = 'scone_hg17_m3_64x64_rates.txt'; % 'triplets_file_human_chimp_baboon.mat'; % file with mutation rates from all 64 codons (estimated from human-chimp-baboon alignment)
 mutation_rates_file = 'human_genes_mutation_rates_hg18.mat'; % output file with triplet mutation rates
+mutation_rates_file2 = 'human_genes_mutation_rates_samocha.mat'; % output file with triplet mutation rates
 
 MISSENSE_C = 1;  NEUTRAL_C = 2; SYNONYMOUS_C = 2;  NULL_C = 3; % set allele classes. Missense BEFORE(!) Synonymous !! 
 

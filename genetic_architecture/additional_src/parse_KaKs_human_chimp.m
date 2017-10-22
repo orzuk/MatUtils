@@ -12,7 +12,7 @@ switch exome_constraint
         Constraint_file_name = 'C:\research\RVAS\Data\SiteFrequencySpectra\ExAC\ConstraintSamocha\fordist_cleaned_exac_r03_march16_z_pli_rec_null_data.txt';
     case 'ExAC_PTV' % protein truncation varinats from Shamil's biorxiv
         Constraint_file_name = 'C:\research\RVAS\Data\SiteFrequencySpectra\ExAC\PTV\ProteinTruncatingVarinats_selection_075523-1.txt'; % filled file name!!!
-    case 'ExAC_TwoClass'; % s_hat estimator from our model using missense+stops
+    case 'ExAC_TwoClass' % s_hat estimator from our model using missense+stops
         Constraint_file_name = 'C:\research\RVAS\Data\SiteFrequencySpectra\ExAC\out\GeneByGene.txt'; % fill file name!!! (for each population!)
 end
 

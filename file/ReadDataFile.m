@@ -37,7 +37,6 @@ else
     end
 end
 
-
 % Allow skip_lines to be a character. We avoid the lines containing this character
 if(ischar(skip_lines))
     skip_lines_inds = strfind_cell(R(:,1), skip_lines); 

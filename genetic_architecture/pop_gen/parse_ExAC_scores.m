@@ -35,6 +35,7 @@ xlabel('s'); ylabel('\alpha');
 my_saveas(gcf, 'ExAC_alpha_s', {'jpg', 'pdf', 'epsc'}); 
 
 
-
+% parse Mutation rates: 
+[SS, RR, RRR] = ReadDataFile('C:\research\RVAS\Data\SiteFrequencySpectra\ExAC\ConstraintSamocha\ng.3050-S2.txt', [], 1, [], tab);
 
 

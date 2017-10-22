@@ -66,7 +66,7 @@ if(params.fit_demography)
             if(i == 1)
                 all_A = A;
             else
-                all_A = union_SFS_structs(all_A, A);
+                all_A = union_SFS_structs(all_A, A);  % currently just unite all variants together - better to keep the gene identities information too? 
             end
         end
         save(fullfile(dir_from_file_name(spectrum_population_data_file), [exome_struct.prefix '_AllPop.mat']), '-struct', 'all_A');
@@ -92,9 +92,17 @@ if(params.fit_demography)
             Demographic_model{i_pop}.name = ['Fitted.' population{1}];
         end
         if(fit_demography)
+%            load(fullfile(spectrum_data_dir, 'mutation_rates', mutation_rates_file)); % load mutation rates 
+%            Unique = load(fullfile(mammals_data_dir, genome_version, [remove_suffix_from_file_name(exons_file) '_unique.mat'])); 
+            % Alternative: read mutation rates from Samocha's paper: 
+            MutationRateTable2 = load(fullfile(spectrum_data_dir, 'mutation_rates', mutation_rates_file2));
+            all_A.mu = sum(10.^(MutationRateTable2.syn)); %             all_A.mu = sum(UniqueMutationRateTable); % compute total mutation rate over ALL genes !! 
+%            [GG, I_G, J_G] = intersect(upper(M.gene), upper(Unique.GeneStruct.gene_names));
+%            figure; plot(10.^(M.syn(I_G)), MMM.UniqueMutationRateTable(J_G, 1), '*');
+            
             [Demographic_model{i_pop}, max_LL_demographic_model(i_pop)] = ...
                 fit_demographic_parameters_from_allele_spectrum( ...
-                all_A.count_vec{synonymous_ind}(:,i_pop), all_A.n_vec{synonymous_ind}(:,i_pop), [],  all_A.mu); % fit demography
+                all_A.count_vec{synonymous_ind}(:,i_pop), all_A.n_vec{synonymous_ind}(:,i_pop), [],  all_A.mu); % all_A.mu(MutationTypes == SYNONYMOUS)); % fit demography
             Demographic_model{i_pop}.name = ['Fitted.' population{1}];
             save(demography_file, 'Demographic_model', 'max_LL_demographic_model'); % Save and plot demography
         end

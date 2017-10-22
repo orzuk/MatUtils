@@ -9,15 +9,11 @@
 % MutationTypes - indices with different types of mutations 
 % MutationTypesStr - strings with different types of mutations 
 % 
-function [MutationRateTable MutationTypes MutationTypesStr] = ComputeGeneMutationRates(TripletsMutationTable, GeneStruct)
-
-
+function [MutationRateTable, MutationTypes, MutationTypesStr] = ComputeGeneMutationRates(TripletsMutationTable, GeneStruct)
 
 Assign24MammalsGlobalConstants;
-[mutation_types_table codons] = get_mutation_types(); % get all possible mutation types 
-
+[mutation_types_table, codons] = get_mutation_types(); % get all possible mutation types 
 num_mutation_types = 4; % synonymous, missesne, stop-gained, stop-lost
-
 % MutationRateTable = zeros(num_genes, num_mutation_types); 
 
 TripletsMutationTable = TripletsMutationTable - diag(diag(TripletsMutationTable)); % get rid of self mutations
@@ -31,8 +27,6 @@ for i=1:64 % loop on possible codons
         ctr=ctr+1; 
     end
 end
-
-
 if(ischar(GeneStruct)) % Get sequences and compute total mutation rates by class
     GeneStruct = load(GeneStruct, ...
         'chr_vec', 'pos_start_vec', 'pos_end_vec', 'seqs', 'strand', 'gene_names', 'sort_perm');
@@ -47,7 +41,3 @@ for i=1:num_genes % Scan all possible genes
     codon_count(i,:) = reshape(tmp_codon_count, 1, 64); 
 end
 MutationRateTable = codon_count * CodonMutationRateTable; 
-
-
-
-

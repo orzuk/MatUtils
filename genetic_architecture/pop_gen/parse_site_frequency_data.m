@@ -278,8 +278,7 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
         end
     end
     [J, UJ] = unique(J); I = I(UJ); % get rid of multiplicities
-    S.allele_types_ind(J) = I;
-    
+    S.allele_types_ind(J) = I;    
     
     n_vec = cell(1, S.num_allele_types); count_vec = cell(1, S.num_allele_types);
     f_vec = cell(1, S.num_allele_types); gene_inds = cell(1, S.num_allele_types);
@@ -395,9 +394,7 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
         S_NEW.ProteinPos = S.ProteinPos(good_gene_inds);  % NEW! variables representing codons 
         S_NEW.aminoAcidChange = S.aminoAcidChange(good_gene_inds); 
         S_NEW.AncCodon = S.REF_CODON(good_gene_inds);
-        S_NEW.DerCodon = S.ALT_CODON(good_gene_inds);
-        
-        
+        S_NEW.DerCodon = S.ALT_CODON(good_gene_inds);                
         S_NEW.Type = S.XXX_FEATURE_(good_gene_inds);
         
         for j_pop = 1:length(exome_struct.populations)
