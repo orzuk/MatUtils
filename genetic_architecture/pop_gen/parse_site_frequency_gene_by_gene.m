@@ -90,7 +90,6 @@ ExonsGeneStruct = load(gene_struct_input_file, ...
 [GeneStruct.s_MLE_vec, GeneStruct.s_MLE_vec, GeneStruct.alpha_MLE_vec, GeneStruct.max_compute_time] = ...
     deal(zeros(num_genes, num_populations));
 
-
 load_fields = {'unique_genes', 'n_vec', 'count_vec', 'f_vec', 'allele_types', ...
     'num_allele_types', 'num_alleles_per_gene_mat', 'total_freq_per_gene_mat', 'total_heterozygosity_per_gene_mat', ...
     'gene_by_allele_type_freq_list', 'gene_by_allele_type_n_list', ...
@@ -128,9 +127,6 @@ for k=1:num_files % loop on different chunks
     ctr=1;
     for i=vec2row(fit_genes_I) % 1:num_genes % loop on genes and plot / fit selection coefficients
         sprintf(['Run gene = %d out of %d, ' upper(GeneStruct.gene_names{i})], i, num_genes)
-        if(i == 10733) % tmp! debug error
-            TTT = 1234234
-        end
         if(startsWith(upper(GeneStruct.gene_names{i}), upper(gene_prefix)))
             gene_header = upper(GeneStruct.gene_names{i}); % (1:2));  % Print gene name
             gene_dir = fullfile(output_data_dir, gene_header(1), GeneStruct.gene_names{i}); % here save all information on gene

@@ -13,8 +13,9 @@
 % n_vec - # of individuals with genotypes in each class
 % count_vec -  # of individuals with alternative allele in each class
 % f_vec - allele frequency of alternative variants in each class
+% allele_inds_vec - array of allele indices 
 %
-function [S, n_vec, count_vec, f_vec] = parse_site_frequency_data(site_frequency_file_name, exome_struct, gene_list, ...
+function [S, n_vec, count_vec, f_vec, allele_inds_vec] = parse_site_frequency_data(site_frequency_file_name, exome_struct, gene_list, ...
     read_to_mat_flag, extract_fields_flag, compute_gene_matrices_flag)
 
 S = [];
@@ -62,7 +63,7 @@ end % if extract_fields_flag
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if(compute_gene_matrices_flag)
 %    [S, n_vec, count_vec, f_vec] = internal_compute_gene_matrices(site_frequency_file_name, populations_vec, exome_struct, compute_frac_carriers);
-    [S, n_vec, count_vec, f_vec] = internal_compute_gene_matrices(site_frequency_file_name, {'_AllPop'}, exome_struct, compute_frac_carriers);
+    [S, n_vec, count_vec, f_vec, allele_inds_vec] = internal_compute_gene_matrices(site_frequency_file_name, {'_AllPop'}, exome_struct, compute_frac_carriers);
 end % if compute_gene_matrices_flag
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -75,10 +76,6 @@ end % if compute_gene_matrices_flag
 %%%%%%%%%%%%% Ended Main function. Start internal functions    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
 
 
 % Internal function: Convert vcf file to .mat file
@@ -239,7 +236,7 @@ S.INFO = tmp_INFO; clear tmp_INFO;
 % count_vec - vector of derived allele counts for each allele
 % f_vec - vector of allele frequencies for each allele 
 % 
-function  [S, n_vec, count_vec, f_vec]  = ...
+function  [S, n_vec, count_vec, f_vec, allele_inds_vec]  = ...
     internal_compute_gene_matrices(site_frequency_file_name, populations_vec, exome_struct, compute_frac_carriers)
 
 Assign24MammalsGlobalConstants; AssignRVASConstants;
@@ -280,8 +277,8 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
     [J, UJ] = unique(J); I = I(UJ); % get rid of multiplicities
     S.allele_types_ind(J) = I;    
     
-    n_vec = cell(1, S.num_allele_types); count_vec = cell(1, S.num_allele_types);
-    f_vec = cell(1, S.num_allele_types); gene_inds = cell(1, S.num_allele_types);
+    [n_vec, count_vec, f_vec, gene_inds, allele_inds_vec]  = deal(cell(1, S.num_allele_types));
+%    f_vec = cell(1, S.num_allele_types);  = cell(1, S.num_allele_types); allele_inds_vec = 
     upper_freq_vec = [0.001 0.005 0.01 0.05 0.1 1]; % maximum allele freqeuncy
     
     if(compute_frac_carriers)
@@ -311,6 +308,7 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
         n_vec{i} =  S.XXX_REF_ALLELE_COUNT_(allele_type_inds,:) +  S.XXX_VARIANT_COUNT_(allele_type_inds,:);
         count_vec{i} =   S.XXX_VARIANT_COUNT_(allele_type_inds,:);
         f_vec{i} = S.XXX_VARIANT_COUNT_(allele_type_inds,:) ./ max(n_vec{i}, 1); % TEMP!!! set to zero frequencies when total (ref+altnerative) counts are zero!!! 
+        allele_inds_vec{i} = allele_type_inds;
         
         [tmp_genes, ~, tmp_J] = unique(upper(S.GENE(allele_type_inds)) ); % get gene indices
         [~, ~, gene_inds{i}] = intersect(tmp_genes, S.unique_genes); % S.GENE(allele_type_inds), S.unique_genes);
@@ -378,7 +376,7 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
     end % if compute frac carriers
     save(add_pop_to_file_name(site_frequency_file_name, population{1}), '-append', '-struct', 'S'); % add new fields
     save(add_pop_to_file_name(site_frequency_file_name, population{1}), '-append', ...
-        'n_vec', 'count_vec', 'f_vec'); % , 'allele_types'); % Save again, add new fields
+        'n_vec', 'count_vec', 'f_vec', 'allele_inds_vec'); % , 'allele_types'); % Save again, add new fields
     
     save_tab=1; 
     if(save_tab)  % Save tab-delimited version
@@ -434,9 +432,6 @@ for i=1:S.num_allele_types
             (1-S.gene_by_allele_type_freq_list{i,j}(I)) );
     end
 end
-
-
-
 
 
 % Internal function for extracting special features. Depends on database !!! 

@@ -190,22 +190,22 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% debug problems in generated SFS
-if(debug_sfs)
-    load('temp_surface.Fitted.European.mat');
-    SFS = load('temp_surface.Fitted.European.mat');
-    figure;     selection_color_vec = {'k', 'c', 'b', 'g', orange, 'r'}; % replace yellow with orange
-    my_symbol_vec = {'--', '-'}; % flip ordering (set integer powers as solid lines)
-    num_s = length(SFS.s_vec);
-    for i_s=1:length(SFS.s_vec)
-        tmp_color_ind = mod_max(ceil(i_s/2), ceil(num_s/2));
-        y_vec = cumsum_hist(SFS.x_vec, SFS.x_vec .* SFS.p_mat(i_s,:)); y_vec = y_vec ./ max(y_vec);
-        semilogx(SFS.x_vec ./ max(SFS.x_vec), y_vec, 'color', selection_color_vec{tmp_color_ind}, ...
-            'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
-        xlim([10^(-4) 1]);
-    end
-    legend(s_vec_to_legend(SFS.s_vec));
-end
+% % % % debug problems in generated SFS
+% % % if(debug_sfs)
+% % %     load('temp_surface.Fitted.European.mat');
+% % %     SFS = load('temp_surface.Fitted.European.mat');
+% % %     figure;     selection_color_vec = {'k', 'c', 'b', 'g', orange, 'r'}; % replace yellow with orange
+% % %     my_symbol_vec = {'--', '-'}; % flip ordering (set integer powers as solid lines)
+% % %     num_s = length(SFS.s_vec);
+% % %     for i_s=1:length(SFS.s_vec)
+% % %         tmp_color_ind = mod_max(ceil(i_s/2), ceil(num_s/2));
+% % %         y_vec = cumsum_hist(SFS.x_vec, SFS.x_vec .* SFS.p_mat(i_s,:)); y_vec = y_vec ./ max(y_vec);
+% % %         semilogx(SFS.x_vec ./ max(SFS.x_vec), y_vec, 'color', selection_color_vec{tmp_color_ind}, ...
+% % %             'linestyle', my_symbol_vec{mod_max(i_s,2)}, 'linewidth', 2); hold on;
+% % %         xlim([10^(-4) 1]);
+% % %     end
+% % %     legend(s_vec_to_legend(SFS.s_vec));
+% % % end
 
 
 % % Next two are already in previous gene-by-gene script?
