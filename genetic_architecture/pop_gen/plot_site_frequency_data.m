@@ -20,7 +20,6 @@ function R = plot_site_frequency_data(A, GeneStruct, exome_struct, mutation_rate
 AssignGeneralConstants; Assign24MammalsGlobalConstants; AssignRVASConstants;
 bar_plot = 0; % plot bar or histogram
 mean_gene_length_in_nt = 2500; % take average exonic length of human genes
-
 if(ischar(A)) % load input data from file
     spectrum_data_file = A; % keep file name
     if(isfield(exome_struct, 'populations') && (~isempty(exome_struct.populations)))
@@ -31,45 +30,24 @@ if(ischar(A)) % load input data from file
     end
     A = cell(num_populations, 1); % 10); % SET DIMENSIONS LATER !
     unite_field_names = {'XXX_FEATURE_', 'GENE', 'XXX_CHROM', 'POS',  'ALLELE_FREQ',   'GENE_INDS', 'unique_genes', 'ProteinPos'}; % list of fields to take in union
-    i=1;% % %     for i=1:num_populations
     sfs_file_names =  GetFileNames(add_pop_to_file_name(spectrum_data_file, 'AllPop'), 1);
     num_variants_vec = zeros(num_populations, 1); %    spectrum_population_data_file = cell(length(sfs_file_names), 1); 
-    for i_c=1:min(length(sfs_file_names), 10) % 10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG.  % loop on all chunks (By chromosomes or otherwise)  % NEW! let many populations !!
-        % % %             spectrum_population_data_file{i,i_c} = sfs_file_names{i_c}; % [remove_suffix_from_file_name(spectrum_data_file) '_' exome_struct.populations{i} '.mat'];
-        % % %             cur_A = load(spectrum_population_data_file{i,i_c}, 'XXX_REF_ALLELE_COUNT_', 'XXX_VARIANT_COUNT_', 'num_genes', 'unique_genes', ... % 'GENE', ...
-        % % %                 'num_allele_types', 'num_alleles_per_gene_mat', 'total_heterozygosity_per_gene_mat', ...
-        % % %                 'upper_freq_vec', 'total_freq_per_gene_mat', 'num_genes', ...
-        % % %                 'allele_types', 'allele_types_ind', 'all_allele_types', 'num_all_allele_types', 'good_allele_inds', 'population', ...
-        % % %                 'count_vec', 'f_vec', 'n_vec', 'allele_types', 'gene_by_allele_type_inds_list', 'GENE_INDS');
-        % % %             if(i==1)
-% % %         spectrum_population_data_file{i_c} = strrep( sfs_file_names{i_c}, exome_struct.populations{i}, 'AllPop');
+    for i_c=1:length(sfs_file_names) % , 10) % 10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG.  % loop on all chunks (By chromosomes or otherwise)  % NEW! let many populations !!
         cur_B = load(sfs_file_names{i_c}, 'XXX_REF_ALLELE_COUNT_', 'XXX_VARIANT_COUNT_', 'num_genes', 'unique_genes', ... % 'GENE', ...
             'num_allele_types', 'num_alleles_per_gene_mat', 'total_heterozygosity_per_gene_mat', ...
             'upper_freq_vec', 'total_freq_per_gene_mat', 'num_genes', ...
             'allele_types', 'allele_types_ind', 'all_allele_types', 'num_all_allele_types', 'good_allele_inds', 'population', ...
             'count_vec', 'f_vec', 'n_vec', 'allele_inds_vec', 'allele_types', 'gene_by_allele_type_inds_list', 'GENE_INDS', 'ProteinPos');
-        % % %             end
         if(i_c==1) % first
-            %                A{i} = cur_A;
-            % % %                 if(i == 1)
             B = cur_B;
-            % % %                 end
         else % next
-            %                A{i} = union_SFS_structs(A{i}, cur_A, unite_field_names);
-            % % %                 if(i == 1)
             B = union_SFS_structs(B, cur_B, unite_field_names);
-            % % %                 end
         end
+        unite_file = i_c
     end % loop on different files in population
-    %         num_variants_vec(i) = length(A{i}.XXX_REF_ALLELE_COUNT_);
-    %         A{i}.good_allele_inds = get_good_allele_inds(A{i}, exome_struct);
-    %         A{i} = internal_unite_by_class(A{i}); % NEW! unite sub-classes into class
-    % % %         if(i == 1)
-    %             num_variants_vec(i) = size(B.XXX_REF_ALLELE_COUNT_, 1);
     B.good_allele_inds = get_good_allele_inds(B, exome_struct);
     B = internal_unite_by_class(B); % NEW! unite sub-classes into class
-    % % %         end
-    % % %     end % loop on populations
+    save(fullfile(dir_from_file_name(sfs_file_names{1}), [exome_struct.prefix '_AllPop_union.mat']), '-struct', 'B'); % save union !! 
 else
     exome_struct.populations = '';     num_populations = 1;
 end
@@ -77,10 +55,10 @@ load(mutation_rates_files); MutationTypes = MutationTypes(1:3); MutationRateTabl
 if(exist('UniqueMutationRateTable', 'var'))
     UniqueMutationRateTable = UniqueMutationRateTable(:,1:3);
 end
-
 if(ischar(GeneStruct)) % load gene-struct file
     load(GeneStruct); % load gene-struct %     gene_struct_input_file = GeneStruct;
 end
+internal_plot_SFS_by_gene_position(B, GeneStruct);
 
 % Compute theoretical constant population size distribution
 N=10000; mu = mu_per_site; theta = 4*N*mu; % estimate for human effective population size and effective mutation rate
@@ -296,7 +274,6 @@ for figure_type = { ... % 'enrichment_missense_hist', ...  % figure_type_vec
     my_saveas(gcf, [output_file_name '_'  cell2vec(exome_struct.populations, '-') '_all_' fig_str], {'epsc', 'jpg'}); % {'epsc', 'pdf', 'jpg', 'fig'});
 end % loop on figure types
 
-internal_plot_SFS_by_gene_position(B, GeneStruct);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -320,19 +297,29 @@ function internal_plot_SFS_by_gene_position(B, GeneStruct) % gene_position_vec, 
 AssignGeneralConstants; AssignRVASConstants;  exome_data_figs_dir;
 have_protein_pos_inds = find(~isempty_cell(B.ProteinPos)); % find alleles with protein position
 
+[gene_names, I, J] = intersect(upper(B.unique_genes), upper(GeneStruct.gene_names));
+gene_lens = GeneStruct.gene_lens(J); 
+B.gene_lens = zeros(length(B.GENE_INDS), 1);
+[aaa, bbb] = ismember(B.GENE_INDS, I);
+B.gene_lens(aaa>0) = gene_lens(bbb(aaa>0));
+
+
 figure;
 for i=1:3 % loop on synonymous, missense, stop 
     B.allele_types(B.good_allele_inds{5})
     cur_f_vec = B.f_vec{B.good_allele_inds{5}(i)}(:,1);
     cur_pos_vec = B.ProteinPos(B.allele_inds_vec{B.good_allele_inds{5}(i)}(:,1)); % get positions
-    have_protein_pos_inds = find(~isempty_cell(cur_pos_vec)); % find alleles with protein position
-    [sorted_cur_pos_vec, sort_perm] = sort( cell2mat(cur_pos_vec(have_protein_pos_inds)) );
+    gene_lens_vec = B.gene_lens(B.allele_inds_vec{B.good_allele_inds{5}(i)});
+    have_protein_pos_inds = find(~isempty_cell(cur_pos_vec) & (gene_lens_vec>0)); % find alleles with protein position
+    cur_pos_vec = 3*cell2mat(cur_pos_vec(have_protein_pos_inds)) ./ gene_lens_vec(have_protein_pos_inds); % move from nucleotides to amino acids and relative position
+    [sorted_cur_pos_vec, sort_perm] = sort( cur_pos_vec );
     sorted_cur_f_vec = cur_f_vec(have_protein_pos_inds); sorted_cur_f_vec = sorted_cur_f_vec(sort_perm);
-    plot(sorted_cur_pos_vec, smooth(sorted_cur_f_vec, 15), [color_vec(i)]); hold on;
+%    sorted_gene_lens_vec = gene_lens_vec(have_protein_pos_inds); sorted_gene_lens_vec = sorted_gene_lens_vec(sort_perm); 
+    plot(sorted_cur_pos_vec, smooth(sorted_cur_f_vec, 25), [color_vec(i)], 'linewidth', 2); hold on;
 end
 xlabel('Protein Pos.'); ylabel('Allele Freq.'); legend({'Synonymous', 'Missense', 'Loss-of-Function'}); legend('boxoff'); 
-x_lim = xlim(gca); xlim([0 x_lim(2)]);
-add_faint_grid(0,5, 0); 
+x_lim = xlim(gca); xlim([0 1]); %  x_lim(2)]);
+%add_faint_grid(0,5, 0); 
 my_saveas(gcf, fullfile(exome_data_figs_dir, 'allele_freq_by_protein_pos'), {'epsc', 'jpg', 'pdf'}); 
 
 % take europe

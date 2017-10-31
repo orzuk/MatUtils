@@ -69,9 +69,9 @@ if(params.fit_demography)
                 all_A = union_SFS_structs(all_A, A);  % currently just unite all variants together - better to keep the gene identities information too? 
             end
         end
-        save(fullfile(dir_from_file_name(spectrum_population_data_file), [exome_struct.prefix '_AllPop.mat']), '-struct', 'all_A');
+        save(fullfile(dir_from_file_name(spectrum_population_data_file), [exome_struct.prefix '_AllPop_union.mat']), '-struct', 'all_A');
     else
-        all_A = load(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, 'AllPop', [exome_struct.prefix '_AllPop.mat']));
+        all_A = load(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, 'AllPop', [exome_struct.prefix '_AllPop_union.mat']));
     end
     all_A.mu = mu_per_site * 3*10^9 * 0.015 * 0.01 / 3; % TEMP!! estimated total mutation rate: mu_per_site * gene size / 3  for synonymous
     all_A.mu = all_A.mu * 1.5; % TEMP CORRECTION !!!
