@@ -311,7 +311,7 @@ B.gene_strand = zeros(length(B.GENE_INDS), 1); % take strand
 B.gene_strand(aaa>0) = gene_strand(bbb(aaa>0));
 
 
-smooth_window_vec = [7500 12000 2000];
+smooth_window_vec = [12000 20000 2000];
 figure;
 for i=1:3 % loop on synonymous, missense, stop 
     B.allele_types(B.good_allele_inds{5})
@@ -330,7 +330,7 @@ for i=1:3 % loop on synonymous, missense, stop
 end
 xlabel('Protein Pos.'); ylabel('Allele Freq.'); legend({'Synonymous', 'Missense', 'Loss-of-Function'}); legend('boxoff'); 
 x_lim = xlim(gca); xlim([0 1]); %  x_lim(2)]);
-%add_faint_grid(0,5, 0); 
+add_faint_grid(0,5); 
 my_saveas(gcf, fullfile(exome_data_figs_dir, 'allele_freq_by_protein_pos'), {'epsc', 'jpg', 'pdf'}); 
 
 % take europe
