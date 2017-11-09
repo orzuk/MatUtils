@@ -107,7 +107,7 @@ my_saveas(gcf, fullfile(two_stage_figs_dir, 'N_star_k_alpha_diff_PCS_new'), {'ep
 relative_error_table_latex = [ [{'$k$ \textbackslash $p$'} num2cell(pcs_vec)]'  [num2cell(10.^(1:7)') num2str_cell(num2cell(relative_error_table), '%2.3f')]' ]';
 relative_error_table_latex = latex(relative_error_table_latex, 2)
 
-relative_error_mat_save = [ [{'$k$ \textbackslash $p$'} num2cell(pcs_vec)]'  [num2cell(k_vec') num2str_cell(num2cell(relative_error_mat), '%2.3f')]' ]';
+relative_error_mat_save = [ [{'Relative error as function of k and p'} cell(1, 4)]'  [{'k \textbackslash p'} num2cell(pcs_vec)]'  [num2cell(k_vec') num2str_cell(num2cell(relative_error_mat), '%2.3f')]' ]';
 savecellfile(relative_error_mat_save, fullfile(github_dir, 'MatUtils\stats\ranking_selection\data', 'N_star_numerics.txt'), [], 1); 
 
 
