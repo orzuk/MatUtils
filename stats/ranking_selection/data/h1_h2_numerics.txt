@@ -1,5 +1,5 @@
-Relative error for h_k for two procedures, as function of k and p				
-p	5.000000e-01	5.000000e-01	9.500000e-01	9.500000e-01
+Table 2: Relative error for h_k for two procedures, as function of k and p				
+p	0.5	0.5	0.95	0.95
 Proc.	1	2	1	2
 k				
 2	3.811	2.709	0.217	0.270
