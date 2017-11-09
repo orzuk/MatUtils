@@ -120,7 +120,8 @@ my_saveas(gcf, fullfile(two_stage_figs_dir, 'h1_and_h2_sqr'), {'epsc', 'jpg'});
 relative_error_table_latex = [ [{'$k$ \textbackslash $p$'} table_head]'  [num2cell(10.^(1:7)') num2str_cell(num2cell(rel_error_table), '%2.3f')]' ]';
 relative_error_table_latex = latex(relative_error_table_latex, 2)
 
-relative_error_matrix_save = [ [{'Relative error for h_1, h_2 as function of k and p'} cell(1, 4)]'  [{'k \ p'} table_head]'  [num2cell(k_vec') num2str_cell(num2cell(rel_error_vec), '%2.3f')]' ]';
+relative_error_matrix_save = [ [{'Relative error for h_k for two procedures, as function of k and p'} cell(1, 4)]' ...
+     [{'p'} num2cell(pcs_vec([1 1 2 2]))]' [{'Proc.', '1', '2', '1', '2'} ]'  [{'k'} cell(1,4)]' [num2cell(k_vec') num2str_cell(num2cell(rel_error_vec), '%2.3f')]' ]';
 savecellfile(relative_error_matrix_save, fullfile(github_dir, 'MatUtils\stats\ranking_selection\data', 'h1_h2_numerics.txt'), [], 1); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

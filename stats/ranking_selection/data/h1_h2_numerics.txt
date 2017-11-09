@@ -1,5 +1,7 @@
-Relative error for h_1, h_2 as function of k and p				
-k \ p	$(\tilde{h}_k^{(1)}-h_k^{(1)}) / h_k^{(1)}, p=0.5$	$(\tilde{h}_k^{(2)}-h_k^{(2)}) / h_k^{(2)}, p=0.5$	$(\tilde{h}_k^{(1)}-h_k^{(1)}) / h_k^{(1)}, p=0.95$	$(\tilde{h}_k^{(2)}-h_k^{(2)}) / h_k^{(2)}, p=0.95$
+Relative error for h_k for two procedures, as function of k and p				
+p	5.000000e-01	5.000000e-01	9.500000e-01	9.500000e-01
+Proc.	1	2	1	2
+k				
 2	3.811	2.709	0.217	0.270
 3	2.312	1.554	0.169	0.205
 4	1.781	1.147	0.142	0.168
