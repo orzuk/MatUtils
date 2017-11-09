@@ -10,11 +10,11 @@ The package was used in the paper:
 [1] [On The Asymptotic Efficiency of Selection Procedures for Independent Gaussian Populations](https://arxiv.org/abs/1707.00314) <br />
 R. Jacobovic and O. Zuk. Submitted (2017) 
 
-In particular, the script [AsymptoticSelectionFigures.m](https://github.com/orzuk/MatUtils/edit/master/stats/ranking_selection/AsymptoticSelectionFigures.m) generates all figures shown in the paper. 
+In particular, the script [AsymptoticSelectionFigures.m](AsymptoticSelectionFigures.m) generates all figures shown in the paper. 
 
-The script saves tables available in the [data] directory: 
-[data/N_star_numerics.txt] shows values appearing in Figure 1 in the paper. 
-[data/h1_h2_numerics.txt] shows values appearing in Figure 2 in the paper. 
+The script saves tables available in the [data](data) directory: 
+[data/N_star_numerics.txt](data/N_star_numerics.txt) shows values appearing in Figure 1 in the paper. 
+[data/h1_h2_numerics.txt](data/h1_h2_numerics.txt) shows values appearing in Figure 2 in the paper. 
 
 
 Please cite this paper if you are using the package. 
