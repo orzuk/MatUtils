@@ -4,7 +4,7 @@
 AssignGeneralConstants
 AssignRVASConstants;
 
-DNDS_file_name = 'C:\research\RVAS\Data\nature04072-s6.txt'; % file with human-chimp DN, DS values
+DNDS_file_name = 'C:\research\RVAS\Data\nature04072-s6_DNDS.txt'; % file with human-chimp DN, DS values
 % Get SFS selection scores
 exome_constraint='ExAC_PTV'; % 'ExAC_PTV'
 switch exome_constraint

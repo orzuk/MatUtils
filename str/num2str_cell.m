@@ -25,7 +25,7 @@ if(iscell(nc)) % input is cell
                 end
             end
         end
-    else
+    else % here use precision 
         for i=1:size(nc,1)
 %            i_is = i 
 %            size_is = size(nc,1)

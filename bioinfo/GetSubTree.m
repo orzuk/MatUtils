@@ -1,6 +1,6 @@
 % Extract a sub-tree from a subset of leaves of a phylogenetic tree
 % 
-% Input; 
+% Input:
 % Tree - the phylogenetic tree (can be input from file) 
 % subspecies - vector of subspecies present in the tree
 % 
@@ -18,7 +18,7 @@ end
 L = get(Tree, 'NUMLEAVES'); % get # of leaves
 if(iscell(subspecies)) % here subspecies are given by names, and we transfer them to their indices
     LN = get(Tree, 'LEAFNAMES');
-    [intersect_species subspecies J] = intersect(upper(LN), upper(subspecies)); % ignore case
+    [intersect_species, subspecies, J] = intersect(upper(LN), upper(subspecies)); % ignore case
 end
 if(length(subspecies) == L) % enable a binary 0/1 input
     if(max(subspecies) == 1)

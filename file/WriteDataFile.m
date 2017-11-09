@@ -21,15 +21,11 @@ end
 
 % field_names = strrep_cell(strrep_cell(R(1,:), ' ', '_'), '.', '_'); %
 % avoid spaces and dots
-
 %%% line skipping R = R((1+skip_lines):end,:);
-
-
 %field_names = strrep_cell(R(1,:), {' ', '.', '-', '(', ')', '{', '}', '[', ']', ...
 %    '\', '/', '#', '%', char(160), char(194)}, '_');% avoid spaces,dots, parenthesis and slashes
 
 field_names = fieldnames(data_struct);
-
 for i=1:length(field_names)
     %    eval_str = ['S.' field_names{i} ' = R(2:end,' num2str(i) ');'];
     if(i == 1) % here set R

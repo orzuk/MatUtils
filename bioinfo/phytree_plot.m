@@ -83,7 +83,7 @@ if nargin - argStart > 0
             'Incorrect number of arguments to %s.',mfilename);
     end
     okargs = {'type','orientation','rotation',...
-        'branchlabels','leaflabels','terminallabels', 'weights', 'new_fig'}; % New! added weights! 
+        'branchlabels','leaflabels','terminallabels', 'weights', 'new_fig', 'plot_params'}; % New! added weights! 
     for j = argStart:2:nargin-argStart
         pname = varargin{j};
         pval = varargin{j+1};
@@ -127,13 +127,15 @@ if nargin - argStart > 0
                 case 4 % branch labels
                     dispBranchLabels = opttf(pval);
                 case 5 % leaf labels
-                    dispLeafLabels = opttf(pval);
+                    dispLeafLabels = pval; %  opttf(pval);
                 case 6 % terminal labels
-                    dispTerminalLabels = opttf(pval);
+                    dispTerminalLabels = pval; %  opttf(pval);
                 case 7 % weights 
                     weights = pval; % numeric 
                 case 8 % new figure false
                     new_fig_flag = 0;
+                case 9 % additional parameters
+                    plot_params = pval;
             end
         end
     end
@@ -269,7 +271,7 @@ if(exist('weights', 'var')) % New: check if we have also weights information.
     n = size(X, 2); linewidth = 0.5; 
     color_mat = colormap; ncolors = size(color_mat,1); % 64 colors
     min_w = min(weights(weights>0)), max_w = max(weights(:)), range_w = max_w - min_w; 
-    k_max = min(range_w / min_w, 10); % set maximum line width
+    k_max = min(max(max_w, range_w) / min_w, 10); % set maximum line width
     
     for i=1:n % loop over branches and color them
         line([X(1,i), X(2,i)], [Y(1,i), Y(2,i)], ...
@@ -319,7 +321,13 @@ switch renderType
 end
 
 if(exist('weights', 'var'))
-    colorbar('WestOutside', 'YTickLabel', [min_w:(range_w/10):max_w]);
+    if(~isfield(plot_params, 'weights_ticks'))
+         plot_params.weights_ticks = [min_w:(range_w/10):max_w];
+    end
+    if(plot_params.colorbar)
+        n_ticks = length(plot_params.weights_ticks)-1;
+        colorbar('WestOutside', 'YTick', (0:n_ticks) ./ n_ticks, 'YTickLabel', plot_params.weights_ticks);    
+    end
 end
 
 % resize figure if needed
@@ -535,6 +543,8 @@ end
 
 if dispTerminalLabels
     set(h.terminalNodeLabels,'Fontsize',min(9,ceil(fontRatio/1.5)));
+else
+    set(h.terminalNodeLabels,'visible','off');    
 end
 
 if ~dispBranchLabels
@@ -542,9 +552,6 @@ if ~dispBranchLabels
 end
 if ~dispLeafLabels
     set(h.leafNodeLabels,'visible','off');
-end
-if ~dispTerminalLabels
-    set(h.terminalNodeLabels,'visible','off');
 end
 
 box on
