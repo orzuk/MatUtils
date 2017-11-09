@@ -12,7 +12,7 @@ R. Jacobovic and O. Zuk. Submitted (2017)
 
 In particular, the script [AsymptoticSelectionFigures.m](AsymptoticSelectionFigures.m) generates all figures shown in the paper. 
 
-The script saves tables available in the [data](data) directory: 
+The script saves tables available in the [data](data) directory:  <br>
 [data/N_star_numerics.txt](data/N_star_numerics.txt) shows values appearing in Figure 1 in the paper. 
 [data/h1_h2_numerics.txt](data/h1_h2_numerics.txt) shows values appearing in Figure 2 in the paper. 
 
