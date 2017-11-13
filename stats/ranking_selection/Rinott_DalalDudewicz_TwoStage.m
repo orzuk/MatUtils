@@ -259,7 +259,8 @@ if(find_best_h)
         semilogx(k_vec, best_N_mat_approx(:, 1)./vec2column(k_vec), 'color', orange, 'linestyle', '--', 'linewidth', line_width); hold on; % optimal N % 2*exp(1).*log(k_vec)
         semilogx(k_vec, best_N_mat_using_nu_approx(:, 1)./vec2column(k_vec), 'color', orange, 'linestyle', '-', 'linewidth', line_width); hold on; % optimal nu
         should_be_beta_N = polyfit(log(k_vec'), 2*exp(1).*log(k_vec'), 1);
-        legend([legend_vec '$\sim$'], 'location', 'northwest', 'interpreter', 'latex'); legend('boxoff');
+%        legend([legend_vec '$\sim$'], 'location', 'northwest', 'interpreter', 'latex', 'fontsize', 11); legend('boxoff');
+        legend([legend_vec '$\sim$'], 'position', [0.785 0.78 0.15 0.15], 'interpreter', 'latex', 'fontsize', 11); legend('boxoff');
         xlim([1, max(k_vec)*1.01]);
         text( 0.84, 0.975, '(c.)', 'units', 'normalized');
         set(ha(3+i_run),'XTick', 10.^(0:7)); %5+
