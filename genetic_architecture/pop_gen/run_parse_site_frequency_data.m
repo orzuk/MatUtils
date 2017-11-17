@@ -23,14 +23,14 @@ vcf_file_names =  GetFileNames(fullfile(spectrum_data_dir, exome_struct.sub_dir_
 if(params.parse_site_frequency_flag) % here we parse
     %    if(read_to_mat_flag)
     for i=1:length(vcf_file_names) % 10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG. length(vcf_file_names) % loop on all chunks (By chromosomes or otherwise)
-        job_str = ['[A] =' ... % , n_vec, count_vec, f_vec, allele_types] = ' ...
+        parse_job_str = ['[A] =' ... % , n_vec, count_vec, f_vec, allele_types] = ' ...
             'parse_site_frequency_data(''' vcf_file_names{i} ...
             ''', exome_struct, [], ' num2str(params.read_to_mat_flag) ', ' num2str(params.extract_fields_flag) ', ' ...
             num2str(params.compute_gene_matrices_flag) ');']; %, gene_list
         if(in_matlab_flag)
-            eval(job_str);
+            eval(parse_job_str);
         else
-            SubmitMatlabJobToFarm(job_str, ...
+            SubmitMatlabJobToFarm(parse_job_str, ...
                 fullfile('out', ['parse_' exome_struct.prefix '.' i '.out']), queue_str, [], [], mem_flag); % allow specifying memory allocation
         end
     end
@@ -172,7 +172,7 @@ if(params.estimate_gene_by_gene) % estimate potential target size for each gene 
     end
     % Need to loop here also on chunks !!
     for gene_prefix = {''} % {'ABCG1'} % for chrom 21 {'ANGPTL'} % for chrom 1 %%%% (num2cell(['A':'Z' '0':'9']'))'  %% {'ANKRD20A3'} %%  %% {'ANGP'} %% (mat2cell(['A':'Z' '0':'9']', ones(36,1), 1))' % enable also weird genes starting with a number
-        job_str = ['parse_site_frequency_gene_by_gene(''' spectrum_data_dir ''', ''' exome_struct.spectrum_data_files_str ''', ' ... % spectrum_data_files{i}
+        gene_by_gene_job_str = ['parse_site_frequency_gene_by_gene(''' spectrum_data_dir ''', ''' exome_struct.spectrum_data_files_str ''', ' ... % spectrum_data_files{i}
             '''' fullfile(spectrum_data_dir, exome_data, 'GeneByGene') ''', ' ... % 'Tennessen_Science_2012'
             '''' fullfile(mammals_data_dir, genome_version, exons_file) ''' , ' ... % GeneStruct
             '''' fullfile(spectrum_data_dir, 'mutation_rates', mutation_rates_file) ''', ' ...
@@ -180,9 +180,9 @@ if(params.estimate_gene_by_gene) % estimate potential target size for each gene 
             num2str(params.plot_gene_by_gene) ', ' ...
             ' ''' gene_prefix{1} ''');'];
         if(in_matlab_flag)
-            eval(job_str);
+            eval(gene_by_gene_job_str);
         else
-            SubmitMatlabJobToFarm(job_str, ...
+            SubmitMatlabJobToFarm(gene_by_gene_job_str, ...
                 fullfile('out', ['run_genes_prefix_' gene_prefix{1} '.out']), queue_str);
         end
     end % loop on prefix

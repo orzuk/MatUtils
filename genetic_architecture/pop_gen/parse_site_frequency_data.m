@@ -15,7 +15,8 @@
 % f_vec - allele frequency of alternative variants in each class
 % allele_inds_vec - array of allele indices 
 %
-function [S, n_vec, count_vec, f_vec, allele_inds_vec] = parse_site_frequency_data(site_frequency_file_name, exome_struct, gene_list, ...
+function [S, n_vec, count_vec, f_vec, allele_inds_vec] = ...
+    parse_site_frequency_data(site_frequency_file_name, exome_struct, gene_list, ...
     read_to_mat_flag, extract_fields_flag, compute_gene_matrices_flag)
 
 S = [];
@@ -240,7 +241,6 @@ function  [S, n_vec, count_vec, f_vec, allele_inds_vec]  = ...
     internal_compute_gene_matrices(site_frequency_file_name, populations_vec, exome_struct, compute_frac_carriers)
 
 Assign24MammalsGlobalConstants; AssignRVASConstants;
-
 output_dir = dir_from_file_name(site_frequency_file_name);
 
 for population = populations_vec % perform further preprocessing (compute SNP-specific parameters)
@@ -317,12 +317,12 @@ for population = populations_vec % perform further preprocessing (compute SNP-sp
             2.*S.ALLELE_FREQ(allele_type_inds) .* (1-S.ALLELE_FREQ(allele_type_inds))); % get total heterozygosity
         for j=1:length(gene_inds{i}) % loop on genes having this allele type
             S.gene_by_allele_type_inds_list{i, gene_inds{i}(j)} = allele_type_inds(tmp_J == j); % indices in original data
-            S.gene_by_allele_type_freq_list{i, gene_inds{i}(j)} = S.ALLELE_FREQ(allele_type_inds(tmp_J == j));
+            S.gene_by_allele_type_freq_list{i, gene_inds{i}(j)} = S.ALLELE_FREQ(allele_type_inds(tmp_J == j),:);
             S.gene_by_allele_type_het_list{i, gene_inds{i}(j)} = 2 .* ...
                 S.gene_by_allele_type_freq_list{i, gene_inds{i}(j)} .* ...
                 (1 - S.gene_by_allele_type_freq_list{i, gene_inds{i}(j)});
-            S.gene_by_allele_type_n_list{i, gene_inds{i}(j)} = S.XXX_VARIANT_COUNT_(allele_type_inds(tmp_J == j)) + ...
-                S.XXX_REF_ALLELE_COUNT_(allele_type_inds(tmp_J == j));
+            S.gene_by_allele_type_n_list{i, gene_inds{i}(j)} = S.XXX_VARIANT_COUNT_(allele_type_inds(tmp_J == j),:) + ...
+                S.XXX_REF_ALLELE_COUNT_(allele_type_inds(tmp_J == j),:);
             S.gene_by_allele_type_pos_list{i, gene_inds{i}(j)} = S.POS(allele_type_inds(tmp_J == j)); % save positions
         end
         
