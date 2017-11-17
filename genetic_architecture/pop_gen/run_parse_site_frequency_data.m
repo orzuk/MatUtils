@@ -125,11 +125,19 @@ if(params.fit_demography)
         end
         index_vec(i_pop) = Demographic_model{i_pop}.index;
     end % loop on populations (temp.)
+    save(demography_file, '-append', 'index_vec'); % Save and plot demography
 end % if fit demographies
 
 if(params.plot_demography)
     % 1. Plot pop. size as function of time V
     % 2. plot SFS
+    if(~exist('Demographic_model', 'var'))
+         load(demography_file);
+         all_A = load(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, 'AllPop', [exome_struct.prefix '_AllPop_union.mat']), ...
+             'n_vec', 'count_vec', 'allele_types');
+        synonymous_ind = find(strcmp( 'synonymous_variant', all_A.allele_types)); % 'synonymous_variant' % 'coding-synonymous'
+    end
+    
     demographic_model_plot(Demographic_model, index_vec, max_LL_demographic_model, ...
         all_A.count_vec{synonymous_ind}, all_A.n_vec{synonymous_ind}, 0);  % plot properties of fitted demography: pop. size and SFS
 end % if plot

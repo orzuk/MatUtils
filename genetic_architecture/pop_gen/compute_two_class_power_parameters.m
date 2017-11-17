@@ -1,6 +1,5 @@
 % Compute power parameters for alleles in the two class model
 %
-%
 % Input:
 % s_null_vec - vector of possible selection coefficients
 % f_rare_vec - vector of possible cutoffs for calling a rare allele 'rare' and including it in test

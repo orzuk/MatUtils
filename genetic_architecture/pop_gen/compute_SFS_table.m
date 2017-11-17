@@ -1,8 +1,8 @@
 %
 % Compute different SFS statistics
 % Input: 
-% A -  
-% MutationRateTable - 
+% A - structure with SFS data
+% MutationRateTable - mutation rate for each gene and each class
 % MutationTypes - 
 % output_file_name - 
 % Output:

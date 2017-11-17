@@ -28,14 +28,13 @@ switch machine % Get directory of data
         %        spectrum_data_dir = 'C:\\research\common_disease_model\data\SiteFrequencySpectra'; % OLD PC
         %%%        spectrum_data_dir = 'D:\research\RVAS\Data\SiteFrequencySpectra'; % NEW PC DELL
         spectrum_data_dir = 'C:\research\RVAS\Data\SiteFrequencySpectra'; % NEW SURFACE
-        
         %        spectrum_data_dir = 'T:\\common_disease_model\data\SiteFrequencySpectra';
         in_matlab_flag = 1;
 end
 exons_file = 'hg18_exons.mat'; % where to save exons
 triplet_mutations_file = 'scone_hg17_m3_64x64_rates.txt'; % 'triplets_file_human_chimp_baboon.mat'; % file with mutation rates from all 64 codons (estimated from human-chimp-baboon alignment)
-mutation_rates_file = 'human_genes_mutation_rates_hg18.mat'; % output file with triplet mutation rates
-mutation_rates_file2 = 'human_genes_mutation_rates_samocha.mat'; % output file with triplet mutation rates
+mutation_rates_file_exons = 'human_genes_mutation_rates_hg18.mat'; % output file with triplet mutation rates
+mutation_rates_file = 'human_genes_mutation_rates_samocha.mat'; % output file with triplet mutation rates
 
 MISSENSE_C = 1;  NEUTRAL_C = 2; SYNONYMOUS_C = 2;  NULL_C = 3; % set allele classes. Missense BEFORE(!) Synonymous !! 
 
