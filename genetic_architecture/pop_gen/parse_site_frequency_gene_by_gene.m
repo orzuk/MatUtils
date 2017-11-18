@@ -204,12 +204,15 @@ for i=vec2row(fit_genes_I) % 1:num_genes % loop on genes and plot / fit selectio
         null_w_vec((end+1):length(gene_k_vec)) = 1; % all stop
         
         
-        for i_pop=1:num_populations % load data from all populations
-            if(~isempty(gene_n_vec)) % for some genes we have no alleles in the relevant population       
+        if(~isempty(gene_n_vec)) % for some genes we have no alleles in the relevant population
+            for i_pop=1:num_populations % load data from all populations
                 gene_n_vec_pop = gene_n_vec(i_pop, ~isnan(gene_k_vec(i_pop,:))); % Remove nan cells
                 gene_k_vec_pop = gene_k_vec(i_pop, ~isnan(gene_k_vec(i_pop,:)));
                 null_w_vec_pop = null_w_vec(~isnan(gene_k_vec(i_pop,:)));
-                X = round([gene_k_vec_pop gene_n_vec_pop]');    
+                X = round([gene_k_vec_pop gene_n_vec_pop]');
+                if(isempty(gene_n_vec_pop) || (max(gene_n_vec_pop) == 0))
+                    continue; % go to next population
+                end
                 switch fit_type
                     case 'MLE'
                         [LL_tab(i_ctr,i_pop), s_hat(i_ctr,i_pop), alpha_hat(i_ctr,i_pop), ~, compute_time(i_ctr,i_pop)] = ... % don't fit  beta_MLE_vec(i,i_pop)] = ...
@@ -220,13 +223,16 @@ for i=vec2row(fit_genes_I) % 1:num_genes % loop on genes and plot / fit selectio
                     case 'total_load'
                         i_mut = strmatch(GeneStruct.gene_names{i}, MutStruct.gene_names, 'exact');
                         if(~isempty(i_mut))
-                            f_lof = sum(gene_k_vec_pop(null_w_vec_pop==1) ./ gene_n_vec(null_w_vec_pop==1));
-                            f_missense = sum(gene_k_vec_pop(null_w_vec_pop==-1) ./ gene_n_vec(null_w_vec_pop==-1));
+                            f_lof = sum(gene_k_vec_pop(null_w_vec_pop==1) ./ gene_n_vec_pop(null_w_vec_pop==1));
+                            f_missense = sum(gene_k_vec_pop(null_w_vec_pop==-1) ./ gene_n_vec_pop(null_w_vec_pop==-1));
                             if(f_lof==0) % no LOF varaints at all! complete depletion
                                 s_hat(i_ctr,i_pop) = 1;
                             else
                                 s_hat(i_ctr,i_pop) = sum(MutStruct.MutationRateTable(i_mut,((MutStruct.MutationTypes == STOP) ...
                                     | (MutStruct.MutationTypes == STOP_LOST)))) / f_lof; % take s_hat = mu / f_LOF
+                            end
+                            if(isnan(s_hat(i_ctr,i_pop)))
+                                nananana = 999999999999
                             end
                             alpha_hat(i_ctr,i_pop) = sum(MutStruct.MutationRateTable(i_mut,((MutStruct.MutationTypes == MISSENSE)))) ...
                                 ./ f_missense; % take ratio of expected loads of missense vs. stop codons
