@@ -51,7 +51,7 @@ if(ischar(MutationRateTable)) % load mutation table
         MutationRateTable(:,3) = 10.^MutStruct.non;
         MutationRateTable(:,4) = 10.^MutStruct.frameshift;
         MutStruct.MutationTypes = [SYNONYMOUS MISSENSE STOP STOP_LOST];
-        MutStruct.gene_names = MutStruct.gene; % copt genes 
+        MutStruct.gene_names = MutStruct.gene; % copt genes
         MutStruct.MutationRateTable = MutationRateTable; % copy to structure
     end
 end
@@ -113,7 +113,7 @@ load_fields = [load_fields {'REF', 'ALT', 'aminoAcidChange', 'gene_by_allele_typ
 %    end
 all_fit_genes_I = [];
 for k=1:num_files % loop on different chunks
-    sprintf('Run genes file %d out of %d', k, num_files) % plot progress 
+    sprintf('Run genes file %d out of %d', k, num_files) % plot progress
     load_fields_str = cell2vec(load_fields, ''', ''');
     load_str = ['SiteFreqSpecStruct{' num2str(k) '} = load(''' fullfile(spectrum_data_dir, spectrum_data_file{k}) ...
         ''', ''' load_fields_str ''');'];
@@ -195,21 +195,21 @@ for i=vec2row(fit_genes_I) % 1:num_genes % loop on genes and plot / fit selectio
                 SiteFreqSpecStruct.gene_by_allele_type_n_list{j,i_sfs})'];
             gene_n_vec = [gene_n_vec SiteFreqSpecStruct.gene_by_allele_type_n_list{j,i_sfs}'];
         end
-        null_w_vec = -ones(size(gene_k_vec)); % all missense
+        null_w_vec = -ones(1,size(gene_k_vec,2)); % all missense
         for j= SiteFreqSpecStruct.good_allele_inds{3} % loop on stop codons
             gene_k_vec = [gene_k_vec (SiteFreqSpecStruct.gene_by_allele_type_freq_list{j,i_sfs} .* ...
                 SiteFreqSpecStruct.gene_by_allele_type_n_list{j,i_sfs})'];
             gene_n_vec = [gene_n_vec SiteFreqSpecStruct.gene_by_allele_type_n_list{j,i_sfs}'];
         end
         null_w_vec((end+1):length(gene_k_vec)) = 1; % all stop
-        null_w_vec = null_w_vec(~isnan(gene_k_vec));
-        gene_n_vec = gene_n_vec(~isnan(gene_k_vec)); % Remove nan cells
-        gene_k_vec = gene_k_vec(~isnan(gene_k_vec));
-        X = round([gene_k_vec gene_n_vec]');
         
         
-        if(~isempty(X)) % for some genes we have no alleles in the relevant population
-            for i_pop=1:num_populations % load data from all populations
+        for i_pop=1:num_populations % load data from all populations
+            if(~isempty(gene_n_vec)) % for some genes we have no alleles in the relevant population       
+                gene_n_vec_pop = gene_n_vec(i_pop, ~isnan(gene_k_vec(i_pop,:))); % Remove nan cells
+                gene_k_vec_pop = gene_k_vec(i_pop, ~isnan(gene_k_vec(i_pop,:)));
+                null_w_vec_pop = null_w_vec(~isnan(gene_k_vec(i_pop,:)));
+                X = round([gene_k_vec_pop gene_n_vec_pop]');    
                 switch fit_type
                     case 'MLE'
                         [LL_tab(i_ctr,i_pop), s_hat(i_ctr,i_pop), alpha_hat(i_ctr,i_pop), ~, compute_time(i_ctr,i_pop)] = ... % don't fit  beta_MLE_vec(i,i_pop)] = ...
@@ -220,8 +220,8 @@ for i=vec2row(fit_genes_I) % 1:num_genes % loop on genes and plot / fit selectio
                     case 'total_load'
                         i_mut = strmatch(GeneStruct.gene_names{i}, MutStruct.gene_names, 'exact');
                         if(~isempty(i_mut))
-                            f_lof = sum(gene_k_vec(null_w_vec==1) ./ gene_n_vec(null_w_vec==1));
-                            f_missense = sum(gene_k_vec(null_w_vec==-1) ./ gene_n_vec(null_w_vec==-1));
+                            f_lof = sum(gene_k_vec_pop(null_w_vec_pop==1) ./ gene_n_vec(null_w_vec_pop==1));
+                            f_missense = sum(gene_k_vec_pop(null_w_vec_pop==-1) ./ gene_n_vec(null_w_vec_pop==-1));
                             if(f_lof==0) % no LOF varaints at all! complete depletion
                                 s_hat(i_ctr,i_pop) = 1;
                             else
