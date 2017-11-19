@@ -48,7 +48,7 @@ if(params.plot_site_frequency_flag) % Here we plot SFS for DATA !! for all popul
         [exome_struct.prefix, '*.mat']), ... %  exome_struct.spectrum_data_file)  '.mat']), ... % '_' population{1}% _unique
         fullfile(mammals_data_dir, genome_version, [remove_suffix_from_file_name(exons_file) '_unique.mat']),  ... % GeneStruct
         exome_struct, ... %   {'European', 'African'}, ...
-        fullfile(spectrum_data_dir, 'mutation_rates', mutation_rates_file), ...
+        fullfile(spectrum_data_dir, 'mutation_rates', mutation_rates_file_exons), ... % TEMP! take old mutation rates file ! 
         [], [], [], [], exome_struct.target_length, num_bins, ...
         fullfile(spectrum_data_dir, 'out', exome_struct.data_str, exome_struct.prefix)); %   remove_suffix_from_file_name(exome_struct.spectrum_data_file)));
 end
@@ -145,6 +145,9 @@ end % if plot
 % Temp: plot all populations together (should be part of plotting function
 plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir; plot_params.hist = 1; plot_params.xlim = [10^(-4) 1];
 plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1; plot_params.font_size=8; % plot cumulative weighted allele frequency distribution
+if(~exist('Demographic_model', 'var'))
+         load(demography_file);
+end
 plot_allele_freq(s_vec, Demographic_model(1:6), plot_params)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

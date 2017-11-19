@@ -14,7 +14,8 @@
 % num_bins - histogram plot resulution
 % output_file_name - where to save figures
 %
-function R = plot_site_frequency_data(A, GeneStruct, exome_struct, mutation_rates_files, n_vec, count_vec, f_vec, ...
+function R = plot_site_frequency_data(A, GeneStruct, exome_struct, mutation_rates_files, ...
+    n_vec, count_vec, f_vec, ...
     allele_types, target_length, num_bins, output_file_name)
 
 AssignGeneralConstants; Assign24MammalsGlobalConstants; AssignRVASConstants;
@@ -29,9 +30,10 @@ if(ischar(A)) % load input data from file
         num_populations = 1;
     end
     A = cell(num_populations, 1); % 10); % SET DIMENSIONS LATER !
-    unite_field_names = {'XXX_FEATURE_', 'GENE', 'XXX_CHROM', 'POS',  'ALLELE_FREQ',   'GENE_INDS', 'unique_genes', 'ProteinPos'}; % list of fields to take in union
+    unite_field_names = {'XXX_FEATURE_', 'GENE', 'XXX_CHROM', 'POS',  'ALLELE_FREQ',  ...
+        'GENE_INDS', 'unique_genes', 'ProteinPos'}; % list of fields to take in union
     sfs_file_names =  GetFileNames(add_pop_to_file_name(spectrum_data_file, 'AllPop'), 1);
-    num_variants_vec = zeros(num_populations, 1); %    spectrum_population_data_file = cell(length(sfs_file_names), 1); 
+    num_variants_vec = zeros(num_populations, 1); %    spectrum_population_data_file = cell(length(sfs_file_names), 1);
     
     if(~exist(fullfile(dir_from_file_name(sfs_file_names{1}), [exome_struct.prefix '_AllPop_union.mat']), 'file'))
         for i_c=1:length(sfs_file_names) % , 10) % 10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG.  % loop on all chunks (By chromosomes or otherwise)  % NEW! let many populations !!
@@ -63,7 +65,10 @@ end
 if(ischar(GeneStruct)) % load gene-struct file
     load(GeneStruct); % load gene-struct %     gene_struct_input_file = GeneStruct;
 end
+internal_plot_SFS_by_AA_change(sfs_file_names, GeneStruct, B.all_allele_types); % plot according to amino-acid. New approach: collect data in chunks and plot - no unification
+
 internal_plot_SFS_by_gene_position(B, GeneStruct);
+
 
 % Compute theoretical constant population size distribution
 N=10000; mu = mu_per_site; theta = 4*N*mu; % estimate for human effective population size and effective mutation rate
@@ -291,11 +296,60 @@ end % loop on figure types
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Internal function for plotting constraint vs. amino acid change
+%
+function internal_plot_SFS_by_AA_change(sfs_file_names, GeneStruct, all_allele_types)
+
+AA_vec = int2aa(1:25);
+AA_freqs = cell(25);
+coding_allele_types = union( union(strfind_cell(all_allele_types, 'missense'), ...
+    strfind_cell(all_allele_types, 'stop')), ...
+    strfind_cell(all_allele_types, 'synonymous') );
+
+for i_c=1:length(sfs_file_names) % , 10) % 10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG.  % loop on all chunks (By chromosomes or otherwise)  % NEW! let many populations !!
+    parse_AA_file = i_c
+    cur_B = load(sfs_file_names{i_c}, 'XXX_REF_ALLELE_COUNT_', 'XXX_VARIANT_COUNT_', 'ALLELE_FREQ', ...
+        'aminoAcidChange', 'REF_CODON', 'ALT_CODON', 'XXX_FEATURE_', 'GENE'); 
+    coding_inds = find(ismember(cur_B.XXX_FEATURE_, all_allele_types(coding_allele_types))); % Get relevant indices
+    bad_chars = {'-', '/'}; bad_inds =[];
+    for c=1:length(bad_chars)
+        bad_inds = union(bad_inds, strfind_cell(cur_B.REF_CODON(coding_inds), bad_chars{c}));
+    end
+    coding_inds = coding_inds(setdiff(1:length(coding_inds), bad_inds));
+    cur_B.REF_AA = nt2aa(cur_B.REF_CODON(coding_inds));
+    cur_B.ALT_AA = nt2aa(cur_B.ALT_CODON(coding_inds));
+    
+    for i=1:25 % loop on first AA
+        i_AA = strmatch(AA_vec(i), cur_B.REF_AA, 'exact');
+        for j=1:25 % loop on second AA
+            j_AA = strmatch(AA_vec(j), cur_B.ALT_AA, 'exact');
+
+            AA_freqs{i, j} = [AA_freqs{i, j} cur_B.ALLELE_FREQ(intersect(i_AA, j_AA),:)'];
+        end
+    end
+end % loop on files
+
+num_populations = size(cur_B.ALLELE_FREQ,2);
+AA_freqs_mean = zeros(num_populations, 25, 25); 
+for i=1:25 % loop on first AA
+    for j=1:25 % loop on second AA
+        AA_freqs_mean(:,i,j) = mean_not_nan(AA_freqs{i,j}');
+    end
+end
+f_mat = log(squeeze(mean(AA_freqs_mean)));
+figure;  imagesc_with_labels(f_mat, AA_vec, AA_vec);
+my_saveas(gcf, fullfile(exome_data_figs_dir, 'allele_freq_by_AA_change'), {'epsc', 'jpg', 'pdf'});
+% for i=1:6 % pop. specific plot
+%     subplot(3,2,i);
+% end
+
+
 
 % Internal function for plotting constraint vs. gene location
 %
 % Input:
-% A - structure with inofrmation about alleles
+% B - structure with inofrmation about alleles
+% GeneStruct - structure with information on each gene (in particular, length!)
 % Output:
 %
 function internal_plot_SFS_by_gene_position(B, GeneStruct) % gene_position_vec, s_missense_vec)
@@ -310,10 +364,9 @@ B.gene_lens(aaa>0) = gene_lens(bbb(aaa>0));
 B.gene_strand = zeros(length(B.GENE_INDS), 1); % take strand
 B.gene_strand(aaa>0) = gene_strand(bbb(aaa>0));
 
-
 smooth_window_vec = [12000 20000 2000];
 figure;
-for i=1:3 % loop on synonymous, missense, stop 
+for i=1:3 % loop on synonymous, missense, stop
     B.allele_types(B.good_allele_inds{5})
     cur_f_vec = B.f_vec{B.good_allele_inds{5}(i)}(:,1);
     cur_pos_vec = B.ProteinPos(B.allele_inds_vec{B.good_allele_inds{5}(i)}(:,1)); % get positions
@@ -321,17 +374,17 @@ for i=1:3 % loop on synonymous, missense, stop
     gene_strand_vec = B.gene_strand(B.allele_inds_vec{B.good_allele_inds{5}(i)});
     have_protein_pos_inds = find(~isempty_cell(cur_pos_vec) & (gene_lens_vec>0)); % find alleles with protein position
     cur_pos_vec = 3*cell2mat(cur_pos_vec(have_protein_pos_inds)) ./ gene_lens_vec(have_protein_pos_inds); % move from nucleotides to amino acids and relative position
-    cur_pos_vec(gene_strand_vec(have_protein_pos_inds) == 1) = 1-cur_pos_vec(gene_strand_vec(have_protein_pos_inds) == 1); % Flip strand !!! 
+    cur_pos_vec(gene_strand_vec(have_protein_pos_inds) == 1) = 1-cur_pos_vec(gene_strand_vec(have_protein_pos_inds) == 1); % Flip strand !!!
     [sorted_cur_pos_vec, sort_perm] = sort( cur_pos_vec );
     sorted_cur_f_vec = cur_f_vec(have_protein_pos_inds); sorted_cur_f_vec = sorted_cur_f_vec(sort_perm);
-%    sorted_gene_lens_vec = gene_lens_vec(have_protein_pos_inds); sorted_gene_lens_vec = sorted_gene_lens_vec(sort_perm); 
+    %    sorted_gene_lens_vec = gene_lens_vec(have_protein_pos_inds); sorted_gene_lens_vec = sorted_gene_lens_vec(sort_perm);
     num_plot = sum(sorted_cur_f_vec>0)
     plot(sorted_cur_pos_vec(sorted_cur_f_vec>0), smooth(sorted_cur_f_vec(sorted_cur_f_vec>0), smooth_window_vec(i)), [color_vec(i)], 'linewidth', 2); hold on;
 end
-xlabel('Protein Pos.'); ylabel('Allele Freq.'); legend({'Synonymous', 'Missense', 'Loss-of-Function'}); legend('boxoff'); 
+xlabel('Protein Pos.'); ylabel('Allele Freq.'); legend({'Synonymous', 'Missense', 'Loss-of-Function'}); legend('boxoff');
 x_lim = xlim(gca); xlim([0 1]); %  x_lim(2)]);
-add_faint_grid(0,5); 
-my_saveas(gcf, fullfile(exome_data_figs_dir, 'allele_freq_by_protein_pos'), {'epsc', 'jpg', 'pdf'}); 
+add_faint_grid(0,5);
+my_saveas(gcf, fullfile(exome_data_figs_dir, 'allele_freq_by_protein_pos'), {'epsc', 'jpg', 'pdf'});
 
 % take europe
 
