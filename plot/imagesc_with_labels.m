@@ -7,7 +7,7 @@
 % x_N - height of x labels (default is zero)
 % y_N - width of y labels (default is zero)
 %
-function imagesc_with_labels(data, x_vec, y_vec, x_N, y_N, varargin)
+function h_col = imagesc_with_labels(data, x_vec, y_vec, x_N, y_N, varargin)
 
 if(~exist('x_N', 'var') || isempty(x_N))
     x_N = 0;
@@ -16,7 +16,7 @@ if(~exist('y_N', 'var') || isempty(y_N))
     y_N = 0;
 end
 
-h = imagesc_nan(data); colorbar; % draw picture
+h = imagesc_nan(data); h_col = colorbar; % draw picture
 
 n = size(data,1);
 set(h, 'ydata', [n:-1:1]); % flip the y axis

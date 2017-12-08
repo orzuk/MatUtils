@@ -4,7 +4,7 @@
 % coupling_str - type of coupling between distributions
 % coupling_param - parameters for coupling 
 % N - effective population size 
-% s_vec - vector of possible selection coefficients
+% s_vec - vector of possible selection coefficients (NEGATIVE for puryfying selection)
 % beta_vec - vector of possible effect sizes 
 % 
 % Output: 
@@ -14,8 +14,8 @@
 % kurtosis - fourth moment 
 % intermediate_heritability - intermediate heritability 
 %
-function [mean_phenotype_change mean_square_phenotype_change ...
-    skewness kurtosis intermediate_heritability] = compute_architecture_constraints(coupling_str, coupling_param, N, s_vec, beta_vec)
+function [mean_phenotype_change, mean_square_phenotype_change ...
+    skewness, kurtosis, intermediate_heritability] = compute_architecture_constraints(coupling_str, coupling_param, N, s_vec, beta_vec)
 
 s_min = min(s_vec); s_max = max(s_vec); beta_min = min(beta_vec); beta_max = max(beta_vec); S_vec = 4.*N.*s_vec;
 

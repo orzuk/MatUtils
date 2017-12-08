@@ -96,8 +96,8 @@ for i=1:length(s_vec) % loop on selection
     tmp_p_vec_equlibrium_analytic{i} = exp( allele_freq_spectrum([0 final_x_vec 1], -s_vec(i), N_vec(i_N), two_side_flag, 'log', 1) ); % compute analytic approxiamtion (valid only for constant population size)
     tmp_p_vec_equlibrium_analytic2{i} = phi_s_integral([0 final_x_vec 1], -s_vec(i)*4*N_vec(i_N), -1 ); % compute analytic approxiamtion (valid only for constant population size)    
     tmp_p_vec_equlibrium_analytic{i} = normalize_hist(final_x_vec, tmp_p_vec_equlibrium_analytic{i}(2:end-1)); % normalized    
-    mean_weighted_freq(i) = absorption_time_by_selection(s_vec(i), theta, N_vec(1), 1/(2*N_vec(i_N)), 1- 1/(2*N_vec(i_N)), 2) / ...
-        absorption_time_by_selection(s_vec(i), theta, N_vec(i_N), 1/(2*N_vec(1)), 1- 1/(2*N_vec(i_N)), 1);    
+    mean_weighted_freq(i) = absorption_time_by_selection(-s_vec(i), theta, N_vec(1), 1/(2*N_vec(i_N)), 1- 1/(2*N_vec(i_N)), 2) / ...
+        absorption_time_by_selection(-s_vec(i), theta, N_vec(i_N), 1/(2*N_vec(1)), 1- 1/(2*N_vec(i_N)), 1);    
     tmp_median_equilibrium_analytic(i) = final_x_vec(find(cumsum(tmp_p_vec_equlibrium_analytic{i}) / ...
         sum(tmp_p_vec_equlibrium_analytic{i}) >= 0.5, 1));
 end

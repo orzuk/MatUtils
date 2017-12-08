@@ -36,6 +36,18 @@ if(~isscalar(s)) % NEW! allow to fit multiple s values using a surface fitting m
         s_vec_cell{i_s} = repmat(s, 1, length(x_vec_cell{i_s})); 
     end
     save(['temp_surface.' D.name '.mat'], 'x_vec_cell', 's_vec_cell', 'p_vec_cell', 'smooth_params', 'D'); 
+    
+    temp_DEBUG=1;
+    if(temp_DEBUG)
+        s_vec = mean_cell(s_vec_cell);
+        D2=D; D2.s_grid = s_vec; 
+        D2.SFS.x_vec = x_vec_cell;
+        D2.SFS.p_vec = p_vec_cell;
+        plot_params.figure_type = 1; plot_params.figs_dir = []; plot_params.hist = 1; plot_params.xlim = [10^(-4) 1];
+        plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1; plot_params.font_size=8; % plot cumulative weighted allele frequency distribution
+        plot_allele_freq(s_vec, {D2}, plot_params);
+    end     
+        
     % Perform smoothing with monotonicity constraints:
     x_vec = unique( [x_vec_cell{:}] ); num_x = length(x_vec); 
     p_mat = zeros(num_s, num_x);

@@ -64,7 +64,7 @@ N=10000; dd.SFS.x_vec = (1:(2*N)) ./ (2*N);
 
 for i=1:length(ss)
 %    dd.SFS.z_vec(i) =  phi_s_integral(1-1/(2*N), ss(i)*4*N, 0) - phi_s_integral(1/(2*N), ss(i)*4*N, 0);
-    dd.SFS.z_vec(i) = absorption_time_by_selection(abs(ss(i)), 1, N, 1/(2*N), 1-1/(2*N));
+    dd.SFS.z_vec(i) = absorption_time_by_selection(ss(i), 1, N, 1/(2*N), 1-1/(2*N));
     dd.SFS.p_vec{i} = allele_freq_spectrum(dd.SFS.x_vec, ss(i), N, 0, 'linear') ./ dd.SFS.z_vec(i);    
 end
 dd.s_grid = ss; dd.name = 'Debug'; 

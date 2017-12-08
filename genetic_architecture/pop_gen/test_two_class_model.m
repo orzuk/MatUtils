@@ -86,7 +86,7 @@ if(test_power) % test detection power in rare-variant GWAS
         for i=1:2  % need to transfer this also to parallel jobs
             compute_alpha_i = i
             [two_class_stat_struct{i}, w_x_null_mat{i}, w_x_harmless{i}, w_all{i} c_cumulative{i}, frac_null_by_freq_cumulative{i}] = ...
-                compute_two_class_model_parameters(s_null_vec, ...
+                compute_two_class_model_parameters(-s_null_vec, ...
                 f_rare_vec, full_enrichment_alpha_vec(i), rare_cumulative_per_gene, N);
         end
         save(equilibrium_parameters_output_file, ...
@@ -184,10 +184,6 @@ if(test_power) % test detection power in rare-variant GWAS
 end % if test_power
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Test absorption-time (two versions should agree !!!)
-%absorption_time_by_selection(s, theta, N, x_min, x_max, weight_flag)
-% N=10000;
-% T = absorption_time_by_selection(0.0001, 1, N, 0.0001, 0.01, 'freq')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if(test_ratio_likelihood)  % Here test ratio of ...???
@@ -247,7 +243,7 @@ tmp_compute_eric=0;
 if(tmp_compute_eric) % Temp computation for Eric: m_s(x)
     N=10000; s_vec =logspace(-6, -2, 100); ctr=1; y_vec = []; f_vec = [1/(2*N) 0.001 0.01 0.1 1];
     for ff = f_vec
-        y_vec(ctr,:) = absorption_time_by_selection(s_vec, 1, N, 0, min(ff, 0.9999999999), 'freq') * 2*N;
+        y_vec(ctr,:) = absorption_time_by_selection(-s_vec, 1, N, 0, min(ff, 0.9999999999), 'freq') * 2*N;
         ctr=ctr+1;
     end
     figure; loglog(s_vec, y_vec, 'linewidth', 2); legend(num2str(f_vec')); title('Num. alleles with freq. <= f / num. alleles at birth');

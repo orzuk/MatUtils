@@ -88,7 +88,7 @@ if(numeric_test) % New: test the relation between selection coefficient and alle
         xlabel('Effect size (\beta)'); ylabel('Selection coefficient (s)');
         title('Joint distribution of effect size and selection coefficient');
         
-        [s_observed_bins s_observed_hist] = observed_selection_distribution(s_bins, s_hist, N); % Compute h(s)
+        [s_observed_bins, s_observed_hist] = observed_selection_distribution(-s_bins, s_hist, N); % Compute h(s)
         n = 100;
         p_k_n = zeros(n-1, length(s_bins));
         p_s_given_k_n = zeros(n-1, length(s_bins));
@@ -217,11 +217,11 @@ if(numeric_test) % New: test the relation between selection coefficient and alle
     num_limits = length(absorption_vec);
     for i=1:num_limits
         absorption_integral_limit = absorption_vec(i);
-        absorption_time_vec{i} = absorption_time_by_selection(all_s_bins, 1, N, absorption_integral_limit);
+        absorption_time_vec{i} = absorption_time_by_selection(-all_s_bins, 1, N, absorption_integral_limit);
         absorption_time_vec{i} = absorption_time_vec{i} ./ absorption_time_vec{i}(1); % normalize
         
         absorption_time_vec_weighted{i} = ...
-            absorption_time_by_selection(all_s_bins, 1, N, absorption_integral_limit, [], 'freq');
+            absorption_time_by_selection(-all_s_bins, 1, N, absorption_integral_limit, [], 'freq');
         absorption_time_vec_weighted{i} = ...
             absorption_time_vec_weighted{i} ./ absorption_time_vec_weighted{i}(1); % normalize
         

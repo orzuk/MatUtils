@@ -2,7 +2,7 @@
 % by weighting alleles according to their absorption time
 % 
 % Input: 
-% s_birth_bins - values of selection coefficient for newly born mutations
+% s_birth_bins - values of selection coefficient for newly born mutations (NEGATIVE for deleterious alleles)
 % s_birth_hist - distribution of selection coefficient for newly born mutations
 % N  - effective population size
 %
@@ -10,7 +10,7 @@
 % s_bins - values of observed selection distribution in the population
 % s_hist - distribution of observed selection distribution in the population 
 %
-function [s_bins s_hist] = observed_selection_distribution(s_birth_bins, s_birth_hist, N)
+function [s_bins, s_hist] = observed_selection_distribution(s_birth_bins, s_birth_hist, N)
 
 theta = 0.001; % set some default mutation rate (doesn't affect results) 
 

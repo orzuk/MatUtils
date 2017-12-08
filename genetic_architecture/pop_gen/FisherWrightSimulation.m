@@ -13,7 +13,7 @@
 % init_str - initialization of allele frequencies (equilibrium or newly-born alleles)
 % iters - how many times to perform simulation
 % compute_mode - how to compute (simulation/markov-chain numeric computation/analytic)
-% num_bins - # of bins in returend histograms (when N is large we want a coarse-grained version of allele frequencies)
+% num_bins - # of bins in returend histograms (when N is large we want a coarse-grained version of allele frequencies) - NOT USED YET!!!
 %
 % Output:
 % freq_struct - structure with output on allele frequencies. Fields:
@@ -74,11 +74,11 @@ end
 % Extract all infromation from Demographic model
 N_vec = demographic_parameters_to_n_vec(D, D.index);  % compute population size at each generation
 N = N_vec(1); num_generations = length(N_vec)-1; max_N = max(N_vec);
-prob_site_polymorphic_at_equilibrium = (2*N*mu) * 2 * absorption_time_by_selection(abs(s), 1, N, 1/(2*N), 0.999999999, 0);  % NEW! Factor of two here! fraction of poylmporphic sites at start
+prob_site_polymorphic_at_equilibrium = (2*N*mu) * 2 * absorption_time_by_selection(s, 1, N, 1/(2*N), 0.999999999, 0);  % NEW! Factor of two here! fraction of poylmporphic sites at start
 mu_vec_analytic = [];  mu_vec_equilibrium = [];
 
 %x_vec = (0:2*N) ./ (2*N); % vector of allele frequencies (include monomorphic alleles) at start
-%heterozygosity_per_site = 4*N*mu * absorption_time_by_selection(abs(s), 1, N, 0, 1, 'var');  % heterozygosity per site
+%heterozygosity_per_site = 4*N*mu * absorption_time_by_selection(s, 1, N, 0, 1, 'var');  % heterozygosity per site
 %p_vec = cell(num_generations+1, 1); %total_het_at_each_generation_vec = zeros(num_generations,1);
 num_moments = min(floor(N_vec(1)/3), 5);
 switch compute_mode
@@ -88,7 +88,7 @@ switch compute_mode
             num_absorptions_by_generation_vec, num_fixations_by_generation_vec, num_losses_by_generation_vec, ...
             absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, loss_time_given_init_freq_vec, ...
             num_simulated_polymorphic_alleles_vec, count_vec, prob_site_polymorphic_at_end, L_correction_factor] = ...
-            simulate_expansion_internal( ...
+            simulate_forward_FisherWright_internal( ...
             D, s, mu, two_side_flag, iters, num_generations, init_str);
         frac_polymorphic_vec = 1-num_absorptions_by_generation_vec ./ iters;
         %        num_effective_iters = sum(p_vec{end}(2:end-1)) % total number of single-generation single-allele steps performed (?)
@@ -99,7 +99,7 @@ switch compute_mode
             absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, num_losses, ...
             loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end, M, ...
             mu_vec_analytic, mu_vec_equilibrium] = ...
-            compute_numeric_expansion_internal( ...
+            compute_numeric_forward_FisherWright_internal( ...
             s, mu, two_side_flag, N_vec, init_str, compute_matrix);
         
     case {'analytic', 'moment', 'moments'} % compute solution based on Jacobi polynomials (See e.g. Kryukov et al. PNAS 2009).
@@ -108,7 +108,7 @@ switch compute_mode
             absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, num_losses, ...
             loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end, ...
             mu_vec_analytic, mu_vec_equilibrium] = ...
-            compute_analytic_expansion_internal( ...
+            compute_analytic_forward_FisherWright_internal( ...
             s, mu, two_side_flag, num_generations, N_vec, init_str, num_moments);
 end % switch compute mode
 
@@ -258,7 +258,7 @@ function [q, weights, x_vec, p_vec, total_het_at_each_generation_vec, ...
     num_absorptions_by_generation_vec, num_fixations_by_generation_vec, num_losses_by_generation_vec, ...
     absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, loss_time_given_init_freq_vec, ...
     num_simulated_polymorphic_alleles_vec, count_vec, prob_site_polymorphic_at_end, L_correction_factor] = ...
-    simulate_expansion_internal( ...
+    simulate_forward_FisherWright_internal( ...
     D, s, mu, two_side_flag, iters, num_generations, init_str)
 
 N_vec = demographic_parameters_to_n_vec(D, D.index);  % compute population size at each generation
@@ -291,8 +291,8 @@ count_vec = zeros(2*max_N+1,1); % count how many alleles were at each allele fre
 
 num_alleles_simulated=0; total_polymorphic_generations = 0; ctr_alleles_blocks_simulated = 0;
 
-mean_time_allele_polymorphic_at_equilibrium = absorption_time_by_selection(abs(s), 1, N, 1/(2*N), 0.999999999, 0);  % NEW! Factor of two here! time until absorbtion for a newly born allele
-prob_site_polymorphic_at_equilibrium = (2*N*mu) * 2 * absorption_time_by_selection(abs(s), 1, N, 1/(2*N), 0.999999999, 0);  % NEW! Factor of two here! fraction of poylmporphic sites at start
+mean_time_allele_polymorphic_at_equilibrium = absorption_time_by_selection(s, 1, N, 1/(2*N), 0.999999999, 0);  % NEW! Factor of two here! time until absorbtion for a newly born allele
+prob_site_polymorphic_at_equilibrium = (2*N*mu) * 2 * absorption_time_by_selection(s, 1, N, 1/(2*N), 0.999999999, 0);  % NEW! Factor of two here! fraction of poylmporphic sites at start
 total_het_at_each_generation_vec = zeros(num_generations, 1, 'single');
 weights = [];
 
@@ -394,12 +394,12 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
                 %                     tttt = 2145345
                 %                 end
                 q = q([survived_inds absorption_inds(1:num_new_alleles)],:);
-                q((end-num_new_alleles+1:end), j+1) = 1; % set frequency for new alleles
+                q((end-num_new_alleles+1:end), j+1) = 1; % set frequency for new alleles (singletons!!!)
                 if(exist('weights', 'var') && (~isempty(weights))) % update weights
                     weights = [weights(survived_inds) repmat(new_weight, 1, num_new_alleles)];
                 end
             else % also add alleles (enlrage q)
-                q(absorption_inds, j+1) = 1; % set frequency for new alleles
+                q(absorption_inds, j+1) = 1; % set frequency for new alleles (singletons!!!)
                 q = [q' zeros(j+1, num_new_alleles-length(absorption_inds), 'single')]'; % set frequency for new alleles
                 q(((end-(num_new_alleles-length(absorption_inds))+1):end), j+1) = 1; % set frequency for new alleles
                 if(exist('weights', 'var') && (~isempty(weights))) % update weights
@@ -530,7 +530,7 @@ function [x_vec, p_vec, total_het_at_each_generation_vec, ...
     absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, ...
     num_losses, loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end, M, ...
     mu_vec_analytic, mu_vec_equilibrium] = ...
-    compute_numeric_expansion_internal(s, mu, two_side_flag, N_vec, init_str, compute_matrix)
+    compute_numeric_forward_FisherWright_internal(s, mu, two_side_flag, N_vec, init_str, compute_matrix)
 
 num_absorptions = 0; num_fixations = 0; num_losses = 0; % temp
 num_absorptions_by_generation_vec = []; count_vec = [];
@@ -727,7 +727,7 @@ end
 mu_vec_equilibrium =  zeros(num_moments, 1); % need  a recurrence formula here !!
 theta = 1;
 for k=1:num_moments
-    mu_vec_equilibrium(k) = absorption_time_by_selection(-abs(s), theta, N, 0, 1, -k-1);  % at equilibrium compute: int_{f=0}^1   f(1-f) \psi_0(f) df
+    mu_vec_equilibrium(k) = absorption_time_by_selection(s, theta, N, 0, 1, -k-1);  % at equilibrium compute: int_{f=0}^1   f(1-f) \psi_0(f) df
 end
 
 mu_vec_analytic = zeros(num_moments, num_generations); % Comptue only the zero-th moment
@@ -769,7 +769,7 @@ function  [x_vec, p_vec, total_het_at_each_generation_vec, num_absorptions ,num_
     absorption_time_given_init_freq_vec, fixation_time_given_init_freq_vec, num_losses, ...
     loss_time_given_init_freq_vec, frac_polymorphic_vec, prob_site_polymorphic_at_end, ...
     mu_vec_analytic, mu_vec_equilibrium] = ...
-    compute_analytic_expansion_internal( ...
+    compute_analytic_forward_FisherWright_internal( ...
     s, mu, two_side_flag, num_generations, N_vec, init_str, num_moments)
 
 use_moments = 1;
@@ -782,7 +782,7 @@ N = N_vec(1); max_N = max(N_vec);
     loss_time_given_init_freq_vec, frac_polymorphic_vec] = deal([]);
 x_vec = cell(num_generations, 1); p_vec = x_vec;
 prob_site_polymorphic_at_equilibrium = (2*N*mu) * 2 * ...
-    absorption_time_by_selection(abs(s), 1, N, 1/(2*N), 0.999999999, 0);  % NEW! Factor of two here! fraction of poylmporphic sites at start
+    absorption_time_by_selection(s, 1, N, 1/(2*N), 0.999999999, 0);  % NEW! Factor of two here! fraction of poylmporphic sites at start
 
 if(use_gegenbauer) % this works only for constant population size
     max_deg = 20; % how many polynomials to sum

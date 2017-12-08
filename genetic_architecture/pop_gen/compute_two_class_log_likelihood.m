@@ -222,7 +222,7 @@ for i_s = 1:num_s % loop on parameters
     [sample_x_vec{NULL_C}, sample_p_vec{NULL_C}] = population_to_sample_allele_freq_distribution( ...
         double(x_vec{NULL_C}), allele_freq_hist{NULL_C}, max(num_individuals_vec), vec2row(unique_num_carriers), 1);
     sum_allele_freq_hist(NULL_C) = sum(allele_freq_hist{NULL_C});
-    T_s(i_s) = sum(allele_freq_hist{NULL_C}) * (x_vec{NULL_C}(2)-x_vec{NULL_C}(1));     %%    T_s(i_s) = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot!     %    T_s = integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C}); %%% T_s = absorption_time_by_selection(-s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq'); % sure we need to use 'freq' here ???
+    T_s(i_s) = sum(allele_freq_hist{NULL_C}) * (x_vec{NULL_C}(2)-x_vec{NULL_C}(1));     %%    T_s(i_s) = absorption_time_by_selection(s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % use analytic approximation (not histogtam). Turns out to matter a lot!     %    T_s = integral_hist(x_vec{NULL_C}, allele_freq_hist{NULL_C}); %%% T_s = absorption_time_by_selection(s_null_vec(i_s), 1, N, 1/(2*N), 1-1/(2*N), 0); % 'freq'); % sure we need to use 'freq' here ???
     
     if(poisson_model_flag) % compute poisson part of likelihood
         % we must assume here we know the number of individuals profiled at each region

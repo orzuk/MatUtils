@@ -300,45 +300,80 @@ end % loop on figure types
 %
 function internal_plot_SFS_by_AA_change(sfs_file_names, GeneStruct, all_allele_types)
 
+AssignRVASConstants;
 AA_vec = int2aa(1:25);
 AA_freqs = cell(25);
+
+hyd_order = 'IVLFCMAWGTSYPHNDQEKR'; % order by hydrophobicity
+AA_vec2 = [hyd_order setdiff(AA_vec, hyd_order)];
 coding_allele_types = union( union(strfind_cell(all_allele_types, 'missense'), ...
     strfind_cell(all_allele_types, 'stop')), ...
     strfind_cell(all_allele_types, 'synonymous') );
 
-for i_c=1:length(sfs_file_names) % , 10) % 10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG.  % loop on all chunks (By chromosomes or otherwise)  % NEW! let many populations !!
-    parse_AA_file = i_c
-    cur_B = load(sfs_file_names{i_c}, 'XXX_REF_ALLELE_COUNT_', 'XXX_VARIANT_COUNT_', 'ALLELE_FREQ', ...
-        'aminoAcidChange', 'REF_CODON', 'ALT_CODON', 'XXX_FEATURE_', 'GENE'); 
-    coding_inds = find(ismember(cur_B.XXX_FEATURE_, all_allele_types(coding_allele_types))); % Get relevant indices
-    bad_chars = {'-', '/'}; bad_inds =[];
-    for c=1:length(bad_chars)
-        bad_inds = union(bad_inds, strfind_cell(cur_B.REF_CODON(coding_inds), bad_chars{c}));
-    end
-    coding_inds = coding_inds(setdiff(1:length(coding_inds), bad_inds));
-    cur_B.REF_AA = nt2aa(cur_B.REF_CODON(coding_inds));
-    cur_B.ALT_AA = nt2aa(cur_B.ALT_CODON(coding_inds));
-    
-    for i=1:25 % loop on first AA
-        i_AA = strmatch(AA_vec(i), cur_B.REF_AA, 'exact');
-        for j=1:25 % loop on second AA
-            j_AA = strmatch(AA_vec(j), cur_B.ALT_AA, 'exact');
-
-            AA_freqs{i, j} = [AA_freqs{i, j} cur_B.ALLELE_FREQ(intersect(i_AA, j_AA),:)'];
+if(~exist('AA_FREQs_ExAC.mat', 'file'))
+    for i_c=1:length(sfs_file_names) % , 10) % 10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG.  % loop on all chunks (By chromosomes or otherwise)  % NEW! let many populations !!
+        parse_AA_file = i_c
+        cur_B = load(sfs_file_names{i_c}, 'XXX_REF_ALLELE_COUNT_', 'XXX_VARIANT_COUNT_', 'ALLELE_FREQ', ...
+            'aminoAcidChange', 'REF_CODON', 'ALT_CODON', 'XXX_FEATURE_', 'GENE');
+        coding_inds = find(ismember(cur_B.XXX_FEATURE_, all_allele_types(coding_allele_types))); % Get relevant indices
+        bad_chars = {'-', '/', 'n'}; bad_inds =[];
+        for c=1:length(bad_chars)
+            bad_inds = union(bad_inds, strfind_cell(cur_B.REF_CODON(coding_inds), bad_chars{c}));
         end
-    end
-end % loop on files
-
-num_populations = size(cur_B.ALLELE_FREQ,2);
+        coding_inds = coding_inds(setdiff(1:length(coding_inds), bad_inds));
+        cur_B.REF_AA = nt2aa(cur_B.REF_CODON(coding_inds));
+        cur_B.ALT_AA = nt2aa(cur_B.ALT_CODON(coding_inds));
+        
+        for i=1:25 % loop on first AA
+            i_AA = strmatch(AA_vec(i), cur_B.REF_AA, 'exact');
+            for j=1:25 % loop on second AA
+                j_AA = strmatch(AA_vec(j), cur_B.ALT_AA, 'exact');
+                
+                AA_freqs{i, j} = [AA_freqs{i, j} cur_B.ALLELE_FREQ(intersect(i_AA, j_AA),:)'];
+            end
+        end
+    end % loop on files    
+    save('AA_FREQs_ExAC.mat', 'AA_freqs'); % save file
+else % save time: load ready file
+    load('AA_FREQs_ExAC.mat');
+end
+num_populations = size(AA_freqs{1},1);
 AA_freqs_mean = zeros(num_populations, 25, 25); 
 for i=1:25 % loop on first AA
     for j=1:25 % loop on second AA
         AA_freqs_mean(:,i,j) = mean_not_nan(AA_freqs{i,j}');
     end
 end
-f_mat = log(squeeze(mean(AA_freqs_mean)));
-figure;  imagesc_with_labels(f_mat, AA_vec, AA_vec);
+[~, III, JJJ] = intersect(AA_vec, AA_vec2);
+P2 = III(inv_perm(JJJ));
+
+ind_vec = [1:21];
+f_mat = log10(squeeze(AA_freqs_mean(1,:,:))); % take europe % f_mat = log10(squeeze(mean(AA_freqs_mean))); 
+f_mat = f_mat(P2,P2); f_mat = f_mat(ind_vec,ind_vec);
+AA_vec_full = aminolookup(cellstr(AA_vec2')); AA_vec_full = AA_vec_full(ind_vec);
+figure;  h_col = imagesc_with_labels(f_mat, AA_vec_full, AA_vec_full);
+y_lab = get(h_col,'YTickLabel'); 
+for i=1:length(y_lab)
+    y_lab{i} = ['10^{' y_lab{i} '}'];
+end
+set(h_col,'YTickLabel', y_lab); 
 my_saveas(gcf, fullfile(exome_data_figs_dir, 'allele_freq_by_AA_change'), {'epsc', 'jpg', 'pdf'});
+
+% plot synonymous and non-synonymous cumulative DAF
+figure;
+for i=1:20
+    for j=1:20
+        if((i==j) || isempty(AA_freqs{i,j}))
+            continue;
+        end
+        x_vec = sort(AA_freqs{i,j}(1,:)); % take europe. Non-Synonymous
+        %    x_vec = sort(AA_freqs{i,i}(1,:)); % take europe. Synonymous
+        x_vec = x_vec(~isnan(x_vec)); x_vec = x_vec(x_vec>0);
+        y_vec = (1:length(x_vec)) ./ length(x_vec);     y_vec = cumsum(x_vec) ./ sum(x_vec);
+        semilogx(x_vec, y_vec, color_vec(i)); hold on;
+    end
+end
+
 % for i=1:6 % pop. specific plot
 %     subplot(3,2,i);
 % end
@@ -385,15 +420,6 @@ xlabel('Protein Pos.'); ylabel('Allele Freq.'); legend({'Synonymous', 'Missense'
 x_lim = xlim(gca); xlim([0 1]); %  x_lim(2)]);
 add_faint_grid(0,5);
 my_saveas(gcf, fullfile(exome_data_figs_dir, 'allele_freq_by_protein_pos'), {'epsc', 'jpg', 'pdf'});
-
-% take europe
-
-% Extract gene position:
-gene_position_vec = [];
-s_missense_vec = [];
-
-figure; hold on; plot(gene_position_vec, s_missense_vec);
-xlabel('Gene Position'); ylabel('Missense s');
 
 
 

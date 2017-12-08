@@ -660,8 +660,8 @@ for i=1:length(show_s_null)
     for j=1:length(f_rare_vec)
         %    var_expl_vec(i,:) = XXX(f_rare_vec, g =
         %   var_expl_vec(i,:) =  exp(allele_freq_spectrum(f_rare_vec, -show_s_null(i), N, 0, 'log', 1));
-        var_expl_vec(i,j)=  absorption_time_by_selection(show_s_null(i), 1, N, 0, f_rare_vec(j), -2);
-        %        absorption_time_by_selection(s, theta, N, x_min, x_max, weight_flag)
+        var_expl_vec(i,j)=  absorption_time_by_selection(-show_s_null(i), 1, N, 0, f_rare_vec(j), -2);
+        %        absorption_time_by_selection(-s, theta, N, x_min, x_max, weight_flag)
     end
     var_expl_vec(i,:) = var_expl_vec(i,:) ./ var_expl_vec(i,end); % normalize
 end

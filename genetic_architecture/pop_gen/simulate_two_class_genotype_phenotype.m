@@ -1,7 +1,7 @@
 % Simulate rare alleles data according to selection coefficient
 %
 % Input:
-% s_null - selection coefficient of null alleles
+% s_null - selection coefficient of null alleles (NEGATIVE for deleterious alleles)
 % alpha - fraction of null alleles
 % beta - effect size of null alleles on trait
 % rare_cumulative_per_gene - total fraction of polymorphic alleles
@@ -35,7 +35,7 @@ end
 if(~exist('poisson_flag', 'var') || isempty(poisson_flag))
     poisson_flag = 0;
 end
-t_s = absorption_time_by_selection(-s_null, 1, N, 1/(2*N), 1-1/(2*N), 0);
+t_s = absorption_time_by_selection(s_null, 1, N, 1/(2*N), 1-1/(2*N), 0);
 t_0 = absorption_time_by_selection(0, 1, N, 1/(2*N), 1-1/(2*N), 0);
 p_null = alpha * t_s / (alpha * t_s + (1-alpha) * t_0); % compute probability that each locus is null
 

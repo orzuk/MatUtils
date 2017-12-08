@@ -49,7 +49,7 @@ for i_pop = 1:num_populations % loop on populations
 end
 %orient landscape;
 
-if(isfield(plot_params, 'figs_dir')) % save plot
+if(isfield(plot_params, 'figs_dir') && (~isempty(plot_params.figs_dir))) % save plot
     %orient landscape;    
     my_saveas(gcf, fullfile(plot_params.figs_dir, save_file), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
 end
@@ -129,7 +129,6 @@ end % loop on i_s
 xlim(plot_params.xlim); ylim([y_lim(1)*0.99, y_lim(2)*1.01]);
 set(gca, 'XTick', logspace(log10(plot_params.xlim(1)), log10(plot_params.xlim(2)), log10(plot_params.xlim(2)) - log10(plot_params.xlim(1)) +1)); % change ticks
 add_faint_grid(0.5, 0);
-
 
 if(strmatch('ylabel', plot_params.legend))
     ylabel(plot_params.ylabel_str, 'fontsize', plot_params.font_size, 'interpreter', 'latex'); 

@@ -268,10 +268,10 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     num_moments = 6; % NEW! plot moments
     analytic_moment_mat = zeros(num_moments, 1); analytic_het_moment_mat = analytic_moment_mat;
     for k=1:num_moments
-        analytic_moment_mat(k) = absorption_time_by_selection(abs(s), 1, N, 0, 1, k); % -k-1); % compute (k)-th moment of SFS function (START FROM FIRST MOMENT!!)
-        analytic_het_moment_mat(k) = absorption_time_by_selection(abs(s), 1, N, 0, 1, -k-1); % compute (k-1)-th moment of heterozygosity function (START FROM ZERO-TH MOMENT !!!)
+        analytic_moment_mat(k) = absorption_time_by_selection(s, 1, N, 0, 1, k); % -k-1); % compute (k)-th moment of SFS function (START FROM FIRST MOMENT!!)
+        analytic_het_moment_mat(k) = absorption_time_by_selection(s, 1, N, 0, 1, -k-1); % compute (k-1)-th moment of heterozygosity function (START FROM ZERO-TH MOMENT !!!)
     end
-    TotalPolymorphicTime = absorption_time_by_selection(abs(s), 1, N, 1/(2*N), 1, 0);
+    TotalPolymorphicTime = absorption_time_by_selection(s, 1, N, 1/(2*N), 1, 0);
     analytic_moment_mat = analytic_moment_mat ./ TotalPolymorphicTime;
     analytic_het_moment_mat = analytic_het_moment_mat ./ TotalPolymorphicTime;
     combined_moment_mat = [freq_struct_simulation.moments_mat(end-1,:); ...
@@ -290,7 +290,7 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     if(debug_figures)
         figure; hold on;
         prob_site_polymorphic_at_equilibrium_end = (2*N_vec(end-1)*mu) * 2 * ...
-            absorption_time_by_selection(abs(s), 1, N_vec(end-1), 1/(2*N_vec(end-1)), 0.999999999, 0);  % NEW! Factor of two here! fraction of poylmporphic sites at start
+            absorption_time_by_selection(s, 1, N_vec(end-1), 1/(2*N_vec(end-1)), 0.999999999, 0);  % NEW! Factor of two here! fraction of poylmporphic sites at start
         plot(freq_struct_simulation.prob_site_polymorphic_at_equilibrium * ...
             simulation_struct.num_simulated_polymorphic_alleles_vec ./ ...
             simulation_struct.num_simulated_polymorphic_alleles_vec(1));

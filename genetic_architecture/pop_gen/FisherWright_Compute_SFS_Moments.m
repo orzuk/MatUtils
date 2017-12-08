@@ -38,7 +38,7 @@ exp_int_one_over_rho_cum_cum_vec = cumsum(exp_int_one_over_rho_cum_vec);
 % First compute moments at equilirbium 
 mu_vec_equilibrium =  zeros(max_k, 1); % need a recurrence formula here !! 
 for k=1:max_k
-    mu_vec_equilibrium(k) = absorption_time_by_selection(-abs(s), theta, N, 0, 1, -k-1);  % at equilibrium compute: int_{f=0}^1   f(1-f) \psi_s(f) df 
+    mu_vec_equilibrium(k) = absorption_time_by_selection(s, theta, N, 0, 1, -k-1);  % at equilibrium compute: int_{f=0}^1   f(1-f) \psi_s(f) df 
 end
 switch init_str
     case 'equilibrium'
