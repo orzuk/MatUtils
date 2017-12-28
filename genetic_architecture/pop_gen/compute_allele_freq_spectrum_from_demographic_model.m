@@ -84,7 +84,7 @@ end
 if(~isfield(D, 'iters'))
     D.iters = 1000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
 end
-D.num_bins = 100; % used for binning in Fisher Right simulation
+D.num_bins = 100; % used for binning in Fisher Right simulation. 100 is too little??? 
 D.compute_absorb = 0; % no need for extra computation!!!
 N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
 if(~exist('n_sample', 'var') || isempty(n_sample))

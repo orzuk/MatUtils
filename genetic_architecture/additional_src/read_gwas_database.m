@@ -23,7 +23,7 @@
 
 AssignGeneralConstants;
 AssignGeneticArchitectureConstants;
-[machine machine_delim html_outdir] = get_machine_type();
+[machine, machine_delim, html_outdir] = get_machine_type();
 format_fig_vec = {'fig', 'epsc', 'jpg'};
 controls_flag = 'population'; % assume general population ( no correction for computed odds-ratios)
 disease_html_root_dir = fullfile(html_outdir, 'common_disease_broad_catalog');

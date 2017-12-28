@@ -23,7 +23,7 @@ if(~exist('do_arithmatics', 'var') || isempty(do_arithmatics))
     do_arithmatics = 1; 
 end
 if(do_arithmatics)
-    dots = regexp(s, '[\/.*+]'); % enable all arithmatic operations except minus (minus sign can be used to set intervals)
+    dots = regexp(s, '[\/.*+]'); % enable all arithmatic operations except minus (minus sign can be used to set intervals) (we can also allow commas?)
 else  % don't do arithmatics
     dots = []; 
 end

@@ -12,7 +12,7 @@
 % h_liab - heritability on liability scale
 % h_liab_vec - heritability on liability scale of each locus 
 % 
-function [h_liab h_liab_vec] = ...
+function [h_liab, h_liab_vec] = ...
     genetic_relative_risk_to_variance_explained(f_vec, grr_vec, mu, SNP_TYPE, scale)
 
 if(~exist('SNP_TYPE', 'var') || isempty(SNP_TYPE))

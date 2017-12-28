@@ -7,7 +7,7 @@
 % 
 % Output: 
 % U - unique vector
-% h - histogram of counts
+% h - histogram of counts for each unique value 
 % 
 function [U, h] = unique_with_counts(x, flag, weights, varargin)
 

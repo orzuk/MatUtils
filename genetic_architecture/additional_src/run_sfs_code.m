@@ -14,7 +14,7 @@ sim_flag = 'mine'   % sfs , schaffner % choose how to simulate SFS
 if(machine == UNIX) % set sfs_code path
     % sfs_code_dir = 'c/Users/user/Downloads/sfscode';
 else % PC
-    sfs_code_dir = 'C:/Users/user/Downloads/sfscode';
+    sfs_code_dir = fullfile('C:/Users/', user_str, 'Downloads/sfscode');
 end
 
 s_vec =  [10.^(-1:-0.5:-5) 0]; % , s=10^-1.5, s=10^-2, ... s=10^-5, s=0);
