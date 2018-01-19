@@ -11,7 +11,7 @@
 % 
 % Written by Or Zuk 10/2010
 %
-function [mu V] = MixtureOfGaussiansMoments(P, M, S) 
+function [mu, V] = MixtureOfGaussiansMoments(P, M, S) 
 
 mu = sum(P .* M); % mean
 V = sum(P .* (M.^2 + S.^2)) - mu^2; % variance 

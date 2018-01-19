@@ -1,4 +1,5 @@
-function A=find_c_alpha(miu,sigma,prior,alpha,one_side_flag,c_a)
+% Compute average to get C_alpha from alpha 
+function A = find_c_alpha(miu,sigma,prior,alpha,one_side_flag,c_a)
 
 num_of_Gaussians=length(miu);
 A=0;

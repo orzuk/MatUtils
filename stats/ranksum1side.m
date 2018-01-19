@@ -1,4 +1,6 @@
 % Wilcoxon rank sum test but with one-sided p-value
+% Note: this function is not needed anymore due to the 'tail' option in Matlab's ranksum function
+%
 function [p, h, stats] = ranksum1side(x,y,varargin)
 %RANKSUM Wilcoxon rank sum test for equal medians.
 %   P = RANKSUM(X,Y) performs a one-sided rank sum test of the hypothesis

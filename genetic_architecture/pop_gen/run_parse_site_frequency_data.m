@@ -114,9 +114,9 @@ if(params.fit_demography)
         load(demography_file);
         if(~isfield(Demographic_model{i_pop}, 'SFS') || (1 == 0)) %  ~isreal(Demographic_model{i_pop}.SFS.p_vec)) % add SFS to demographic mode
             %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
-            Demographic_model{i_pop}.iters = 1000; % number of alleles to simulate !!
+            Demographic_model{i_pop}.iters = 10000; % number of alleles to simulate !!
             Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
-            compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;
+            compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;  Demographic_model{i_pop}.cond_on_polymorphic_flag=1
             [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, ...
                 Demographic_model{i_pop}.SFS.L, SFS_compute_time] = ...
                 compute_allele_freq_spectrum_from_demographic_model( ...
