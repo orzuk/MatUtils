@@ -1,26 +1,34 @@
 % Script for testing calculations with the Wright-Fisher model
-run_sim_flag = 0; % compute site frequency distribution for each s
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Decide which tests to run: 
+run_sim_flag = 1; % compute site frequency distribution for each s using simulations
+test_absorption_time = 0; % compare absorption time for simulations vs. analytical formula
+test_moments = 0; % NEW: test analytic moments calculation of SFS using Ewens paper
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set flags for running 
+debug_figures = 0;
 run_two_expansions_flag = 0; % a mode within simulation, running a two-stage expansion model
 one_plot_flag = 0; % make one plot for each s
 unite_results_flag = 0; % make one plot for all s values together
 save_in_mathematica = 0; % save in mathematica format for Eric
-test_absorption_time = 1; % compare absorption time for simulations vs. analytical formula
-test_moments = 0; % NEW: test analytic moments calculation of SFS using Ewens paper
-debug_figures = 0;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set running parameters 
 AssignGeneralConstants; AssignRVASConstants;
-N = 10; % population size
-num_generations_vec = [200 10]; % two-stage model: slow and fast expansion % 2500; % 50;
-expansion_factor_vec = [1.005 1.05]; % 1.1; % 1.02; % two-stage moe: growth in population size
-
-% s_vec = -[0 logspace(-6, -1, 11)]; % take log-space
-s_vec = -[0 0.000001 0.000005 0.00001 0.00005 0.0001 0.0005 0.001 0.005 0.01]; %  0.05 0.1]; % -0.00000001; % selection coefficient
-compute_mode = 'simulation'; % 'simulation'; % 'simulation';  % 'simulation'; % 'numeric'; % 'simulation'; % 'numeric'; % how to advance calculation
-mu = mu_per_site * (10000 / N); % mutation rate (per nucleotide per generation)
 init_str = 'equilibrium'; % 'equilibrium' 'newly_born'; % start at newly born allele or equilibrium
+demography_str = 'expansion1'; % choose demographic model 
+s_vec = -[0 0.000001 0.000005 0.00001 0.00005 0.0001 0.0005 0.001 0.005 0.01]; %  0.05 0.1]; % -0.00000001; % selection coefficient % s_vec = -[0 logspace(-6, -1, 11)]; % take log-space
+compute_mode = 'simulation'; % 'simulation'; % 'simulation';  % 'simulation'; % 'numeric'; % 'simulation'; % 'numeric'; % how to advance calculation
+N_vec = []; [N_vec{1}, D] = create_demographic_model(demography_str); N = N_vec{1}(1); % 'expansion1'); 
+mu = mu_per_site * (10000 / N); % mutation rate (per nucleotide per generation)
 iters = [20000 20]; % relevant only for simulation. Spend more iterations on equilibrium (new alleles take more time per iteration)
-
-if(~save_in_mathematica)
+%N = 10; % population size
+%num_generations_vec = [200 10]; % two-stage model: slow and fast expansion % 2500; % 50;
+%expansion_factor_vec = [1.005 1.05]; % 1.1; % 1.02; % two-stage moe: growth in population size
+if(~save_in_mathematica) % dave in mathematica format 
     num_bins = 2000; % for plotting histograms
     mathematica_str = '';
     mathematica_flag = 0;
@@ -29,46 +37,51 @@ else
     mathematica_str = '_mathematica';
     mathematica_flag = 1;
 end
-fisher_wright_output_dir = '../../common_disease_model/figs/RVAS_gene_specific/FisherWright/'
-
+fisher_wright_output_dir = '../../common_disease_model/figs/RVAS_gene_specific/FisherWright/';
 s_ctr = 1; % counter of selection coefficient
 het_struct = cell(length(s_vec), 1);
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Run FisherWright Simulation to compute SFS 
 total_time = cputime;
-for s = [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end-1) % s_vec % loop on different selection coefficients
+% Choose model
+for s = 0 % [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end-1) % s_vec % loop on different selection coefficients
     close all; run_s = s
     frac_polymorphic = 2*N*mu * absorption_time_by_selection(s, 1, N, 1/(2*N), 0.999999999, 0);
     for expansion_model = 0:0 % run_two_expansions_flag % allow one rate and two-rate exponential expansions
         ctr=1; % counter on init str
         
-        if(expansion_model) % here run two-stage expansion
-            expansion_str = '_two-stage-expansion';
-            num_generations = sum(num_generations_vec); % simulate a few stages together
-            expansion_factor = zeros(num_generations, 1);
-            expansion_ctr = 1;
-            for i=1:length(expansion_factor_vec)
-                expansion_factor(expansion_ctr:(expansion_ctr+num_generations_vec(i)-1)) = expansion_factor_vec(i);
-                expansion_ctr = expansion_ctr + num_generations_vec(i);
-            end % loop on different expansions
-            tmp_dir = (['N_' num2str(N) '_two_stage_expansion_k_' num2str(num_generations) '_s_' num2str(s,3)]);
-            
-        else % here run one stage exponential expansion
-            expansion_str = '';
-            expansion_factor = expansion_factor_vec(1);
-            num_generations = num_generations_vec(1);
-            tmp_dir = (['N_' num2str(N) '_expansion_' num2str(expansion_factor,3) '_k_' num2str(num_generations) '_s_' num2str(s,3)]);
-        end
-        tmp_dir = strrep(tmp_dir, '.', '_');
+        tmp_dir = demography_str; % new: tmp_dir = 
+        
+%         if(expansion_model) % here run two-stage expansion
+%             expansion_str = '_two-stage-expansion';
+%             num_generations = sum(num_generations_vec); % simulate a few stages together
+%             expansion_factor = zeros(num_generations, 1);
+%             expansion_ctr = 1;
+%             for i=1:length(expansion_factor_vec)
+%                 expansion_factor(expansion_ctr:(expansion_ctr+num_generations_vec(i)-1)) = expansion_factor_vec(i);
+%                 expansion_ctr = expansion_ctr + num_generations_vec(i);
+%             end % loop on different expansions
+%             tmp_dir = (['N_' num2str(N) '_two_stage_expansion_k_' num2str(num_generations) '_s_' num2str(s,3)]);
+%             
+%         else % here run one stage exponential expansion
+%             expansion_str = '';
+%             expansion_factor = expansion_factor_vec(1);
+%             num_generations = num_generations_vec(1);
+%             tmp_dir = (['N_' num2str(N) '_expansion_' num2str(expansion_factor,3) '_k_' num2str(num_generations) '_s_' num2str(s,3)]);
+%         end
+%         tmp_dir = strrep(tmp_dir, '.', '_');
         for init_str = {'equilibrium', 'newly_born'} % , 'equilibrium' 'newly_born'} % list two distributions separately
             fisher_wright_output_file = fullfile(fisher_wright_output_dir, tmp_dir, ['fisher_wright_expansion_' init_str{1}]);
-            all_s_output_file = fullfile(fisher_wright_output_dir, ['fisher_wright_expansion_all_s_' ...
-                init_str{1} expansion_str mathematica_str]);
+            all_s_output_file = fullfile(fisher_wright_output_dir, tmp_dir, ['all_s_' ...
+                init_str{1} mathematica_str]);
             
             if(run_sim_flag)
                 compute_mode_ctr=1; freq_struct = cell(2,1); absorption_struct = cell(2,1); simulation_struct = cell(2,1); simulation_time = zeros(2,1)
                 for compute_mode = {'simulation', 'numeric'}
-                    [freq_struct{compute_mode_ctr} absorption_struct{compute_mode_ctr} simulation_struct{compute_mode_ctr} ...
-                        N_vec{compute_mode_ctr} simulation_time(compute_mode_ctr)] = ...
+                    [freq_struct{compute_mode_ctr}, absorption_struct{compute_mode_ctr}, simulation_struct{compute_mode_ctr}, ...
+                        N_vec{compute_mode_ctr}, simulation_time(compute_mode_ctr)] = ...
                         FisherWrightSimulation([], D, mu, s, init_str{1}, iters(ctr), compute_mode{1}, num_bins); % run simulation
                     compute_mode_ctr=compute_mode_ctr+1;
                 end
@@ -139,10 +152,11 @@ for s = [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end
     
     s_ctr=s_ctr+1;
 end % loop on selection coefficients
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-if(test_absorption_time || test_moments) % Test simulation/numerics only for CONSTANT population size where we have also analytic solution
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Test simulation/numerics only for CONSTANT population size where we have also analytic solution
+if(test_absorption_time || test_moments) 
     N = 500; % take moderate value to let all alleles die
     mu = mu_per_site * (10000 / N); % mutation rate (per nucleotide per generation)
     s=0; % -0.0001;
@@ -165,6 +179,7 @@ if(test_absorption_time || test_moments) % Test simulation/numerics only for CON
     N_vec = demographic_parameters_to_n_vec(D, 1);
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if(test_absorption_time) % Test simulation/numerics only for CONSTANT population size where we have also analytic solution
     [freq_struct_simulation, absorption_struct, simulation_struct, N_vec, simulation_time] = ...
         FisherWrightSimulation([], D, mu, s, init_str{1}, iters, 'simulation', num_bins); % run simulation
@@ -412,6 +427,8 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Compute moments of SFS 
 if(test_moments)
     max_k = 5; % how many moments to compute
     D.expan_rate = 1.1;
@@ -455,7 +472,7 @@ total_time = cputime - total_time
 
 
 
-% % Check binomial and Gaussian approxiamtions
+% % Check binomial and Gaussian approximations
 % n = 10000; p = 0.005; M = 10000;
 % y_binom = binornd(n, p, [M, 1]);
 % y_poiss = poissrnd(n*p, [M, 1]);

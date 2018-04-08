@@ -19,7 +19,10 @@ exome_struct = get_exome_data_info(params.exome_data); % get metadata: file name
 %%%%%%%%%%%%%%%%%%%
 % Parse SFS Files %
 %%%%%%%%%%%%%%%%%%%
-vcf_file_names =  GetFileNames(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, [exome_struct.prefix, '*.vcf']), 1);
+vcf_file_names = GetFileNames(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, [exome_struct.prefix, '*.vcf']), 1);
+gz_file_names = GetFileNames(fullfile(spectrum_data_dir, exome_struct.sub_dir_str, [exome_struct.prefix, '*.vcf.gz']), 1);
+vcf_file_names = union(vcf_file_names,  strrep_cell(gz_file_names, 'vcf.gz', 'vcf')); 
+
 if(params.parse_site_frequency_flag) % here we parse
     %    if(read_to_mat_flag)
     for i=1:length(vcf_file_names) % 10 % TEMP!!! RUN ON FIRST 10 FILES FOR DEBUG. length(vcf_file_names) % loop on all chunks (By chromosomes or otherwise)
@@ -116,7 +119,8 @@ if(params.fit_demography)
             %    s_vec = [0 -logspace(-6, -2, 4)]; % light run - just for debugging
             Demographic_model{i_pop}.iters = 10000; % number of alleles to simulate !!
             Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
-            compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;  Demographic_model{i_pop}.cond_on_polymorphic_flag=1
+            compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;  
+            Demographic_model{i_pop}.save_flag = 1; Demographic_model{i_pop}.cond_on_polymorphic_flag=0
             [Demographic_model{i_pop}.SFS.x_vec, Demographic_model{i_pop}.SFS.p_vec, ...
                 Demographic_model{i_pop}.SFS.L, SFS_compute_time] = ...
                 compute_allele_freq_spectrum_from_demographic_model( ...

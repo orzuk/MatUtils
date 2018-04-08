@@ -100,6 +100,11 @@ switch compute_flag
         [freq_struct, ~, simulation_struct, N_vec, simulation_time] = ... % New: separate output to different structures
             FisherWrightSimulation([], D, mu, s, init_str, D.iters, compute_flag, D.num_bins);
         fprintf('Fisher-Wright simulation time was %f\n', simulation_time);
+        if(D.save_flag) % save input and output to file for debugging 
+            save(['debug_SFS_' D.name num2str(D.cond_on_polymorphic_flag) '.mat'], ...
+                'D', 'mu', 's', 'init_str', 'compute_flag', 'freq_struct', 'simulation_struct', 'N_vec', 'simulation_time');
+        end
+        
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
         p_vec = freq_struct.p_vec{end-1};
         L_correction_factor = simulation_struct.L_correction_factor;

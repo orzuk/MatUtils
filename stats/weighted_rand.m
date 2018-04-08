@@ -27,9 +27,13 @@ if(L == 1) % only one weight (binary search doesn't work) ..
     r(:) = 1;
 else
     for w_ind = 1:m
-        r(w_ind,:) = bsearch(cum_weights(w_ind,:), tmp_r(w_ind,:));
-        f = find(tmp_r(w_ind,:) > cum_weights(w_ind,r(w_ind,:)));
-        r(w_ind, f) = r(w_ind, f) + 1;
+        if(cum_weights(w_ind,1)==1) % take first, Binary search doesn't work 
+            r(w_ind,:)=1;
+        else
+            r(w_ind,:) = bsearch(cum_weights(w_ind,:), tmp_r(w_ind,:));
+            f = find(tmp_r(w_ind,:) > cum_weights(w_ind,r(w_ind,:)));
+            r(w_ind, f) = r(w_ind, f) + 1;
+        end
     end
 end
 
