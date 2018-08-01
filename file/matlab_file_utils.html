@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0069)http://www.broadinstitute.org/~orzuk/matlab/matlab_utilities_template.html -->
+<HTML xmlns="http://www.w3.org/1999/xhtml"><HEAD><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<!--<LINK rel="SHORTCUT ICON" href="orzuk.ico">-->
+<LINK rel="stylesheet" href="http://www.broadinstitute.org/~orzuk/orzuk.css" type="text/css"> 
+<TITLE>Matlab file utilities</TITLE>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7650195-3']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</HEAD><BODY>
+
+
+<DIV class="navbar"> 
+<a href="http://www.broadinstitute.org/~orzuk/matlab/libs/matlab_utils.html">libs</a>  :
+</DIV> 
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <DIV class="main">
+    <H2>Matlab file utilities</H2>
+
+    <UL>
+
+      <LI> Matlab file utilities (see documentation and examples within the functions)</LI>
+
+    </UL>
+
+<!--    <p>Changes are now logged in the <a href="http://home.online.no/%7Epjacklam/matlab/software/util/statutil/ChangeLog">ChangeLog</a> file.</p>--><!-- Begin m-file index -->
+    <!-- This table was automatically generated -->
+    <!-- by updhtml.pl on Sat Feb 21 14:26:51 2004 -->
+
+    <TABLE summary="M-file index" border="0" cellpadding="0" cellspacing="0">
+      <TBODY><TR>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/GenerateLibHTML.m" name="GenerateLibHTML" id="GenerateLibHTML">GenerateLibHTML.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Make automatically an html file telling where exactly are all functions.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/GetFileNames.m" name="GetFileNames" id="GetFileNames">GetFileNames.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get the file names matching a certain regular expression in a directory.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/GetFilePermissions.m" name="GetFilePermissions" id="GetFilePermissions">GetFilePermissions.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Checks the premissions of files in a certain directory (works only with unix).</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/ReadBin.m" name="ReadBin" id="ReadBin">ReadBin.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Read a binary file </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/ReadDataFile.m" name="ReadDataFile" id="ReadDataFile">ReadDataFile.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Read a file in a generic format. 1st line gives field names, other lines give the data</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/SetPathScript.m" name="SetPathScript" id="SetPathScript">SetPathScript.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Add variuos directories to Matlab path</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/WriteDataFile.m" name="WriteDataFile" id="WriteDataFile">WriteDataFile.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Write a file in a generic format. 1st line gives field names, other lines give the data</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/copy_dir_content.m" name="copy_dir_content" id="copy_dir_content">copy_dir_content.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Copy all files in dir1 to dir2 (by default don't overwrite files) </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/delete_files.m" name="delete_files" id="delete_files">delete_files.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Delete all files matching a string in sub-directories</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/dir_from_file_name.m" name="dir_from_file_name" id="dir_from_file_name">dir_from_file_name.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Extracts only the directory from a string containing the file</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/file_name_to_mat.m" name="file_name_to_mat" id="file_name_to_mat">file_name_to_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get a .mat file with the same file name as input file</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/file_name_to_new_suffix.m" name="file_name_to_new_suffix" id="file_name_to_new_suffix">file_name_to_new_suffix.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get a file with the same file name as input file but different suffix</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/get_file_length.m" name="get_file_length" id="get_file_length">get_file_length.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get the size of a file in lines</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/get_subdirectories.m" name="get_subdirectories" id="get_subdirectories">get_subdirectories.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get the entire path under a given directory</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/intersect_dirs.m" name="intersect_dirs" id="intersect_dirs">intersect_dirs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Check which files are shared between two directories</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/is_mat_file.m" name="is_mat_file" id="is_mat_file">is_mat_file.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Check if a file is .mat file</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/loadcellfile.m" name="loadcellfile" id="loadcellfile">loadcellfile.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction table=loadcellfile(infile)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/loadcellfile_old.m" name="loadcellfile_old" id="loadcellfile_old">loadcellfile_old.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Load a tab-delimited .txt file into a cel array (Written by Assif Yitzhaky)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/merge_file_columns.m" name="merge_file_columns" id="merge_file_columns">merge_file_columns.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Unite columns from different files to the same file</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/mxdom2ppt.m" name="mxdom2ppt" id="mxdom2ppt">mxdom2ppt.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>XDOM2PPT Create a PowerPoint presentation.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/mxdom2ppt_old_ver.m" name="mxdom2ppt_old_ver" id="mxdom2ppt_old_ver">mxdom2ppt_old_ver.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Create a PowerPoint presentation (from Tal Shay)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/my_delete.m" name="my_delete" id="my_delete">my_delete.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Delete file if it exists</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/my_mkdir.m" name="my_mkdir" id="my_mkdir">my_mkdir.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Make dir if it doesn't exist</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/my_path.m" name="my_path" id="my_path">my_path.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Add directory to path, but check first that it exists (to avoid matlab warnings)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/my_saveas.m" name="my_saveas" id="my_saveas">my_saveas.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Like saveas but make directory if it's non-existance</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/read_lines.m" name="read_lines" id="read_lines">read_lines.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Read a set of consecutive lines from a .txt file </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/read_url.m" name="read_url" id="read_url">read_url.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Read a file given as an html url</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/remove_dir_from_file_name.m" name="remove_dir_from_file_name" id="remove_dir_from_file_name">remove_dir_from_file_name.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Extract only file name from a string containing the file name and its full path</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/remove_suffix_from_file_name.m" name="remove_suffix_from_file_name" id="remove_suffix_from_file_name">remove_suffix_from_file_name.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Extract file name from a string containing file name and its suffix</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/save_matrix_data_text_as_mat.m" name="save_matrix_data_text_as_mat" id="save_matrix_data_text_as_mat">save_matrix_data_text_as_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Save any matrix data in .mat format</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/savecellfile.m" name="savecellfile" id="savecellfile">savecellfile.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Save a cell array into a tab-delimited .txt file (Written by Assif Yitzhaky)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/setdiff_dirs.m" name="setdiff_dirs" id="setdiff_dirs">setdiff_dirs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Check which files are in one directory but not the other </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/strrep_in_files.m" name="strrep_in_files" id="strrep_in_files">strrep_in_files.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Replace all occurances of a string in a set of file by another string</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/suffix_from_file_name.m" name="suffix_from_file_name" id="suffix_from_file_name">suffix_from_file_name.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Extract file suffix from a file name </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/union_dirs.m" name="union_dirs" id="union_dirs">union_dirs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Take all files appearing in either directory </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/file/file.tgz" name="file" id="file"><STRONG><i>file.tgz</i></STRONG></a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td><b><i>Download the whole package. (35 .m files) </i></b></td>
+</tr>
+      <TR>
+    </TR></TBODY></TABLE><!-- End m-file index -->
+  </DIV>
+
+
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <ADDRESS>
+
+Contact: <BR> 
+&nbsp; &nbsp; O. Zuk (<A href="mailto:orzuk@broadinstitute.org">orzuk@broadinstitute.org</A>) <!-- hhmts end -->
+<br> Last Modified: <!--#echo var="LAST_MODIFIED"-->  
+  </ADDRESS>
+</BODY></HTML>

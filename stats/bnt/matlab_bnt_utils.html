@@ -1,0 +1,915 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0069)http://www.broadinstitute.org/~orzuk/matlab/matlab_utilities_template.html -->
+<HTML xmlns="http://www.w3.org/1999/xhtml"><HEAD><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<!--<LINK rel="SHORTCUT ICON" href="orzuk.ico">-->
+<LINK rel="stylesheet" href="http://www.broadinstitute.org/~orzuk/orzuk.css" type="text/css"> 
+<TITLE>Matlab bnt utilities</TITLE>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7650195-3']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</HEAD><BODY>
+
+
+<DIV class="navbar"> 
+<a href="http://www.broadinstitute.org/~orzuk/matlab/libs/matlab_utils.html">libs</a>  :
+<a href="http://www.broadinstitute.org/~orzuk/matlab/libs/bnt/matlab_bnt_utils.html">bnt</a>  :
+</DIV> 
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <DIV class="main">
+    <H2>Matlab bnt utilities</H2>
+
+    <UL>
+
+      <LI> Matlab bnt utilities (see documentation and examples within the functions)</LI>
+
+    </UL>
+
+<!--    <p>Changes are now logged in the <a href="http://home.online.no/%7Epjacklam/matlab/software/util/statutil/ChangeLog">ChangeLog</a> file.</p>--><!-- Begin m-file index -->
+    <!-- This table was automatically generated -->
+    <!-- by updhtml.pl on Sat Feb 21 14:26:51 2004 -->
+
+    <TABLE summary="M-file index" border="0" cellpadding="0" cellspacing="0">
+      <TBODY><TR>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/BUG_in_var_elim_inf_engine.m" name="BUG_in_var_elim_inf_engine" id="BUG_in_var_elim_inf_engine">BUG_in_var_elim_inf_engine.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Small test for detecting a bug in BNT var_elim_inf_engine !!!! </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/add_BNT_to_path.m" name="add_BNT_to_path" id="add_BNT_to_path">add_BNT_to_path.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>NT_HOME = 'C:
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/are_dags_equiv.m" name="are_dags_equiv" id="are_dags_equiv">are_dags_equiv.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Check if two graphs are equivalent. Use Pearl & Verma criteria,</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/bnet_to_fgraph.m" name="bnet_to_fgraph" id="bnet_to_fgraph">bnet_to_fgraph.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>BNET_TO_FGRAPH Convert a Bayes net to a factor graph</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/bnets_to_pairwise_MI.m" name="bnets_to_pairwise_MI" id="bnets_to_pairwise_MI">bnets_to_pairwise_MI.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute for many (discrete noded) bnets, the mutual information</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/check_learning_quality.m" name="check_learning_quality" id="check_learning_quality">check_learning_quality.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/check_learning_quality_fixed_BN.m" name="check_learning_quality_fixed_BN" id="check_learning_quality_fixed_BN">check_learning_quality_fixed_BN.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/check_learning_quality_known_bnets.m" name="check_learning_quality_known_bnets" id="check_learning_quality_known_bnets">check_learning_quality_known_bnets.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/check_only_sample_dist_KL.m" name="check_only_sample_dist_KL" id="check_only_sample_dist_KL">check_only_sample_dist_KL.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we do a very simple thing : Generate a BN.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/check_sample_dist_KL_OnlyUniform_Importance_Sampling.m" name="check_sample_dist_KL_OnlyUniform_Importance_Sampling" id="check_sample_dist_KL_OnlyUniform_Importance_Sampling">check_sample_dist_KL_OnlyUniform_Importance_Sampling.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we do a very simple thing : Generate a BN.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/check_sample_dist_KL_Uniform_And_Not.m" name="check_sample_dist_KL_Uniform_And_Not" id="check_sample_dist_KL_Uniform_And_Not">check_sample_dist_KL_Uniform_And_Not.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we do a very simple thing : Generate a BN.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/check_sample_dist_KL_Uniform_And_Not_Importance_Sampling.m" name="check_sample_dist_KL_Uniform_And_Not_Importance_Sampling" id="check_sample_dist_KL_Uniform_And_Not_Importance_Sampling">check_sample_dist_KL_Uniform_And_Not_Importance_Sampling.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we do a very simple thing : Generate a BN.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/closest_DAG_to_point.m" name="closest_DAG_to_point" id="closest_DAG_to_point">closest_DAG_to_point.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Find the DAG (model) which is closest in relative entropy to</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/closest_Tree_to_point.m" name="closest_Tree_to_point" id="closest_Tree_to_point">closest_Tree_to_point.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get the closest tree (in KL) to a point (distribution). </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/closest_and_random_Trees_to_point.m" name="closest_and_random_Trees_to_point" id="closest_and_random_Trees_to_point">closest_and_random_Trees_to_point.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get the closest tree (in KL distance) to a point (distribution). </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/collapse_prob.m" name="collapse_prob" id="collapse_prob">collapse_prob.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>calc the marginal of the probability P on the variables in I</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/compute_joint_pot.m" name="compute_joint_pot" id="compute_joint_pot">compute_joint_pot.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>COMPUTE_JOINT_POT Compute the global joint potential of a Bayes net</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/compute_minimal_interface.m" name="compute_minimal_interface" id="compute_minimal_interface">compute_minimal_interface.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction clqs = compute_minimal_interface(intra, inter)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/cond_indep_chisquare.m" name="cond_indep_chisquare" id="cond_indep_chisquare">cond_indep_chisquare.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>COND_INDEP_CHISQUARE Test if X indep Y given Z using ChiSquare test</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/conditional_mutual_information.m" name="conditional_mutual_information" id="conditional_mutual_information">conditional_mutual_information.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Find the DAG (model) which is closest in relative entropy to</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/cpdag_to_dag.m" name="cpdag_to_dag" id="cpdag_to_dag">cpdag_to_dag.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>dags = cpdag_to_dag(cpdags)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/create_bounded_degree_DAG.m" name="create_bounded_degree_DAG" id="create_bounded_degree_DAG">create_bounded_degree_DAG.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>create_bounded_degree_DAG creates 'random' directed acyclic graphs.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/create_bounded_degree_bnet.m" name="create_bounded_degree_bnet" id="create_bounded_degree_bnet">create_bounded_degree_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>create_random_bnet creates a 'random' bayesian net.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/create_random_DAG.m" name="create_random_DAG" id="create_random_DAG">create_random_DAG.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>create_random_DAG creates a 'random' directed acyclic graph.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/create_random_bnet.m" name="create_random_bnet" id="create_random_bnet">create_random_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>create_random_bnet creates a 'random' bayesian net.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/dag_to_cpdag.m" name="dag_to_cpdag" id="dag_to_cpdag">dag_to_cpdag.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>DAG_TO_CPDAG produce a N*N matrix which values respect :</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/dbn_to_bnet.m" name="dbn_to_bnet" id="dbn_to_bnet">dbn_to_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>DBN_TO_BNET Convert a DBN to a static network by unroll for T slices</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/demo_hist_ic.m" name="demo_hist_ic" id="demo_hist_ic">demo_hist_ic.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Test de la fonction hist_ic revue et corrig� PhL</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/determine_elim_constraints.m" name="determine_elim_constraints" id="determine_elim_constraints">determine_elim_constraints.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>DETERMINE_ELIM_CONSTRAINTS Determine what the constraints are (if any) on the elimination ordering.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/dim_dag.m" name="dim_dag" id="dim_dag">dim_dag.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get the dimension of a binary dag</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/dispcpt.m" name="dispcpt" id="dispcpt">dispcpt.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction display_CPT(CPT)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/do_intervention.m" name="do_intervention" id="do_intervention">do_intervention.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MUTILATE_BNET Clamp nodes to specific values (perform a surgical intervention)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/draw_all_graphs_nicely.m" name="draw_all_graphs_nicely" id="draw_all_graphs_nicely">draw_all_graphs_nicely.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>draw_all_graphs_nicely</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/draw_dot.m" name="draw_dot" id="draw_dot">draw_dot.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/draw_factor_graph_example.m" name="draw_factor_graph_example" id="draw_factor_graph_example">draw_factor_graph_example.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Draw   an example of a factor graph</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/draw_learning_quality_graphs.m" name="draw_learning_quality_graphs" id="draw_learning_quality_graphs">draw_learning_quality_graphs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Exhaustive search</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/dsep.m" name="dsep" id="dsep">dsep.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>DSEP Is X indep Y given S wrt DAG G?</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/dsep_test.m" name="dsep_test" id="dsep_test">dsep_test.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Cowell et al p72</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/enumerate_scenarios.m" name="enumerate_scenarios" id="enumerate_scenarios">enumerate_scenarios.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>ENUMERATE_SCENARIOS Enumerate all assignments, and return the prob. of the non-zeros ones</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/fgraph_to_bnet.m" name="fgraph_to_bnet" id="fgraph_to_bnet">fgraph_to_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>FGRAPH_TO_BNET Convert a factor graph to a Bayes net</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/get_all_Cij_for_dag.m" name="get_all_Cij_for_dag" id="get_all_Cij_for_dag">get_all_Cij_for_dag.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>We generate all the 'almost clicks' (with all possible orientations)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/get_children.m" name="get_children" id="get_children">get_children.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get the children of X in G</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/get_dag_indep.m" name="get_dag_indep" id="get_dag_indep">get_dag_indep.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get ALL the independecies from a graph G </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/get_descendants.m" name="get_descendants" id="get_descendants">get_descendants.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get all the descendant of X in G</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/get_non_descendants.m" name="get_non_descendants" id="get_non_descendants">get_non_descendants.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get all the non-descendant of X in G</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/get_parents.m" name="get_parents" id="get_parents">get_parents.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get the parents of X in G</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/hist_ic.m" name="hist_ic" id="hist_ic">hist_ic.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>IST_IC  optimal Histogram based on IC information criterion</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/histc_ic.m" name="histc_ic" id="histc_ic">histc_ic.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>ISTC_IC  Histogram count </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/hodbn_to_bnet.m" name="hodbn_to_bnet" id="hodbn_to_bnet">hodbn_to_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>DBN_TO_BNET Convert a DBN to a static network by unroll for T slices</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/is_mnet.m" name="is_mnet" id="is_mnet">is_mnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction m = is_mnet(model)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/learn_struct_EM.m" name="learn_struct_EM" id="learn_struct_EM">learn_struct_EM.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>LEARN_STRUCT_EM(), structural EM algorithm , learn structure and parameters</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/learn_struct_gs.m" name="learn_struct_gs" id="learn_struct_gs">learn_struct_gs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/learn_struct_gs2.m" name="learn_struct_gs2" id="learn_struct_gs2">learn_struct_gs2.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/learn_struct_hc.m" name="learn_struct_hc" id="learn_struct_hc">learn_struct_hc.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/learn_struct_mwst.m" name="learn_struct_mwst" id="learn_struct_mwst">learn_struct_mwst.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>LEARN_STRUCT_MWST Learn an oriented tree using the MSWT algorithm</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/learn_struct_tan.m" name="learn_struct_tan" id="learn_struct_tan">learn_struct_tan.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>LEARN_STRUCT_TAN Learn the structure of the tree augmented naive bayesian network </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/linear_gaussian_to_cpot.m" name="linear_gaussian_to_cpot" id="linear_gaussian_to_cpot">linear_gaussian_to_cpot.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>LINEAR_GAUSSIAN_TO_CPOT Convert a linear Gaussian CPD  to a canonical potential.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/log_lik_complete.m" name="log_lik_complete" id="log_lik_complete">log_lik_complete.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>LOG_LIK_COMPLETE Compute sum_m sum_i log P(x(i,m)| x(pi_i,m), theta_i) for a completely observed data set</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/log_marg_lik_complete.m" name="log_marg_lik_complete" id="log_marg_lik_complete">log_marg_lik_complete.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>LOG_MARG_LIK_COMPLETE Compute sum_m sum_i log P(x(i,m)| x(pi_i,m)) for a completely observed data set</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mat_to_bnt.m" name="mat_to_bnt" id="mat_to_bnt">mat_to_bnt.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MAT_TO_BNT Convert a matrix to a cell array</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_alarm_bnet.m" name="mk_alarm_bnet" id="mk_alarm_bnet">mk_alarm_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>make bnet of alarm net, using BIF2BNT converter.http://www.digitas.harvard.edu/~ken/bif2bnt/</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_asia_bnet.m" name="mk_asia_bnet" id="mk_asia_bnet">mk_asia_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>make bnet of ASIA net</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_bnet.m" name="mk_bnet" id="mk_bnet">mk_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MK_BNET Make a Bayesian network.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_dbn.m" name="mk_dbn" id="mk_dbn">mk_dbn.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MK_DBN Make a Dynamic Bayesian Network.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_fgraph.m" name="mk_fgraph" id="mk_fgraph">mk_fgraph.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MK_FGRAPH Make a factor graph</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_fgraph_given_ev.m" name="mk_fgraph_given_ev" id="mk_fgraph_given_ev">mk_fgraph_given_ev.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MK_FGRAPH_GIVEN_EV Make a factor graph where each node has its own private evidence term</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_higher_order_dbn.m" name="mk_higher_order_dbn" id="mk_higher_order_dbn">mk_higher_order_dbn.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MK_DBN Make a Dynamic Bayesian Network.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_limid.m" name="mk_limid" id="mk_limid">mk_limid.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MK_LIMID Make a limited information influence diagram</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_mnet.m" name="mk_mnet" id="mk_mnet">mk_mnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MK_MNET Make a Markov network (Markov Random Field)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_mrf2.m" name="mk_mrf2" id="mk_mrf2">mk_mrf2.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MK_MRF2 Make a Markov random field with pairwise potentials</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_mutilated_samples.m" name="mk_mutilated_samples" id="mk_mutilated_samples">mk_mutilated_samples.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>GEN_MUTILATED_SAMPLES Do random interventions and then draw random samples</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_named_CPT.m" name="mk_named_CPT" id="mk_named_CPT">mk_named_CPT.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MK_NAMED_CPT Permute the dimensions of a CPT so they agree with the internal numbering convention</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_nbrs_of_dag_topo.m" name="mk_nbrs_of_dag_topo" id="mk_nbrs_of_dag_topo">mk_nbrs_of_dag_topo.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>MK_NBRS_OF_DAG_TOPO Make all DAGs that differ from G0 by a single edge deletion, addition or reversal</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mk_slice_and_half_dbn.m" name="mk_slice_and_half_dbn" id="mk_slice_and_half_dbn">mk_slice_and_half_dbn.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function bnet = mk_slice_and_half_dbn(bnet, int)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/mutual_info_score.m" name="mutual_info_score" id="mutual_info_score">mutual_info_score.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>G = mutual_info_score(i,si,j,sj,data)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_BIC_score_all_dags.m" name="my_BIC_score_all_dags" id="my_BIC_score_all_dags">my_BIC_score_all_dags.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>my_BIC_SCORE_ALL_DAGS Compute the mdl BIC score of many DAGs</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_BIC_score_dags.m" name="my_BIC_score_dags" id="my_BIC_score_dags">my_BIC_score_dags.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Give the MDL-BIC  score for the dags, based on the data counts. Works</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_bnet_entropy.m" name="my_bnet_entropy" id="my_bnet_entropy">my_bnet_entropy.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>my_BNET_ENTROPY computes the entropy of a distribution given by a bayesian network, </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_bnet_relative_entropy.m" name="my_bnet_relative_entropy" id="my_bnet_relative_entropy">my_bnet_relative_entropy.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>my_BNET_RELATIVE_ENTROPY computes the relative entropy , </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_bnet_to_probs.m" name="my_bnet_to_probs" id="my_bnet_to_probs">my_bnet_to_probs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute for many (discrete noded) bnets, their joint probability</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_bnets_to_probs.m" name="my_bnets_to_probs" id="my_bnets_to_probs">my_bnets_to_probs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute for many (discrete noded) bnets, their joint probability</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_bnt_test.m" name="my_bnt_test" id="my_bnt_test">my_bnt_test.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>My tests for the BNT , just prelimenary runs (Or)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_is_submodel.m" name="my_is_submodel" id="my_is_submodel">my_is_submodel.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Check if the equivalence class of dag1 is a submodel of the equivalence</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_mcmc_sample_bnet_counts.m" name="my_mcmc_sample_bnet_counts" id="my_mcmc_sample_bnet_counts">my_mcmc_sample_bnet_counts.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Generate random samples from a BNT (given as a distribution) using mcmc </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_mk_all_dags.m" name="my_mk_all_dags" id="my_mk_all_dags">my_mk_all_dags.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>my_mk_all_dags generate all DAGs on N variables</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_plot_graph.m" name="my_plot_graph" id="my_plot_graph">my_plot_graph.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>My plot graph function for the BNT , uses the graphViz freeware package (Or)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_plot_graph2.m" name="my_plot_graph2" id="my_plot_graph2">my_plot_graph2.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>My plot graph function for the BNT , uses the graphViz freeware package (Or)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_sample_bnet.m" name="my_sample_bnet" id="my_sample_bnet">my_sample_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Generate a random sample from a Bayes net - a modified implementation </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_sample_bnet_generate_many_samples.m" name="my_sample_bnet_generate_many_samples" id="my_sample_bnet_generate_many_samples">my_sample_bnet_generate_many_samples.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td> Generate many random samples from a Bayes net already given as a distribution (increased efficiency)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_sample_bnet_generate_sample.m" name="my_sample_bnet_generate_sample" id="my_sample_bnet_generate_sample">my_sample_bnet_generate_sample.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td> Generate one random sample from a Bayes net already given as a distribution (increased efficiency)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_sample_bnet_prepare.m" name="my_sample_bnet_prepare" id="my_sample_bnet_prepare">my_sample_bnet_prepare.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Prepare BNT to be sampled. Run only once as pre-processing. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/my_score_dags.m" name="my_score_dags" id="my_score_dags">my_score_dags.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>my_score_dags Compute the score of one or more DAGs</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/partition_dbn_nodes.m" name="partition_dbn_nodes" id="partition_dbn_nodes">partition_dbn_nodes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>PARTITION_DBN_NODES Divide the nodes into a DBN into persistent and transient.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/partition_matrix_vec_3.m" name="partition_matrix_vec_3" id="partition_matrix_vec_3">partition_matrix_vec_3.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Partition matrix to 3 (?) </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/project_on_bnet.m" name="project_on_bnet" id="project_on_bnet">project_on_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Find the distribution consistent with graph G</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/relative_entropy_from_bnet.m" name="relative_entropy_from_bnet" id="relative_entropy_from_bnet">relative_entropy_from_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute the relative entropy between dag G and distribution P.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/relative_entropy_to_bnet.m" name="relative_entropy_to_bnet" id="relative_entropy_to_bnet">relative_entropy_to_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute the relative entropy between distribution P and dag G</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/sample_bnet.m" name="sample_bnet" id="sample_bnet">sample_bnet.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>SAMPLE_BNET Generate a random sample from a Bayes net.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/sample_bnet_nocell.m" name="sample_bnet_nocell" id="sample_bnet_nocell">sample_bnet_nocell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>sample_bnet_nocell Generate a random sample from a Bayes net, of size</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/sample_dbn.m" name="sample_dbn" id="sample_dbn">sample_dbn.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>SAMPLE_DBN Generate a random sequence from a DBN.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/score_bnet_complete.m" name="score_bnet_complete" id="score_bnet_complete">score_bnet_complete.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>LOG_LIK_COMPLETE Compute sum_m sum_i log P(x(i,m)| x(pi_i,m), theta_i) for a completely observed data set</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/score_dags.m" name="score_dags" id="score_dags">score_dags.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>SCORE_DAGS Compute the score of one or more DAGs</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/score_family.m" name="score_family" id="score_family">score_family.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>SCORE_FAMILY_COMPLETE Compute the score of a node and its parents given completely observed data</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/shrink_obs_dims_in_gaussian.m" name="shrink_obs_dims_in_gaussian" id="shrink_obs_dims_in_gaussian">shrink_obs_dims_in_gaussian.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>SHRINK_OBS_DIMS_IN_GAUSSIAN Remove observed dimensions from mu/Sigma</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/shrink_obs_dims_in_table.m" name="shrink_obs_dims_in_table" id="shrink_obs_dims_in_table">shrink_obs_dims_in_table.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>SHRINK_OBS_DIMS_IN_TABLE Set observed dimensions to size 1</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/solve_limid.m" name="solve_limid" id="solve_limid">solve_limid.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>SOLVE_LIMID Find the (locally) optimal strategy for a LIMID</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/test_check_learning_quality.m" name="test_check_learning_quality" id="test_check_learning_quality">test_check_learning_quality.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>determine parameters</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/test_check_learning_quality_fixed_BN.m" name="test_check_learning_quality_fixed_BN" id="test_check_learning_quality_fixed_BN">test_check_learning_quality_fixed_BN.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>determine parameters</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/test_check_learning_quality_known_bnets.m" name="test_check_learning_quality_known_bnets" id="test_check_learning_quality_known_bnets">test_check_learning_quality_known_bnets.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>determine parameters</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/test_cpdag.m" name="test_cpdag" id="test_cpdag">test_cpdag.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Test Dag2Cpdag and Cpdag2Dag functions ...</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/test_gs2.m" name="test_gs2" id="test_gs2">test_gs2.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>test Greedy Search with cache</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/test_my_is_submodel.m" name="test_my_is_submodel" id="test_my_is_submodel">test_my_is_submodel.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>addpath 'C:
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/test_pc.m" name="test_pc" id="test_pc">test_pc.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>test PC + Chi2 statistical test</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/test_sem1.m" name="test_sem1" id="test_sem1">test_sem1.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Lawn sprinker example from Russell and Norvig p454</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/test_sem2.m" name="test_sem2" id="test_sem2">test_sem2.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>learn the structure of "discrete1" network.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/test_sem3.m" name="test_sem3" id="test_sem3">test_sem3.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>learn the structure of "alarm" network. The learning time is so long!</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/test_structure.m" name="test_structure" id="test_structure">test_structure.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Test StructureLearning Package</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/unroll_dbn_topology.m" name="unroll_dbn_topology" id="unroll_dbn_topology">unroll_dbn_topology.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>UNROLL_DBN_TOPOLOGY Make the block diagonal adjacency matrix for a DBN consisting of T slices</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/unroll_higher_order_topology.m" name="unroll_higher_order_topology" id="unroll_higher_order_topology">unroll_higher_order_topology.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>UNROLL_DBN_TOPOLOGY Make the block diagonal adjacency matrix for a DBN consisting of T slices</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/unroll_set.m" name="unroll_set" id="unroll_set">unroll_set.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>UNROLL_SET Make T shifted copies of the set of nodes S in a slice of size ss.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/stats/bnt/bnt.tgz" name="bnt" id="bnt"><STRONG><i>bnt.tgz</i></STRONG></a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td><b><i>Download the whole package. (120 .m files) </i></b></td>
+</tr>
+<tr>
+<td><a href="bnt_dim/matlab_bnt_dim_utils.html" name="&nbsp; &nbsp; bnt_dim" id="&nbsp; &nbsp; bnt_dim"><STRONG><i>&nbsp; &nbsp; bnt_dim</i></STRONG></a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td><b><i>Go to the bnt_dim package. </i></b></td>
+</tr>
+      <TR>
+    </TR></TBODY></TABLE><!-- End m-file index -->
+  </DIV>
+
+
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <ADDRESS>
+
+Contact: <BR> 
+&nbsp; &nbsp; O. Zuk (<A href="mailto:orzuk@broadinstitute.org">orzuk@broadinstitute.org</A>) <!-- hhmts end -->
+<br> Last Modified: <!--#echo var="LAST_MODIFIED"-->  
+  </ADDRESS>
+</BODY></HTML>

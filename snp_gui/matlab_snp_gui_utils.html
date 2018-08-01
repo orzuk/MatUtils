@@ -1,0 +1,2006 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0069)http://www.broadinstitute.org/~orzuk/matlab/matlab_utilities_template.html -->
+<HTML xmlns="http://www.w3.org/1999/xhtml"><HEAD><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<!--<LINK rel="SHORTCUT ICON" href="orzuk.ico">-->
+<LINK rel="stylesheet" href="http://www.broadinstitute.org/~orzuk/orzuk.css" type="text/css"> 
+<TITLE>Matlab snp_gui utilities</TITLE>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7650195-3']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</HEAD><BODY>
+
+
+<DIV class="navbar"> 
+<a href="http://www.broadinstitute.org/~orzuk/matlab/libs/matlab_utils.html">libs</a>  :
+</DIV> 
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <DIV class="main">
+    <H2>Matlab snp_gui utilities</H2>
+
+    <UL>
+
+      <LI> Matlab snp_gui utilities (see documentation and examples within the functions)</LI>
+
+    </UL>
+
+<!--    <p>Changes are now logged in the <a href="http://home.online.no/%7Epjacklam/matlab/software/util/statutil/ChangeLog">ChangeLog</a> file.</p>--><!-- Begin m-file index -->
+    <!-- This table was automatically generated -->
+    <!-- by updhtml.pl on Sat Feb 21 14:26:51 2004 -->
+
+    <TABLE summary="M-file index" border="0" cellpadding="0" cellspacing="0">
+      <TBODY><TR>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/add_genome_build_gui.m" name="add_genome_build_gui" id="add_genome_build_gui">add_genome_build_gui.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>ADD_GENOME_BUILD_GUI M-file for add_genome_build_GUI.fig</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/add_genotype_info_to_norm_and_hmm_summary_file.m" name="add_genotype_info_to_norm_and_hmm_summary_file" id="add_genotype_info_to_norm_and_hmm_summary_file">add_genotype_info_to_norm_and_hmm_summary_file.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Add genotype inforation to summary file </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/add_pref_to_cell_str.m" name="add_pref_to_cell_str" id="add_pref_to_cell_str">add_pref_to_cell_str.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction new_cell_str = add_pref_to_cell_str(cell_str, str)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/add_suff_to_cell_str.m" name="add_suff_to_cell_str" id="add_suff_to_cell_str">add_suff_to_cell_str.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction new_cell_str = add_suff_to_cell_str(cell_str, str)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/all_probe_intens_txt_into_mat_files.m" name="all_probe_intens_txt_into_mat_files" id="all_probe_intens_txt_into_mat_files">all_probe_intens_txt_into_mat_files.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This function reads several files of the hapmap hind samples and convert</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/assign_empty_str_to_empty_cells.m" name="assign_empty_str_to_empty_cells" id="assign_empty_str_to_empty_cells">assign_empty_str_to_empty_cells.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction ret_cell = assign_empty_str_to_empty_cells(input_cell)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/assign_str_to_indices_in_cell.m" name="assign_str_to_indices_in_cell" id="assign_str_to_indices_in_cell">assign_str_to_indices_in_cell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction assigned_cell = assign_str_to_indices_in_cell(cell_array, str, ind_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/assignallglobalconstants.m" name="assignallglobalconstants" id="assignallglobalconstants">assignallglobalconstants.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we define several constants which are used by many of the other</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/averageoverallsamples.m" name="averageoverallsamples" id="averageoverallsamples">averageoverallsamples.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 5/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/avoidpointsgaussianfields.m" name="avoidpointsgaussianfields" id="avoidpointsgaussianfields">avoidpointsgaussianfields.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This function gives the value of the gaussian fields when we have</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/avoidpointsgaussianfieldsgrad.m" name="avoidpointsgaussianfieldsgrad" id="avoidpointsgaussianfieldsgrad">avoidpointsgaussianfieldsgrad.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function tries to find the 'best' curve, i.e. the curve which is as</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/avoidpointsgaussianpotentialgrid.m" name="avoidpointsgaussianpotentialgrid" id="avoidpointsgaussianpotentialgrid">avoidpointsgaussianpotentialgrid.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function tries to find the 'best' curve, i.e. the curve which is as</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/avoidpointsgaussiansfields.m" name="avoidpointsgaussiansfields" id="avoidpointsgaussiansfields">avoidpointsgaussiansfields.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>For each data point give a class according to which gaussian does it</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/avoidpointsnewtonsmethod.m" name="avoidpointsnewtonsmethod" id="avoidpointsnewtonsmethod">avoidpointsnewtonsmethod.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function tries to find the 'best' curve, i.e. the curve which is as</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/build_snp_chip_annot_mat.m" name="build_snp_chip_annot_mat" id="build_snp_chip_annot_mat">build_snp_chip_annot_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction build_snp_chip_annot_mat(genome_build, chip)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/build_snp_stretch_annot_cell.m" name="build_snp_stretch_annot_cell" id="build_snp_stretch_annot_cell">build_snp_stretch_annot_cell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Build snp annotations </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/calc_allele_freq.m" name="calc_allele_freq" id="calc_allele_freq">calc_allele_freq.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Calculate the frequency of every SNP in a given population. We also</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/calc_array_outlier.m" name="calc_array_outlier" id="calc_array_outlier">calc_array_outlier.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction array_outlier_vec = calc_array_outlier(copy_num_mat, std_outlier)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/calc_integer_p_value_conv.m" name="calc_integer_p_value_conv" id="calc_integer_p_value_conv">calc_integer_p_value_conv.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction p_vals_up = calc_integer_p_value_conv(int_mat)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/calc_probe_allele_ratio.m" name="calc_probe_allele_ratio" id="calc_probe_allele_ratio">calc_probe_allele_ratio.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [ratio_vec] = calc_probe_allele_ratio(probe_intens_mat, proj_name, mean_mm_flag)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/calc_std_mat.m" name="calc_std_mat" id="calc_std_mat">calc_std_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction std_mat = calc_std_mat(copy_num_mat)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/calc_stretch_len_thresh.m" name="calc_stretch_len_thresh" id="calc_stretch_len_thresh">calc_stretch_len_thresh.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute stretch width threshold </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/calclinkagedisequilirium.m" name="calclinkagedisequilirium" id="calclinkagedisequilirium">calclinkagedisequilirium.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 6/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/call_type_ind_into_call_type_str_ind.m" name="call_type_ind_into_call_type_str_ind" id="call_type_ind_into_call_type_str_ind">call_type_ind_into_call_type_str_ind.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>transfer index to string </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/call_vecs_into_call_types.m" name="call_vecs_into_call_types" id="call_vecs_into_call_types">call_vecs_into_call_types.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [call_type_vec, call_type_str_cell] = call_vecs_into_call_types(calls_vec1, calls_vec2)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/calls_ind_into_call_str.m" name="calls_ind_into_call_str" id="calls_ind_into_call_str">calls_ind_into_call_str.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [call_ind_str] = calls_ind_into_call_str(call_ind_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/calls_ind_into_call_types.m" name="calls_ind_into_call_types" id="calls_ind_into_call_types">calls_ind_into_call_types.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [call_type_vec, call_type_str_cell] = calls_ind_into_call_types(no_call_ind1, AB_ind1, AA_ind1, BB_ind1, no_call_ind2, AB_ind2, AA_ind2, BB_ind2, num_snps)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/calls_types_into_call_str.m" name="calls_types_into_call_str" id="calls_types_into_call_str">calls_types_into_call_str.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [call_type_str] = calls_types_into_call_str(call_type_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/calls_vec_into_ind.m" name="calls_vec_into_ind" id="calls_vec_into_ind">calls_vec_into_ind.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [no_call_ind1, AB_ind1, AA_ind1, BB_ind1] = calls_vec_into_ind(calls_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/cell_column_of_nums_to_mat.m" name="cell_column_of_nums_to_mat" id="cell_column_of_nums_to_mat">cell_column_of_nums_to_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction mat = cell_column_of_nums_to_mat(cell_num)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/cell_of_nums_to_mat.m" name="cell_of_nums_to_mat" id="cell_of_nums_to_mat">cell_of_nums_to_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction mat = cell_of_nums_to_mat(cell_num)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/change_strs_in_cell.m" name="change_strs_in_cell" id="change_strs_in_cell">change_strs_in_cell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction out_cell = change_strs_in_cell(in_cell, str_to_change_cell, new_str)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/check_if_chr_loc_big_aberr.m" name="check_if_chr_loc_big_aberr" id="check_if_chr_loc_big_aberr">check_if_chr_loc_big_aberr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [ret, aberr_str] = check_if_chr_loc_big_aberr(big_aberr_mat, end_p_location, chr_num, chr_loc_vec);</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/check_if_whole_chr_aberr.m" name="check_if_whole_chr_aberr" id="check_if_whole_chr_aberr">check_if_whole_chr_aberr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [whole_chr_aberr_flag del_flag amp_flag] = check_if_whole_chr_aberr(chr_copy_num_vec, del_amp_flag)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/checkclippeddata.m" name="checkclippeddata" id="checkclippeddata">checkclippeddata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot a mixture model and see how does it look !!!! </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/chr_loc_into_x_axis.m" name="chr_loc_into_x_axis" id="chr_loc_into_x_axis">chr_loc_into_x_axis.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function converts the chromosomal locations into actuall x-axis which</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/chr_str_cell_into_chr_num_vec.m" name="chr_str_cell_into_chr_num_vec" id="chr_str_cell_into_chr_num_vec">chr_str_cell_into_chr_num_vec.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction chr_num_vec = chr_str_cell_into_chr_num_vec(chr_str_cell)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/chromaxesclick_callback.m" name="chromaxesclick_callback" id="chromaxesclick_callback">chromaxesclick_callback.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>--- Executes on button press in chromAxes</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/clipmodelobserveddata.m" name="clipmodelobserveddata" id="clipmodelobserveddata">clipmodelobserveddata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Clipp gaussian variables into discrete variables </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/colon_make_samples_file.m" name="colon_make_samples_file" id="colon_make_samples_file">colon_make_samples_file.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Prepare the .txt file for all the samples for the Colon SNP data.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/com_aber_options.m" name="com_aber_options" id="com_aber_options">com_aber_options.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>COM_ABER_OPTIONS M-file for com_aber_options.fig</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/combine_refgene_reflink.m" name="combine_refgene_reflink" id="combine_refgene_reflink">combine_refgene_reflink.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction combine_refgene_reflink(refgene_file,reflink_file,genome_build)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/comp_affy_hmm_geno_scipt.m" name="comp_affy_hmm_geno_scipt" id="comp_affy_hmm_geno_scipt">comp_affy_hmm_geno_scipt.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Load Chip Annotations - We need the strand from here !!!</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/comp_chips_common_aberr.m" name="comp_chips_common_aberr" id="comp_chips_common_aberr">comp_chips_common_aberr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>pp_folder = 'E:
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/comp_proj_common_aberr.m" name="comp_proj_common_aberr" id="comp_proj_common_aberr">comp_proj_common_aberr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction comp_proj_common_aberr(folder1, folder2, proj1, proj2, params_str, chips, n_d)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/compare_all_hmm_chrom_models.m" name="compare_all_hmm_chrom_models" id="compare_all_hmm_chrom_models">compare_all_hmm_chrom_models.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This script assumes that we already learned an HMM model for each</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/comparedataandhapmapfreqs.m" name="comparedataandhapmapfreqs" id="comparedataandhapmapfreqs">comparedataandhapmapfreqs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compare SNPs frequencies from hapmap and from a given data</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/comparetumorandnormalgenotypes.m" name="comparetumorandnormalgenotypes" id="comparetumorandnormalgenotypes">comparetumorandnormalgenotypes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compare paired of sampled - tumor and normal, and see how many of the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/comparetwochipsabberations_script.m" name="comparetwochipsabberations_script" id="comparetwochipsabberations_script">comparetwochipsabberations_script.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>ser_dir = 'E:
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/comparetwochipsabberationssamples.m" name="comparetwochipsabberationssamples" id="comparetwochipsabberationssamples">comparetwochipsabberationssamples.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction  TwoChipsCopyChangesScore = CompareTwoChipsAbberationsSamples(user_dir, chip_types, display_dir, sample_names, chroms, f_name_str)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/comparetwodispstructsabberations.m" name="comparetwodispstructsabberations" id="comparetwodispstructsabberations">comparetwodispstructsabberations.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This function compares how well are the abberations based on two chips</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/compileallmexfiles.m" name="compileallmexfiles" id="compileallmexfiles">compileallmexfiles.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compile all the mex file needed for the hmm_chrom program</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/computehmploglikelihood.m" name="computehmploglikelihood" id="computehmploglikelihood">computehmploglikelihood.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function computes the log-likelihood of a sequence according to </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/computesnpsadjacentld.m" name="computesnpsadjacentld" id="computesnpsadjacentld">computesnpsadjacentld.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 6/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/concat_cell_str_column.m" name="concat_cell_str_column" id="concat_cell_str_column">concat_cell_str_column.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction cell_str = concat_cell_str_column(cell_str1, cell_str2)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/concat_cells.m" name="concat_cells" id="concat_cells">concat_cells.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction new_cell = concat_cells(cell1, cell2, dim)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/copy of penalized_dist_hmm.m" name="copy of penalized_dist_hmm" id="copy of penalized_dist_hmm">copy of penalized_dist_hmm.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function gives penalty to the model size. It is used for model size</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/copymatstoratio.m" name="copymatstoratio" id="copymatstoratio">copymatstoratio.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction [copy_num_vec, allele_ratio_vec] = CopyMatsToRatio(CopyMatA, CopyMatB)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/count_joined_ones.m" name="count_joined_ones" id="count_joined_ones">count_joined_ones.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [joined_ones_vec, stretch_len_vec = count_joined_ones(zero_one_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/countabberations.m" name="countabberations" id="countabberations">countabberations.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Count abberations for one sample</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/countabberationssamples.m" name="countabberationssamples" id="countabberationssamples">countabberationssamples.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Libi Hertzberg and Or Zuk 9/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/countabberationssamples_script.m" name="countabberationssamples_script" id="countabberationssamples_script">countabberationssamples_script.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction  CountAbberationsSamples_script()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/create_and_save_norm_summary_file.m" name="create_and_save_norm_summary_file" id="create_and_save_norm_summary_file">create_and_save_norm_summary_file.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction create_and_save_norm_summary_file(sample_names, median_intensity_mat, user_dir, chip, array_outlier_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/create_chr_bands_data.m" name="create_chr_bands_data" id="create_chr_bands_data">create_chr_bands_data.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction create_chr_bands_data(genome_build)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/create_gene_cards_link_column.m" name="create_gene_cards_link_column" id="create_gene_cards_link_column">create_gene_cards_link_column.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction link_str_column = create_gene_cards_link_column(gene_list)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/debugbuggyexample.m" name="debugbuggyexample" id="debugbuggyexample">debugbuggyexample.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>HORT_PLACE_M3_OFFSET(2:end,:) = SHORT_PLACE_M3(1:end-1,:); 
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/debugcomparetwocopymatmatrices.m" name="debugcomparetwocopymatmatrices" id="debugcomparetwocopymatmatrices">debugcomparetwocopymatmatrices.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction DebugCompareTwoCopymatMatrices(ALL_MAT)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/debugscriptrlmm.m" name="debugscriptrlmm" id="debugscriptrlmm">debugscriptrlmm.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>ALL=load('F:
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/destroyallchipsuffixes.m" name="destroyallchipsuffixes" id="destroyallchipsuffixes">destroyallchipsuffixes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A short utility that tries to eliminate all the '_hind' created by older</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/determinemodelstability.m" name="determinemodelstability" id="determinemodelstability">determinemodelstability.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 5/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/determinemodelstabilitybackup.m" name="determinemodelstabilitybackup" id="determinemodelstabilitybackup">determinemodelstabilitybackup.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Find what happens if we generate data from a given model and try to learn it again.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/display_raw_data_gui.m" name="display_raw_data_gui" id="display_raw_data_gui">display_raw_data_gui.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>DISPLAY_RAW_DATA_GUI M-file for display_raw_data_GUI.fig</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/displayallsamplespca.m" name="displayallsamplespca" id="displayallsamplespca">displayallsamplespca.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Read the files containing all the stuff on samples and display it.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/displayformatsave.m" name="displayformatsave" id="displayformatsave">displayformatsave.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 6/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/displaysamplespca.m" name="displaysamplespca" id="displaysamplespca">displaysamplespca.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Display a PCA of the samples.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/dks_hmm_gaussian2_helper.m" name="dks_hmm_gaussian2_helper" id="dks_hmm_gaussian2_helper">dks_hmm_gaussian2_helper.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction ret = dKS_HMM_gaussian2_helper(observed_data_2, trans_prob_mat,</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/dks_hmm_gaussian2_scan.m" name="dks_hmm_gaussian2_scan" id="dks_hmm_gaussian2_scan">dks_hmm_gaussian2_scan.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>libi: check this</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/drawchrom.m" name="drawchrom" id="drawchrom">drawchrom.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>hr = handles.chr;</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/drawchrommap.m" name="drawchrommap" id="drawchrommap">drawchrommap.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>hr = handles.chr;</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/drawhmmstatesimage.m" name="drawhmmstatesimage" id="drawhmmstatesimage">drawhmmstatesimage.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 6/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/drawrlmmonesnp.m" name="drawrlmmonesnp" id="drawrlmmonesnp">drawrlmmonesnp.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction DrawRLMMOneSNP(RLMM, x, mult_ratio, legend_flag, color_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/entropy.m" name="entropy" id="entropy">entropy.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>ENTROPY Entropy log base 2</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/erase_backslash_cell.m" name="erase_backslash_cell" id="erase_backslash_cell">erase_backslash_cell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction new_str_cell = erase_backslash_cell(str_cell)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/expandsnpsmoments.m" name="expandsnpsmoments" id="expandsnpsmoments">expandsnpsmoments.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/export_all_callback.m" name="export_all_callback" id="export_all_callback">export_all_callback.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>drawChromMap(handles, 0);</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/extract_sub_stretch_cell.m" name="extract_sub_stretch_cell" id="extract_sub_stretch_cell">extract_sub_stretch_cell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [sub_stretch_cell, samples] =</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/fakeafterrunhmmfile.m" name="fakeafterrunhmmfile" id="fakeafterrunhmmfile">fakeafterrunhmmfile.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 6/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/find_common_aberr.m" name="find_common_aberr" id="find_common_aberr">find_common_aberr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>ormal_disease_flag = 1;
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/find_common_aberr_old.m" name="find_common_aberr_old" id="find_common_aberr_old">find_common_aberr_old.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction find_common_aberr(sample_names, user_dir, ChipName, snp_ids, chr_loc_vec, chr_vec, snp_gene_symbols, snps_gene_dist, del_amp_flag, thresh_del, thresh_amp, Q)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/find_snp_gene_symbols_ind.m" name="find_snp_gene_symbols_ind" id="find_snp_gene_symbols_ind">find_snp_gene_symbols_ind.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction ind = find_snp_gene_symbols_ind(snp_gene_symbols, gene_symbols)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/full_f_name_into_dir_f_name.m" name="full_f_name_into_dir_f_name" id="full_f_name_into_dir_f_name">full_f_name_into_dir_f_name.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [dir, f_name] = full_f_name_into_dir_f_name(full_f_name)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/gene_dist_vec_into_dist_cell.m" name="gene_dist_vec_into_dist_cell" id="gene_dist_vec_into_dist_cell">gene_dist_vec_into_dist_cell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction dist_cell = gene_dist_vec_into_dist_cell(dist_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/geno_hmm_into_affy.m" name="geno_hmm_into_affy" id="geno_hmm_into_affy">geno_hmm_into_affy.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction genotype_mat_affy = geno_hmm_into_affy(genotype_mat, data_snp_ids, chip_type, chip_snp_ids_ordered)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/geno_into_affy_strand.m" name="geno_into_affy_strand" id="geno_into_affy_strand">geno_into_affy_strand.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction ret_geno = geno_into_affy_strand(geno_mat, strand)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/genome_assembly_to_hapmap_version.m" name="genome_assembly_to_hapmap_version" id="genome_assembly_to_hapmap_version">genome_assembly_to_hapmap_version.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>return the current hapmap version </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/genotype_call_into_num.m" name="genotype_call_into_num" id="genotype_call_into_num">genotype_call_into_num.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [AA, AB, BB, NoCall, call_cell] = genotype_call_into_num()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/genotype_call_into_num_hmm.m" name="genotype_call_into_num_hmm" id="genotype_call_into_num_hmm">genotype_call_into_num_hmm.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [AA, AB, BA, BB] = genotype_call_into_num_hmm()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_cdf_f_name.m" name="get_cdf_f_name" id="get_cdf_f_name">get_cdf_f_name.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction cdf_f_name = get_cdf_f_name(chip)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_chip_annot.m" name="get_chip_annot" id="get_chip_annot">get_chip_annot.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction handles=get_chip_annot(handles,chip_name)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_chip_name.m" name="get_chip_name" id="get_chip_name">get_chip_name.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction chip_name=get_chip_name(chip_name)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_chr_limits.m" name="get_chr_limits" id="get_chr_limits">get_chr_limits.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function gets the limits of a chromosome, from zero</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_chr_locs_band.m" name="get_chr_locs_band" id="get_chr_locs_band">get_chr_locs_band.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This function gets as input a vector of chromosomal locations, and the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_chr_locs_band_chrs.m" name="get_chr_locs_band_chrs" id="get_chr_locs_band_chrs">get_chr_locs_band_chrs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction bands_name_cell = get_chr_locs_band_chrs(chr_vec, chr_loc_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_chrom_locs.m" name="get_chrom_locs" id="get_chrom_locs">get_chrom_locs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This function outputs the chromosomes and chromosomal locations of input snps. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_chrs_limits.m" name="get_chrs_limits" id="get_chrs_limits">get_chrs_limits.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [xmin_vec, xmax_vec] =  get_chrs_limits(chr_num_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_diploid_ind.m" name="get_diploid_ind" id="get_diploid_ind">get_diploid_ind.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction diploid_ind = get_diploid_ind(sample_names)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_dist_from_gene.m" name="get_dist_from_gene" id="get_dist_from_gene">get_dist_from_gene.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [dist_vec] = get_dist_from_gene(loc_start, loc_end, exon_start_vec, exon_end_vec, in_loc_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_empirical_dist2.m" name="get_empirical_dist2" id="get_empirical_dist2">get_empirical_dist2.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction ret = get_empirical_dist2(empirical_dist_data, observed_data_2)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_gender_from_allele_ratio.m" name="get_gender_from_allele_ratio" id="get_gender_from_allele_ratio">get_gender_from_allele_ratio.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [gender_cell, female_inds] = get_gender_from_allele_ratio(allele_ratio_vec_in_chr_x_mat, chip)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_genome_assembly.m" name="get_genome_assembly" id="get_genome_assembly">get_genome_assembly.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function reads from the database the genome assebmly</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_genotype_from_hmm_out.m" name="get_genotype_from_hmm_out" id="get_genotype_from_hmm_out">get_genotype_from_hmm_out.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function extracts the (discrete) geneoypes from the HMM output probabilities</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_hapmap_file_names_from_web.m" name="get_hapmap_file_names_from_web" id="get_hapmap_file_names_from_web">get_hapmap_file_names_from_web.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Get the file names of hapmap genotypes from the web</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_hmm_dist_gaussian.m" name="get_hmm_dist_gaussian" id="get_hmm_dist_gaussian">get_hmm_dist_gaussian.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction ret = get_HMM_dist_gaussian(trans_prob_mat, dist_params, observed_data)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_mat_spec_ind.m" name="get_mat_spec_ind" id="get_mat_spec_ind">get_mat_spec_ind.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction vals = get_mat_spec_ind(mat, I,J)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_normal_copy_num_samples_ind.m" name="get_normal_copy_num_samples_ind" id="get_normal_copy_num_samples_ind">get_normal_copy_num_samples_ind.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This function finds which of the samples are considered 'Normals'.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_probe_intens_column_contents.m" name="get_probe_intens_column_contents" id="get_probe_intens_column_contents">get_probe_intens_column_contents.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [quartet_num_vec, match_cell, strand_cell] = get_probe_intens_column_contents()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_probe_pm_mm_columns.m" name="get_probe_pm_mm_columns" id="get_probe_pm_mm_columns">get_probe_pm_mm_columns.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [pm_column] = snp_get_probe_pm_mm_columns(cur_dir, array_name, sample_name)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_probe_pm_mm_ind.m" name="get_probe_pm_mm_ind" id="get_probe_pm_mm_ind">get_probe_pm_mm_ind.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [pa_vec, ma_vec, pb_vec, mb_vec] =</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_probesets.m" name="get_probesets" id="get_probesets">get_probesets.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Load all the probesets of a chip</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_rand_consequent_vec.m" name="get_rand_consequent_vec" id="get_rand_consequent_vec">get_rand_consequent_vec.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction num_consequent_vec = get_rand_consequent_vec(num_loc, num_events, num_start, max_num_consequent)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_samples_with_gender.m" name="get_samples_with_gender" id="get_samples_with_gender">get_samples_with_gender.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction samples=get_samples_with_gender(samples, gender)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_segments_zero_one_vec.m" name="get_segments_zero_one_vec" id="get_segments_zero_one_vec">get_segments_zero_one_vec.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [joined_ones_vec] = get_segments_zero_one_vec(zero_one_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_stationary_dist.m" name="get_stationary_dist" id="get_stationary_dist">get_stationary_dist.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This function computes the stationary distribution of </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/get_stretches_limits.m" name="get_stretches_limits" id="get_stretches_limits">get_stretches_limits.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [samples_start_end_cell, samples_loh_cell, ret_snp_loc_vec, samples_big_aberr_vec] = get_stretches_limits(diag_table, samples)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/getbestmarginalpredictions.m" name="getbestmarginalpredictions" id="getbestmarginalpredictions">getbestmarginalpredictions.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 5/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/gethapmapsampleindex.m" name="gethapmapsampleindex" id="gethapmapsampleindex">gethapmapsampleindex.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function gets the index of the samples in the HAPMAP data, based on</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/getnormalmeanintensities.m" name="getnormalmeanintensities" id="getnormalmeanintensities">getnormalmeanintensities.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This function goes over all the samples and find for each sample what is</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/getprobesperm.m" name="getprobesperm" id="getprobesperm">getprobesperm.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute a permutation on 56 elements. The output should be</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/getsegmentsfromindexes.m" name="getsegmentsfromindexes" id="getsegmentsfromindexes">getsegmentsfromindexes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function finds the start and end of each segment of ones.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/getsnpsgenotypematfrompackedr.m" name="getsnpsgenotypematfrompackedr" id="getsnpsgenotypematfrompackedr">getsnpsgenotypematfrompackedr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction GenotypeMat = GetSNPsGenotypeMatFromPackedR(R, snp_ids); </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hapmap_make_samples_file.m" name="hapmap_make_samples_file" id="hapmap_make_samples_file">hapmap_make_samples_file.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Prepare the .txt file for all the samples for the Hapmap SNP data.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hapmap_version_to_http.m" name="hapmap_version_to_http" id="hapmap_version_to_http">hapmap_version_to_http.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Choose correct url</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hapmapcompareaffyandhmmgenotypes.m" name="hapmapcompareaffyandhmmgenotypes" id="hapmapcompareaffyandhmmgenotypes">hapmapcompareaffyandhmmgenotypes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 5/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hapmapcomparepopulationsrlmmparams.m" name="hapmapcomparepopulationsrlmmparams" id="hapmapcomparepopulationsrlmmparams">hapmapcomparepopulationsrlmmparams.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compare RLMM intensities for many populations</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hapmapdchipoutputtxtintomatfiles.m" name="hapmapdchipoutputtxtintomatfiles" id="hapmapdchipoutputtxtintomatfiles">hapmapdchipoutputtxtintomatfiles.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This function converts the output of dchip into a mat file for each sample in the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hapmapextractonlychipgenotypes.m" name="hapmapextractonlychipgenotypes" id="hapmapextractonlychipgenotypes">hapmapextractonlychipgenotypes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 5/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hapmapgenotypetxttomatfiles.m" name="hapmapgenotypetxttomatfiles" id="hapmapgenotypetxttomatfiles">hapmapgenotypetxttomatfiles.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 5/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hapmapgetgenders.m" name="hapmapgetgenders" id="hapmapgetgenders">hapmapgetgenders.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Find the Genders of all samples in all three populations</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hmm_dist_gaussian_params_to_vec.m" name="hmm_dist_gaussian_params_to_vec" id="hmm_dist_gaussian_params_to_vec">hmm_dist_gaussian_params_to_vec.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction params_vec = HMM_dist_gaussian_params_to_vec(trans_prob_mat, dist_params)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hmm_dist_gaussian_params_vec_to_params.m" name="hmm_dist_gaussian_params_vec_to_params" id="hmm_dist_gaussian_params_vec_to_params">hmm_dist_gaussian_params_vec_to_params.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>ind number of states</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hmm_geno_into_old.m" name="hmm_geno_into_old" id="hmm_geno_into_old">hmm_geno_into_old.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction geno_mat = hmm_geno_into_old(in_geno_mat)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/hmm_k_by_penalized_dist_em.m" name="hmm_k_by_penalized_dist_em" id="hmm_k_by_penalized_dist_em">hmm_k_by_penalized_dist_em.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [K_min, pen_dist_vec, params_cell] = HMM_K_by_penalized_dist_EM(empirical_data, K_bound)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/ind_seq_into_start_end.m" name="ind_seq_into_start_end" id="ind_seq_into_start_end">ind_seq_into_start_end.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [start_vec, end_vec] = ind_seq_into_start_end(ind_seq)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/intersect_order_by_first_gr.m" name="intersect_order_by_first_gr" id="intersect_order_by_first_gr">intersect_order_by_first_gr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [C, AI, BI] = intersect_order_by_first_gr(A, B)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/is_bet_vals.m" name="is_bet_vals" id="is_bet_vals">is_bet_vals.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction ret_vec = is_bet_vals(val_vec1, val_vec2, in_val)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/is_bet_vals_in_vec.m" name="is_bet_vals_in_vec" id="is_bet_vals_in_vec">is_bet_vals_in_vec.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction ret_vec = is_bet_vals_in_vec(val1, val2, in_val_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/is_file_pres.m" name="is_file_pres" id="is_file_pres">is_file_pres.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction ret = is_file_pres(f_name)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/isposdef.m" name="isposdef" id="isposdef">isposdef.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Check if a square matrix is positive definite</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/ispositivedefinite.m" name="ispositivedefinite" id="ispositivedefinite">ispositivedefinite.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Returns 0 if false, 1 if true</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/knnimpute.m" name="knnimpute" id="knnimpute">knnimpute.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>NNIMPUTE imputes missing data using the nearest-neighbor method</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/ldtoplacem.m" name="ldtoplacem" id="ldtoplacem">ldtoplacem.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 6/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/learnhmmchromfromdata.m" name="learnhmmchromfromdata" id="learnhmmchromfromdata">learnhmmchromfromdata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 6/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_all_genotypes.m" name="load_all_genotypes" id="load_all_genotypes">load_all_genotypes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [genotypes, snp_ids] = load_all_genotypes(samples, work_dir, chip)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_and_norm_data.m" name="load_and_norm_data" id="load_and_norm_data">load_and_norm_data.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction load_and_norm_data(sample_names, array_names, working_path, diploid_ind, chip)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_cel_probes.m" name="load_cel_probes" id="load_cel_probes">load_cel_probes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Read a Cel files and output it's probs name, snp_ids </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_chip_allele_info_table.m" name="load_chip_allele_info_table" id="load_chip_allele_info_table">load_chip_allele_info_table.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction load_chip_allele_info_table(chip_name, genome_build, annot_file)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_chr_bands.m" name="load_chr_bands" id="load_chr_bands">load_chr_bands.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function loads all the bands which belong to a certain chromsome</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_end_p_loc.m" name="load_end_p_loc" id="load_end_p_loc">load_end_p_loc.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function loads from the database the ending of the p-locations</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_gene_loc_exons_ucsc.m" name="load_gene_loc_exons_ucsc" id="load_gene_loc_exons_ucsc">load_gene_loc_exons_ucsc.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [gene_symbols, chr, loc_start, loc_end, exon_start_cell,</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_hind_and_xba.m" name="load_hind_and_xba" id="load_hind_and_xba">load_hind_and_xba.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction chip_annot=load_Hind_and_Xba</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_hmm_avg_copy_mat.m" name="load_hmm_avg_copy_mat" id="load_hmm_avg_copy_mat">load_hmm_avg_copy_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [average_copy_num_mat, chr_num_snps_vec, data_snp_ids] =</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_hmm_copy_num_mat.m" name="load_hmm_copy_num_mat" id="load_hmm_copy_num_mat">load_hmm_copy_num_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [copy_num_mat, chr_num_snps_vec, data_snp_ids] =</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_hmm_genotype_mat.m" name="load_hmm_genotype_mat" id="load_hmm_genotype_mat">load_hmm_genotype_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [genotype_mat, chr_num_snps_vec, data_snp_ids] =</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_hmm_out_copy_num_mat.m" name="load_hmm_out_copy_num_mat" id="load_hmm_out_copy_num_mat">load_hmm_out_copy_num_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [raw_copy_num_mat, chr_num_snps_vec, genotype_mat, data_snp_ids] =</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_hmm_out_copy_num_mat_and_raw.m" name="load_hmm_out_copy_num_mat_and_raw" id="load_hmm_out_copy_num_mat_and_raw">load_hmm_out_copy_num_mat_and_raw.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function [err, copy_num_mat, average_copy_num_mat, chr_num_snps_vec, genotype_mat, data_snp_ids, raw_copy_num_mat] = ...</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_hmm_out_copy_num_mat_of_chips.m" name="load_hmm_out_copy_num_mat_of_chips" id="load_hmm_out_copy_num_mat_of_chips">load_hmm_out_copy_num_mat_of_chips.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction [err, genotype_mat, data_snp_ids, chr_num_snps_vec, average_copy_num_mat, copy_num_mat] = ...</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_hmm_out_prepare_zero_one_mat.m" name="load_hmm_out_prepare_zero_one_mat" id="load_hmm_out_prepare_zero_one_mat">load_hmm_out_prepare_zero_one_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [err hmm_out] = load_hmm_out_prepare_zero_one_mat(sample_names, user_dir, chip_type, thresh_del, thresh_amp, snp_ids, chr_vec, gender)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_hmm_out_prepare_zero_one_mat_of_chips.m" name="load_hmm_out_prepare_zero_one_mat_of_chips" id="load_hmm_out_prepare_zero_one_mat_of_chips">load_hmm_out_prepare_zero_one_mat_of_chips.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>    [err, hmm_out.copy_num_mat, hmm_out.average_copy_num_mat, hmm_out.chr_num_snps_vec, hmm_out.genotype_mat, hmm_out.data_snp_ids] = ...</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_normalized_copy_num_mat.m" name="load_normalized_copy_num_mat" id="load_normalized_copy_num_mat">load_normalized_copy_num_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [err, raw_copy_num_mat, data_snp_ids, array_outlier_vec] = load_normalized_copy_num_mat(sample_names, user_dir, chip_type)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_normalized_copy_num_mat_of_chips.m" name="load_normalized_copy_num_mat_of_chips" id="load_normalized_copy_num_mat_of_chips">load_normalized_copy_num_mat_of_chips.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction [err, raw_copy_num_mat, data_snp_ids] = load_normalized_copy_num_mat_of_chips(sample_names, user_dir, chip_type, chip_snp_ids_ordered)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/load_snp_ids_strand.m" name="load_snp_ids_strand" id="load_snp_ids_strand">load_snp_ids_strand.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [ret_strand ret_snp_ids] = load_snp_ids_strand(in_snp_ids, chip)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/loadandintersectdata.m" name="loadandintersectdata" id="loadandintersectdata">loadandintersectdata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 7/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/loadcellfile_str.m" name="loadcellfile_str" id="loadcellfile_str">loadcellfile_str.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction table=loadCellFile_str(infile)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/make_cel_mat_files.m" name="make_cel_mat_files" id="make_cel_mat_files">make_cel_mat_files.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction make_CEL_mat_files(CEL_folder)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/make_segal_genesets_db.m" name="make_segal_genesets_db" id="make_segal_genesets_db">make_segal_genesets_db.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>genesets_mat=cell(0,6);</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/make_ucsc_files.m" name="make_ucsc_files" id="make_ucsc_files">make_ucsc_files.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction err=make_ucsc_files(ucsc_mounted_folder, segments_del, mat_genes_del, segments_samples_del, segments_samples_arm_del, ...</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/manysamplefilestooneallsamplefile.m" name="manysamplefilestooneallsamplefile" id="manysamplefilestooneallsamplefile">manysamplefilestooneallsamplefile.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Addition: Save also one big matrix with everything. Save A and B intensities</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/mapaxesclick_callback.m" name="mapaxesclick_callback" id="mapaxesclick_callback">mapaxesclick_callback.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>--- Executes on mouse button press on axes</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/mat_into_vec.m" name="mat_into_vec" id="mat_into_vec">mat_into_vec.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction vec = mat_into_vec(mat)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/mgd.m" name="mgd" id="mgd">mgd.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>enerates a Multivariate Gaussian Distribution</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/mixture_of_gaussians_example.m" name="mixture_of_gaussians_example" id="mixture_of_gaussians_example">mixture_of_gaussians_example.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>load('E:
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/move_additional_src.m" name="move_additional_src" id="move_additional_src">move_additional_src.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction move_additional_src()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/old2learnhmmchromfromdata.m" name="old2learnhmmchromfromdata" id="old2learnhmmchromfromdata">old2learnhmmchromfromdata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A function for learning the HMM models from the data. Here is what the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/old_expandsnpsmoments.m" name="old_expandsnpsmoments" id="old_expandsnpsmoments">old_expandsnpsmoments.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/old_hapmapcompareaffyandhmmgenotypes.m" name="old_hapmapcompareaffyandhmmgenotypes" id="old_hapmapcompareaffyandhmmgenotypes">old_hapmapcompareaffyandhmmgenotypes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 5/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/oldcalclinkagedisequilirium.m" name="oldcalclinkagedisequilirium" id="oldcalclinkagedisequilirium">oldcalclinkagedisequilirium.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Calculate the Linkage Disequilibrium values of all pairs</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/oldcomputesnpsadjacentld.m" name="oldcomputesnpsadjacentld" id="oldcomputesnpsadjacentld">oldcomputesnpsadjacentld.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute Linkage Disequilibrium values for pairs of SNPs which are on the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/oldhapmapcompareaffyandhmmgenotypes.m" name="oldhapmapcompareaffyandhmmgenotypes" id="oldhapmapcompareaffyandhmmgenotypes">oldhapmapcompareaffyandhmmgenotypes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This function reads the genotypes derived from the HAPMAP data, and</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/oldlearnhmmchromfromdata.m" name="oldlearnhmmchromfromdata" id="oldlearnhmmchromfromdata">oldlearnhmmchromfromdata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A function for learning the HMM models from the data. Here is what the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/oldplotpatientonchromresults.m" name="oldplotpatientonchromresults" id="oldplotpatientonchromresults">oldplotpatientonchromresults.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Various data types</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/oldrun_learnhmmchromfromdata.m" name="oldrun_learnhmmchromfromdata" id="oldrun_learnhmmchromfromdata">oldrun_learnhmmchromfromdata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Run the function for learning the models from the data. Here is what the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/order_by_chr_loc.m" name="order_by_chr_loc" id="order_by_chr_loc">order_by_chr_loc.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction ordered_ind = order_by_chr_loc(chr_num_vec, chr_loc_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/pachterpolytopeanalysis.m" name="pachterpolytopeanalysis" id="pachterpolytopeanalysis">pachterpolytopeanalysis.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Perform PCA analysis specialy for genotypes</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/parse_words_from_line.m" name="parse_words_from_line" id="parse_words_from_line">parse_words_from_line.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction words_cell = parse_words_from_line(line_str)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/parsexml.m" name="parsexml" id="parsexml">parsexml.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>PARSEXML Convert XML file to a MATLAB structure.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/penalized_dist_hmm.m" name="penalized_dist_hmm" id="penalized_dist_hmm">penalized_dist_hmm.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function gives penalty to the model size. It is used for model size</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plot_common_aberr.m" name="plot_common_aberr" id="plot_common_aberr">plot_common_aberr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>extract sub-stretch cell according to loc_start and loc_end</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plot_genes_exons.m" name="plot_genes_exons" id="plot_genes_exons">plot_genes_exons.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [fig_ind, xmin, xmax, ymin, ymax, legend_vec, legend_cell]= plot_genes_exons(chr_num, loc_start, loc_end, genes_chr, gene_symbols, genes_loc_start, exon_start_cell, exon_end_cell)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plot_hmm_gaussian_elipse.m" name="plot_hmm_gaussian_elipse" id="plot_hmm_gaussian_elipse">plot_hmm_gaussian_elipse.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td></td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plot_x_labels_vertical.m" name="plot_x_labels_vertical" id="plot_x_labels_vertical">plot_x_labels_vertical.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction plot_x_labels_vertical(x_loc_vec, y_loc, labels, font_size)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plotabcopynums.m" name="plotabcopynums" id="plotabcopynums">plotabcopynums.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot two allele copy numbers</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plotalleleratios.m" name="plotalleleratios" id="plotalleleratios">plotalleleratios.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot two allele copy numbers</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plotfordebugging.m" name="plotfordebugging" id="plotfordebugging">plotfordebugging.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plothmmchromresults.m" name="plothmmchromresults" id="plothmmchromresults">plothmmchromresults.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A function for learning the models from the data. Here is what the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plotmodel.m" name="plotmodel" id="plotmodel">plotmodel.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot a mixture model and see how does it look !!!! </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plotmodelsdiff.m" name="plotmodelsdiff" id="plotmodelsdiff">plotmodelsdiff.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot various difference metrics between two HMMs </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plotpatientonchromresults.m" name="plotpatientonchromresults" id="plotpatientonchromresults">plotpatientonchromresults.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Various data types</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/plotwholechromresults.m" name="plotwholechromresults" id="plotwholechromresults">plotwholechromresults.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>loading the needed data </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/prelearnmogchromfromdata.m" name="prelearnmogchromfromdata" id="prelearnmogchromfromdata">prelearnmogchromfromdata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>chip_type = lower(SNPChipAnnotStruct.chip); 
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/prepareinputfileforfastphase.m" name="prepareinputfileforfastphase" id="prepareinputfileforfastphase">prepareinputfileforfastphase.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function takes the genotypes and saves them in a file which is in the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/prepareinputforchromsdislayfunction.m" name="prepareinputforchromsdislayfunction" id="prepareinputforchromsdislayfunction">prepareinputforchromsdislayfunction.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Create and input according to the format of the Displaying function we use</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/preparelabelsforcoloncancer.m" name="preparelabelsforcoloncancer" id="preparelabelsforcoloncancer">preparelabelsforcoloncancer.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Run the function for learning the models from the data. Here is what the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/probe_intens_txt_into_mat.m" name="probe_intens_txt_into_mat" id="probe_intens_txt_into_mat">probe_intens_txt_into_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction median_intensity = probe_intens_txt_into_mat(probe_intens_path, array_name, mat_f_name_path, mat_f_name, sample_name)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/probesetvalues_no_bg.m" name="probesetvalues_no_bg" id="probesetvalues_no_bg">probesetvalues_no_bg.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>PROBESETVALUES extracts probe set values from probe results</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/projectoncopyab.m" name="projectoncopyab" id="projectoncopyab">projectoncopyab.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 5/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/put_one_in_putative_aberr.m" name="put_one_in_putative_aberr" id="put_one_in_putative_aberr">put_one_in_putative_aberr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction zero_one_mat = put_one_in_putative_aberr(del_amp_flag, raw_copy_num_mat, chr_num_snps_vec, copy_num_mat, thresh_del, thresh_amp, gender, chr_x_ind)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/ratiotocopymats.m" name="ratiotocopymats" id="ratiotocopymats">ratiotocopymats.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction [CopyMatA CopyMatB] = RatioToCopyMats(copy_num_vec, allele_ratio_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/read_gxa_file.m" name="read_gxa_file" id="read_gxa_file">read_gxa_file.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction genesets_mat=read_gxa_file(gxa_file)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/readchiamocohorts.m" name="readchiamocohorts" id="readchiamocohorts">readchiamocohorts.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Read the example files with 10 different SNPs from the CHIAMO algorithm</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/readoutputfilefromfastphase.m" name="readoutputfilefromfastphase" id="readoutputfilefromfastphase">readoutputfilefromfastphase.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function reads the genotypes from the fastPhase output format, </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/remove_outliers_hmm_out.m" name="remove_outliers_hmm_out" id="remove_outliers_hmm_out">remove_outliers_hmm_out.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [hmm_out, good_ind] = remove_outliers_hmm_out(hmm_out, outlier_thresh)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/replace_ab_according_to_strand.m" name="replace_ab_according_to_strand" id="replace_ab_according_to_strand">replace_ab_according_to_strand.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [CopyMatA CopyMatB] = replace_AB_according_to_strand(CopyMatA, CopyMatB, snp_ids, chip_type)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/rlmm_adjustparamstocurrentdata.m" name="rlmm_adjustparamstocurrentdata" id="rlmm_adjustparamstocurrentdata">rlmm_adjustparamstocurrentdata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 7/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/rlmm_classifyusinggaussianparams.m" name="rlmm_classifyusinggaussianparams" id="rlmm_classifyusinggaussianparams">rlmm_classifyusinggaussianparams.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 7/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/rlmm_computeauxillaryparams.m" name="rlmm_computeauxillaryparams" id="rlmm_computeauxillaryparams">rlmm_computeauxillaryparams.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 8/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/rlmm_learngaussianparams.m" name="rlmm_learngaussianparams" id="rlmm_learngaussianparams">rlmm_learngaussianparams.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 7/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/rlmm_normalize.m" name="rlmm_normalize" id="rlmm_normalize">rlmm_normalize.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Here we implement the RLMM package of Rabbee&Speed (Bioinformatics 2006),</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/run_find_common_aberr.m" name="run_find_common_aberr" id="run_find_common_aberr">run_find_common_aberr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>un_find_common_aberr</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/run_hmm_learn_on_data.m" name="run_hmm_learn_on_data" id="run_hmm_learn_on_data">run_hmm_learn_on_data.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/run_learnhmmchromfromdata.m" name="run_learnhmmchromfromdata" id="run_learnhmmchromfromdata">run_learnhmmchromfromdata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Run the function for learning the models from the data. Here is what the</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/run_load_and_norm_data.m" name="run_load_and_norm_data" id="run_load_and_norm_data">run_load_and_norm_data.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction run_load_and_norm_data()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/runcomputesnpsadjacentld.m" name="runcomputesnpsadjacentld" id="runcomputesnpsadjacentld">runcomputesnpsadjacentld.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This script is used for updating the LD structure </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/rundestroyallchipsuffixes.m" name="rundestroyallchipsuffixes" id="rundestroyallchipsuffixes">rundestroyallchipsuffixes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Run the short utility that tries to eliminate all the '_hind' created by older</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/rundeterminemodelstability.m" name="rundeterminemodelstability" id="rundeterminemodelstability">rundeterminemodelstability.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 5/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/runhapmapcompareaffyandhmmgenotypes.m" name="runhapmapcompareaffyandhmmgenotypes" id="runhapmapcompareaffyandhmmgenotypes">runhapmapcompareaffyandhmmgenotypes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td> comp_data = 'AffyBenchmark_data';</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/runmanysamplefilestooneallsamplefile.m" name="runmanysamplefilestooneallsamplefile" id="runmanysamplefilestooneallsamplefile">runmanysamplefilestooneallsamplefile.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td> user_dir = 'E:
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/samples_into_pairs.m" name="samples_into_pairs" id="samples_into_pairs">samples_into_pairs.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [sample_pairs_cell, pairs_samples_ind non_paired_ind_n non_paired_ind_d] = samples_into_pairs_old(samples);</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/savecellfile.m" name="savecellfile" id="savecellfile">savecellfile.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>his function saves cell table into outFile </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/sequenceloglikelihood.m" name="sequenceloglikelihood" id="sequenceloglikelihood">sequenceloglikelihood.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The function computes the log-likelihood of a given (X,Y) sequence, and a</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/shortplotmanysnps.m" name="shortplotmanysnps" id="shortplotmanysnps">shortplotmanysnps.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot several SNPs to see how they behave ... </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/simulatesequencefrommodelmatlab.m" name="simulatesequencefrommodelmatlab" id="simulatesequencefrommodelmatlab">simulatesequencefrommodelmatlab.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>An interface with the C function SimulateSequenceFromModel. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/simulatesnpsmats.m" name="simulatesnpsmats" id="simulatesnpsmats">simulatesnpsmats.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Auxillary function. Simuale data from multi-variate Gaussian</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/smallratiocheck.m" name="smallratiocheck" id="smallratiocheck">smallratiocheck.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A small check to see that two .txt files (one with genotypes and one with probe intensities match </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/snp_calc_probe_allele_ratio.m" name="snp_calc_probe_allele_ratio" id="snp_calc_probe_allele_ratio">snp_calc_probe_allele_ratio.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [ratio_vec] = snp_calc_probe_allele_ratio(probe_intens_mat, proj_name, mean_mm_flag)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/snp_gene_symbols_into_descr.m" name="snp_gene_symbols_into_descr" id="snp_gene_symbols_into_descr">snp_gene_symbols_into_descr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction snp_gene_descr = snp_gene_symbols_into_descr(snp_gene_symbols, gene_symbols, gene_descr)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/snp_get_probe_pm_mm_columns.m" name="snp_get_probe_pm_mm_columns" id="snp_get_probe_pm_mm_columns">snp_get_probe_pm_mm_columns.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction [pa_vec, ma_vec, pb_vec, mb_vec] = snp_get_probe_pm_mm_columns(proj_name)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/snp_gui.m" name="snp_gui" id="snp_gui">snp_gui.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>SNP_GUI M-file for SNP_GUI.fig</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/snp_gui2.m" name="snp_gui2" id="snp_gui2">snp_gui2.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>SNP_GUI M-file for SNP_GUI.fig</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/snp_large_num_in_loh.m" name="snp_large_num_in_loh" id="snp_large_num_in_loh">snp_large_num_in_loh.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction stretch_len_vec = snp_large_num_in_loh(loh_vec, stretch_len_vec)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/snpquartets.m" name="snpquartets" id="snpquartets">snpquartets.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Create a table of quartets from the output of probesetvalues</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/spectral_ica.m" name="spectral_ica" id="spectral_ica">spectral_ica.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Y1 ~ U[-sqrt(3),sqrt(3)]</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/spectral_ica2d.m" name="spectral_ica2d" id="spectral_ica2d">spectral_ica2d.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Improving Zigi's code - better readability and performance.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/spectral_ica3.m" name="spectral_ica3" id="spectral_ica3">spectral_ica3.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Y1 ~ U[-sqrt(3),sqrt(3)]</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/spectral_ica_deg.m" name="spectral_ica_deg" id="spectral_ica_deg">spectral_ica_deg.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>The degenarated spectral ICA algorithm for two uniform distributions</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/spectral_ica_zuk.m" name="spectral_ica_zuk" id="spectral_ica_zuk">spectral_ica_zuk.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Improving Zigi's code - better readability and performance.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/subtract_mm_from_pm.m" name="subtract_mm_from_pm" id="subtract_mm_from_pm">subtract_mm_from_pm.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function data_pm = subtract_mm_from_pm(probe_intens_mat, pa_vec, ma_vec,</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/swap.m" name="swap" id="swap">swap.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>nction [a,b] = swap(a,b)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/temp_script.m" name="temp_script" id="temp_script">temp_script.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>signAllGlobalConstants;</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/tempdebugcolondata.m" name="tempdebugcolondata" id="tempdebugcolondata">tempdebugcolondata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td> [OutputFilesNames NormalMeanIntensities r_mat] = PreLearnMoGChromFromData('E:
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/tempdrawmeangaussians.m" name="tempdrawmeangaussians" id="tempdrawmeangaussians">tempdrawmeangaussians.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td> = 20;</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/temprunupdatedatabase.m" name="temprunupdatedatabase" id="temprunupdatedatabase">temprunupdatedatabase.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>apmap_data_http = 'http://www.hapmap.org/genotypes/latest_ncbi_build36/fwd_strand/non-redundant/';</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/testpachterpolytopeanalysis.m" name="testpachterpolytopeanalysis" id="testpachterpolytopeanalysis">testpachterpolytopeanalysis.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Test the PCA function</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/testrlmm.m" name="testrlmm" id="testrlmm">testrlmm.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>This script is desinged to test the RLMM normalization and SNP genotyping</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/testrlmmadjust.m" name="testrlmmadjust" id="testrlmmadjust">testrlmmadjust.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td> load('E:
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/trainhmmfromdataemmatlab.m" name="trainhmmfromdataemmatlab" id="trainhmmfromdataemmatlab">trainhmmfromdataemmatlab.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td> An interface function for calling the C function which does all the work.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/twogaussiansdiff.m" name="twogaussiansdiff" id="twogaussiansdiff">twogaussiansdiff.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Clipp gaussian variables into discrete variables </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/twogaussiansthreshold.m" name="twogaussiansthreshold" id="twogaussiansthreshold">twogaussiansthreshold.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Clipp gaussian variables into discrete variables </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/ucsc_gene_loc_table_into_mat_with_exons.m" name="ucsc_gene_loc_table_into_mat_with_exons" id="ucsc_gene_loc_table_into_mat_with_exons">ucsc_gene_loc_table_into_mat_with_exons.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction ucsc_gene_loc_table_into_mat_with_exons_script(genome_build)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/uncompressgenotypedata.m" name="uncompressgenotypedata" id="uncompressgenotypedata">uncompressgenotypedata.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Move from bit representation to full mat</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/untitled2.m" name="untitled2" id="untitled2">untitled2.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>signAllGlobalConstants;</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/updatechromview.m" name="updatechromview" id="updatechromview">updatechromview.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>max = max(handles.chr_band_end(ix));</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/updatedatabasehapmap.m" name="updatedatabasehapmap" id="updatedatabasehapmap">updatedatabasehapmap.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 7/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/updatedatabaserlmmparams.m" name="updatedatabaserlmmparams" id="updatedatabaserlmmparams">updatedatabaserlmmparams.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Written by Or Zuk 7/2007</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/updateonepopulation.m" name="updateonepopulation" id="updateonepopulation">updateonepopulation.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Note : We return here SINGLE copy and INT genotype - To save Memory!!! </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/vec_into_mat.m" name="vec_into_mat" id="vec_into_mat">vec_into_mat.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>unction mat = vec_into_mat(vec, m)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/zeitouni_asymptotic_filtering_error.m" name="zeitouni_asymptotic_filtering_error" id="zeitouni_asymptotic_filtering_error">zeitouni_asymptotic_filtering_error.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute the asymptotic filtering error, when the data goes to infinity,</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/zoomintochrom.m" name="zoomintochrom" id="zoomintochrom">zoomintochrom.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>remove old rect</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/snp_gui/snp_gui.tgz" name="snp_gui" id="snp_gui"><STRONG><i>snp_gui.tgz</i></STRONG></a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td><b><i>Download the whole package. (277 .m files) </i></b></td>
+</tr>
+      <TR>
+    </TR></TBODY></TABLE><!-- End m-file index -->
+  </DIV>
+
+
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <ADDRESS>
+
+Contact: <BR> 
+&nbsp; &nbsp; O. Zuk (<A href="mailto:orzuk@broadinstitute.org">orzuk@broadinstitute.org</A>) <!-- hhmts end -->
+<br> Last Modified: <!--#echo var="LAST_MODIFIED"-->  
+  </ADDRESS>
+</BODY></HTML>

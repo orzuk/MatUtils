@@ -1,0 +1,9 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+exome_data:		    		ExAC % data to use 
+mu:  					1.8*10^(-8) % parse original datafile (different between different datasets)
+cond_on_polymorphic_flag:		1 % simulate only polymorphic alleles 
+rand_str: 		    		poisson % How to sample in simulations
+init_str:	    			equilibium % set frequency of new alleles (can be newly born freq 1/2N or sampled from equilibrium)
+extract_fields_flag: 	    		0 % extract fields ??? 
+output_file:		  		exome_res.txt % where to save 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

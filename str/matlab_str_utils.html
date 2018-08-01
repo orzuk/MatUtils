@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0069)http://www.broadinstitute.org/~orzuk/matlab/matlab_utilities_template.html -->
+<HTML xmlns="http://www.w3.org/1999/xhtml"><HEAD><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<!--<LINK rel="SHORTCUT ICON" href="orzuk.ico">-->
+<LINK rel="stylesheet" href="http://www.broadinstitute.org/~orzuk/orzuk.css" type="text/css"> 
+<TITLE>Matlab str utilities</TITLE>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7650195-3']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</HEAD><BODY>
+
+
+<DIV class="navbar"> 
+<a href="http://www.broadinstitute.org/~orzuk/matlab/libs/matlab_utils.html">libs</a>  :
+</DIV> 
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <DIV class="main">
+    <H2>Matlab str utilities</H2>
+
+    <UL>
+
+      <LI> Matlab str utilities (see documentation and examples within the functions)</LI>
+
+    </UL>
+
+<!--    <p>Changes are now logged in the <a href="http://home.online.no/%7Epjacklam/matlab/software/util/statutil/ChangeLog">ChangeLog</a> file.</p>--><!-- Begin m-file index -->
+    <!-- This table was automatically generated -->
+    <!-- by updhtml.pl on Sat Feb 21 14:26:51 2004 -->
+
+    <TABLE summary="M-file index" border="0" cellpadding="0" cellspacing="0">
+      <TBODY><TR>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/cell2str.m" name="cell2str" id="cell2str">cell2str.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Write the cell array as a string with the correct matlab syntax</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/empty_cell_to_empty_str.m" name="empty_cell_to_empty_str" id="empty_cell_to_empty_str">empty_cell_to_empty_str.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Convert empty cells in a cell array to empty strings</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/key_to_val.m" name="key_to_val" id="key_to_val">key_to_val.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Match a key string to a value using a cell array of mapping</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/my_str2num.m" name="my_str2num" id="my_str2num">my_str2num.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Like str2num for an array and deal with empty strings (from Tal Shay)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/my_strmatch.m" name="my_strmatch" id="my_strmatch">my_strmatch.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Strmatch for cell, deals with empty cells (from Tal Shay)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/my_upper.m" name="my_upper" id="my_upper">my_upper.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Upper for a cell, deals with empty cells (from Tal Shay)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/num2str_cell.m" name="num2str_cell" id="num2str_cell">num2str_cell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Convert numbers to string in a cell array</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/num2str_delim.m" name="num2str_delim" id="num2str_delim">num2str_delim.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Perform num2str but choose any delimiter rather than space </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/remove_last_num.m" name="remove_last_num" id="remove_last_num">remove_last_num.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Remove last number from a string</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/split_latex_table.m" name="split_latex_table" id="split_latex_table">split_latex_table.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Split a table to a few table (so it doesn't go out of pages)</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/str2nonums.m" name="str2nonums" id="str2nonums">str2nonums.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Remove all digits from a string</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/str2num_cell.m" name="str2num_cell" id="str2num_cell">str2num_cell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Convert strings to numbers in a cell array </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/str2nums.m" name="str2nums" id="str2nums">str2nums.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Convert a sting to all the numbers (doubles) contained in it,</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/str2nums_cell.m" name="str2nums_cell" id="str2nums_cell">str2nums_cell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Convert strings to many-numbers in a cell array</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/str2title.m" name="str2title" id="str2title">str2title.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Make a string nice for plotting</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/str2word.m" name="str2word" id="str2word">str2word.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Return one word out of a string, seperated by a certain delimiter</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/strcat_unique.m" name="strcat_unique" id="strcat_unique">strcat_unique.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Concatenate two strings, but remove duplicate substrings</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/strdiff.m" name="strdiff" id="strdiff">strdiff.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Remove the occurances of string s2 from string s1</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/strfind_cell.m" name="strfind_cell" id="strfind_cell">strfind_cell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Return the indices in a cell-array</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/strsplit_cell.m" name="strsplit_cell" id="strsplit_cell">strsplit_cell.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Split each string in a cell array </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/str/str.tgz" name="str" id="str"><STRONG><i>str.tgz</i></STRONG></a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td><b><i>Download the whole package. (20 .m files) </i></b></td>
+</tr>
+      <TR>
+    </TR></TBODY></TABLE><!-- End m-file index -->
+  </DIV>
+
+
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <ADDRESS>
+
+Contact: <BR> 
+&nbsp; &nbsp; O. Zuk (<A href="mailto:orzuk@broadinstitute.org">orzuk@broadinstitute.org</A>) <!-- hhmts end -->
+<br> Last Modified: <!--#echo var="LAST_MODIFIED"-->  
+  </ADDRESS>
+</BODY></HTML>

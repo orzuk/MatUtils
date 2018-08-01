@@ -206,7 +206,7 @@ H_new = mu .* sum(prod_vec); % H_new_per_gen = mu;
 %
 % Input:
 % N_vec - population size at each generation (number of INDIVIDUALS!)
-% s - selection coefficient. Should be NEGATIVE for detelitirious alleles
+% s - selection coefficient. Should be NEGATIVE for deleterious alleles
 % mu - mutation rate: per REGION per individual per generation
 % two_side_flag - derived/minor allele frequency
 % iters - how many alleles to output
@@ -236,7 +236,6 @@ function [q, weights, x_vec, p_vec, total_het_at_each_generation_vec, ...
     num_simulated_polymorphic_alleles_vec, count_vec, prob_site_polymorphic_at_end, L_correction_factor] = ...
     simulate_forward_FisherWright_internal( ...
     D, s, mu, two_side_flag, iters, init_str)
-
 
 if(~isfield(D, 'cond_on_polymorphic_flag'))
     D.cond_on_polymorphic_flag=0; % NEW!!! DEFAULT IS SIMULATE ONLY POLYMORPHIC ALLELES !!!
@@ -270,22 +269,23 @@ absorption_time_given_init_freq_vec = zeros(2*max_N+1,1); fixation_time_given_in
 count_vec = zeros(2*max_N+1,1); % count how many alleles were at each allele frequency (from alleles absorbed)
 
 num_alleles_simulated=0; total_polymorphic_generations = 0; ctr_alleles_blocks_simulated = 0;
-
 mean_time_allele_polymorphic_at_equilibrium = absorption_time_by_selection(s, 1, N, 1/(2*N), 0.999999999, 0);  % NEW! Factor of two here! time until absorbtion for a newly born allele
 prob_site_polymorphic_at_equilibrium = (2*N*mu) * 2 * absorption_time_by_selection(s, 1, N, 1/(2*N), 0.999999999, 0);  % NEW! Factor of two here! fraction of poylmporphic sites at start
 total_het_at_each_generation_vec = zeros(num_generations, 1, 'single');
 weights = [];
 
-q = zeros(iters, num_generations); % NEW approach !! allocate in advance entire q !!!
-sim_ind_vec = zeros(iters, 1);
+[generation_num_alleles, generation_weight] = num_alleles_to_simulate_per_generation_internal(N_vec, mu, s, iters)
+
+q = zeros(iters, num_generations); % NEW approach !! allocate in advance entire q array (should be faster) !!!
+sim_ind_vec = zeros(iters, 1); % indicators saying if each coordinate was already simulated 
 while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec(1) < max_num_alleles) ) % simulate blocks. Problem: No new alleles born here! (these can be simulated separatey?)
-    block_inds = find(sim_ind_vec==0, min(block_size, iters-sum(sim_ind_vec))); % set block indices
+    block_inds = find(sim_ind_vec==0, min(generation_num_alleles(1), min(block_size, iters-sum(sim_ind_vec)))); sim_ind_vec(block_inds)=1; % set block indices
     %    weights = ones(block_size, num_generations, 'single');  % give later generations higher weights (why?)
     switch init_str % determine starting allele frequencies
         case 'equilibrium'
-            q(block_inds,1) = single(round(2*N.* vec2column(allele_freq_spectrum_rnd(s, N, two_side_flag, block_size)))); % sample allele frequency from equilibrium distribution
+            q(block_inds,1) = single(round(2*N.* vec2column(allele_freq_spectrum_rnd(s, N, two_side_flag, length(block_inds))))); % sample allele frequency from equilibrium distribution
         case 'newly_born'
-            q(block_inds,1) = ones(block_size, 1, 'single'); % start with newly born alleles
+            q(block_inds,1) = ones(length(block_inds), 1, 'single'); % start with newly born alleles
     end
     survive_prob = ones(size(q(block_inds,:))); [first_time_vec, last_time_vec] = deal(ones(1, iters)); % last_time_vec = ones(1, iters); % For each allele record the first and last polymorphic times
     num_simulated_polymorphic_alleles_vec(1) = num_simulated_polymorphic_alleles_vec(1)+ block_size;
@@ -306,7 +306,7 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         if(isempty(weights))
             [U, C] = unique_with_counts(vec2row(q(block_inds,j))); % Compute histogram of counts
             total_het_at_each_generation_vec(j) = total_het_at_each_generation_vec(j) + ...
-                2 .* sum(q(block_inds,j) ./ (2.*N_vec(j)) .* (1-  q(block_inds,j) ./ (2.*N_vec(j)) ) ); % this indicates how much heterozygosity was absorbed at each time - should go down if we start at equilibrium!
+                2 .* sum(q(block_inds,j) ./ (2.*N_vec(j)) .* (1-q(block_inds,j) ./ (2.*N_vec(j)) ) ); % this indicates how much heterozygosity was absorbed at each time - should go down if we start at equilibrium!
         else  % here use weighted sums
             [U, C] = unique_with_counts(vec2row(q(block_inds,j)), [], weights); % Compute histogram of counts with weights !!!
             total_het_at_each_generation_vec(j) = total_het_at_each_generation_vec(j) + ...
@@ -315,12 +315,20 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         % NEW !!! count by weights !!!
         [x_vec{j}, p_vec{j}] = union_with_counts(x_vec{j}, p_vec{j}, [0 U 2*N_vec(j)], [num_losses C num_fixations]);
         
-        unique_time=cputime-unique_time;
-        unique_time_cum = unique_time_cum+unique_time;
-        rand_time=cputime;
-        [q(block_inds,j+1), new_survive_prob, ~, num_simulated_polymorphic_alleles_vec(j+1)] = ...
+        unique_time=cputime-unique_time; unique_time_cum = unique_time_cum+unique_time; rand_time=cputime; % get times 
+        
+%        new_block_inds = block_inds; % set indices for next generation
+        if(D.add_new_alleles) % NEW! Add newly born alleles. Rate DOES NOT depend on current polymorphic probability !!! % Separate: simulate newly born alleles
+            newly_born_inds = find(sim_ind_vec==0, min(generation_num_alleles(j+1), iters-sum(sim_ind_vec))); sim_ind_vec(newly_born_inds)=1; % set block indices; 
+            %q(newly_born_inds,j+1) = 1/(2*N_vec(j+1));        
+        end
+       [q([vec2row(block_inds) vec2row(newly_born_inds)],j+1), new_survive_prob, ~, num_simulated_polymorphic_alleles_vec(j+1)] = ...
             simulate_WrightFisher_one_step(q(block_inds,j), N_vec, rand_str, s, j, ...
-            D.cond_on_polymorphic_flag, D.add_new_alleles, num_simulated_polymorphic_alleles_vec(j+1)); % Simulate one step (heavy part !!!)
+            D.cond_on_polymorphic_flag, D.add_new_alleles, num_simulated_polymorphic_alleles_vec(j+1), ...
+            generation_num_alleles, generation_weight); % Simulate one step (heavy part !!!). Always keep same size (block inds) 
+        if(add_new_alleles) % NEW! Add newly born alleles. Rate DOES NOT depend on current polymorphic probability !!! % Separate: simulate newly born alleles
+            block_inds = [block_inds newly_born_inds];     
+        end
         survive_prob = survive_prob .* new_survive_prob;
         loss_inds = block_inds(find(q(block_inds,j+1) == 0)); fixation_inds = block_inds(find(q(block_inds,j+1) == 2*N_vec(j+1)));
         absorption_inds = vec2row(union(loss_inds, fixation_inds)); % reached fixation/extinsion and stop
@@ -328,9 +336,7 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         total_polymorphic_generations=total_polymorphic_generations+length(survived_inds);
         num_simulated_polymorphic_alleles_vec(j+1) = num_simulated_polymorphic_alleles_vec(j+1) + length(survived_inds);
         last_time_vec(absorption_inds) = j; % set the time at which these indices were absorbed
-        rand_time=cputime-rand_time;
-        rand_time_cum = rand_time_cum+rand_time;
-        arrange_time=cputime;
+        rand_time=cputime-rand_time; rand_time_cum = rand_time_cum+rand_time;         arrange_time=cputime;
         
         if(D.compute_absorb) % compute absorption time and count vec. Can be heavy (?)
             if(~isempty(absorption_inds))
@@ -405,7 +411,7 @@ L_correction_factor = 4*N*mu*mean_time_allele_polymorphic_at_equilibrium / num_a
 
 % Simulate one step of Wright-Fisher process forward
 % Input:
-% q - vector of current allele frequencies
+% old_q - vector of current allele frequencies
 % N_vec - vector of population sizes
 % rand_str - how to sample next generation
 % s - selection coefficient
@@ -416,15 +422,17 @@ L_correction_factor = 4*N*mu*mean_time_allele_polymorphic_at_equilibrium / num_a
 % Output:
 % new_q - allele frequencies in next generation
 % survive_prob - survival probability when we force polymorphic alleles
+% weights - give weight to each simulated allele 
+% num_simulated_polymorphic_alleles - total number of polymorphic alleles simulated 
 %
 function [new_q, survive_prob, weights, num_simulated_polymorphic_alleles] = ...
     simulate_WrightFisher_one_step(old_q, N_vec, rand_str, s, j, ...
-    cond_on_polymorphic_flag, add_new_alleles, num_simulated_polymorphic_alleles)
+    cond_on_polymorphic_flag, add_new_alleles, num_simulated_polymorphic_alleles, ...
+                generation_num_alleles, generation_weight) % Simulate one step (heavy part !!!))
 
 if(~exist('cond_on_polymorphic_flag', 'var') || isempty(cond_on_polymorphic_flag))
     cond_on_polymorphic_flag=0;
 end
-
 new_expected_q = old_q .* ((1+s)./(1+s.*old_q./(2*N_vec(j)))) ./ (2*N_vec(j));  % new allele freq. of the deleterious alleles
 switch rand_str % sample new generation
     case {'binomial', 'exact'}
@@ -451,7 +459,7 @@ switch rand_str % sample new generation
             if(~cond_on_polymorphic_flag || isempty(big_inds))
                 break
             end
-            big_inds = big_inds(new_q(big_inds) == 2*N_vec(j+1));  % monomorphic !!
+            big_inds = big_inds(new_q(big_inds) == 2*N_vec(j+1));  % these are monomorphic !!
         end
         if(~isempty(medium_inds)) % for these alleles, simulation does depend on N.
             survive_prob(medium_inds) = 1-normcdf(0, 2*N_vec(j+1) .* new_expected_q(medium_inds), ...
@@ -464,13 +472,15 @@ end % switch rand_str
 
 if(~cond_on_polymorphic_flag)
     survive_prob = new_q>0; % determine who survived (0/1 probabilities)
+    absorption_inds = find((new_q == 0) | (new_q == 2*N_vec(j+1)));
+else
+    absorption_inds = []; 
 end
 
-%q = [q new_q]; % add new generation
 
 % New: add newly born alleles !!!
 if(add_new_alleles) % NEW! Add newly born alleles. Rate DOES NOT depend on current polymorphic probability !!!
-    q(absorption_inds,:) = 0; % set to zero ALL (why not just current generation j?)
+    new_q(absorption_inds) = 0; % set to zero ALL (why not just current generation j?)
     num_new_alleles = poissrnd( (block_size /(2*mean_time_allele_polymorphic_at_equilibrium)) * (N_vec(j+1)/N) ); % Proportional to mutation rate times # of chromosomes . Mutation rate is cancelled !
     num_simulated_polymorphic_alleles = num_simulated_polymorphic_alleles+num_new_alleles; % update BEFORE down-weighting!!! to keep weighted # !!!
     
@@ -513,6 +523,46 @@ if(add_new_alleles) % NEW! Add newly born alleles. Rate DOES NOT depend on curre
 else % don't add new alleles
     q = q(survived_inds,:); % take only indices that are left
 end % if D.add_new_alleles
+
+% Determine total number of alleles to simulate at each genertion and how to weight them
+% Input: 
+% N_vec - population size at each generation
+% mu - mutation rate (not used) 
+% s - selection coefficient
+% iters - total number of alleles
+% 
+% Output: 
+% generation_num_alleles - number of new alleles to simulate in each generation
+% generation_weight - weight of alleles simulated in each generation
+% 
+function [generation_num_alleles, generation_weight] = num_alleles_to_simulate_per_generation_internal(N_vec, mu, s, iters)
+
+num_gen = length(N_vec); 
+mean_time_allele_polymorphic_at_equilibrium = absorption_time_by_selection(s, 1, N_vec(1), 1/(2*N_vec(1)), 0.999999999, 0);  % NEW! Factor of two here! time until absorbtion for a newly born allele
+%num_new_alleles = poissrnd( (block_size /(2*mean_time_allele_polymorphic_at_equilibrium)) * (N_vec(j+1)/N) ); % Proportional to mutation rate times # of chromosomes . Mutation rate is cancelled !
+
+generation_num_alleles = [2*mean_time_allele_polymorphic_at_equilibrium vec2row(N_vec) ./ N_vec(1)]; % set relative proportions. First is old alleles (equilibrium) 
+
+% Make sure that each generation have enough alleles born at each generation 
+MIN_GEN = 10; 
+new_generation_num_alleles = max(MIN_GEN, generation_num_alleles); 
+new_generation_num_alleles = ceil (iters * new_generation_num_alleles / sum(new_generation_num_alleles)); % set total number of alleles. Only iters?  
+
+% Make sum exactly equal to iters 
+k = sum(new_generation_num_alleles)-iters; [~, sort_perm] = sort(N_vec, 'descend'); big_inds = sort_perm(1:k)+1; 
+new_generation_num_alleles(big_inds) = new_generation_num_alleles(big_inds)-1;
+
+%generation_weight = ones(num_gen, 1); 
+generation_weight = new_generation_num_alleles ./ generation_num_alleles; % give weights 
+generation_weight = generation_weight ./ mean(generation_weight); 
+
+
+poisson_flag=0;
+if(poisson_flag) 
+    generation_num_alleles = poissrnd(new_generation_num_alleles); 
+else
+    generation_num_alleles = new_generation_num_alleles;
+end
 
 
 
@@ -630,7 +680,6 @@ for j=1:num_generations+1  %change output format (convention)
     x_vec{j} = round(x_vec{j} .* (2*N_vec(j))); % get number of individual alleles (not fracion)
 end
 prob_site_polymorphic_at_end = frac_polymorphic_vec; % (end-1); % NEED TO FILL !!!
-
 
 % NEW! compute EXACTLY the heterozygosity (separate to new and old).
 if(~exist('num_moments', 'var') || isempty(num_moments))

@@ -1,0 +1,698 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0069)http://www.broadinstitute.org/~orzuk/matlab/matlab_utilities_template.html -->
+<HTML xmlns="http://www.w3.org/1999/xhtml"><HEAD><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<!--<LINK rel="SHORTCUT ICON" href="orzuk.ico">-->
+<LINK rel="stylesheet" href="http://www.broadinstitute.org/~orzuk/orzuk.css" type="text/css"> 
+<TITLE>Matlab additional_src utilities</TITLE>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7650195-3']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</HEAD><BODY>
+
+
+<DIV class="navbar"> 
+<a href="http://www.broadinstitute.org/~orzuk/matlab/libs/matlab_utils.html">libs</a>  :
+<a href="http://www.broadinstitute.org/~orzuk/matlab/libs/additional_src/matlab_additional_src_utils.html">additional_src</a>  :
+</DIV> 
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <DIV class="main">
+    <H2>Matlab additional_src utilities</H2>
+
+    <UL>
+
+      <LI> Matlab additional_src utilities (see documentation and examples within the functions)</LI>
+
+    </UL>
+
+<!--    <p>Changes are now logged in the <a href="http://home.online.no/%7Epjacklam/matlab/software/util/statutil/ChangeLog">ChangeLog</a> file.</p>--><!-- Begin m-file index -->
+    <!-- This table was automatically generated -->
+    <!-- by updhtml.pl on Sat Feb 21 14:26:51 2004 -->
+
+    <TABLE summary="M-file index" border="0" cellpadding="0" cellspacing="0">
+      <TBODY><TR>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/AssignGeneticArchitectureConstants.m" name="AssignGeneticArchitectureConstants" id="AssignGeneticArchitectureConstants">AssignGeneticArchitectureConstants.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function AssignGeneticArchitectureConstants</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/EyreWalker_dist_rnd.m" name="EyreWalker_dist_rnd" id="EyreWalker_dist_rnd">EyreWalker_dist_rnd.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Sample effect sizes and selection coefficient based on Eyre-Walker's</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/EyreWalker_plot_dist.m" name="EyreWalker_plot_dist" id="EyreWalker_plot_dist">EyreWalker_plot_dist.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Sample effect sizes and selection coefficient based on Eyre-Walker's</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/GRR_and_h_liab_plot.m" name="GRR_and_h_liab_plot" id="GRR_and_h_liab_plot">GRR_and_h_liab_plot.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot the relation between GRR and variance explained</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/GenerateGeneticArchitecturePapersHTML.m" name="GenerateGeneticArchitecturePapersHTML" id="GenerateGeneticArchitecturePapersHTML">GenerateGeneticArchitecturePapersHTML.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Create a web-page for genetic-architecture papers </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/GeneratePapersHTML.m" name="GeneratePapersHTML" id="GeneratePapersHTML">GeneratePapersHTML.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Create a web-page for genetic-architecture papers </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/IBD_compute_statistics.m" name="IBD_compute_statistics" id="IBD_compute_statistics">IBD_compute_statistics.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Analyze IBD data from Barak Markus</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/analyze_crohns_MLT.m" name="analyze_crohns_MLT" id="analyze_crohns_MLT">analyze_crohns_MLT.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Analyze crohn's data as if it was from an MLT model</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/analyze_crohns_MLT2.m" name="analyze_crohns_MLT2" id="analyze_crohns_MLT2">analyze_crohns_MLT2.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Run different values of N for Crohn's</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/compute_BMI_effect_sizes.m" name="compute_BMI_effect_sizes" id="compute_BMI_effect_sizes">compute_BMI_effect_sizes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A script for computing BMI effect sizes</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/compute_beta_debug.m" name="compute_beta_debug" id="compute_beta_debug">compute_beta_debug.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function compute_beta_debug()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/compute_crohns_effect_sizes.m" name="compute_crohns_effect_sizes" id="compute_crohns_effect_sizes">compute_crohns_effect_sizes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function compute_crohns_effect_sizes</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/compute_gwas_parameters.m" name="compute_gwas_parameters" id="compute_gwas_parameters">compute_gwas_parameters.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute several statistical parameters from GWAS results</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/compute_heritability_power_parameters.m" name="compute_heritability_power_parameters" id="compute_heritability_power_parameters">compute_heritability_power_parameters.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute power parameters that should appear in figure and in supp. info.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/compute_lipids_effect_sizes.m" name="compute_lipids_effect_sizes" id="compute_lipids_effect_sizes">compute_lipids_effect_sizes.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A script for computing Lipids effect sizes</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/correct_variance_by_power.m" name="correct_variance_by_power" id="correct_variance_by_power">correct_variance_by_power.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Add power correction for variance explained : currently do it by stripes</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/crohns_paper_analysis.m" name="crohns_paper_analysis" id="crohns_paper_analysis">crohns_paper_analysis.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute Crohns variance explained from from Daly's paper: </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/debug_architectures.m" name="debug_architectures" id="debug_architectures">debug_architectures.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Debug problem in architectures</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/debug_epistasis_power.m" name="debug_epistasis_power" id="debug_epistasis_power">debug_epistasis_power.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function debug_epistasis_power()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/debug_grr.m" name="debug_grr" id="debug_grr">debug_grr.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function debug_grr()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/filter_gwas_data.m" name="filter_gwas_data" id="filter_gwas_data">filter_gwas_data.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Filter association with data according to desired format.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/gen_arch_gui.m" name="gen_arch_gui" id="gen_arch_gui">gen_arch_gui.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>GEN_ARCH_GUI M-file for gen_arch_gui.fig</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/get_additional_NHGRI_parameters.m" name="get_additional_NHGRI_parameters" id="get_additional_NHGRI_parameters">get_additional_NHGRI_parameters.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Intersect with NHGRI catalog to get misssing data</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/k_of_N_liabilities_example.m" name="k_of_N_liabilities_example" id="k_of_N_liabilities_example">k_of_N_liabilities_example.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A script for computing example of k-of-N liabilities model (Quantitative or binary trait) .</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/lipids_preprocessing.m" name="lipids_preprocessing" id="lipids_preprocessing">lipids_preprocessing.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Analyze lipids data from Eliana.</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/make_QTL_two_tails_figure.m" name="make_QTL_two_tails_figure" id="make_QTL_two_tails_figure">make_QTL_two_tails_figure.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Prepare a two-tail quantile figure</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/parse_Blood_Pressure_Ji_et_al.m" name="parse_Blood_Pressure_Ji_et_al" id="parse_Blood_Pressure_Ji_et_al">parse_Blood_Pressure_Ji_et_al.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Analyze the rare-alleles appearing in the paper on MTNR1B rare-variants on T2D</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/parse_GxE_data.m" name="parse_GxE_data" id="parse_GxE_data">parse_GxE_data.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Parse data from Eliana for different effect size under different</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/parse_GxE_tables.m" name="parse_GxE_tables" id="parse_GxE_tables">parse_GxE_tables.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Convert GxE tables to latex</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/parse_T2D_MTNR1B.m" name="parse_T2D_MTNR1B" id="parse_T2D_MTNR1B">parse_T2D_MTNR1B.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Analyze the rare-alleles appearing in the paper on MTNR1B rare-variants on T2D</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/parse_qatar_data.m" name="parse_qatar_data" id="parse_qatar_data">parse_qatar_data.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>figure; hold on; plot(E); plot(Q, 'r');</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/parse_rare_alleles.m" name="parse_rare_alleles" id="parse_rare_alleles">parse_rare_alleles.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Script reading rare-alleles table and computing variance explained for each study</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/parse_romeo_tables.m" name="parse_romeo_tables" id="parse_romeo_tables">parse_romeo_tables.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Parse supp info tables from Romeo et al. ICS 2009</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/parse_schaffner_simulation_data.m" name="parse_schaffner_simulation_data" id="parse_schaffner_simulation_data">parse_schaffner_simulation_data.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function parse_schaffner_simulation_data() 
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_architecture_statistics.m" name="plot_architecture_statistics" id="plot_architecture_statistics">plot_architecture_statistics.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Make various plots for all architectures</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_distribution_func_of_gaussians.m" name="plot_distribution_func_of_gaussians" id="plot_distribution_func_of_gaussians">plot_distribution_func_of_gaussians.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot density distribution of maximum of i.i.d. Gaussians</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_gwas_data_stats.m" name="plot_gwas_data_stats" id="plot_gwas_data_stats">plot_gwas_data_stats.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot allele frequencies and genetic relative risks for gwas data</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_heritability_deviation_figures.m" name="plot_heritability_deviation_figures" id="plot_heritability_deviation_figures">plot_heritability_deviation_figures.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot heritability estimation for different lambda_R values</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_heritability_deviation_figures_QTL.m" name="plot_heritability_deviation_figures_QTL" id="plot_heritability_deviation_figures_QTL">plot_heritability_deviation_figures_QTL.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot and save heritability deviation figs for QTL</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_heritability_parameters.m" name="plot_heritability_parameters" id="plot_heritability_parameters">plot_heritability_parameters.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot the relation between heritability on liability scale</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_heritability_power_figures.m" name="plot_heritability_power_figures" id="plot_heritability_power_figures">plot_heritability_power_figures.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot power for MLT model</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_hill_epistasis_and_dominance.m" name="plot_hill_epistasis_and_dominance" id="plot_hill_epistasis_and_dominance">plot_hill_epistasis_and_dominance.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function plot_hill_epistasis_and_dominance()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_max_of_gaussians.m" name="plot_max_of_gaussians" id="plot_max_of_gaussians">plot_max_of_gaussians.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot density distribution of maximum of i.i.d. Gaussians</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_num_loci_needed.m" name="plot_num_loci_needed" id="plot_num_loci_needed">plot_num_loci_needed.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Show how many loci are needed to explain heritability for varrious effect</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_one_architecture_statistics.m" name="plot_one_architecture_statistics" id="plot_one_architecture_statistics">plot_one_architecture_statistics.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot various statistic for an attempt at finding one architecture with</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_power_landscape.m" name="plot_power_landscape" id="plot_power_landscape">plot_power_landscape.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot detection power for different effect sizes</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_schizophrenia_lambda_s.m" name="plot_schizophrenia_lambda_s" id="plot_schizophrenia_lambda_s">plot_schizophrenia_lambda_s.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function plot_schizophrenia_lambda_s()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_sigmoid_architecture.m" name="plot_sigmoid_architecture" id="plot_sigmoid_architecture">plot_sigmoid_architecture.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot the sigmoid curve along with the risk values for different genotypes</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_stabilizing_selection.m" name="plot_stabilizing_selection" id="plot_stabilizing_selection">plot_stabilizing_selection.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot average selection coefficient as a function of effect size</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_two_class_equilibrium_statistics.m" name="plot_two_class_equilibrium_statistics" id="plot_two_class_equilibrium_statistics">plot_two_class_equilibrium_statistics.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot several statistics for the two-class model</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_var_explained_by_allele_freq.m" name="plot_var_explained_by_allele_freq" id="plot_var_explained_by_allele_freq">plot_var_explained_by_allele_freq.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot how much of genetic variation resides at each allele frequency</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_var_explained_by_allele_freq_quantiles.m" name="plot_var_explained_by_allele_freq_quantiles" id="plot_var_explained_by_allele_freq_quantiles">plot_var_explained_by_allele_freq_quantiles.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot var. explained distribution (quantiles) for different values of</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/plot_wray_lambda_table.m" name="plot_wray_lambda_table" id="plot_wray_lambda_table">plot_wray_lambda_table.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Flip: lambda_mz on x-axis</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/prune_SNPs_by_LD_script.m" name="prune_SNPs_by_LD_script" id="prune_SNPs_by_LD_script">prune_SNPs_by_LD_script.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Prune table of SNP pvals based on LD structure</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/prune_SNPs_by_LD_script2.m" name="prune_SNPs_by_LD_script2" id="prune_SNPs_by_LD_script2">prune_SNPs_by_LD_script2.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Prune table of SNP pvals based on LD structure</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/read_gwas_database.m" name="read_gwas_database" id="read_gwas_database">read_gwas_database.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Master script for parsing and computing statistics for SNPs from GWAS</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/run_LD_prunning.m" name="run_LD_prunning" id="run_LD_prunning">run_LD_prunning.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>%%%%%%%%%%%%%%%%%%%%%%%%%%%%</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/run_compute_genetic_architectures.m" name="run_compute_genetic_architectures" id="run_compute_genetic_architectures">run_compute_genetic_architectures.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Simulate many architectures and check if they give desired statistics</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/run_compute_k_of_N_liabilities_statistics.m" name="run_compute_k_of_N_liabilities_statistics" id="run_compute_k_of_N_liabilities_statistics">run_compute_k_of_N_liabilities_statistics.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Produce some figures for k-of-N liabilities model</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/run_generalized_LP_different_P_norm_models.m" name="run_generalized_LP_different_P_norm_models" id="run_generalized_LP_different_P_norm_models">run_generalized_LP_different_P_norm_models.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute the phantom heritability for different generalized LP models</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/run_simulate_disease_pair_model.m" name="run_simulate_disease_pair_model" id="run_simulate_disease_pair_model">run_simulate_disease_pair_model.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Simulate many architectures and check if they give desired statistics</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/run_simulate_disease_prob.m" name="run_simulate_disease_prob" id="run_simulate_disease_prob">run_simulate_disease_prob.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Script for running simulate_disease_prob for different models</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/run_test_estimate_IBD_sharing_from_snps.m" name="run_test_estimate_IBD_sharing_from_snps" id="run_test_estimate_IBD_sharing_from_snps">run_test_estimate_IBD_sharing_from_snps.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Run IBD estimation</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/save_architectures_in_latex.m" name="save_architectures_in_latex" id="save_architectures_in_latex">save_architectures_in_latex.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Save good architectures in latex format</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/save_genotypes_in_PLINK_format.m" name="save_genotypes_in_PLINK_format" id="save_genotypes_in_PLINK_format">save_genotypes_in_PLINK_format.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Save data in PLINK format</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/simulate_disease_pair_model_old.m" name="simulate_disease_pair_model_old" id="simulate_disease_pair_model_old">simulate_disease_pair_model_old.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Simulate disease probability according to any model with just two markers</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/simulate_visscher_analysis_LP.m" name="simulate_visscher_analysis_LP" id="simulate_visscher_analysis_LP">simulate_visscher_analysis_LP.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Simulate parents and offspring and regress them for the LP model</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/temp_gwas_specific_traits.m" name="temp_gwas_specific_traits" id="temp_gwas_specific_traits">temp_gwas_specific_traits.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Temp script for analyzing height and T2D</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_EyreWalker.m" name="test_EyreWalker" id="test_EyreWalker">test_EyreWalker.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function test_EyreWalker</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_compute_association_power.m" name="test_compute_association_power" id="test_compute_association_power">test_compute_association_power.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function test_compute_association_power(p_mat, n_samples, [], alpha, ...</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_directional_selection.m" name="test_directional_selection" id="test_directional_selection">test_directional_selection.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Test effect of directional selection and additive breeding value</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_effect_size_moments.m" name="test_effect_size_moments" id="test_effect_size_moments">test_effect_size_moments.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute the distribution of effect size estimated from a set of samples</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_estimate_IBD_sharing_from_snps.m" name="test_estimate_IBD_sharing_from_snps" id="test_estimate_IBD_sharing_from_snps">test_estimate_IBD_sharing_from_snps.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Estimator should be unbiased !!!</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_genetic_parameters_conversion.m" name="test_genetic_parameters_conversion" id="test_genetic_parameters_conversion">test_genetic_parameters_conversion.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Convert between different quantaties and make sure conversion works</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_inheritance_and_lods.m" name="test_inheritance_and_lods" id="test_inheritance_and_lods">test_inheritance_and_lods.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A small function to test whether it is possible to get different values</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_maximize_allele_freq_likelihood.m" name="test_maximize_allele_freq_likelihood" id="test_maximize_allele_freq_likelihood">test_maximize_allele_freq_likelihood.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>A script for finding the maximum likelihood parameters given a set of found loci</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_model_for_epistasis.m" name="test_model_for_epistasis" id="test_model_for_epistasis">test_model_for_epistasis.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Test a model given by a 8x1 probability vec for epistasis interaction</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_rare_variants.m" name="test_rare_variants" id="test_rare_variants">test_rare_variants.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>function test_rare_variants()</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_run_compute_genetic_architectures.m" name="test_run_compute_genetic_architectures" id="test_run_compute_genetic_architectures">test_run_compute_genetic_architectures.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Script for running simulations to find good architectures</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_run_simulate_disease_pair_model.m" name="test_run_simulate_disease_pair_model" id="test_run_simulate_disease_pair_model">test_run_simulate_disease_pair_model.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Script for running simulations to find good architectures</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/test_visscher_analysis.m" name="test_visscher_analysis" id="test_visscher_analysis">test_visscher_analysis.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Test the sibling regression method from Visscher et al. (2006) for the LP model</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/unite_gwas_data_by_traits.m" name="unite_gwas_data_by_traits" id="unite_gwas_data_by_traits">unite_gwas_data_by_traits.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Unite several GWAS studies of the same disease. </td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/vischer_heritability_analysis.m" name="vischer_heritability_analysis" id="vischer_heritability_analysis">vischer_heritability_analysis.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute all pairwise correlations between individuals for genotype and phenotype</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/visscher_heritability_analysis.m" name="visscher_heritability_analysis" id="visscher_heritability_analysis">visscher_heritability_analysis.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Compute all pairwise correlations between individuals for genotype and phenotype</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/visscher_table_twin_corr_analysis.m" name="visscher_table_twin_corr_analysis" id="visscher_table_twin_corr_analysis">visscher_table_twin_corr_analysis.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Read and analyse data from r_MZ and r_DZ table from Visscher</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/wray_lambda_table.m" name="wray_lambda_table" id="wray_lambda_table">wray_lambda_table.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Take sib-risk values from Wray's paper</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/write_disease_specific_plots.m" name="write_disease_specific_plots" id="write_disease_specific_plots">write_disease_specific_plots.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Plot all figures for a specific disease</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/write_disease_table_main_html.m" name="write_disease_table_main_html" id="write_disease_table_main_html">write_disease_table_main_html.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Internal function: Save one page for all diseases</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/write_disease_tables_html.m" name="write_disease_tables_html" id="write_disease_tables_html">write_disease_tables_html.m</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>Make a central web-page for all diseases and a disease-specific page for</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/readme_old.txt" name="readme_old.t" id="readme_old.t"><font color="003300">readme_old.txt</a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td>TLAB Compiler</td>
+</tr>
+<tr>
+<td><a href="http://www.broadinstitute.org/~orzuk/matlab/libs/genetic_architecture/additional_src/additional_src.tgz" name="additional_src" id="additional_src"><STRONG><i>additional_src.tgz</i></STRONG></a></td>
+
+<td>&nbsp;-&nbsp;</td>
+
+<td><b><i>Download the whole package. (89 .m files) </i></b></td>
+</tr>
+      <TR>
+    </TR></TBODY></TABLE><!-- End m-file index -->
+  </DIV>
+
+
+  <DIV class="sep">
+    <HR>
+  </DIV>
+
+  <ADDRESS>
+
+Contact: <BR> 
+&nbsp; &nbsp; O. Zuk (<A href="mailto:orzuk@broadinstitute.org">orzuk@broadinstitute.org</A>) <!-- hhmts end -->
+<br> Last Modified: <!--#echo var="LAST_MODIFIED"-->  
+  </ADDRESS>
+</BODY></HTML>

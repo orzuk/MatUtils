@@ -3,6 +3,7 @@
 % p0 - initial condition
 % M - transition matrix 
 % A - forbidden set
+% T - number of steps 
 % method_str - 'numeric' exact computation, 'simulation' 
 % iters - number of iterations to simulate 
 % 
@@ -34,7 +35,7 @@ switch method_str
         P_Ac_sum = sum(P_Ac); 
         P_Ac_cond = P_Ac ./ repmat(P_Ac_sum, n, 1); 
         p = P_Ac_cond(:,T+1)'; % return last probabilities 
-    case 'simulation'
+    case 'simulation' % simulate chains and throw the ones which pass through forbidden states
         mc = dtmc(M);
         x = simulate(mc, T, 'X0', iters*p0); % simulate vector 
 %        x = x(:,find(1-max(ismember(x, A)))); % remove chains passing through forbidden state
@@ -46,8 +47,8 @@ switch method_str
         for t=1:T % loop on times 
             for i=Ac
                I = find(x == i);  
-               x_new(I) = Ac(weighted_rand(M(i,Ac)./p_to_Ac(i), length(I))); 
-               w(I) = w(I) * p_to_Ac(i); 
+               x_new(I) = Ac(weighted_rand(M(i,Ac)./p_to_Ac(i), length(I))); % draw only from Ac 
+               w(I) = w(I) * p_to_Ac(i); % multiply weight by probability of staying in Ac  
             end
             x = x_new; % update x 
         end
