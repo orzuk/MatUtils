@@ -65,7 +65,7 @@ if(params.fit_demography)
             iii = i
             spectrum_population_data_file = fullfile(dir_from_file_name(vcf_file_names{i}), ...
                 'AllPop', [remove_suffix_from_file_name(remove_dir_from_file_name(vcf_file_names{i})) '_AllPop.mat']);
-            A = load(spectrum_population_data_file, 'count_vec', 'f_vec', 'n_vec', 'allele_types', 'num_allele_types');
+            A = load(spectrum_population_data_file, 'count_vec', 'f_vec', 'n_vec', 'allele_types',  'num_allele_types'); % 'allele_inds_vec',
             if(i == 1)
                 all_A = A;
             else

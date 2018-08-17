@@ -1,34 +1,34 @@
 % Script for testing calculations with the Wright-Fisher model
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Decide which tests to run: 
+% Decide which tests to run:
 run_sim_flag = 1; % compute site frequency distribution for each s using simulations
 test_absorption_time = 0; % compare absorption time for simulations vs. analytical formula
 test_moments = 0; % NEW: test analytic moments calculation of SFS using Ewens paper
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Set flags for running 
+% Set flags for running
 debug_figures = 0;
 run_two_expansions_flag = 0; % a mode within simulation, running a two-stage expansion model
-one_plot_flag = 0; % make one plot for each s
+one_plot_flag = 1; % make one plot for each s
 unite_results_flag = 0; % make one plot for all s values together
 save_in_mathematica = 0; % save in mathematica format for Eric
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Set running parameters 
+% Set running parameters
 AssignGeneralConstants; AssignRVASConstants;
 init_str = 'equilibrium'; % 'equilibrium' 'newly_born'; % start at newly born allele or equilibrium
-demography_str = 'expansion1'; % choose demographic model 
+demography_str = 'small-expan'; % 'expansion1'; % choose demographic model
 s_vec = -[0 0.000001 0.000005 0.00001 0.00005 0.0001 0.0005 0.001 0.005 0.01]; %  0.05 0.1]; % -0.00000001; % selection coefficient % s_vec = -[0 logspace(-6, -1, 11)]; % take log-space
 compute_mode = 'simulation'; % 'simulation'; % 'simulation';  % 'simulation'; % 'numeric'; % 'simulation'; % 'numeric'; % how to advance calculation
-N_vec = []; [N_vec{1}, D] = create_demographic_model(demography_str); N = N_vec{1}(1); % 'expansion1'); 
+N_vec = []; [N_vec{1}, D] = create_demographic_model(demography_str); N = N_vec{1}(1); % 'expansion1');
 mu = mu_per_site * (10000 / N); % mutation rate (per nucleotide per generation)
-iters = [20000 20]; % relevant only for simulation. Spend more iterations on equilibrium (new alleles take more time per iteration)
+iters = [20000 20000]; % NEW! always take 2000 % Old: relevant only for simulation. Spend more iterations on equilibrium (new alleles take more time per iteration)
 %N = 10; % population size
 %num_generations_vec = [200 10]; % two-stage model: slow and fast expansion % 2500; % 50;
 %expansion_factor_vec = [1.005 1.05]; % 1.1; % 1.02; % two-stage moe: growth in population size
-if(~save_in_mathematica) % dave in mathematica format 
+if(~save_in_mathematica) % dave in mathematica format
     num_bins = 2000; % for plotting histograms
     mathematica_str = '';
     mathematica_flag = 0;
@@ -41,106 +41,93 @@ fisher_wright_output_dir = '../../common_disease_model/figs/RVAS_gene_specific/F
 s_ctr = 1; % counter of selection coefficient
 het_struct = cell(length(s_vec), 1);
 
+% New: Set plotting parameters
+plot_params.figure_type = 1; plot_params.figs_dir = exome_data_figs_dir; plot_params.hist = 1; plot_params.xlim = [10^(-4) 1];
+plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1; plot_params.font_size=8; % plot cumulative weighted allele frequency distribution
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Run FisherWright Simulation to compute SFS 
+% Run FisherWright Simulation to compute SFS
 total_time = cputime;
 % Choose model
-for s = 0 % [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end-1) % s_vec % loop on different selection coefficients
+D.s_grid = s_vec; 
+for s = s_vec % 0 % [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end-1) % s_vec % loop on different selection coefficients
     close all; run_s = s
     frac_polymorphic = 2*N*mu * absorption_time_by_selection(s, 1, N, 1/(2*N), 0.999999999, 0);
     for expansion_model = 0:0 % run_two_expansions_flag % allow one rate and two-rate exponential expansions
         ctr=1; % counter on init str
-        
-        tmp_dir = demography_str; % new: tmp_dir = 
-        
-%         if(expansion_model) % here run two-stage expansion
-%             expansion_str = '_two-stage-expansion';
-%             num_generations = sum(num_generations_vec); % simulate a few stages together
-%             expansion_factor = zeros(num_generations, 1);
-%             expansion_ctr = 1;
-%             for i=1:length(expansion_factor_vec)
-%                 expansion_factor(expansion_ctr:(expansion_ctr+num_generations_vec(i)-1)) = expansion_factor_vec(i);
-%                 expansion_ctr = expansion_ctr + num_generations_vec(i);
-%             end % loop on different expansions
-%             tmp_dir = (['N_' num2str(N) '_two_stage_expansion_k_' num2str(num_generations) '_s_' num2str(s,3)]);
-%             
-%         else % here run one stage exponential expansion
-%             expansion_str = '';
-%             expansion_factor = expansion_factor_vec(1);
-%             num_generations = num_generations_vec(1);
-%             tmp_dir = (['N_' num2str(N) '_expansion_' num2str(expansion_factor,3) '_k_' num2str(num_generations) '_s_' num2str(s,3)]);
-%         end
-%         tmp_dir = strrep(tmp_dir, '.', '_');
+        tmp_dir = demography_str; % new: tmp_dir =
         for init_str = {'equilibrium', 'newly_born'} % , 'equilibrium' 'newly_born'} % list two distributions separately
             fisher_wright_output_file = fullfile(fisher_wright_output_dir, tmp_dir, ['fisher_wright_expansion_' init_str{1}]);
             all_s_output_file = fullfile(fisher_wright_output_dir, tmp_dir, ['all_s_' ...
                 init_str{1} mathematica_str]);
-            
             if(run_sim_flag)
                 compute_mode_ctr=1; freq_struct = cell(2,1); absorption_struct = cell(2,1); simulation_struct = cell(2,1); simulation_time = zeros(2,1)
                 for compute_mode = {'simulation', 'numeric'}
-                    [freq_struct{compute_mode_ctr}, absorption_struct{compute_mode_ctr}, simulation_struct{compute_mode_ctr}, ...
-                        N_vec{compute_mode_ctr}, simulation_time(compute_mode_ctr)] = ...
-                        FisherWrightSimulation([], D, mu, s, init_str{1}, iters(ctr), compute_mode{1}, num_bins); % run simulation
+                    % New!! Go to higher level - compute directly x-vec and p-vec
+                    [D.SFS.x_vec{compute_mode_ctr}, D.SFS.p_vec{compute_mode_ctr}, L_correction_factor, compute_time, k_vec, n_vec, weights_vec] = ...
+                        compute_allele_freq_spectrum_from_demographic_model(D, s, compute_mode{1}, [], mu);
+                    %                    compute_allele_freq_spectrum_from_demographic_model(
+                    
+                    %                    [freq_struct{compute_mode_ctr}, absorption_struct{compute_mode_ctr}, simulation_struct{compute_mode_ctr}, ...
+                    %                        N_vec{compute_mode_ctr}, simulation_time(compute_mode_ctr)] = ...
+                    %                        FisherWrightSimulation([], D, mu, s, init_str{1}, iters(ctr), compute_mode{1}, num_bins); % run simulation/Markov chain (can take long time!)
                     compute_mode_ctr=compute_mode_ctr+1;
                 end
-                
                 my_mkdir(fullfile(fisher_wright_output_dir, tmp_dir));
                 save([fisher_wright_output_file '.mat'], ...
-                    'freq_struct', 'absorption_struct', 'simulation_struct', 'N_vec', 'simulation_time');
-            else
+                    'D', 'N_vec', 's'); %                    'freq_struct', 'absorption_struct', 'simulation_struct', 'N_vec', 'simulation_time');
+            else % already simulated. Load from file
                 if(one_plot_flag) % no need to load if not plotting anything
                     load([fisher_wright_output_file '.mat']);
                 end
             end
             if(one_plot_flag) % one plot
-                switch init_str{1}
-                    case 'equilibrium' % This assumes equilibrium is called first !!!
-                        for compute_mode_ctr=1:2
-                            save_all_old_x_vec{compute_mode_ctr} = freq_struct{compute_mode_ctr}.x_vec{num_generations}; %  .* (2*N_vec(num_generations));
-                            save_all_old_p_vec{compute_mode_ctr} = freq_struct{compute_mode_ctr}.p_vec{num_generations};
-                            save_all_old_het_vec{compute_mode_ctr} = freq_struct{compute_mode_ctr}.het_vec{num_generations};
-                            
-                            save_old_total_het_at_each_generation_vec{compute_mode_ctr} = freq_struct{compute_mode_ctr}.total_het_at_each_generation_vec
-                            if(compute_mode_ctr==1) % simulations
-                                save_old_num_simulated_polymorphic_alleles_vec{compute_mode_ctr} = simulation_struct{compute_mode_ctr}.num_simulated_polymorphic_alleles_vec;
-                            end
-                        end
-                    case 'newly_born'
-                        for compute_mode_ctr=1:2
-                            freq_struct{compute_mode_ctr}.all_old_x_vec = save_all_old_x_vec{compute_mode_ctr};
-                            freq_struct{compute_mode_ctr}.all_old_p_vec = save_all_old_p_vec{compute_mode_ctr};
-                            freq_struct{compute_mode_ctr}.all_old_het_vec = save_all_old_het_vec{compute_mode_ctr};
-                            freq_struct{compute_mode_ctr}.old_total_het_at_each_generation_vec = save_old_total_het_at_each_generation_vec{compute_mode_ctr};
-                            
-                            if(compute_mode_ctr==1) % simulations
-                                simulation_struct{compute_mode_ctr}.new_num_simulated_polymorphic_alleles_vec = simulation_struct{compute_mode_ctr}.num_simulated_polymorphic_alleles_vec;
-                                simulation_struct{compute_mode_ctr}.old_num_simulated_polymorphic_alleles_vec = save_old_num_simulated_polymorphic_alleles_vec{compute_mode_ctr};
-                            end
-                        end
-                        [het_struct{s_ctr}.plot_x_vec het_struct{s_ctr}.plot_y_vec het_struct{s_ctr}.legend_vec] = ...
-                            FisherWrightPlotResults(freq_struct, absorption_struct, simulation_struct, ...
-                            N_vec, expansion_factor, s, mu, num_bins, init_str{1}, iters, ...
-                            fisher_wright_output_dir, fisher_wright_output_file, tmp_dir, all_s_output_file, mathematica_flag); % plot result
-                        
-                        
-                        if( (s == s_vec(end)) && (~mathematica_flag) ) % plot different s values together
-                            my_mkdir( dir_from_file_name(all_s_output_file, 1));
-                            if(exist(all_s_output_file, 'file'))
-                                save(all_s_output_file, 'het_struct', '-append');
-                            else
-                                save(all_s_output_file, 'het_struct');
-                            end
-                            plot_inds = [3 4 5];
-                            FisherWrightPlotResults2(het_struct, s_vec, fisher_wright_output_dir, tmp_dir)
-                        end
-                end
+                plot_allele_freq(s, {D}, plot_params)
+                % %                 switch init_str{1}
+                % %                     case 'equilibrium' % This assumes equilibrium is called first !!!
+                % %                         for compute_mode_ctr=1:2
+                % %                             save_all_old_x_vec{compute_mode_ctr} = freq_struct{compute_mode_ctr}.x_vec{D.total_generations}; %  .* (2*N_vec(num_generations));
+                % %                             save_all_old_p_vec{compute_mode_ctr} = freq_struct{compute_mode_ctr}.p_vec{D.total_generations};
+                % %                             save_all_old_het_vec{compute_mode_ctr} = freq_struct{compute_mode_ctr}.het_vec{D.total_generations};
+                % %                             save_old_total_het_at_each_generation_vec{compute_mode_ctr} = freq_struct{compute_mode_ctr}.total_het_at_each_generation_vec
+                % %                             if(compute_mode_ctr==1) % simulations
+                % %                                 save_old_num_simulated_polymorphic_alleles_vec{compute_mode_ctr} = simulation_struct{compute_mode_ctr}.num_simulated_polymorphic_alleles_vec;
+                % %                             end
+                % %                         end
+                % %                     case 'newly_born'
+                % %                         for compute_mode_ctr=1:2
+                % %                             freq_struct{compute_mode_ctr}.all_old_x_vec = save_all_old_x_vec{compute_mode_ctr};
+                % %                             freq_struct{compute_mode_ctr}.all_old_p_vec = save_all_old_p_vec{compute_mode_ctr};
+                % %                             freq_struct{compute_mode_ctr}.all_old_het_vec = save_all_old_het_vec{compute_mode_ctr};
+                % %                             freq_struct{compute_mode_ctr}.old_total_het_at_each_generation_vec = save_old_total_het_at_each_generation_vec{compute_mode_ctr};
+                % %
+                % %                             if(compute_mode_ctr==1) % simulations
+                % %                                 simulation_struct{compute_mode_ctr}.new_num_simulated_polymorphic_alleles_vec = simulation_struct{compute_mode_ctr}.num_simulated_polymorphic_alleles_vec;
+                % %                                 simulation_struct{compute_mode_ctr}.old_num_simulated_polymorphic_alleles_vec = save_old_num_simulated_polymorphic_alleles_vec{compute_mode_ctr};
+                % %                             end
+                % %                         end % function existed before !!!!
+                % %
+                %                         [het_struct{s_ctr}.plot_x_vec het_struct{s_ctr}.plot_y_vec het_struct{s_ctr}.legend_vec] = ...
+                %                             FisherWrightPlotResults(freq_struct, absorption_struct, simulation_struct, ...
+                %                             N_vec, expansion_factor, s, mu, num_bins, init_str{1}, iters, ...
+                %                             fisher_wright_output_dir, fisher_wright_output_file, tmp_dir, all_s_output_file, mathematica_flag); % plot result
+                
+                %                         if( (s == s_vec(end)) && (~mathematica_flag) ) % plot different s values together
+                %                             my_mkdir( dir_from_file_name(all_s_output_file, 1));
+                %                             if(exist(all_s_output_file, 'file'))
+                %                                 save(all_s_output_file, 'het_struct', '-append');
+                %                             else
+                %                                 save(all_s_output_file, 'het_struct');
+                %                             end
+                %                             plot_inds = [3 4 5];
+                %                             FisherWrightPlotResults2(het_struct, s_vec, fisher_wright_output_dir, tmp_dir)
+                %                         end
+                % %                 end
             end % one plot flag
             ctr = ctr+1; % ctr of init str
         end % loop on init_str
     end % loop on expansion model
-    
     if(unite_results_flag) %
         all_s{s_ctr} = load([fisher_wright_output_file '.mat']);
         all_s{s_ctr}.s = s;
@@ -149,14 +136,13 @@ for s = 0 % [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % 
         end
         % Plot results
     end % if unite results flag
-    
     s_ctr=s_ctr+1;
 end % loop on selection coefficients
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Test simulation/numerics only for CONSTANT population size where we have also analytic solution
-if(test_absorption_time || test_moments) 
+if(test_absorption_time || test_moments)
     N = 500; % take moderate value to let all alleles die
     mu = mu_per_site * (10000 / N); % mutation rate (per nucleotide per generation)
     s=0; % -0.0001;
@@ -235,7 +221,7 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
             accumarray(freq_struct_moments.x_vec{end-1}'+1, ...
             freq_struct_moments.p_vec{end-1}') * ...
             new_p_poly(end);
-            freq_struct_moments.prob_site_polymorphic_at_end(end); % NEW! compute #generations from moments! need to debug here!
+        freq_struct_moments.prob_site_polymorphic_at_end(end); % NEW! compute #generations from moments! need to debug here!
         all_p_vec_analytic = 2.*mu.*exp( allele_freq_spectrum((0:2*N) ./ (2*N), s, N, two_side_flag, 'log') ); % compute analytic approxiamtion (valid only for constant population size)
         all_p_vec_analytic_end = 2.*mu.*exp( allele_freq_spectrum((0:2*N_vec(end)) ./ (2*N_vec(end)), s, N_vec(end), two_side_flag, 'log') ); % compute analytic approxiamtion (valid only for constant population size)
         
@@ -244,42 +230,42 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
     x_vec = (1:(2*N-1)) ./ (2*N); % take only polymorphic frequencies !!
     x_vec_final = (1:(2*N_vec(end)-1)) ./ (2*N_vec(end)); % change to end-1?
     for cum_flag = 0:1
-    for plot_flag = 2:2
-        if(plot_flag == 2) % normalize
-            bin_size = x_vec(2)-x_vec(1);
-            bin_size_final = x_vec_final(2)-x_vec_final(1);
-            density_str = '(density)';
-        else
-            bin_size = 1; bin_size_final = 1;
-            density_str = '';
-        end
-        if(~cum_flag) % Plot PROBABILITY at each allele frequency !!!
-            figure; loglog( x_vec_final, all_p_vec_simulation(2:end-1) ./ bin_size_final, 'linewidth', 2 ); hold on;
-            loglog( x_vec_final, all_p_vec_numeric(2:end-1) ./ bin_size_final, 'm', 'linewidth', 2 ); % Why divide by # simulations here?? problem with Normalization here!!!
-            loglog( x_vec, all_p_vec_analytic(2:end-1) ./ bin_size, 'r' , 'linewidth', 2); % HERE WE MULTIPLY BY FACTOR 2 !!!
-            loglog( x_vec_final, all_p_vec_analytic_end(2:end-1) ./ bin_size_final, 'r--' , 'linewidth', 2 );
-            loglog( x_vec_final, all_p_vec_moments(2:end-1) ./ bin_size_final, 'c' , 'linewidth', 2 );        % New! add moments based calculations
-        else        % cumulative
-            figure; semilogx( x_vec_final, cumsum(all_p_vec_simulation(2:end-1)), 'linewidth', 2 ); hold on;
-            semilogx( x_vec_final, cumsum(all_p_vec_numeric(2:end-1)), 'm', 'linewidth', 2 ); % Why divide by # simulations here?? problem with Normalization here!!!
-            semilogx( x_vec, cumsum(all_p_vec_analytic(2:end-1)), 'r' , 'linewidth', 2); % HERE WE MULTIPLY BY FACTOR 2 !!!
-            semilogx( x_vec_final, cumsum(all_p_vec_analytic_end(2:end-1)), 'r--' , 'linewidth', 2 );
-            semilogx( x_vec_final, cumsum(all_p_vec_moments(2:end-1)), 'c' , 'linewidth', 2 );        % New! add moments based calculations
+        for plot_flag = 2:2
+            if(plot_flag == 2) % normalize
+                bin_size = x_vec(2)-x_vec(1);
+                bin_size_final = x_vec_final(2)-x_vec_final(1);
+                density_str = '(density)';
+            else
+                bin_size = 1; bin_size_final = 1;
+                density_str = '';
+            end
+            if(~cum_flag) % Plot PROBABILITY at each allele frequency !!!
+                figure; loglog( x_vec_final, all_p_vec_simulation(2:end-1) ./ bin_size_final, 'linewidth', 2 ); hold on;
+                loglog( x_vec_final, all_p_vec_numeric(2:end-1) ./ bin_size_final, 'm', 'linewidth', 2 ); % Why divide by # simulations here?? problem with Normalization here!!!
+                loglog( x_vec, all_p_vec_analytic(2:end-1) ./ bin_size, 'r' , 'linewidth', 2); % HERE WE MULTIPLY BY FACTOR 2 !!!
+                loglog( x_vec_final, all_p_vec_analytic_end(2:end-1) ./ bin_size_final, 'r--' , 'linewidth', 2 );
+                loglog( x_vec_final, all_p_vec_moments(2:end-1) ./ bin_size_final, 'c' , 'linewidth', 2 );        % New! add moments based calculations
+            else        % cumulative
+                figure; semilogx( x_vec_final, cumsum(all_p_vec_simulation(2:end-1)), 'linewidth', 2 ); hold on;
+                semilogx( x_vec_final, cumsum(all_p_vec_numeric(2:end-1)), 'm', 'linewidth', 2 ); % Why divide by # simulations here?? problem with Normalization here!!!
+                semilogx( x_vec, cumsum(all_p_vec_analytic(2:end-1)), 'r' , 'linewidth', 2); % HERE WE MULTIPLY BY FACTOR 2 !!!
+                semilogx( x_vec_final, cumsum(all_p_vec_analytic_end(2:end-1)), 'r--' , 'linewidth', 2 );
+                semilogx( x_vec_final, cumsum(all_p_vec_moments(2:end-1)), 'c' , 'linewidth', 2 );        % New! add moments based calculations
+                
+                
+            end
             
-            
+            legend({'simulation', 'numeric', 'diffusion-approximation (start)', 'diffusion-approximation (end)', 'Moments'}, ...
+                'location', 'southwest', 'fontsize', 14); legend('boxoff');
+            xlabel('Derived Allele Frequency'); ylabel(['Prob. ' density_str]);
+            title_str = ['N=' num2str(N*1) '->' num2str(N_vec(end-1)) ...
+                ', s=' num2str(s,3)  ...
+                ', iters ' num2str(simulation_struct.num_simulated_polymorphic_alleles_vec(1)) '->' num2str(iters(1)) ', ' model_name];
+            title(str2title([' Prob. ' density_str ' at each allele freq. ' title_str]));
+            my_saveas(gcf, fullfile(fisher_wright_output_dir, ...
+                ['mean_time_at_each_allele_freq_simulation_vs_diffusion_approx_' density_str(2:end-1)]), 'pdf');
         end
-        
-        legend({'simulation', 'numeric', 'diffusion-approximation (start)', 'diffusion-approximation (end)', 'Moments'}, ...
-            'location', 'southwest', 'fontsize', 14); legend('boxoff');
-        xlabel('Derived Allele Frequency'); ylabel(['Prob. ' density_str]);
-        title_str = ['N=' num2str(N*1) '->' num2str(N_vec(end-1)) ...
-            ', s=' num2str(s,3)  ...
-            ', iters ' num2str(simulation_struct.num_simulated_polymorphic_alleles_vec(1)) '->' num2str(iters(1)) ', ' model_name];
-        title(str2title([' Prob. ' density_str ' at each allele freq. ' title_str]));
-        my_saveas(gcf, fullfile(fisher_wright_output_dir, ...
-            ['mean_time_at_each_allele_freq_simulation_vs_diffusion_approx_' density_str(2:end-1)]), 'pdf');
     end
-    end    
     num_moments = 6; % NEW! plot moments
     analytic_moment_mat = zeros(num_moments, 1); analytic_het_moment_mat = analytic_moment_mat;
     for k=1:num_moments
@@ -335,28 +321,28 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         xlabel('Generation'); ylabel('P_{poly}'); legend('simulation', 'numeric', 'new-equilibrium');
         
         
-        figure; hold on; plot(freq_struct_simulation_equil.prob_site_polymorphic_at_end); 
-        plot(freq_struct_numeric_equil.prob_site_polymorphic_at_end, 'r'); 
-        plot(freq_struct_moments_equil.prob_site_polymorphic_at_end, 'g'); 
-        xlabel('Generation'); ylabel('P_{poly}'); legend('simulation', 'numeric', 'new-equilibrium'); title('equilibrium'); 
-
+        figure; hold on; plot(freq_struct_simulation_equil.prob_site_polymorphic_at_end);
+        plot(freq_struct_numeric_equil.prob_site_polymorphic_at_end, 'r');
+        plot(freq_struct_moments_equil.prob_site_polymorphic_at_end, 'g');
+        xlabel('Generation'); ylabel('P_{poly}'); legend('simulation', 'numeric', 'new-equilibrium'); title('equilibrium');
+        
         % Plot Prob. (polymorphic) for expansion
-        figure; hold on; plot(freq_struct_simulation.prob_site_polymorphic_at_end); 
-        plot(freq_struct_numeric.prob_site_polymorphic_at_end, 'r'); 
-        plot(freq_struct_moments.prob_site_polymorphic_at_end, 'g'); 
-        xlabel('Generation'); ylabel('P_{poly}'); legend('simulation', 'numeric', 'moments'); title('expansion'); 
+        figure; hold on; plot(freq_struct_simulation.prob_site_polymorphic_at_end);
+        plot(freq_struct_numeric.prob_site_polymorphic_at_end, 'r');
+        plot(freq_struct_moments.prob_site_polymorphic_at_end, 'g');
+        xlabel('Generation'); ylabel('P_{poly}'); legend('simulation', 'numeric', 'moments'); title('expansion');
         new_p_poly = 4*2*N*mu*freq_struct_moments.mu_vec_analytic(1,1:end-1) ./ freq_struct_moments.het_moments_mat(:,1)'
-        plot(new_p_poly, 'g*'); 
+        plot(new_p_poly, 'g*');
         
         
-        figure; hold on; % plot zero'th moment for equilibrium 
+        figure; hold on; % plot zero'th moment for equilibrium
         plot(freq_struct_simulation_equil.het_moments_mat(:,1), 'b');
         plot(freq_struct_numeric_equil.het_moments_mat(:,1), 'r');
         plot(freq_struct_moments_equil.het_moments_mat(:,1), 'g');
-        plot(freq_struct_moments_equil.mu_vec_analytic(1,1:end-1)' ./ (freq_struct_moments_equil.prob_site_polymorphic_at_end.*N_vec_equil(1:end-1)), 'g--'); 
+        plot(freq_struct_moments_equil.mu_vec_analytic(1,1:end-1)' ./ (freq_struct_moments_equil.prob_site_polymorphic_at_end.*N_vec_equil(1:end-1)), 'g--');
         xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted', 'moments');title('equilibrium');
-
-    
+        
+        
         
         figure; hold on; % plot zero'th moment for expansion
         for j=1:num_moments
@@ -368,33 +354,33 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
             xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted', 'moments'); title('expansion');
         end
         
-        figure; hold on; 
+        figure; hold on;
         plot(freq_struct_simulation.het_moments_mat(:,2)./freq_struct_simulation.het_moments_mat(:,1), 'b') ;
         plot(freq_struct_numeric.het_moments_mat(:,2)./freq_struct_numeric.het_moments_mat(:,1), 'r') ;
         plot(freq_struct_moments.het_moments_mat(:,2)./freq_struct_moments.het_moments_mat(:,1), 'g') ;
-        plot(freq_struct_moments.mu_vec_analytic(2,:) ./ freq_struct_moments.mu_vec_analytic(1,:), 'g*'); 
-        xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted'); title('expansion'); title('\mu_1 / \mu_0 ratio'); 
+        plot(freq_struct_moments.mu_vec_analytic(2,:) ./ freq_struct_moments.mu_vec_analytic(1,:), 'g*');
+        xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted'); title('expansion'); title('\mu_1 / \mu_0 ratio');
         
-        figure; hold on; 
+        figure; hold on;
         plot(freq_struct_simulation.het_moments_mat(:,1), 'b') ;
         plot(freq_struct_numeric.het_moments_mat(:,1), 'r') ;
         plot(freq_struct_moments.het_moments_mat(:,1), 'g') ;
         plot(freq_struct_moments.mu_vec_analytic(1,1:end-1)  .* 8*N*mu ./ freq_struct_moments.prob_site_polymorphic_at_end', 'g*') ;
-        xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted'); title('expansion'); title('\mu_0 '); 
-
+        xlabel('Generation'); ylabel('\mu_0'); legend('simulation', 'numeric', 'moments-fitted'); title('expansion'); title('\mu_0 ');
         
         
-        figure; 
-        semilogx(freq_struct_numeric.x_vec{1}, cumsum(freq_struct_numeric.p_vec{1})); hold on; 
-        semilogx(freq_struct_simulation.x_vec{1}, cumsum(freq_struct_simulation.p_vec{1}), 'g');
-        semilogx(freq_struct_moments.x_vec{1}, cumsum(freq_struct_moments.p_vec{1}), 'r');
-        xlabel('x'); ylabel('\Phi(x)'); legend('numeric',  'simulation', 'moments'); title('cumulative \Phi at t=1'); 
         
         figure;
-        semilogx(freq_struct_numeric.x_vec{end-1}, cumsum(freq_struct_numeric.p_vec{end-1}));  hold on; 
+        semilogx(freq_struct_numeric.x_vec{1}, cumsum(freq_struct_numeric.p_vec{1})); hold on;
+        semilogx(freq_struct_simulation.x_vec{1}, cumsum(freq_struct_simulation.p_vec{1}), 'g');
+        semilogx(freq_struct_moments.x_vec{1}, cumsum(freq_struct_moments.p_vec{1}), 'r');
+        xlabel('x'); ylabel('\Phi(x)'); legend('numeric',  'simulation', 'moments'); title('cumulative \Phi at t=1');
+        
+        figure;
+        semilogx(freq_struct_numeric.x_vec{end-1}, cumsum(freq_struct_numeric.p_vec{end-1}));  hold on;
         semilogx(freq_struct_simulation.x_vec{end-1}, cumsum(freq_struct_simulation.p_vec{end-1}), 'g');
         semilogx(freq_struct_moments.x_vec{end-1}, cumsum(freq_struct_moments.p_vec{end-1}), 'r');
-        xlabel('x'); ylabel('\Phi(x)'); legend('numeric', 'simulation', 'moments'); title(['cumulative \Phi at t=' length(freq_struct_numeric.x_vec)-1]); 
+        xlabel('x'); ylabel('\Phi(x)'); legend('numeric', 'simulation', 'moments'); title(['cumulative \Phi at t=' length(freq_struct_numeric.x_vec)-1]);
         
         freq_struct_numeric.het_moments_mat(1,:)
         freq_struct_moments.het_moments_mat(1,:)
@@ -402,11 +388,11 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
         freq_struct_numeric.het_moments_mat(end-1,:)
         freq_struct_moments.het_moments_mat(end-1,:)
         
-        num = load('numeric_file.mat'); mom = load('moments_file.mat'); 
-        figure; hold on; 
-        plot(num.new_vec); plot(num.old_vec, 'r'); 
-        plot(mom.new_vec, 'b--'); plot(mom.old_vec, 'r--'); 
-        legend('new-num', 'old-num', 'new-mom', 'old-mom'); 
+        num = load('numeric_file.mat'); mom = load('moments_file.mat');
+        figure; hold on;
+        plot(num.new_vec); plot(num.old_vec, 'r');
+        plot(mom.new_vec, 'b--'); plot(mom.old_vec, 'r--');
+        legend('new-num', 'old-num', 'new-mom', 'old-mom');
         
         
         
@@ -428,7 +414,7 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Compute moments of SFS 
+% Compute moments of SFS
 if(test_moments)
     max_k = 5; % how many moments to compute
     D.expan_rate = 1.1;
@@ -465,12 +451,7 @@ if(test_moments)
     
 end
 
-
 total_time = cputime - total_time
-
-
-
-
 
 % % Check binomial and Gaussian approximations
 % n = 10000; p = 0.005; M = 10000;

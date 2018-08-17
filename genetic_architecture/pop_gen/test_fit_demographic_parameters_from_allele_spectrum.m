@@ -15,6 +15,7 @@ D.expan_rate = [expansion_factor 1]; %  0.99]; % [expansion_factor 1.0];
 D.index = 1; % only one demography
 D.add_new_alleles = 1; % use NEW! simulation (track all alleles: alleles at start and newly born alleles) - to be changed !!
 D.name = 'True';
+D.save_flag = 0; % don't save 
 n_sample = 200; % take a smaller sample size (can be equal to final population size)
 
 N_vec = demographic_parameters_to_n_vec(D, 1);
@@ -22,12 +23,10 @@ N_vec = demographic_parameters_to_n_vec(D, 1);
 mu = mu_per_site * 100000; % take effective mutation rate in a region
 D.mu=mu;
 run_test=0;
-if(run_test)
-    
+if(run_test)    
     % Simulate data:
     [x_vec, p_vec, L_correction_factor, ~, k_vec, n_vec, weights_vec]  = ...
-        compute_allele_freq_spectrum_from_demographic_model(D, 0, 'simulation', n_sample, mu); % simulate from neutral model
-    
+        compute_allele_freq_spectrum_from_demographic_model(D, 0, 'simulation', n_sample, mu); % simulate from neutral model    
     % D_equi = D; D_equi.expan_rate(:) = 1;
     % [x_vec_equi, p_vec_equi, k_vec_equi, n_vec_equi]  = compute_allele_freq_spectrum_from_demographic_model(D_equi, 0, 'simulation', n_sample); % simulate from neutral model
     % p_vec_equi_analytic = 1 ./ x_vec_equi; p_vec_equi_analytic(1) = 0; p_vec_equi_analytic(end) = 0;
@@ -37,14 +36,12 @@ if(run_test)
     % sum(p_vec .* (x_vec./(2*N_vec(end))) .* (1-x_vec./(2*N_vec(end))) )
     
     % now run and see if we get correct demography back
-    
-    
+        
     [D_hat, max_LL, N_vec_hat, log_like_mat] = ...
         fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, weights_vec, mu, L_correction_factor, D);
     D_hat.name = 'Fitted';
     
     % N_vec_hat = demographic_parameters_to_n_vec(D_hat, 1);
-    
     
     % figure;  % Compare demographic model
     % semilogy(N_vec, 'linewidth', 2); hold on; semilogy(N_vec_hat, 'r', 'linewidth', 2);
@@ -56,8 +53,7 @@ if(run_test)
     semilogx(x_vec_hat ./ (2*N_vec_hat(end-1)), p_vec_hat, 'r', 'linewidth', 2);
     xlabel('f (allele freq.)'); ylabel('$\Psi(f)$', 'interpreter', 'latex');
     legend({'True', 'Fitted'}); legend('boxoff');
-    
-    
+        
     % Save everything for debugging! so no need to re-run:
     save('DebugRVASDemography.mat', 'D', 'N_vec', ...
         'x_vec', 'p_vec', 'L_correction_factor', 'k_vec', 'n_vec', 'weights_vec', ...
@@ -67,7 +63,6 @@ else
     load('DebugRVASDemography.mat');
 end
 demographic_model_plot({D, D_hat}, [D.index D_hat.index], log_like_mat, k_vec, n_vec, 1); % plot
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Temp test: see difference between population and sample allele frequencies

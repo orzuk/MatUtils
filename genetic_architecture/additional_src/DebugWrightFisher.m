@@ -28,6 +28,7 @@ legend({'All', 'Poly'}); xlabel('t'); ylabel('DAF'); title('Trajectories of rand
 
 
 %%%%%%%%%%%%% NEW!! Calculate everything from scratch !!! %%%%%%%%%%%%%
+i_pop=1;
 Demographic_model{i_pop}.iters = 10000; % number of alleles to simulate !!
 Demographic_model{i_pop}.s_grid = [0 -logspace(-6, -2, 101)]; % s vector for interpolation
 compute_flag = []; compute_flag.method = 'simulation'; compute_flag.smooth = 1;

@@ -1,7 +1,7 @@
 % Compute allele frequency distribution using Fisher-Wright model with changing population size.
 % Input:
 % D - structure with demographic models
-% s - selection coefficient. NOTE: Should be NEGATIVE for deleterious alleles
+% s - selection coefficient. Should be NEGATIVE for deleterious alleles
 % compute_flag - 'simulation' (default) or 'moments' (computation based on moments)
 % n_sample - # of individuals in a SAMPLE (default: = population size at END)
 % mu - regional mutation rate (default: mu for one site)
@@ -18,6 +18,9 @@
 function [x_vec, p_vec, L_correction_factor, compute_time, k_vec, n_vec, weights_vec] = ...
     compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu)
 
+if(~isfield(D, 'save_flag'))
+    D.save_flag = 0; 
+end
 if(~ischar(compute_flag)) % allow for structure of compute parameters
     smooth_params.smooth = compute_flag.smooth;
     compute_flag = compute_flag.method;
@@ -116,7 +119,7 @@ switch compute_flag
             if(~isfield(simulation_struct, 'weights'))
                 simulation_struct.weights = [];
             end
-            % currently: round p_vec to integers! (could be innaccurate, and also have many alleles for large N)
+            % currently: round p_vec to integers! (why? could be innaccurate, and also have many alleles for large N)
             p_vec_counts = round(p_vec .* simulation_struct.num_simulated_polymorphic_alleles_vec(end));
             if(sum(p_vec_counts) > max_num_alleles)
                 for M=(sum(p_vec_counts)-max_num_alleles):-1:0 % determine where to chop
@@ -129,7 +132,7 @@ switch compute_flag
             else
                 weights_vec =1;
             end
-            allele_freq_vec = hist_to_vals(x_vec, p_vec_counts); % compute alleles at sample ?
+            allele_freq_vec = hist_to_vals(x_vec, p_vec_counts); % compute alleles at sample ? why not p_vec? 
             num_alleles = length(allele_freq_vec);
             pop_to_sample_t = cputime;
             k_vec = population_to_sample_allele_freq(allele_freq_vec, 2*N_vec(end-1), n_sample); % simulate a sample from population

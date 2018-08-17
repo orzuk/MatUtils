@@ -110,14 +110,14 @@ for i=1:num_s
         otherwise % here take a power > 2
             if(weight_flag > 0) % Compute indefinite integral:  \int_x x^{weight_flag} * t_s(x) dx
                 if(S(i) ~= 0)
-                    %                    T(i,:) = 444444; % USE INTEGRATION BY PARTS !!!                    (We don't have an answer here! need a recursive formula)
+                    %    % USE INTEGRATION BY PARTS !!!                    (We don't have an answer here! need a recursive formula)
                 else % S = 0
                     T(i,:) = (x.^weight_flag) ./ weight_flag; % compute integral of f^{k-1}
                 end
             else % Compute integral:  \int_{x_min}^{x_max} x^{-weight_flag-1}*(1-x) * t_s(x) dx
                 if(S(i) ~= 0)
                     T(i,:) = 2 .* ( (S(i).*x).^(-weight_flag) + exp(-S(i)*(1-x)) .* factorial(-weight_flag-1) .* ...
-                        sum( (-S(i)*f).^(0:(-weight_flag-1)) .* (-1)^(weight_flag) ./ factorial(0:(-weight_flag-1))) ) ./ ...
+                        sum( (-S(i)*x).^(0:(-weight_flag-1)) .* (-1)^(weight_flag) ./ factorial(0:(-weight_flag-1))) ) ./ ...
                         (S(i).^(-weight_flag) .* (1-exp(-S(i)))); % Get sum from integration by parts !!!
                 else % S = 0
                     T(i,:) = (x.^(-weight_flag) ) ./ weight_flag - ...

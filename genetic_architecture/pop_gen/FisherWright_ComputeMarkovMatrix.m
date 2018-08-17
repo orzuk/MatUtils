@@ -3,7 +3,7 @@
 % N - population size
 % s - selection coefficient
 % prob_compute_method - how to compute transition probabilities. 'exact' - binomial probabilities, 'approximate' - use Poisson or Normal approximation)
-% compute_matrix -
+% compute_matrix - flag saying if to compute the entire matrix, or just advance to compute next p
 % p_cur - (optional) current allele frequency probabilities
 %
 % Output:
@@ -19,7 +19,7 @@ if(~exist('prob_compute_method', 'var') || isempty(prob_compute_method))
     prob_compute_method = 'approximate'; % 'exact'; % 'approximate'; %'exact'; % s'exact'; % ''; % 'exact';
 end
 if(isscalar(N)) % set current and next generation population size
-    N= [N N];
+    N = [N N];
 end
 if(~exist('compute_matrix', 'var') || isempty(compute_matrix))
     compute_matrix = 1; % compute transition matrix
@@ -27,8 +27,6 @@ end
 if(~exist('compute_prob_vector', 'var') || isempty(compute_prob_vector))
     compute_prob_vector = 0; % compute next generation probability vector for frequencies 
 end
-
-
 x_vec = (0:2*N(1)) ./ (2*N(1)); % set current allele frequency vector
 
 new_x_mean_vec = x_vec .* (1+s) ./ (1 + x_vec.*s); % first get the mean vector of new #offspring

@@ -1,5 +1,5 @@
 % Set constants and paths for RVAS project
-exome_data = 'ExAC'; % 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!!
+exome_data = 'ExAC'; % 'ESP'; % 'ExAC'; % NEW! add also Exome Aggregation Data!!!! % gnomad
 
 if(~exist('machine', 'var'))
     AssignGeneralConstants;
@@ -44,3 +44,4 @@ mu_per_site = 2*10^(-8); % set mutation rate per-generation per nucleotide
 global cumsum_log_vec;
 cumsum_log_vec = cumsum([0 log(1:2*N_eff)]);
 
+    

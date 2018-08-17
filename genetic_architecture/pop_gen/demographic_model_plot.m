@@ -6,6 +6,7 @@
 % log_like_mat - log-likelihood of each model
 % k_vec - data (number of derived allele carriers)
 % n_vec - data (number of individuals profiled)
+% print_all_models  - ?? 
 %
 function demographic_model_plot(D_cell, index, log_like_mat, k_vec, n_vec, print_all_models)
 
@@ -69,7 +70,7 @@ if(print_all_models)
     title('All potential demographic models with LL');    
 end % print all models
 
-plot_sfs = 1; % plot sfs for true and fitted model (Should be close)
+plot_sfs = 1; % plot sfs for true and fitted model (the two should be close)
 if(plot_sfs) % plot neutral sfs for demographic model
     rare_cumulative_per_gene = []; % set dummy variables
     target_size_by_class_vec = [mu_per_site, mu_per_site, mu_per_site]; % [neutral, null, missense]

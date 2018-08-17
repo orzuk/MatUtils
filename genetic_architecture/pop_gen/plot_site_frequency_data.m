@@ -298,6 +298,11 @@ end % loop on figure types
 
 % Internal function for plotting constraint vs. amino acid change
 %
+% Input: 
+% sfs_file_names - 
+% GeneStruct - structure containing all genes information
+% all_allele_types - structure containing type of alleles 
+%
 function internal_plot_SFS_by_AA_change(sfs_file_names, GeneStruct, all_allele_types)
 
 AssignRVASConstants;

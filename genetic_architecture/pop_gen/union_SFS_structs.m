@@ -10,7 +10,7 @@
 % 
 function A = union_SFS_structs(A1, A2, unite_field_names)
 
-if(~exist('unite_field_names', 'var') || isempty(unite_field_names))
+if(~exist('unite_field_names', 'var') || isempty(unite_field_names)) % set default fields 
     unite_field_names = {'XXX_VARIANT_COUNT_', 'XXX_REF_ALLELE_COUNT_', 'XXX_FEATURE_', 'GENE', 'XXX_CHROM', ...
         'POS',  'ALLELE_FREQ', 'GENE_INDS', 'unique_genes'};
 end

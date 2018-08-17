@@ -4,21 +4,21 @@
 % Demographic_models - structure with demographic information
 % plot_params - parameters for plotting
 %
-function plot_allele_freq(s_vec, Demographic_models, plot_params) % N, two_side_flag, log_flag, cum_flag, scale_mode, weight_flag)
+function plot_allele_freq(s_vec, Demographic_models, plot_params) 
+% N, two_side_flag, log_flag, cum_flag, scale_mode, weight_flag)
 
 AssignGeneralConstants; AssignRVASConstants;
 num_populations = length(Demographic_models);
-num_s = length(s_vec);
-[num_h, num_w] = num_to_height_width(num_populations);
+[num_h, num_w] = num_to_height_width(num_populations); % num_s = length(s_vec);
 
-plot_params  = internal_set_default_params(plot_params);
+plot_params = internal_set_default_params(plot_params);
 if(plot_params.new_fig)
     figure;  
 end
 set(0, 'defaultFigureRenderer', 'painters'); % set render to show dots 
 
 switch plot_params.figure_type % ALWAYS add legend !!!
-    case 1 % CAF
+    case 1 % Combined Allele Frequency (CAF)
         plot_params.ylabel_str = 'Combined allele frequency $f_s$';
         save_file = 'CAF_different_populations';
     case 2 % median of median allele frequency
@@ -44,7 +44,7 @@ for i_pop = 1:num_populations % loop on populations
         if((i_w == num_w) && (i_h == ceil(num_h/2)))
             plot_params.legend = [plot_params.legend 'legend'];
         end
-        internal_plot_allele_freq(s_vec, Demographic_models{i_pop}, plot_params);
+        internal_plot_allele_freq(s_vec, Demographic_models{i_pop}, plot_params); % plot according to flag figure type
     end
 end
 %orient landscape;
@@ -55,7 +55,12 @@ if(isfield(plot_params, 'figs_dir') && (~isempty(plot_params.figs_dir))) % save 
 end
 
 
-% Internal plot
+% Internal plot: 
+% Input: 
+% s_vec - vector of s values 
+% D - demographic models
+% plot_params - parameters for plotting 
+% 
 function internal_plot_allele_freq(s_vec, D, plot_params)
 
 AssignGeneralConstants;
@@ -72,7 +77,7 @@ y_lim = [0 0];
 for i_s = 1:num_s   
     %    tmp_color_ind = mod_max(6-floor(mod(i_s, 10)/2), 5);
     tmp_color_ind = mod_max(ceil(i_s/2), ceil(num_s/2));
-    [~, i_s2] = min(abs(abs(D.s_grid)-abs(s_vec(i_s))));
+    [~, i_s2] = min(abs(abs(D.s_grid)-abs(s_vec(i_s)))); % find closest s to current s with SFS pre-computed 
     if(iscell(D.SFS.x_vec))
         plot_x_vec = D.SFS.x_vec{i_s2} ./ D.SFS.x_vec{i_s2}(end);
     else
@@ -183,28 +188,3 @@ end
 
 
 
-
-% % % if(old_plot)
-% % %
-% % %     legend_vec = [repmat('s= -10^{', length(s_vec), 1) num2str(log10(abs(s_vec')),3) ...
-% % %         repmat('}', length(s_vec), 1)];
-% % %     legend_vec = cellstr(legend_vec);
-% % %     legend_vec = strrep_cell(legend_vec, ' ', '');
-% % %     legend_vec{1} = 's= 0'; % fix s=0
-% % %     x_vec = (0:(2*N)) ./ (2*N);
-% % %
-% % %     figure;
-% % %     for i=1:length(s_vec);
-% % %         f_vec{i} = allele_freq_cumulative(x_vec, s_vec(i), N, two_side_flag, scale_mode, weight_flag);
-% % %         semilogx(x_vec, f_vec{i}, [eric_color_vec(ceil(i/2)) my_symbol_vec{mod_max(i+1,2)}], 'linewidth', 2); hold on;
-% % %     end
-% % %     %legend(legend_vec, 'location', 'best'); legend('boxoff');
-% % %     legend(legend_vec, 'position', [0.76 0.09 0.16 0.4]); legend('boxoff');
-% % %
-% % %     %    legend('frac. null', 'frac mutations captured');
-% % %     xlabel('Derived allele frequency f'); ylabel('Proportion of alleles below f, \Psi_s(f)');
-% % %     ylim([0 1.01*max(max_cell(f_vec))]);
-% % %     if(log_flag)
-% % %         xlim([10^(-4) 2]);
-% % %     end
-% % % end
