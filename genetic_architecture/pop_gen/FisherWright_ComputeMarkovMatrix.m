@@ -4,13 +4,14 @@
 % s - selection coefficient
 % prob_compute_method - how to compute transition probabilities. 'exact' - binomial probabilities, 'approximate' - use Poisson or Normal approximation)
 % compute_matrix - flag saying if to compute the entire matrix, or just advance to compute next p
+% compute_prob_vector - flag saying if to compute next probability vector 
 % p_cur - (optional) current allele frequency probabilities
 %
 % Output:
 % M - transition matrix
 % p_next - probability distribution at the next generation
 %
-function [M, p_next] = FisherWright_ComputeMarkovMatrix(N, s, prob_compute_method, compute_matrix, compute_prob_vector,  p_cur)
+function [M, p_next] = FisherWright_ComputeMarkovMatrix(N, s, prob_compute_method, compute_matrix, compute_prob_vector, p_cur)
 
 if(~exist('s', 'var') || isempty(s)) % default is neutral
     s=0;

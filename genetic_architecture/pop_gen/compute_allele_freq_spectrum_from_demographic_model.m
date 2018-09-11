@@ -85,7 +85,7 @@ if(~exist('mu', 'var') || isempty(mu))
     mu = mu_per_site; % set default mutation rate (per-nucleotide per-generation)
 end
 if(~isfield(D, 'iters'))
-    D.iters = 1000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
+    D.iters = 10000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
 end
 D.num_bins = 100; % used for binning in Fisher Right simulation. 100 is too little??? 
 D.compute_absorb = 0; % no need for extra computation!!!
@@ -102,18 +102,25 @@ switch compute_flag
         max_num_alleles = 20000; % set maximum to save time
         [freq_struct, ~, simulation_struct, N_vec, simulation_time] = ... % New: separate output to different structures
             FisherWrightSimulation([], D, mu, s, init_str, D.iters, compute_flag, D.num_bins);
+        [freq_struct_num, ~, simulation_struct_num, N_vec_num, simulation_time_num] = ... % New: separate output to different structures
+            FisherWrightSimulation([], D, mu, s, init_str, D.iters, 'numeric', D.num_bins);
+        p_stationary = allele_freq_spectrum(1:(2*N_vec(1)-1), 0, N_vec(1), 0, 'linear');
+        p_stationary_num = allele_freq_spectrum_numeric(1:(2*N_vec(1)-1), 0, N_vec(1), 0, 'linear');
         fprintf('Fisher-Wright simulation time was %f\n', simulation_time);
         if(D.save_flag) % save input and output to file for debugging 
             save(['debug_SFS_' D.name num2str(D.cond_on_polymorphic_flag) '.mat'], ...
                 'D', 'mu', 's', 'init_str', 'compute_flag', 'freq_struct', 'simulation_struct', 'N_vec', 'simulation_time');
         end
-        
+%         if(isfield(simulation_struct, 'q'))
+%             [sorted_q, sort_perm] = sort(simulation_struct.q(:,end));
+%             figure; semilogx(sorted_q, cumsum(simulation_struct.weights(sort_perm)) ./ sum(simulation_struct.weights(sort_perm)));
+%         end
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
-        p_vec = freq_struct.p_vec{end-1};
-        L_correction_factor = simulation_struct.L_correction_factor;
+        p_vec = freq_struct.p_vec{end-1}; 
         
-        [x_vec, ~, p_vec] = fit_monotonic_surface(x_vec, abs(s), p_vec, smooth_params);  % constraints
-
+        L_correction_factor = simulation_struct.L_correction_factor;
+%        [x_vec, ~, p_vec] = fit_monotonic_surface(x_vec, abs(s), p_vec, smooth_params);  % constraints
+        p_vec = freq_struct.p_vec{end-1} ./ sum(freq_struct.p_vec{end-1});
         
         if(nargout > 4) % output k_vec, n_vec ...
             if(~isfield(simulation_struct, 'weights'))

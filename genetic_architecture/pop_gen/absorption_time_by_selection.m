@@ -1,7 +1,7 @@
 % Compute mean time until absorption for allele with selection coefficient s
 % The function computes the following expression:
 % \int_{x_min}^{x_max} x^{weight_flag} * t_s(x) dx
-% There is NO Normalization
+% There is NO Normalization.
 % For equilibrium we have: t_s(f) =  (1 - e^(-S(1-f))) / [f(1-f)(1-e^(-S))]
 %
 % Input:
@@ -92,8 +92,7 @@ for i=1:num_s
             T(i,:) = ( Ei(-S.*(x-1)) - log(1-x) - x - exp(-S.*(x-1))./S ) ./ (1-exp(S));
             T(i, S == 0) = x(S==0).^2./2;
             null_inds = find(isnan(T(i,:))); % here S is too big - use asymptotics.
-            T(i,null_inds) = exp(S(null_inds) .* x(null_inds)) ./ S(null_inds).^2;
-            
+            T(i,null_inds) = exp(S(null_inds) .* x(null_inds)) ./ S(null_inds).^2;            
         case {-2, 'var', 'het'} % average variance explained. Compute \int x(1-x) T_s(x) dx. (DO NOT! multiply by 2). We also have an analytic solution here. (Do not multiply by theta!)
             if(S(i) > 300) % take limiting formula as -S->infinity. Why one??? should be ...
                 T(i,:) = exp(x.*S(i)) ./ S(i); % 0 <= f < 1
@@ -105,8 +104,7 @@ for i=1:num_s
                     T(i,:) = x .* (1-x./2);
                 end
             end
-            T(i,:) = theta .* T(i,:); % weight by theta
-            
+            T(i,:) = theta .* T(i,:); % weight by theta            
         otherwise % here take a power > 2
             if(weight_flag > 0) % Compute indefinite integral:  \int_x x^{weight_flag} * t_s(x) dx
                 if(S(i) ~= 0)

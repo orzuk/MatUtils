@@ -39,6 +39,16 @@ switch lower(demographic_str)
         D.init_pop_size = N;
         D.generations = num_generations;
         D.expan_rate = 1;        
+    case 'small-equilibrium'
+        N = 500; 
+        D.init_pop_size = N;
+        D.generations = num_generations;
+        D.expan_rate = 1;    
+    case 'tiny-equilibrium'
+        N = 10; 
+        D.init_pop_size = N;
+        D.generations = num_generations;
+        D.expan_rate = 1;    
     case 'expansion1'
         D.init_pop_size = [N -1 -1];
         D.generations = [num_generations 1000]; 

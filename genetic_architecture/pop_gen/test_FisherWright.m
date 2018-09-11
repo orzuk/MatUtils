@@ -19,10 +19,10 @@ save_in_mathematica = 0; % save in mathematica format for Eric
 % Set running parameters
 AssignGeneralConstants; AssignRVASConstants;
 init_str = 'equilibrium'; % 'equilibrium' 'newly_born'; % start at newly born allele or equilibrium
-demography_str = 'small-expan'; % 'expansion1'; % choose demographic model
-s_vec = -[0 0.000001 0.000005 0.00001 0.00005 0.0001 0.0005 0.001 0.005 0.01]; %  0.05 0.1]; % -0.00000001; % selection coefficient % s_vec = -[0 logspace(-6, -1, 11)]; % take log-space
+demography_str = 'tiny-equilibrium'; % 'small-expan'; % 'expansion1'; % choose demographic model
+s_vec = -[0 logspace(-5, -1, 9)]; % -[0 0.000001 0.000005 0.00001 0.00005 0.0001 0.0005 0.001 0.005 0.01]; %  0.05 0.1]; % -0.00000001; % selection coefficient % s_vec = -[0 logspace(-6, -1, 11)]; % take log-space
 compute_mode = 'simulation'; % 'simulation'; % 'simulation';  % 'simulation'; % 'numeric'; % 'simulation'; % 'numeric'; % how to advance calculation
-N_vec = []; [N_vec{1}, D] = create_demographic_model(demography_str); N = N_vec{1}(1); % 'expansion1');
+N_vec = []; [N_vec{1}, D] = create_demographic_model(demography_str, 1000); N = N_vec{1}(1); % 'expansion1');
 mu = mu_per_site * (10000 / N); % mutation rate (per nucleotide per generation)
 iters = [20000 20000]; % NEW! always take 2000 % Old: relevant only for simulation. Spend more iterations on equilibrium (new alleles take more time per iteration)
 %N = 10; % population size
@@ -50,29 +50,31 @@ plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1; plot_param
 % Run FisherWright Simulation to compute SFS
 total_time = cputime;
 % Choose model
-D.s_grid = s_vec; 
-for s = s_vec % 0 % [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end-1) % s_vec % loop on different selection coefficients
-    close all; run_s = s
+D.s_grid = s_vec; D.iters = 10000; 
+[D.SFS.x_vec, D.SFS.p_vec] = deal(cell(length(s_vec), 2)); D.SFS.compute_mode = {'simulation', 'numeric'};
+for s_ctr = 1:length(s_vec) % 0 % [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end-1) % s_vec % loop on different selection coefficients    
+    % close all; 
+    s = s_vec(s_ctr); sprintf('run s=%lf\n', s)
     frac_polymorphic = 2*N*mu * absorption_time_by_selection(s, 1, N, 1/(2*N), 0.999999999, 0);
     for expansion_model = 0:0 % run_two_expansions_flag % allow one rate and two-rate exponential expansions
         ctr=1; % counter on init str
         tmp_dir = demography_str; % new: tmp_dir =
-        for init_str = {'equilibrium', 'newly_born'} % , 'equilibrium' 'newly_born'} % list two distributions separately
+        for init_str = {'equilibrium'} % , 'newly_born'} % , 'equilibrium' 'newly_born'} % list two distributions separately
             fisher_wright_output_file = fullfile(fisher_wright_output_dir, tmp_dir, ['fisher_wright_expansion_' init_str{1}]);
             all_s_output_file = fullfile(fisher_wright_output_dir, tmp_dir, ['all_s_' ...
                 init_str{1} mathematica_str]);
             if(run_sim_flag)
-                compute_mode_ctr=1; freq_struct = cell(2,1); absorption_struct = cell(2,1); simulation_struct = cell(2,1); simulation_time = zeros(2,1)
-                for compute_mode = {'simulation', 'numeric'}
+                compute_mode_ctr=1; [freq_struct, absorption_struct, simulation_struct] = deal(cell(2,1)); simulation_time = zeros(2,1);
+                for compute_mode_ctr = 1:length(D.SFS.compute_mode) %  = {'simulation', 'numeric'}
                     % New!! Go to higher level - compute directly x-vec and p-vec
-                    [D.SFS.x_vec{compute_mode_ctr}, D.SFS.p_vec{compute_mode_ctr}, L_correction_factor, compute_time, k_vec, n_vec, weights_vec] = ...
-                        compute_allele_freq_spectrum_from_demographic_model(D, s, compute_mode{1}, [], mu);
+                    [D.SFS.x_vec{s_ctr, compute_mode_ctr}, D.SFS.p_vec{s_ctr, compute_mode_ctr}, L_correction_factor, compute_time, k_vec, n_vec, weights_vec] = ...
+                        compute_allele_freq_spectrum_from_demographic_model(D, s, D.SFS.compute_mode{compute_mode_ctr}, [], mu);
                     %                    compute_allele_freq_spectrum_from_demographic_model(
                     
                     %                    [freq_struct{compute_mode_ctr}, absorption_struct{compute_mode_ctr}, simulation_struct{compute_mode_ctr}, ...
                     %                        N_vec{compute_mode_ctr}, simulation_time(compute_mode_ctr)] = ...
                     %                        FisherWrightSimulation([], D, mu, s, init_str{1}, iters(ctr), compute_mode{1}, num_bins); % run simulation/Markov chain (can take long time!)
-                    compute_mode_ctr=compute_mode_ctr+1;
+                    %compute_mode_ctr=compute_mode_ctr+1;
                 end
                 my_mkdir(fullfile(fisher_wright_output_dir, tmp_dir));
                 save([fisher_wright_output_file '.mat'], ...
@@ -83,7 +85,6 @@ for s = s_vec % 0 % [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3
                 end
             end
             if(one_plot_flag) % one plot
-                plot_allele_freq(s, {D}, plot_params)
                 % %                 switch init_str{1}
                 % %                     case 'equilibrium' % This assumes equilibrium is called first !!!
                 % %                         for compute_mode_ctr=1:2
@@ -138,6 +139,13 @@ for s = s_vec % 0 % [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3
     end % if unite results flag
     s_ctr=s_ctr+1;
 end % loop on selection coefficients
+
+for www=0:1
+    plot_params.weighted = www
+    plot_params.sfs_ind=1; plot_allele_freq(s_vec, {D}, plot_params); % plot all results together for simulation
+    plot_params.sfs_ind=2; plot_allele_freq(s_vec, {D}, plot_params);  % same for markov-chain
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -190,8 +198,7 @@ if(test_absorption_time) % Test simulation/numerics only for CONSTANT population
             FisherWrightSimulation([], D_equil_end, mu, s, init_str{1}, iters, 'numeric', num_bins); % run numeric computation
         [freq_struct_moments_equil_end, absorption_struct_moments_equil_end] = ...
             FisherWrightSimulation([], D_equil_end, mu, s, init_str{1}, iters, 'moment', num_bins); % run analytic computation using moments
-        
-        
+                
         D_equil_2000 = D_equil_end; D_equil_2000.init_pop_size = 2000; D_equil_2000.generations = 1000;
         [freq_struct_simulation_equil_2000, absorption_struct_equil_2000, simulation_struct_equil_2000] = ...
             FisherWrightSimulation([], D_equil_2000, mu, s, init_str{1}, iters, 'simulation', num_bins); % run simulation

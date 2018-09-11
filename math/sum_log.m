@@ -1,4 +1,9 @@
-% compute sum(log(x_i))
+% Compute sum(log(x_i))
+% Input: 
+% x_vec - vector of x values
+% y_vec - vector of y values
+% Output: 
+% s - log ( e^x + e^y ) 
 function s = sum_log(x_vec, y_vec)
 
 if(~exist('y_vec', 'var')) % sum a vector 

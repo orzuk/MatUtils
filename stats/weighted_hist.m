@@ -3,18 +3,18 @@
 % value in the corresponding column of weights.
 %
 % Input:
-% vals = a 1xn matrix of positive integer values.  The (weighted) frequency of these values
+% vals = a 1xn matrix of positive integer values. The (weighted) frequency of these values
 % will be made into the output histogram. (why must they be integers?)
-% weights  -  a 1xn matrix of weights (default is ones(1,n))
+% weights - a 1xn matrix of weights (default is ones(1,n))
 % bins - number of bins, or the bins themselves (bin CENTER!!) 
-% min_val = the minimum integer bin to be included on the output histogram
-% (default is 0)
+% min_val - the minimum integer bin to be included on the output histogram (default is 0)
 %
 % Output:
 % H = a row vector of weighted counts, such that H(x) is the weighted
 % number of times min_val+(x-1) appears in vals
+% bins - the 
 %
-function [H, bins] =  weighted_hist(vals, weights, bins, min_val)
+function [H, bins] = weighted_hist(vals, weights, bins, min_val)
 
 if ~exist('weights','var')
     weights = ones(1, size(vals,2));
@@ -26,7 +26,12 @@ end
 epsilon = 0.00000000000001;
 if(length(bins) == 1) % input is number of bins
     [~, bins] = hist(vals, bins);
-    bins = [min(vals)-epsilon bins max(vals)+epsilon]; % make sure all are represented 
+    if(min(vals) < bins(1))
+        bins = [min(vals)-epsilon bins]; % make sure all are represented - this makes non-integer bins!
+    end
+    if(max(vals) > bins(end))
+        bins = [bins max(vals)+epsilon]; % make sure all are represented - this makes non-integer bins!
+    end
 end
 [~, bin_inds] = histc(vals,bins); % assume bins represent EDGES !!!! 
 missing_bins = setdiff((1:length(bins)-1), unique(bin_inds));

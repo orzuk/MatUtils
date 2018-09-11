@@ -1,5 +1,4 @@
-% Compute moments of the site-frequency spectrum for variable population
-% size using the method in Evans, Shvets&Slatkin [2007]
+% Compute moments of the site-frequency spectrum for variable population size using the method in Evans, Shvets&Slatkin [2007]
 % Here moment k is: theta * \int_{0}^1 \psi_0(f) f^k (1-f) df, where k starts from 1    
 %
 % Input: 
