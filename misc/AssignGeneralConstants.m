@@ -1,7 +1,8 @@
 % function AssignGeneralConstants()
 % General constants to use
 beep off; % avoid annoying beeping
-UNIX=0; PC=1;% Check if machine is unix or pc
+UNIX=0; PC=1; machine = ispc; % Check if machine is unix or pc
+CLUSTER='huji'; % broad % choose cluster to work with 
 LEFT = 0; RIGHT = 1; % directions
 COLUMN = 0; ROW = 1;  % vector orientations
 OLD = 0; NEW = 1;
@@ -9,13 +10,43 @@ BFS = 0; DFS = 1; % breadth-first-search vs. depth-first-search
 epsilon = 0.00000000001;
 BIG_NUM = 9999999999.9;
 color_vec = 'brgkmcbrgkmcbrgkmcbrgkmcbrgkmcbrgkmcbrgkmcbrgkmcbrgkmcbrgkmcbrgkmcbrgkmcbrgkmcbrgkmcbrgkmcbrgkmc';
+orange = [1 0.6 0.1]; % set more colors
 % symbol_vec = '.:-xo*s+dv^ph.:-xo*s+dv^ph.:-xo*s+dv^ph.:-xo*s+dv^ph.:-xo*s+dv^ph.:-xo*s+dv^ph.:-xo*s+dv^ph';
 symbol_vec = {'-', ':', '--', '-.', 'o', 'x', 's', 'v', 'd', '*', '^', '.'}; 
 symbol_str_vec = {'solid', 'dotted', 'dashed', '-.',  'o', 'square', 'v', 'diamond', 'star', '^', 'dot'}; 
 
-%matlab_root = '/broad/tools/apps/matlab77/bin/matlab'; % matlab root dir
-matlab_root = '/broad/tools/apps/matlab2009b/bin/matlab'; % matlab root dir (new version)
-%matlab_root = '/broad/tools/apps/matlab2010a/bin/matlab'; % matlab root dir (new version)
+% New: add all github directories - why? 
+if(exist('c:\Users\orzuk', 'dir'))
+    user_str = 'orzuk'; 
+else
+    if(exist('c:\Users\oorzu', 'dir'))
+        user_str = 'oorzu';
+    else
+        if(exist('c:\Users\Or Zuk\', 'dir'))   
+            user_str = 'Or Zuk'; 
+        else
+            user_str = 'user'; 
+        end
+    end
+end
+
+switch CLUSTER
+    case 'broad'
+        %matlab_root = '/broad/tools/apps/matlab77/bin/matlab'; % matlab root dir
+        matlab_root = '/broad/tools/apps/matlab2009b/bin/matlab'; % matlab root dir (new version)
+        %matlab_root = '/broad/tools/apps/matlab2010a/bin/matlab'; % matlab root dir (new version)
+        submit_job_str = 'bsub'; 
+    case 'huji'
+        matlab_root = '/usr/local/matlab8/current';
+        submit_job_str = 'sbatch'; 
+        github_dir = '/cs/cbio/orzuk/software/GitHub';        
+end
+if(machine == PC)
+    matlab_root = 'C:\Program Files\MATLAB\R2018b\bin'; % matlab root dir (new version)
+    github_dir = fullfile('c:\Users\', user_str, 'Documents\GitHub');
+end    
+
+
 RED = 1; GREEN = 2; BLUE = 3; MAGENTA = 4; ORANGE = 5; BLACK = 6; CYAN = 7; BROWN = 8; YELLOW = 9;
 tab = sprintf('\t'); eoln = sprintf('\n');
 MAT = 1; TXT = 2; MAT_AND_TXT = 3; % file formats
@@ -32,7 +63,6 @@ precision = 3; % precision when displaying real numbers
 
 MALE = 1; FEMALE = 0; % genders
 
-machine = ispc;
 %if(machine == UNIX)
 %    format_fig_vec = {'fig'};
 %else
@@ -45,20 +75,9 @@ switch machine
         matlab_word_size = 64; % NEW! assume we're working in 64 bit
     otherwise
 %        matlab_libs_root_dir = 'C:\research\matlab\libs'; % new laptop
-        matlab_libs_root_dir = 'C:\Users\oorzu\Documents\GitHub\MatUtils'; % new surface
-        
-        matlab_word_size = 32; % assume we're working in 32 bit
+        matlab_libs_root_dir = fullfile('C:\Users\', user_str, 'Documents\GitHub\MatUtils'); % laptop        
+        matlab_word_size = 64; % assume we're no longer working in 32 bit
 end
 %                        matlab_libs_root_dir = 'Y:\public_html\matlab\libs';
 
-% New: add all github directories - why? 
-if(exist('c:\Users\orzuk', 'dir'))
-    user_str = 'orzuk'; 
-else
-    if(exist('c:\Users\oorzu', 'dir'))
-        user_str = 'oorzu';
-    else
-        user_str = 'user'; 
-    end
-end
-
+opengl('save', 'software');

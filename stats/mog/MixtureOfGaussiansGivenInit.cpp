@@ -1,13 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <iostream.h>
+#include <iostream>
 #include <time.h>
 #include <math.h>
 #include <string.h>
 
 #include "mex.h"
-#include "general.h"
-#include "hmm_chrom_funcs.h"
+#include "../hmp/general.h"
+#include "../hmp/hmm_chrom_funcs.h"
 
 
 long PrintModel2(hmm_model *hmm);
