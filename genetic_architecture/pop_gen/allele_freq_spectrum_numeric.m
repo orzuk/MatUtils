@@ -36,7 +36,12 @@ switch scale_mode
         end
         M = FisherWright_ComputeMarkovMatrix(N, s, 'exact', 1); % compute Markov matrix 
         mu=1;         M(1,2)=mu; M(1,1)=1-mu; M(end,2)=mu; M(end,end)=1-mu; % add small mutation to make process ergodic 
-        g = markov_chain_stationary_dist(M); g = g(2:(end-1)) ./ sum( g(2:(end-1)) ); % get stationary distribution 
+        g = vec2row(markov_chain_stationary_dist(M));  g = g(round(x*2*N)+1); g=g./sum(g);  % take only relevant indices and normalize
+
+        [~, g2] = MarkovChainAbsoptionTime(M, [1 2*N+1]); g2 = g2(1,:); g2 = g2(round(x*2*N)+1); % take absorption time. No normalization! 
+        g=g2; % New: do not normalize g but set it such that g(k) is mean number
+        % of generations spent at generation k before absorption ! 
+        %        g = g(2:(end-1)) ./ sum( g(2:(end-1)) ); % get stationary distribution 
 end % switch scale 
 
 

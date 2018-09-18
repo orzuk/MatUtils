@@ -19,7 +19,7 @@ D.add_new_alleles = 1; % Default: add new alleles each generation (this is part 
 
 switch lower(demographic_str)
     case 'small-expan'
-        N = 500; 
+        N = 200; 
         D.init_pop_size = [N -1];
         D.generations = [num_generations 100]; 
         D.expan_rate = [1 1.01];
@@ -45,7 +45,7 @@ switch lower(demographic_str)
         D.generations = num_generations;
         D.expan_rate = 1;    
     case 'tiny-equilibrium'
-        N = 10; 
+        N = 5; 
         D.init_pop_size = N;
         D.generations = num_generations;
         D.expan_rate = 1;    

@@ -8,7 +8,7 @@
 % full_enrichment_alpha_vec -  vector of possible fractions of null (functional) alleles at birth , allowing for only including them (100%)
 % n_vec - sample size
 % rare_cumulative_per_gene - ??? USED ???
-% N - popualtion size (we assume equlibirum)
+% N - popualtion size (we assume equilibirum)
 % prevalence - disease prevalence
 % L - gene length
 % mu - mutation rate

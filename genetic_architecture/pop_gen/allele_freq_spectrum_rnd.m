@@ -14,7 +14,7 @@
 %
 function f = allele_freq_spectrum_rnd(s, N, two_side_flag, M)
 
-x_vec = (1:2*N-1) ./ (2*N); p_vec = exp(allele_freq_spectrum(x_vec, s, N, two_side_flag, 'log')); % compute density
-
+x_vec = (1:2*N-1) ./ (2*N); % p_vec = exp(allele_freq_spectrum(x_vec, s, N, two_side_flag, 'log')); % compute density
+p_vec = allele_freq_spectrum_numeric(x_vec, s, N, two_side_flag, 'linear'); % TEMP! take numeric ! 
 f = weighted_rand(p_vec, M) ./ (2.*N);
 
