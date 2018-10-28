@@ -10,5 +10,8 @@ s_legend_vec = [repmat('s= 10^{', length(s_vec), 1) num2str(log10(abs(vec2column
     repmat('}', length(s_vec), 1)];
 s_legend_vec = cellstr(s_legend_vec);
 s_legend_vec = strrep_cell(s_legend_vec, ' ', '');
-s_legend_vec{s_vec == 0} = 's= 0'; % fix s=0
+if(any(s_vec == 0))
+    s_legend_vec{s_vec == 0} = 's= 0'; % fix s=0
+end
+
 

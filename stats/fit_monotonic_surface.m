@@ -155,6 +155,8 @@ z_fit = max(z_fit, realmin);
 
 return;  % up to here simple fitting - no row-column joint information. Fitting looks good (?)
 
+% Part below not reached!
+
 [num_y, num_x] = size(z_fit); % update size
 tol=10e-6; ctr=1;
 while(~(issortedtol(z_fit, tol, 'decreasing') && issortedtol(z_fit_cum', tol)))  % add tolerance

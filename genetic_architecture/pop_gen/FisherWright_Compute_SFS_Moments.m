@@ -47,7 +47,6 @@ switch init_str
 end
 
 % Compute non-equilibrium vec (only for neutral! s=0) - use eqs. (36-37) in in Evans et al.:  
-
 mu_vec(1,:) = exp_minus_int_one_over_rho_cum_vec .* (mu_vec_init(1) + 0.5*theta * exp_int_one_over_rho_cum_cum_vec ./ (2*N)); % first moment 
 for j=1:num_generations
 %     if(j == 1) % alternative: exact, discrete calculation  

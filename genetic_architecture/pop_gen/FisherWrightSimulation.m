@@ -231,7 +231,7 @@ if(~isfield(D, 'compute_absorb')) % default: don't compute absorption time (can 
 end
 p_vec = cell(num_generations+1, 1); x_vec = p_vec; % het_vec = p_vec; % initilize distributions
 
-rand_str = 'binomial'; % 'poisson'; % 'binomial'; % 'poisson'; % 'binomial'; % How to simulate each generation: poisson is much faster (approximation)
+rand_str = 'poisson'; % 'poisson'; % 'binomial'; % 'poisson'; % 'binomial'; % How to simulate each generation: poisson is much faster (approximation)
 max_num_alleles = 20000; % maximum number of alleles to simulate (to save time!)
 block_size = min(max_num_alleles, iters); % number of simulations to perform simultaniously
 %final_q = zeros(iters, num_generations, 'single'); % fill this with alleles not absorbed
@@ -255,13 +255,11 @@ weights = [];
 generation_weight_expanded = RunLength(generation_weight, generation_num_alleles);
 
 % TEMP: compute for small example also absorption probability at stationary
-M = FisherWright_ComputeMarkovMatrix(N_vec(1), s, 'exact', 1); % compute Markov matrix
-M(1,2)=mu; M(1,1)=1-mu; M(end,2)=mu; M(end,end)=1-mu; % add small mutation to make process ergodic
+% M = FisherWright_ComputeMarkovMatrix(N_vec(1), s, 'exact', 1); % compute Markov matrix
+% M(1,2)=mu; M(1,1)=1-mu; M(end,2)=mu; M(end,end)=1-mu; % add small mutation to make process ergodic
 
 %[T_vec, T_mat] = MarkovChainAbsoptionTime(M, [1 2*N+1]); 
-pi_vec = markov_chain_stationary_dist(M);  pi_poly_vec = [0 pi_vec(2:end-1)' ./ sum(pi_vec(2:end-1)) 0]'
-
-
+% pi_vec = markov_chain_stationary_dist(M);  % pi_poly_vec = [0 pi_vec(2:end-1)' ./ sum(pi_vec(2:end-1)) 0]'
 
 q = zeros(iters, num_generations+1, 'single'); % NEW approach !! allocate in advance entire q array (should be faster) !!!
 survive_prob = ones(size(q), 'single'); survive_prob_by_gen = zeros(num_generations, 1);  % ones(size(q(block_inds,:))); %[first_time_vec, last_time_vec] = deal(ones(1, iters)); % last_time_vec = ones(1, iters); % For each allele record the first and last polymorphic times
@@ -345,21 +343,21 @@ while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec
         arrange_time_cum = arrange_time_cum+arrange_time;
         
         % TEMP DEBUG: 
-        p_init_vec = p_vec{1} ./ sum(p_vec{1})
-        p_next_vec = p_init_vec * M
-        p_abs = p_next_vec(1)+p_next_vec(end)
-        M * p_init_vec'
-        p_next_poly_vec = pi_poly_vec' * M
-        p_poly_abs = p_next_poly_vec(1)+p_next_poly_vec(end); 
-        M_empiric = zeros(2*N_vec(1)-1); 
-        for k=1:2*N_vec(1)-1
-            for m=1:2*N_vec(1)-1
-                M_empiric(k,m) = sum((q(1:generation_num_alleles(1),1) == k) & (q(1:generation_num_alleles(1),2) == m)); 
-            end
-        end
-        M_empiric = M_empiric ./ repmat(sum(M_empiric,2), 1, 2*N_vec(1)-1); % normalize 
-        M_normalized = M(2:end-1,2:end-1); M_normalized = M_normalized ./ repmat(sum(M_normalized, 2), 1, 2*N_vec(1)-1); 
-        figure; imagesc(M_empiric-M_normalized); colorbar;
+%         p_init_vec = p_vec{1} ./ sum(p_vec{1})
+%         p_next_vec = p_init_vec * M
+%         p_abs = p_next_vec(1)+p_next_vec(end)
+%         M * p_init_vec'
+%         p_next_poly_vec = pi_poly_vec' * M
+%         p_poly_abs = p_next_poly_vec(1)+p_next_poly_vec(end); 
+%         M_empiric = zeros(2*N_vec(1)-1); 
+%         for k=1:2*N_vec(1)-1
+%             for m=1:2*N_vec(1)-1
+%                 M_empiric(k,m) = sum((q(1:generation_num_alleles(1),1) == k) & (q(1:generation_num_alleles(1),2) == m)); 
+%             end
+%         end
+%         M_empiric = M_empiric ./ repmat(sum(M_empiric,2), 1, 2*N_vec(1)-1); % normalize 
+%         M_normalized = M(2:end-1,2:end-1); M_normalized = M_normalized ./ repmat(sum(M_normalized, 2), 1, 2*N_vec(1)-1); 
+%         figure; imagesc(M_empiric-M_normalized); colorbar;
     end % loop on generations (heaviest loop!)
     fprintf('init-time=%f, rand-time=%f, arrange-time=%f\n', unique_time, rand_time_cum, arrange_time_cum)
     cur_num_alleles_survived = min(size(q, 1), iters - num_alleles_simulated);
@@ -755,7 +753,7 @@ right_range_vec = 1+min(2*N_vec(j+1), round(new_x_mean_vec.*2*N_vec(j+1) + num_s
 non_negligile_x_inds = find(p_vec > 10^(-9)); % take only states with non-negligible probability
 skip_running_fraction_of_inds = (2*N_vec(j)+1-length(non_negligile_x_inds)) / (2*N_vec(j)+1); % see how much time we've saved
 max_range = max(right_range_vec - left_range_vec);
-prob_compute_method = 'exact'; % 'approximate'; % 'exact'; % 'approximate'; %'exact'; % s'exact'; % ''; % 'exact';
+prob_compute_method = 'approximate'; % 'approximate'; % 'exact'; % 'approximate'; %'exact'; % s'exact'; % ''; % 'exact';
 for k=vec2row(non_negligile_x_inds) % 1:2*N_vec(j)+1 % -1 % loop on current allele frequency. This is the heaviest part
     cur_range_vec = left_range_vec(k):right_range_vec(k); % set output range vec
     

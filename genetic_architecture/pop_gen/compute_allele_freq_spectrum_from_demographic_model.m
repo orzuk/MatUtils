@@ -40,7 +40,7 @@ if(~isscalar(s)) % NEW! allow to fit multiple s values using a surface fitting m
     end
     save(['temp_surface.' D.name '.mat'], 'x_vec_cell', 's_vec_cell', 'p_vec_cell', 'smooth_params', 'D'); 
     
-    temp_DEBUG=1;
+    temp_DEBUG=1; % plot fitted frequencies 
     if(temp_DEBUG)
         s_vec = mean_cell(s_vec_cell);
         D2=D; D2.s_grid = s_vec; 
@@ -102,11 +102,11 @@ switch compute_flag
         max_num_alleles = 20000; % set maximum to save time
         [freq_struct, ~, simulation_struct, N_vec, simulation_time] = ... % New: separate output to different structures
             FisherWrightSimulation([], D, mu, s, init_str, D.iters, compute_flag, D.num_bins);
-        [freq_struct_num, ~, simulation_struct_num, N_vec_num, simulation_time_num] = ... % New: separate output to different structures
-            FisherWrightSimulation([], D, mu, s, init_str, D.iters, 'numeric', D.num_bins);
-        p_stationary = allele_freq_spectrum((1:(2*N_vec(1)-1))./(2*N_vec(1)), s, N_vec(1), 0, 'linear');
-        p_stationary_num = allele_freq_spectrum_numeric((1:(2*N_vec(1)-1))./(2*N_vec(1)), s, N_vec(1), 0, 'linear');
-        p_stationary_num = p_stationary_num ./ sum(p_stationary_num); % normalize
+%        [freq_struct_num, ~, simulation_struct_num, N_vec_num, simulation_time_num] = ... % New: separate output to different structures
+%            FisherWrightSimulation([], D, mu, s, init_str, D.iters, 'numeric', D.num_bins);
+%        p_stationary = allele_freq_spectrum((1:(2*N_vec(1)-1))./(2*N_vec(1)), s, N_vec(1), 0, 'linear');
+%        p_stationary_num = allele_freq_spectrum_numeric((1:(2*N_vec(1)-1))./(2*N_vec(1)), s, N_vec(1), 0, 'linear');
+%        p_stationary_num = p_stationary_num ./ sum(p_stationary_num); % normalize
         fprintf('Fisher-Wright simulation time was %f\n', simulation_time);
         if(D.save_flag) % save input and output to file for debugging 
             save(['debug_SFS_' D.name num2str(D.cond_on_polymorphic_flag) '.mat'], ...
@@ -115,13 +115,13 @@ switch compute_flag
         M = FisherWright_ComputeMarkovMatrix(N_vec(1), s, 'exact', 1); % compute Markov matrix 
         M(1,2)=1; M(1,1)=1-1; M(end,2)=1; M(end,end)=1-1; % add small mutation to make process ergodic 
 
-        g=1; % pick generation and plot
-        p_vec_sim = zeros(size(p_stationary_num)); p_vec_sim(freq_struct.x_vec{g}(2:(end-1))) = freq_struct.p_vec{g}(2:(end-1))' ./ sum(freq_struct.p_vec{g}(2:(end-1))');
-        figure; bar([p_vec_sim' freq_struct_num.p_vec{g}(2:(end-1))' p_stationary_num']); legend('sim', 'numeric', 'stationary'); title(['Generation ' num2str(g) ', s=' num2str(s)]);
-        for g=1:length(freq_struct.p_vec)
-            mean_sim_vec(g) = mean_hist(freq_struct.x_vec{g}, freq_struct.p_vec{g}); 
-        end
-        figure; plot(mean_sim_vec); hold on; plot(mean_hist(freq_struct.x_vec{g}(2:end-1), p_stationary_num), '*r'); 
+% %         g=2; % pick generation and plot
+% %         p_vec_sim = zeros(size(p_stationary_num)); p_vec_sim(freq_struct.x_vec{g}(2:(end-1))) = freq_struct.p_vec{g}(2:(end-1))' ./ sum(freq_struct.p_vec{g}(2:(end-1))');
+% %         figure; bar([p_vec_sim' freq_struct_num.p_vec{g}(2:(end-1))' p_stationary_num']); legend('sim', 'numeric', 'stationary'); title(['Generation ' num2str(g) ', s=' num2str(s)]);
+% %         for g=1:length(freq_struct.p_vec)
+% %             mean_sim_vec(g) = mean_hist(freq_struct.x_vec{g}, freq_struct.p_vec{g}); 
+% %         end
+% %         figure; plot(mean_sim_vec); hold on; plot(mean_hist(freq_struct.x_vec{g}(2:end-1), p_stationary_num), '*r'); 
         
 %         if(isfield(simulation_struct, 'q'))
 %             [sorted_q, sort_perm] = sort(simulation_struct.q(:,end));
@@ -131,8 +131,8 @@ switch compute_flag
         p_vec = freq_struct.p_vec{end-1}; 
         
         L_correction_factor = simulation_struct.L_correction_factor;
-%        [x_vec, ~, p_vec] = fit_monotonic_surface(x_vec, abs(s), p_vec, smooth_params);  % constraints
-        p_vec = freq_struct.p_vec{end-1} ./ sum(freq_struct.p_vec{end-1});
+        [x_vec, ~, p_vec] = fit_monotonic_surface(x_vec, abs(s), double(p_vec), smooth_params);          p_vec = p_vec ./ sum(p_vec); % normalize    % constraints
+%        p_vec = freq_struct.p_vec{end-1} ./ sum(freq_struct.p_vec{end-1}); % take only last one 
         
         if(nargout > 4) % output k_vec, n_vec ...
             if(~isfield(simulation_struct, 'weights'))
@@ -172,7 +172,7 @@ switch compute_flag
             p_vec = p_vec + lambda_max_ent(k) .* x_vec .^ (k-1);
         end
         p_vec = exp(-p_vec) ./ (x_vec .* (1-x_vec)); % Compute f. How to normalize?
-end
+end % switch compute_flag 
 
 % % % % New! smooth SFS  (should we do it at sample or at population level?)
 % % % if(~isempty(smooth_params))

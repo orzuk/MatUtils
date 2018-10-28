@@ -2,23 +2,23 @@
 %
 % Input:
 % D_cell - cell array with different demographic models
-% index - representing the correct model chosen
+% index - representing the model chosen for each structure in D_cell
 % log_like_mat - log-likelihood of each model
 % k_vec - data (number of derived allele carriers)
 % n_vec - data (number of individuals profiled)
-% print_all_models  - ?? 
+% print_all_models  - flag (default 1) 
 %
 function demographic_model_plot(D_cell, index, log_like_mat, k_vec, n_vec, print_all_models)
 
 AssignGeneralConstants; AssignRVASConstants;
-plot_params.font_size=10;
+plot_params.font_size=12;
 if(~exist('print_all_models', 'var') || isempty(print_all_models))
     print_all_models = 1; % print all possible models
 end
 num_D = length(D_cell);
 pseudo_count = 1;
 
-figure; % subplot(1,2,1);  % Plot demographic models
+figure; % subplot(1,2,1);  % Plot demographic models: pop. size vs. time 
 legend_vec = cell(num_D, 1);
 for i=1:num_D
     N_vec = demographic_parameters_to_n_vec(D_cell{i}, index(i));
@@ -30,44 +30,47 @@ if((num_D > 1) && print_all_models)
     title(['Best model: LL=' num2str(log_like_mat(index(2)), 5)]);
 end
 legend(legend_vec, 'fontsize', plot_params.font_size, 'location', 'southeast'); legend('boxoff');
-add_faint_grid(0.5);
-my_saveas(gcf, fullfile(exome_data_figs_dir, 'fitted_demographies'), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
+%add_faint_grid(0.5);
 
-if(print_all_models)
-    N_vec = demographic_parameters_to_n_vec(D_cell{1}, index(1));
+if(~print_all_models)
+my_saveas(gcf, fullfile(exome_data_figs_dir, 'fitted_demographies'), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
+else
+N_vec = demographic_parameters_to_n_vec(D_cell{1}, index(1)); % take first model 
+    sprintf('Computing models demographic distances ..')
     N_vec_cell = cell(D_cell{2}.num_params, 1); demographic_dist = zeros(D_cell{2}.num_params, 1); demographic_dist_mat = zeros(D_cell{2}.num_params);
     for i=1:D_cell{2}.num_params  % loop on all models of first
         N_vec_cell{i} = demographic_parameters_to_n_vec(D_cell{2}, i);
     end
     for i=1:D_cell{2}.num_params  % loop on all models of first
-        comp_dist = i
-        demographic_dist(i) = demographic_models_distance(N_vec, N_vec_cell{i});         % find which one is most similar to the true model
+        demographic_dist(i) = demographic_models_distance(N_vec, N_vec_cell{i});  % find which one is most similar to the TRUE model
         for j=2:D_cell{2}.num_params % compute all pairwise distances between models
-            demographic_dist_mat(i,j) = demographic_models_distance(N_vec_cell{i}, N_vec_cell{j});         % find which one is most similar to the true model
+            demographic_dist_mat(i,j) = demographic_models_distance(N_vec_cell{i}, N_vec_cell{j});   % find which ones are more similar to each other
         end
     end
-    [min_demographic_dist, min_I] = min(demographic_dist);
-    % Print the minimum with it's log-likelihood
-    %    figure; semilogy(N_vec, 'linewidth', 2, 'color', color_vec(1)); hold on; % semilogy(N_vec_hat, 'r', 'linewidth', 2);
-    semilogy(N_vec_cell{min_I}, 'linewidth', 2, 'color', color_vec(3)); % add new
+    [~, min_I] = min(demographic_dist); % find closest model with respect to demographic distance and print it
+    semilogy(N_vec_cell{min_I}, 'linewidth', 2, 'color', color_vec(3), 'linestyle', '--'); %       
     xlabel('Time (generations)'); ylabel('Population size');
     cur_title = get(gca, 'title');
     title([cur_title.String '; Similar model: LL=' num2str(log_like_mat(min_I), 5)]);
-    legend([legend_vec' 'Fitted-Similar'] , 'fontsize', plot_params.font_size); legend('boxoff');
+    legend([legend_vec' 'closest-demography'] , 'fontsize', plot_params.font_size); legend('boxoff');
     
     D_cell{end+1} = D_cell{end}; index(end+1) = min_I; D_cell{end}.index = min_I; % Add closest demography to true demography
     legend_vec{end+1} = 'closest-demography';
     
     good_inds = find(abs(log_like_mat) < inf)
     demographic_dist_mat = demographic_dist_mat+demographic_dist_mat'; % make symmetric
-    demographic_embed = cmdscale(demographic_dist_mat(good_inds, good_inds));
-    subplot(1,2,2); hold off;
+    demographic_embed = cmdscale(demographic_dist_mat(good_inds, good_inds)); % Run MDS 
+    add_faint_grid(0.5);
+    my_saveas(gcf, fullfile(exome_data_figs_dir, 'fitted_demographies'), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
+    
+    figure;  hold off; % PCA plot % subplot(1,2,2);
     scatter(demographic_embed(:,1), demographic_embed(:, 2), ...
         0.5*(log(max_cell(N_vec_cell(good_inds)))).^2.5, log_like_mat(good_inds)); hold on;
-    plot(demographic_embed(find(good_inds == min_I),1), demographic_embed(find(good_inds == min_I), 2), 'k*'); colorbar; % closest model
+    plot(demographic_embed(good_inds == min_I,1), demographic_embed(find(good_inds == min_I), 2), 'kd'); colorbar; % closest model
     [~, best_I] = max(log_like_mat);
-    plot(demographic_embed(find(good_inds == best_I),1), demographic_embed(find(good_inds == best_I), 2), 'r*'); colorbar; % closest model
-    title('All potential demographic models with LL');    
+    plot(demographic_embed(find(good_inds == best_I),1), demographic_embed(find(good_inds == best_I), 2), 'r*'); colorbar; % highest-scoring model
+    title('PCA LL of potential dem. models (size: max-N)');  xlabel('PC_1'); ylabel('PC_2'); 
+    legend('All', 'Closest', 'Max-LL'); legend('boxoff'); 
 end % print all models
 
 plot_sfs = 1; % plot sfs for true and fitted model (the two should be close)
@@ -76,8 +79,13 @@ if(plot_sfs) % plot neutral sfs for demographic model
     target_size_by_class_vec = [mu_per_site, mu_per_site, mu_per_site]; % [neutral, null, missense]
     full_flag = 0; % use summary statistics
     null_w_vec = 1; % NULL_C % assume all alleles are 'null' (but s=0 so actually neutral)
+    if(size(k_vec,2)==1) % duplicate data 
+        k_vec = repmat(k_vec, 1, length(D_cell)); 
+    end
+    if(size(n_vec,2)==1) % duplicate data 
+        n_vec = repmat(n_vec, 1, length(D_cell)); 
+    end
     X = [vec2row(k_vec) vec2row(n_vec)]'; % Represent counts in a packed form
-    
     n_sample = 200; % this should be determined in input
     LL_legend_vec = legend_vec;
     loglike_params = struct('null_w_vec', null_w_vec, 'include_phenotype', 0, ...
@@ -218,12 +226,8 @@ else % here we know that t2>t1
     stretch_time=0;
     if(stretch_time) % compre all times stretched
         N_vec1 = interp1((1:t1).*t2./t1, N_vec1, (1:t2)', 'linear', N_vec1(1));
-        d = mean((log(N_vec1)-log(N_vec2)).^2);
-        
+        d = mean((log(N_vec1)-log(N_vec2)).^2);        
     else % compare only recent times
         d = mean((log(N_vec1)-log(N_vec2((t2-t1+1):end))).^2);
     end
 end
-
-
-

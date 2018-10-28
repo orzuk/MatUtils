@@ -19,7 +19,7 @@ save_in_mathematica = 0; % save in mathematica format for Eric
 % Set running parameters
 AssignGeneralConstants; AssignRVASConstants;
 init_str = 'equilibrium'; % 'equilibrium' 'newly_born'; % start at newly born allele or equilibrium
-demography_str = 'tiny-equilibrium'; % 'small-expan'; % 'expansion1'; % choose demographic model
+demography_str = 'small-equilibrium'; % 'small-expan'; % 'expansion1'; % choose demographic model
 s_vec = -[0 logspace(-5, -1, 9)]; % -[0 0.000001 0.000005 0.00001 0.00005 0.0001 0.0005 0.001 0.005 0.01]; %  0.05 0.1]; % -0.00000001; % selection coefficient % s_vec = -[0 logspace(-6, -1, 11)]; % take log-space
 compute_mode = 'simulation'; % 'simulation'; % 'simulation';  % 'simulation'; % 'numeric'; % 'simulation'; % 'numeric'; % how to advance calculation
 N_vec = []; [N_vec{1}, D] = create_demographic_model(demography_str, 3); N = N_vec{1}(1); % 'expansion1');
@@ -50,7 +50,7 @@ plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1; plot_param
 % Run FisherWright Simulation to compute SFS
 total_time = cputime;
 % Choose model
-D.s_grid = s_vec; D.iters = 20000; % take twice as many iters ! 
+D.s_grid = s_vec; D.iters = 1000; % take twice as many iters ! 
 [D.SFS.x_vec, D.SFS.p_vec] = deal(cell(length(s_vec), 2)); D.SFS.compute_mode = {'simulation', 'numeric'};
 for s_ctr = 1:length(s_vec) % 0 % [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end-1) % s_vec % loop on different selection coefficients    
     % close all; 

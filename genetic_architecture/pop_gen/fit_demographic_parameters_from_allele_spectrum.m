@@ -18,7 +18,6 @@ function [D, max_LL, N_vec_hat, log_like_mat] = fit_demographic_parameters_from_
     k_vec, n_vec, weights_vec, mu, L_correction_factor, D_opt)
 
 AssignGeneralConstants; AssignRVASConstants;
-
 if(~exist('weights_vec', 'var') || isempty(weights_vec))
     weights_vec = 1;
 end
@@ -79,7 +78,7 @@ for i=vec2row(good_inds) % 1:D.num_params
     fprintf(' Loglike=%f, cur-time=%f, total-time=%f\n', log_like_mat(i), compute_time(i), sum(compute_time(1:i)));
     
     i_ctr=i_ctr+1;
-end
+end % end loop on good inds 
 
 [max_LL, max_J] = max(log_like_mat(good_inds)); max_J = good_inds(max_J); % maximize likelihood. (Take only good inds)
 % D = D{max_J};
@@ -165,7 +164,12 @@ D.use_allele_counts = 0; % new! don't use counts in likelihood computations !!!
 %
 % Input:
 % D - structure with candidate models
+% D_opt - 
 % num_moments - how many moments to generate
+% k_vec - vector with number of carriers per site
+% n_vec - vector with number of individuals per site
+% L_correction_factor - normalizing constant: theta* E[T] / n_alleles
+% mu - mutation rate 
 %
 % Output:
 % good_inds - indices of models consistent with data
@@ -196,21 +200,18 @@ for i=1:D.num_params
                 break;
             end
         end
-        %             if(filter_N_vec_internal(N_vec)) % get rid of this model
-        %                 continue;  % PROBLEM! this gets rid of a 'bad' model, and then will get rid of all sub-models, some of which might be 'good'
-        %             end
         to_moment_start_time = cputime;
-        mu_vec_expansion_analytic = FisherWright_Compute_SFS_Moments(N_vec, 0, num_moments); % compute moments with Formulas from Ewens
+        mu_vec_expansion_analytic = FisherWright_Compute_SFS_Moments(N_vec, 0, num_moments); % compute moments with formulas from Ewens
         to_moment_time = to_moment_time + cputime - to_moment_start_time;
 
-        %            het_moment_mat_all_models(i,:) = mu_vec_expansion_analytic(:,end);
         for j=1:max_j % length(D.generations_vec{end}) % loop on all smaller numbers of generations !
             j_vec(2*D.num_stages) = j;
             cur_ind = mysub2ind(D.num_params_vec, length(D.num_params_vec), j_vec);
-            het_moment_mat_all_models(cur_ind,:) = 2 * mu_vec_expansion_analytic(:,D.generations_vec{3}(j)+D.generations_vec{1}+D.generations_vec{2});
+            het_moment_mat_all_models(cur_ind,:) = ... % take last generatio.  Compute # generations first 
+                2 * mu_vec_expansion_analytic(:, length(demographic_parameters_to_n_vec(D, cur_ind))); % D.generations_vec{3}(j)+D.generations_vec{1}+D.generations_vec{2});
             init_N(cur_ind) = N_vec(1); % take first value of N
         end
-    end
+    end % end if i_vec (highest # of generations)
 end
 
 all_to_n_time = to_n_time
@@ -229,4 +230,5 @@ end
 good_inds = find( (abs(region_het_moment_mat_all_models - het_moment_mat_data(:,1)) ./ het_moment_mat_data(:,1))  < D_opt.moments_epsilon );
 if(isempty(good_inds))
     error('Error!! No Demographic Model Fits SFS Moments!!');
+    figure; hist(region_het_moment_mat_all_models, 100); hold on; plot(het_moment_mat_data(:,1), 0, '*r'); legend('Candidates', 'True-Model'); xlabel('Het'); 
 end
