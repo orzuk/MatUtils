@@ -13,7 +13,7 @@ function demographic_model_plot(D_cell, index, log_like_mat, k_vec, n_vec, print
 AssignGeneralConstants; AssignRVASConstants;
 plot_params.font_size=12;
 if(~exist('print_all_models', 'var') || isempty(print_all_models))
-    print_all_models = 1; % print all possible models
+    print_all_models =  1; % print all possible models
 end
 num_D = length(D_cell);
 pseudo_count = 1;
@@ -38,17 +38,18 @@ else
     good_inds = vec2row(find(abs(log_like_mat) < inf))
     N_vec = demographic_parameters_to_n_vec(D_cell{1}, index(1)); % take first model
     sprintf('Computing models demographic distances ..')
-    N_vec_cell = cell(D_cell{2}.num_params, 1); demographic_dist = zeros(D_cell{2}.num_params, 1); demographic_dist_mat = zeros(D_cell{2}.num_params);
+    N_vec_cell = cell(D_cell{2}.num_params, 1); demographic_dist = zeros(length(good_inds), 1); 
+    demographic_dist_mat = zeros(length(good_inds)); % D_cell{2}.num_params);
     for i=good_inds % 1:D_cell{2}.num_params  % loop on all models of first
         N_vec_cell{i} = demographic_parameters_to_n_vec(D_cell{2}, i);
     end
-    for i=good_inds % 1:D_cell{2}.num_params  % loop on all models of first
-        demographic_dist(i) = demographic_models_distance(N_vec, N_vec_cell{i});  % find which one is most similar to the TRUE model
-        for j=good_inds(good_inds>i) % 2:D_cell{2}.num_params % compute all pairwise distances between models
-            demographic_dist_mat(i,j) = demographic_models_distance(N_vec_cell{i}, N_vec_cell{j});   % find which ones are more similar to each other
+    for i=1:length(good_inds) % 1:D_cell{2}.num_params  % loop on all models of first
+        demographic_dist(i) = demographic_models_distance(N_vec, N_vec_cell{good_inds(i)});  % find which one is most similar to the TRUE model
+        for j=(i+1):length(good_inds) % 2:D_cell{2}.num_params % compute all pairwise distances between models
+            demographic_dist_mat(i,j) = demographic_models_distance(N_vec_cell{good_inds(i)}, N_vec_cell{good_inds(j)});   % find which ones are more similar to each other
         end
     end
-    [~, min_I] = min(demographic_dist); % find closest model with respect to demographic distance and print it
+    [~, min_I] = min(demographic_dist); min_I = good_inds(min_I);  % find closest model with respect to demographic distance and print it
     semilogy(N_vec_cell{min_I}, 'linewidth', 2, 'color', color_vec(3), 'linestyle', '--'); %
     xlabel('Time (generations)'); ylabel('Population size');
     cur_title = get(gca, 'title');
@@ -58,8 +59,8 @@ else
     D_cell{end+1} = D_cell{end}; index(end+1) = min_I; D_cell{end}.index = min_I; % Add closest demography to true demography
     legend_vec{end+1} = 'closest-demography';
     
-    demographic_dist_mat = demographic_dist_mat+demographic_dist_mat'; % make symmetric
-    demographic_embed = cmdscale(demographic_dist_mat(good_inds, good_inds)); % Run MDS
+%    demographic_dist_mat = demographic_dist_mat+demographic_dist_mat'; % make symmetric
+    demographic_embed = cmdscale(demographic_dist_mat+demographic_dist_mat'); % demographic_dist_mat(good_inds, good_inds)); % Run MDS
     add_faint_grid(0.5);
     my_saveas(gcf, fullfile(exome_data_figs_dir, 'fitted_demographies'), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
     
