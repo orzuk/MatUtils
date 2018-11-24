@@ -32,8 +32,7 @@ if(run_test)
     % sum(p_vec_equi .* (x_vec_equi./(2*N)) .* (1-x_vec_equi./(2*N)) )
     % sum(p_vec .* (x_vec./(2*N_vec(end))) .* (1-x_vec./(2*N_vec(end))) )
     
-    % now run and see if we get correct demography back
-        
+    % now run and see if we get correct demography back        
     [D_hat, max_LL, N_vec_hat, log_like_mat] = ...
         fit_demographic_parameters_from_allele_spectrum(k_vec, n_vec, weights_vec, D.mu, L_correction_factor, D);
     D_hat.name = 'Fitted';
@@ -45,7 +44,7 @@ if(run_test)
     % xlabel('Time (generations)'); ylabel('Population size');
     % legend({'True', 'Fitted'});
     [x_vec_hat, p_vec_hat, L_correction_factor_hat, ~, k_vec_hat, n_vec_hat, weights_vec_hat]  = ... % Compare allele-freq distribution
-        compute_allele_freq_spectrum_from_demographic_model(D_hat, 0, 'simulation', n_sample, mu); % simulate from neutral model
+        compute_allele_freq_spectrum_from_demographic_model(D_hat, 0, 'simulation', n_sample, D.mu); % simulate from neutral model
     figure; semilogx(x_vec ./ (2*N_vec(end-1)), p_vec, 'b', 'linewidth', 2); hold on; % insert this to plot !!
     semilogx(x_vec_hat ./ (2*N_vec_hat(end-1)), p_vec_hat, 'r', 'linewidth', 2);
     xlabel('f (allele freq.)'); ylabel('$\Psi(f)$', 'interpreter', 'latex');

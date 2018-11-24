@@ -61,7 +61,7 @@ for i=vec2row(good_inds) % 1:D.num_params
     if(filter_N_vec_internal(N_vec))
         continue;
     end
-    test_model_ctr = test_model_ctr+1
+    test_model_ctr = test_model_ctr+1;
     %end
     % Compute likelihood. This is trivial one-class likelihood (no mixture ) so should be fast !!!
     rare_cumulative_per_gene = []; % set dummy variables
@@ -137,7 +137,7 @@ end
 function D = generate_candidate_models_internal()
 
 % Set different demographic models:
-D.init_pop_size_vec{1} = round(logspace(3, 4.5, 20)); % 500; % 1. ancestral population size 
+D.init_pop_size_vec{1} = round(logspace(2, 4.5, 20)); % start with 100 !!! 500; % 1. ancestral population size 
 D.init_pop_size_vec{2} = round(logspace(1, 3, 10)); % 2. bottleneck size 1, 4, 10
 D.init_pop_size_vec{3} = -1; % 3. population after bottleneck
 D.init_pop_size_vec{4} = -1; % 3. population in second expansion phase

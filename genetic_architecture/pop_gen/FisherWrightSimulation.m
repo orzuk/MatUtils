@@ -514,9 +514,11 @@ end % if D.add_new_alleles
 function [generation_num_alleles, generation_weight] = num_alleles_to_simulate_per_generation_internal(N_vec, s, iters)
 
 %num_gen = length(N_vec); %num_new_alleles = poissrnd( (block_size /(2*mean_time_allele_polymorphic_at_equilibrium)) * (N_vec(j+1)/N) ); % Proportional to mutation rate times # of chromosomes . Mutation rate is cancelled !
-% mean_time_allele_polymorphic_at_equilibrium = absorption_time_by_selection(s, 1, N_vec(1), 1/(2*N_vec(1)), 0.999999999, 0);  % NEW! Factor of two here! time until absorbtion for a newly born allele
-mean_time_allele_polymorphic_at_equilibrium = absorption_time_by_selection_numeric(s, N_vec(1));  % NEW! Factor of two here! time until absorbtion for a newly born allele
-
+if(N_vec(1)>100) % use approximation for large N 
+    mean_time_allele_polymorphic_at_equilibrium = 1+2*absorption_time_by_selection(s, 1, N_vec(1), 1/(2*N_vec(1)), 0.999999999, 0);  % NEW! Factor of two here! time until absorbtion for a newly born allele    
+else
+    mean_time_allele_polymorphic_at_equilibrium = absorption_time_by_selection_numeric(s, N_vec(1));  % NEW! Factor of two here! time until absorbtion for a newly born allele
+end
 
 total_het_by_gen_vec = n_vec_to_het_per_generation(N_vec); 
 % set relative proportions. First is old alleles (equilibrium).
