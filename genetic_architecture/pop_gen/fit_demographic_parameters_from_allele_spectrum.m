@@ -164,7 +164,8 @@ D.use_allele_counts = 0; % new! don't use counts in likelihood computations !!!
 %
 % Input:
 % D - structure with candidate models
-% D_opt - 
+% D_opt - optimization method (here determines epsilon tolerance in moments
+% values)
 % num_moments - how many moments to generate
 % k_vec - vector with number of carriers per site
 % n_vec - vector with number of individuals per site
@@ -180,6 +181,7 @@ moments_time=cputime;
 het_moment_mat_all_models = zeros(D.num_params, num_moments);
 init_N = zeros(D.num_params, 1);
 to_n_time=0; to_moment_time=0;
+D.N0 = zeros(D.num_params, 1);
 for i=1:D.num_params
     if(mod(i, 100) == 0)
         sprintf('Fitting %ld out of %ld demographic model', i, D.num_params)
@@ -212,6 +214,7 @@ for i=1:D.num_params
             init_N(cur_ind) = N_vec(1); % take first value of N
         end
     end % end if i_vec (highest # of generations)
+    D.N0(i) = N_vec(1);
 end
 
 all_to_n_time = to_n_time

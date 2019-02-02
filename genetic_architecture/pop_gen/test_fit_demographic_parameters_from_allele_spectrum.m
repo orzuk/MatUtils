@@ -16,13 +16,14 @@ D.add_new_alleles = 1; % use NEW! simulation (track all alleles: alleles at star
 D.name = 'True';
 D.save_flag = 0; % don't save 
 n_sample = 200; % take a smaller sample size (can be equal to final population size)
+L = 100000; % region length in nucleotides 
 
 N_vec = demographic_parameters_to_n_vec(D, 1);
-D.mu = mu_per_site * 100000; % take effective mutation rate in a region
+D.mu = mu_per_site * L; % take effective mutation rate in a region
 run_test=1;
 if(run_test)    
     % Simulate data:
-    [x_vec, p_vec, L_correction_factor, ~, k_vec, n_vec, weights_vec]  = ...
+    [x_vec, p_vec, L_correction_factor, ~, k_vec, n_vec, weights_vec, allele_freq_vec]  = ...
         compute_allele_freq_spectrum_from_demographic_model(D, 0, 'simulation', n_sample, D.mu); % simulate from neutral model    
     % D_equi = D; D_equi.expan_rate(:) = 1;
     % [x_vec_equi, p_vec_equi, k_vec_equi, n_vec_equi]  = compute_allele_freq_spectrum_from_demographic_model(D_equi, 0, 'simulation', n_sample); % simulate from neutral model
@@ -58,7 +59,7 @@ if(run_test)
 else
     load('DebugRVASDemography.mat');
 end
-demographic_model_plot({D, D_hat}, [D.index D_hat.index], log_like_mat, k_vec, n_vec, 1); % plot
+plot_time = demographic_model_plot({D, D_hat}, [D.index D_hat.index], log_like_mat, k_vec, n_vec, 1) % plot. This also takes quite a while 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Temp test: see difference between population and sample allele frequencies

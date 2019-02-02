@@ -11,11 +11,13 @@
 % p_vec - vector of their frequencies at each generation
 % L_correction_factor - correction factor for total mutation rate
 % compute_time - total time it took to run
-% k_vec - alleles in sample
+% k_vec - counts for derived alleles in sample
 % n_vec - sample sizes
-% weights_vec - weight of each allele (each allele can represent multiple alleles)
-%
-function [x_vec, p_vec, L_correction_factor, compute_time, k_vec, n_vec, weights_vec] = ...
+% weights_vec - weight of each allele (each allele can represent multiple
+% alleles) 
+% allele_freq_vec - population allele frequencies 
+% 
+function [x_vec, p_vec, L_correction_factor, compute_time, k_vec, n_vec, weights_vec, allele_freq_vec] = ...
     compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu)
 
 if(~isfield(D, 'save_flag'))

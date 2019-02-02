@@ -8,7 +8,9 @@
 % n_vec - data (number of individuals profiled)
 % print_all_models  - flag (default 1)
 %
-function demographic_model_plot(D_cell, index, log_like_mat, k_vec, n_vec, print_all_models)
+function plot_time = demographic_model_plot(D_cell, index, log_like_mat, k_vec, n_vec, print_all_models)
+
+ttt = cputime; 
 
 AssignGeneralConstants; AssignRVASConstants;
 plot_params.font_size=12;
@@ -38,18 +40,22 @@ else
     good_inds = vec2row(find(abs(log_like_mat) < inf))
     N_vec = demographic_parameters_to_n_vec(D_cell{1}, index(1)); % take first model
     sprintf('Computing models demographic distances ..')
-    N_vec_cell = cell(D_cell{2}.num_params, 1); demographic_dist = zeros(length(good_inds), 1); 
+    N_vec_cell = cell(D_cell{2}.num_params, 1); 
+%    demographic_dist = zeros(length(good_inds), 1); 
+    demographic_dist = zeros(D_cell{2}.num_params, 1); 
     demographic_dist_mat = zeros(length(good_inds)); % D_cell{2}.num_params);
-    for i=good_inds % 1:D_cell{2}.num_params  % loop on all models of first
+    for i=1:D_cell{2}.num_params % good_inds % 1:D_cell{2}.num_params  % loop on all models of first
         N_vec_cell{i} = demographic_parameters_to_n_vec(D_cell{2}, i);
     end
+    for i=1:D_cell{2}.num_params  % loop on all models of first
+        demographic_dist(i) = demographic_models_distance(N_vec, N_vec_cell{i}); % N_vec_cell{good_inds(i)});  % find which one is most similar to the TRUE model
+    end
     for i=1:length(good_inds) % 1:D_cell{2}.num_params  % loop on all models of first
-        demographic_dist(i) = demographic_models_distance(N_vec, N_vec_cell{good_inds(i)});  % find which one is most similar to the TRUE model
         for j=(i+1):length(good_inds) % 2:D_cell{2}.num_params % compute all pairwise distances between models
             demographic_dist_mat(i,j) = demographic_models_distance(N_vec_cell{good_inds(i)}, N_vec_cell{good_inds(j)});   % find which ones are more similar to each other
         end
     end
-    [~, min_I] = min(demographic_dist); min_I = good_inds(min_I);  % find closest model with respect to demographic distance and print it
+    [~, min_I] = min(demographic_dist); % min_I = good_inds(min_I);  % find closest model with respect to demographic distance and print it
     semilogy(N_vec_cell{min_I}, 'linewidth', 2, 'color', color_vec(3), 'linestyle', '--'); %
     xlabel('Time (generations)'); ylabel('Population size');
     cur_title = get(gca, 'title');
@@ -210,27 +216,5 @@ if(length(log_like_mat_again)>2)
     closest_demography_model_loglike = log_like_mat_again{3}
 end
 
+plot_time = cputime - ttt; 
 
-% Compute how similar are two demographic models. Allow stretching of time (?)
-% Input:
-% N_vec1 - population size at each time for first model
-% N_vec2 - population size at each time for second model
-%
-% Output:
-% d - average difference in (log) population size between two models
-%
-function d = demographic_models_distance(N_vec1, N_vec2)
-
-t1 = length(N_vec1); t2 = length(N_vec2);
-
-if(t1>t2)
-    d = demographic_models_distance(N_vec2, N_vec1);
-else % here we know that t2>t1
-    stretch_time=0;
-    if(stretch_time) % compre all times stretched
-        N_vec1 = interp1((1:t1).*t2./t1, N_vec1, (1:t2)', 'linear', N_vec1(1));
-        d = mean((log(N_vec1)-log(N_vec2)).^2);
-    else % compare only recent times
-        d = mean((log(N_vec1)-log(N_vec2((t2-t1+1):end))).^2);
-    end
-end
