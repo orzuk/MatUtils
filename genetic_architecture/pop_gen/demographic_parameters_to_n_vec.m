@@ -8,6 +8,9 @@
 % 
 function N_vec = demographic_parameters_to_n_vec(D, i)
 
+if(~exist('i', 'var') || isempty(i)) % default is first 
+    i=1;
+end
 if(~isfield(D, 'num_params_vec'))
     D.num_params_vec = ones(3,1);
 end

@@ -37,7 +37,7 @@ legend(legend_vec, 'fontsize', plot_params.font_size, 'location', 'southeast'); 
 if(~print_all_models)
     my_saveas(gcf, fullfile(exome_data_figs_dir, 'fitted_demographies'), {'epsc', 'pdf', 'jpg'}); % NEW: add .jpg for Robert
 else
-    good_inds = vec2row(find(abs(log_like_mat) < inf))
+    good_inds = vec2row(find(abs(log_like_mat) < inf)) % filter to include only these 
     N_vec = demographic_parameters_to_n_vec(D_cell{1}, index(1)); % take first model
     sprintf('Computing models demographic distances ..')
     N_vec_cell = cell(D_cell{2}.num_params, 1); 

@@ -159,36 +159,3 @@ if(strmatch('legend', plot_params.legend))
     pos_l = get(h_leg, 'position'); set(h_leg, 'position', [pos_l(1)+0.11 pos_l(2)-0.015 pos_l(3) pos_l(4)]);
 end
 
-% Internal function for setting defaults: density un-weighted
-function plot_params  = internal_set_default_params(plot_params)
-if(~isfield(plot_params, 'new_fig')) % normalize distribution
-    plot_params.new_fig = 1;
-end
-if(~isfield(plot_params, 'normalize')) % normalize distribution
-    plot_params.normalize = 0;
-end
-if(~isfield(plot_params, 'cum')) % cumulative
-    plot_params.cum = 0;
-end
-if(~isfield(plot_params, 'log')) % default: plot semilogx
-    plot_params.log = [1 0];
-end
-if(isscalar(plot_params.log))
-    plot_params.log = [plot_params.log plot_params.log];
-end
-if(~isfield(plot_params, 'weighted')) % plot log-log
-    plot_params.weighted = 0;
-end
-if(~isfield(plot_params, 'xlim')) % plot lim
-    plot_params.xlim = [10^(-4) 1];
-end
-if(~isfield(plot_params, 'hist')) % hold distribution as histgoram
-    plot_params.hist = 0;
-end
-if(~isfield(plot_params, 'font_size')) % set default font size 
-    plot_params.font_size = 14;
-end
-
-
-
-

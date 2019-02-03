@@ -25,10 +25,11 @@ if(run_test)
     % Simulate data:
     [x_vec, p_vec, L_correction_factor, ~, k_vec, n_vec, weights_vec, allele_freq_vec]  = ...
         compute_allele_freq_spectrum_from_demographic_model(D, 0, 'simulation', n_sample, D.mu); % simulate from neutral model    
-    % D_equi = D; D_equi.expan_rate(:) = 1;
-    % [x_vec_equi, p_vec_equi, k_vec_equi, n_vec_equi]  = compute_allele_freq_spectrum_from_demographic_model(D_equi, 0, 'simulation', n_sample); % simulate from neutral model
-    % p_vec_equi_analytic = 1 ./ x_vec_equi; p_vec_equi_analytic(1) = 0; p_vec_equi_analytic(end) = 0;
-    % p_vec_equi_analytic=p_vec_equi_analytic./sum(p_vec_equi_analytic);
+    D_equi = D; D_equi.expan_rate(:) = 1;
+    [x_vec_equi, p_vec_equi, k_vec_equi, n_vec_equi]  = ...
+        compute_allele_freq_spectrum_from_demographic_model(D_equi, 0, 'simulation', n_sample); % simulate from neutral model
+    p_vec_equi_analytic = 1 ./ x_vec_equi; p_vec_equi_analytic(1) = 0; p_vec_equi_analytic(end) = 0;
+    p_vec_equi_analytic=p_vec_equi_analytic./sum(p_vec_equi_analytic);
     % sum(p_vec_equi_analytic .* (x_vec_equi./(2*N)) .* (1-x_vec_equi./(2*N)) )
     % sum(p_vec_equi .* (x_vec_equi./(2*N)) .* (1-x_vec_equi./(2*N)) )
     % sum(p_vec .* (x_vec./(2*N_vec(end))) .* (1-x_vec./(2*N_vec(end))) )
@@ -46,10 +47,18 @@ if(run_test)
     % legend({'True', 'Fitted'});
     [x_vec_hat, p_vec_hat, L_correction_factor_hat, ~, k_vec_hat, n_vec_hat, weights_vec_hat]  = ... % Compare allele-freq distribution
         compute_allele_freq_spectrum_from_demographic_model(D_hat, 0, 'simulation', n_sample, D.mu); % simulate from neutral model
+    
+    plot_params = []; plot_params.log = [1 0]; plot_params.cum = 0; plot_params.legend = {'True', 'Fitted', 'Equil.', 'Equil. Analytic'};
+    plot_allele_freq_basic({x_vec, x_vec_hat, x_vec_equi, x_vec_equi}, ...
+        {p_vec, p_vec_hat, p_vec_equi, p_vec_equi_analytic}, plot_params) 
+    
     figure; semilogx(x_vec ./ (2*N_vec(end-1)), p_vec, 'b', 'linewidth', 2); hold on; % insert this to plot !!
     semilogx(x_vec_hat ./ (2*N_vec_hat(end-1)), p_vec_hat, 'r', 'linewidth', 2);
+    semilogx(x_vec_equi ./ (2*N_vec(1)), p_vec_equi, 'g', 'linewidth', 2);
+    semilogx(x_vec_equi ./ (2*N_vec(1)), p_vec_equi_analytic, 'm', 'linewidth', 2);
+    
     xlabel('f (allele freq.)'); ylabel('$\Psi(f)$', 'interpreter', 'latex');
-    legend({'True', 'Fitted'}); legend('boxoff');
+    legend({'True', 'Fitted', 'Equil.', 'Equil. Analytic'}); legend('boxoff');
         
     % Save everything for debugging! so no need to re-run:
     save('DebugRVASDemography.mat', 'D', 'N_vec', ...
