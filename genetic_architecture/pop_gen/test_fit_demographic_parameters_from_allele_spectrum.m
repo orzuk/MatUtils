@@ -47,10 +47,13 @@ if(run_test)
     % legend({'True', 'Fitted'});
     [x_vec_hat, p_vec_hat, L_correction_factor_hat, ~, k_vec_hat, n_vec_hat, weights_vec_hat]  = ... % Compare allele-freq distribution
         compute_allele_freq_spectrum_from_demographic_model(D_hat, 0, 'simulation', n_sample, D.mu); % simulate from neutral model
+    [x_vec_numeric, p_vec_numeric]  = ...
+        compute_allele_freq_spectrum_from_demographic_model(D, 0, 'numeric', n_sample, D.mu); % simulate from neutral model    
     
-    plot_params = []; plot_params.log = [1 0]; plot_params.cum = 0; plot_params.legend = {'True', 'Fitted', 'Equil.', 'Equil. Analytic'};
-    plot_allele_freq_basic({x_vec, x_vec_hat, x_vec_equi, x_vec_equi}, ...
-        {p_vec, p_vec_hat, p_vec_equi, p_vec_equi_analytic}, plot_params) 
+    plot_params = []; plot_params.log = [1 0]; plot_params.cum = 1; plot_params.weighted = 0; plot_params.normalize = 1;
+    plot_params.legend = {'True', 'True-Numeric', 'Equil.', 'Equil. Analytic', 'Fitted'};
+    plot_allele_freq_basic({x_vec, x_vec_numeric, x_vec_equi, x_vec_equi, x_vec_hat}, ...
+        {p_vec, p_vec_numeric, p_vec_equi, p_vec_equi_analytic, p_vec_hat}, plot_params) 
     
     figure; semilogx(x_vec ./ (2*N_vec(end-1)), p_vec, 'b', 'linewidth', 2); hold on; % insert this to plot !!
     semilogx(x_vec_hat ./ (2*N_vec_hat(end-1)), p_vec_hat, 'r', 'linewidth', 2);

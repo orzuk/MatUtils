@@ -28,7 +28,7 @@ for i = 1:num_curves
         plot_p_vec = p_vec_cell(i,:);
     end
     if(plot_params.weighted) % weight by allele frequency
-        if(i_s == 1)
+        if(i == 1)
             plot_params.ylabel_str = [plot_params.ylabel_str ' (weighted)'];
         end
         plot_p_vec = plot_p_vec .* plot_x_vec;
@@ -37,7 +37,7 @@ for i = 1:num_curves
         plot_p_vec = plot_p_vec ./ sum(plot_p_vec);
     end
     if(plot_params.cum) % plot cumulative
-        if(i_s == 1)
+        if(i == 1)
             plot_params.ylabel_str = [plot_params.ylabel_str ' (cum.)'];
         end
         if(plot_params.hist)
@@ -48,6 +48,9 @@ for i = 1:num_curves
         else
             plot_p_vec = cumsum(plot_p_vec);
         end
+        plot_params.legend_loc = 'southeast';
+    else
+        plot_params.legend_loc = 'northeast';
     end
     y_lim(1) = min(y_lim(1), min(plot_p_vec)); y_lim(2) = max(y_lim(2), max(plot_p_vec));
     
@@ -72,13 +75,16 @@ for i = 1:num_curves
 end % loop on i 
 
 
-[h_leg, h_l] = legend(plot_params.legend, 'location', 'northeast', 'fontsize', plot_params.font_size-4); legend('boxoff'); % just legend
-xlabel('f (allele. freq.'); 
+[h_leg, h_l] = legend(plot_params.legend, 'location', plot_params.legend_loc, 'fontsize', plot_params.font_size-4); legend('boxoff'); % just legend
+xlabel('f (allele. freq.)'); ylabel(plot_params.ylabel_str); 
 
 % Internal function for setting defaults: density un-weighted
 function plot_params  = internal_set_default_params(plot_params)
 if(~isfield(plot_params, 'new_fig')) % normalize distribution
     plot_params.new_fig = 1;
+end
+if(~isfield(plot_params, 'ylabel_str'))
+    plot_params.ylabel_str = '\Psi';
 end
 if(~isfield(plot_params, 'normalize')) % normalize distribution
     plot_params.normalize = 0;

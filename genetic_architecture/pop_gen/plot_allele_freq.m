@@ -43,6 +43,8 @@ for i_pop = 1:num_populations % loop on populations
         if((i_w == num_w) && (i_h == ceil(num_h/2)))
             plot_params.legend = [plot_params.legend 'legend'];
         end
+        % should be replaced by plot_allele_freq_basic()
+%        plot_allele_freq_basic(Demographic_models{i_pop}D.SFS.x_vec(??), Demographic_models{i_pop}.SFS.p_vec(??), plot_params);
         internal_plot_allele_freq(s_vec, Demographic_models{i_pop}, plot_params); % plot according to flag figure type
     end
 end
@@ -76,6 +78,9 @@ end
 my_symbol_vec = {'--', '-'}; % flip ordering (set integer powers as solid lines)
 s_legend_vec = s_vec_to_legend(s_vec);
 y_lim = [0 0];
+
+
+
 
 for i_s = 1:num_s   
     %    tmp_color_ind = mod_max(6-floor(mod(i_s, 10)/2), 5);
