@@ -18,6 +18,12 @@ D.index = 1; % only one demography
 D.add_new_alleles = 1; % Default: add new alleles each generation (this is part of demography?) % use old simulation (track only alleles at start) - to be changed !!
 
 switch lower(demographic_str)
+    case 'two-stage-expan'
+        N = 500; 
+        D.init_pop_size = [N -1];
+        D.generations = [num_generations num_generations]; 
+        D.expan_rate = [1.02 1]; 
+    
     case 'small-expan'
         N = 200; 
         D.init_pop_size = [N -1];

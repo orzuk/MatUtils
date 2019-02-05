@@ -10,7 +10,7 @@ AssignGeneralConstants; AssignRVASConstants;
 num_populations = length(Demographic_models);
 [num_h, num_w] = num_to_height_width(num_populations); % num_s = length(s_vec);
 
-plot_params = internal_set_default_params(plot_params);
+plot_params = set_default_plot_params(plot_params);
 if(plot_params.new_fig)
     figure;  
 end
