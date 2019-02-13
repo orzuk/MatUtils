@@ -5,6 +5,7 @@
 % compute_flag - 'simulation' (default) or 'moments' (computation based on moments)
 % n_sample - # of individuals in a SAMPLE (default: = population size at END)
 % mu - regional mutation rate (default: mu for one site)
+% num_bins - NEW! allow coarse-grained SFS 
 %
 % Output:
 % x_vec - vector of x values (allele frequencies) at each generation
@@ -18,7 +19,11 @@
 % allele_freq_vec - population allele frequencies 
 % 
 function [x_vec, p_vec, L_correction_factor, compute_time, k_vec, n_vec, weights_vec, allele_freq_vec] = ...
-    compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu)
+    compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu, num_bins)
+
+if(~exist('num_bins', 'var'))
+    num_bins = [];
+end
 
 if(~isfield(D, 'save_flag'))
     D.save_flag = 0;

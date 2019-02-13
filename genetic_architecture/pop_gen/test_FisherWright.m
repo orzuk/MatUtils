@@ -50,7 +50,7 @@ plot_params.cum=1; plot_params.weighted = 1; plot_params.normalize=1; plot_param
 % Run FisherWright Simulation to compute SFS
 total_time = cputime;
 % Choose model
-D.s_grid = s_vec; D.iters = 1000; % take twice as many iters ! 
+D.s_grid = s_vec; D.iters = 100000; % take twice as many iters ! 
 [D.SFS.x_vec, D.SFS.p_vec] = deal(cell(length(s_vec), 2)); D.SFS.compute_mode = {'simulation', 'numeric'};
 for s_ctr = 1:length(s_vec) % 0 % [] %  s_vec(1) %   1:end-2) % (2:end) % s_vec(end) % s_vec(3:end) % (end-1) % s_vec % loop on different selection coefficients    
     % close all; 

@@ -34,8 +34,8 @@ switch scale_mode
                 allele_freq_spectrum_numeric(1-x, s, N, 0, scale_mode, var_explained_flag);
             return;
         end
-        M = FisherWright_ComputeMarkovMatrix(N, s, 'exact', 1); % compute Markov matrix 
-        mu=1;         M(1,2)=mu; M(1,1)=1-mu; M(end,2)=mu; M(end,end)=1-mu; % add small mutation to make process ergodic 
+        M = FisherWright_ComputeMarkovMatrix(N, s, 'exact', 1); % compute Markov matrix. Very costly !!!  
+        mu=1; M(1,2)=mu; M(1,1)=1-mu; M(end,2)=mu; M(end,end)=1-mu; % add small mutation to make process ergodic 
         g = vec2row(markov_chain_stationary_dist(M));  g = g(round(x*2*N)+1); g=g./sum(g);  % take only relevant indices and normalize
 
         [~, g2] = MarkovChainAbsoptionTime(M, [1 2*N+1]); g2 = g2(1,:); g2 = g2(round(x*2*N)+1); % take absorption time. No normalization! 
