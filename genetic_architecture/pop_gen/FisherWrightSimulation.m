@@ -649,8 +649,10 @@ if(~exist('num_bins', 'var') || isempty(num_bins))
     freq_struct.x_vec{1} = (0:2*N) ./ (2*N); % vector of allele frequencies (include monomorphic alleles)
     init_p_vec = allele_freq_spectrum_numeric(freq_struct.x_vec{1}, s, N, two_side_flag, 'linear') *N ; % TEMP! factor N.  get stationary distrubution at equilibrium (initial condition)
 else % new! set x_vec as center of bins 
-    freq_struct.x_vec{1} = [(0:50) logspace(50, 2*N, num_bins-50)] ./ (2*N); % set bins 
-    init_p_vec = exp( allele_freq_spectrum(freq_struct.x_vec{1}, s, N, two_side_flag, 'log') ); % get stationary distrubution at equilibrium (initial condition)
+    freq_struct.x_vec{1} = [(0:50) linspace(50, 2*N, num_bins-50)] ./ (2*N); % set bins 
+    bin_sizes = [1 diff(freq_struct.x_vec{1})*2*N]
+    init_p_vec = exp( allele_freq_spectrum(freq_struct.x_vec{1}, s, N, two_side_flag, 'log') ) .* bin_sizes; % get stationary distrubution at equilibrium (initial condition)
+    init_p_vec(1) = N; % correction for 0 frequency 
 end
     
 M=[]; % Markov chain
@@ -751,6 +753,7 @@ simulation_struct.num_simulated_polymorphic_alleles_vec = 10000;
 % N_vec - population sizes 
 % j - generation
 % compute_matrix - 1: compute Markov transition matrix. 0: No (default) 
+% num_bins - new ! enable coarse grain resolution
 %
 % Output:
 % new_x_vec - frequency values at next generation
@@ -759,7 +762,7 @@ simulation_struct.num_simulated_polymorphic_alleles_vec = 10000;
 % skip_running_fraction_of_inds - ???
 % max_range - values with positive probability to compute  
 function [new_x_vec, new_p_vec, M, skip_running_fraction_of_inds, max_range] = ...
-    compute_numeric_forward_FisherWright_one_step(x_vec, p_vec, s, mu, N_vec, j, compute_matrix)
+    compute_numeric_forward_FisherWright_one_step(x_vec, p_vec, s, mu, N_vec, j, compute_matrix, num_bins)
 
 if(~exist('compute_matrix', 'var') || isempty(compute_matrix))
     compute_matrix = 0; 
@@ -772,7 +775,15 @@ end
 num_sigmas = 5; % keep only these many st.d. (to speed-up computation)
 normpdf_vec = normpdf(-6:10^(-5):6); % Prepare in advance Gaussian density to save time. Current resolution: 1 million
 prob_compute_method = 'approximate'; % 'approximate'; % 'exact'; % 'approximate'; %'exact'; % s'exact'; % ''; % 'exact';
-new_x_vec = (0:2*N_vec(j+1)) ./ (2*N_vec(j+1)); % new: include also 0 and 1 freqs. to get absolute values
+if (~exist('num_bins', 'var') || isempty(num_bins))
+    new_x_vec = (0:2*N_vec(j+1)) ./ (2*N_vec(j+1)); % new: include also 0 and 1 freqs. to get absolute values
+else
+    new_x_vec = [(0:50) linspace(50, 2*N_vec(j+1), num_bins-50)] ./ (2*N_vec(j+1)); % set bins 
+    bin_sizes = [1 diff(freq_struct.x_vec{1})*2*N]
+%    init_p_vec = exp( allele_freq_spectrum(freq_struct.x_vec{1}, s, N, two_side_flag, 'log') ) .* bin_sizes; % get stationary distrubution at equilibrium (initial condition)
+%    init_p_vec(1) = N; % correction for 0 frequency 
+end
+
 new_x_mean_vec = x_vec .* (1+s); % first get the mean vector for next generation
 std_vec = sqrt(2*N_vec(j+1) .* new_x_mean_vec .* (1-new_x_mean_vec));
 new_p_vec  = zeros(1, 2*N_vec(j+1)+1);
@@ -819,6 +830,9 @@ for k=vec2row(non_negligile_x_inds) % 1:2*N_vec(j)+1 % -1 % loop on current alle
                     end
                 end
             end % if: what probability propagating approximation to use
+            if (exist('num_bins', 'var') && ~isempty(num_bins))
+                new_p_vec(cur_range_vec) = new_p_vec(cur_range_vec) .* bin_sizes(cur_range_vec)
+            end
     end % switch approximate
 end % loop on k
 new_p_vec(1) = 1-sum(new_p_vec(2:end-1)); new_p_vec(end) = 0; % combine zero and one frequencies

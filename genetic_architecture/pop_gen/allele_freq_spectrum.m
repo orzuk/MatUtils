@@ -2,7 +2,10 @@
 % Formula from Sawyer&Hartl paper. We use S=4*N*s (not 2*N*s) since N
 % is the number of individuals (not chromosomes)
 % The formula is: g(f) = t_s(f) =  [1 - e^(-S(1-f))] / [f(1-f)(1-e^(-S))].
-% Note: This is HALF (1/2) of the corret value !! (a factor 2 is missing here!)
+% This is density of the time being spent at frequency, such that expected
+% time spent between frequencies [a,b] is \int_a^b g(f) df
+% Note: This is HALF (1/2) of the corret value !! (a factor 2 is missing here!).
+% This function gives approximately same answer as allele_freq_spectrum_numeric if dividing by a factor of 2N/2 = N
 %
 % Input:
 % x - allele frequency
@@ -14,7 +17,7 @@
 %                      (multiply by x*(1-x)). Default is 'OFF'.
 %
 % Output:
-% g - probability of allele frequency being x (NOT normalized!)
+% g - g(i) is mean-time-spent density of allele frequency being x(i) (NOT normalized!). 
 %
 function g = allele_freq_spectrum(x, s, N, two_side_flag, scale_mode, var_explained_flag)
 
@@ -32,19 +35,6 @@ switch scale_mode
     case 'linear'
         % NEW! just take log part
         g = exp(allele_freq_spectrum(x, s, N, two_side_flag, 'log', var_explained_flag)); 
-% % %         if(two_side_flag) % collapse x and 1-x
-% % %             g = allele_freq_spectrum(x, s, N, 0, scale_mode, var_explained_flag) + ...
-% % %                 allele_freq_spectrum(1-x, s, N, 0, scale_mode, var_explained_flag);
-% % %             return;
-% % %         end                
-% % %         if(isscalar(S) && (S == 0))
-% % %             g = 1 ./ x;
-% % %         else
-% % %             g = (exp(S.*x) - exp(S)) ./ (x.*(1-x).*(1-exp(S))); % prevent overflow for large s!
-% % %         end                
-% % %         if(var_explained_flag)
-% % %             g = g .* x .* (1-x);
-% % %         end        
     case 'log' % compute log of allele frequency density
         if(two_side_flag) % collapse x and 1-x
             g = sum_log(allele_freq_spectrum(x, s, N, 0, scale_mode, var_explained_flag), ...

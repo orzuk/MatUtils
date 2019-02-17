@@ -1,5 +1,4 @@
 % Compute allele frequency distribution in a population using Markov Chain numeric calculation
-% Note: This is Normalized to one !! 
 %
 % Input:
 % x - allele frequency
@@ -11,7 +10,7 @@
 %                      (multiply by x*(1-x)). Default is 'OFF'.
 %
 % Output:
-% g - probability of allele frequency being x (NOT normalized!)
+% g - g(i) is expected number of generations an allele stays at allele frequency x(i) (NOT normalized!)
 %
 function g = allele_freq_spectrum_numeric(x, s, N, two_side_flag, scale_mode, var_explained_flag)
 
