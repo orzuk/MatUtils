@@ -652,7 +652,7 @@ else % new! set x_vec as center of bins
     freq_struct.x_vec{1} = [(0:50) linspace(50, 2*N, num_bins-50)] ./ (2*N); % set bins 
     bin_sizes = [1 diff(freq_struct.x_vec{1})*2*N];
     init_p_vec = exp( allele_freq_spectrum(freq_struct.x_vec{1}, s, N, two_side_flag, 'log') ) .* bin_sizes; % get stationary distrubution at equilibrium (initial condition)
-    init_p_vec(1) = N; % correction for 0 frequency 
+    init_p_vec(1) = N; % correction for 0 frequency. init_p_vec not normalized 
 end
     
 M=[]; % Markov chain
@@ -663,7 +663,7 @@ switch init_str
         init_p_vec(end) = 0; % 1 allele frequency
 end % switch init_str
 init_p_vec = init_p_vec .* 2.* max(10^(-10), mu); %  .* 2*N;  % multiply by theta. (If mu=0: no mutations, then we've got a problem ... set some mu>0)
-init_p_vec(1) = 1 - sum(init_p_vec(2:end-1)); % set first value to complete distribution to sum to one. Also when using init?
+init_p_vec(1) = 1 - sum(init_p_vec(2:end-1)); % Normalize! set first value to complete distribution to sum to one. Also when using init?
 
 new_x_mean_vec = freq_struct.x_vec{1} .* (1+s); % first get the mean vector of new #offspring
 %std_vec = sqrt(2*N .* new_x_mean_vec .* (1-new_x_mean_vec)); % binomial standard deviation
@@ -786,58 +786,73 @@ end
 
 new_x_mean_vec = x_vec .* (1+s); % first get the mean vector for next generation
 std_vec = sqrt(2*N_vec(j+1) .* new_x_mean_vec .* (1-new_x_mean_vec));
-new_p_vec  = zeros(1, 2*N_vec(j+1)+1);
-left_range_vec = max(2, round(new_x_mean_vec.*2*N_vec(j+1) - num_sigmas .* std_vec)); % NEW! start from 2, not 1 !!!! % calculate range to compute binomial distribution
-right_range_vec = 1+min(2*N_vec(j+1), round(new_x_mean_vec.*2*N_vec(j+1) + num_sigmas .* std_vec));
+new_p_vec  = zeros(1, length(new_x_vec)); %  2*N_vec(j+1)+1);
+if (~exist('num_bins', 'var') || isempty(num_bins))
+    left_range_vec = max(2, round(new_x_mean_vec.*2*N_vec(j+1) - num_sigmas .* std_vec)); % NEW! start from 2, not 1 !!!! % calculate range to compute binomial distribution
+    right_range_vec = 1+min(2*N_vec(j+1), round(new_x_mean_vec.*2*N_vec(j+1) + num_sigmas .* std_vec));
+else % use bins 
+   left_range_vec = ones(1, length(x_vec)); right_range_vec = 2*N_vec(j+1) + ones(1, length(x_vec));
+end
+    
 non_negligile_x_inds = find(p_vec > 10^(-9)); % take only states with non-negligible probability
 skip_running_fraction_of_inds = (2*N_vec(j)+1-length(non_negligile_x_inds)) / (2*N_vec(j)+1); % see how much time we've saved
 max_range = max(right_range_vec - left_range_vec);
 for k=vec2row(non_negligile_x_inds) % 1:2*N_vec(j)+1 % -1 % loop on current allele frequency. This is the heaviest part
-    cur_range_vec = left_range_vec(k):right_range_vec(k); % set output range vec    
-    if(max(cur_range_vec>=100))
-        TTTT = 14124; 
+    if (~exist('num_bins', 'var') || isempty(num_bins))
+        cur_range_vec = left_range_vec(k):right_range_vec(k); % set output range vec    
+        cur_range_vec_inds = cur_range_vec;
+    else % use bins
+       cur_range_vec = round(new_x_vec(2:(end-1)) .* (2*N_vec(j+1))) + 1; % values of bin centers  
+       cur_range_vec_inds = 2:(length(new_x_vec)-1);
     end
+%    if(max(cur_range_vec>=100))
+%        TTTT = 14124; 
+%    end
     switch prob_compute_method
         case 'exact'   % Exact binomial computation
-            new_p_vec(cur_range_vec) = ...
-                new_p_vec(cur_range_vec) + p_vec(k)  .* ...
+            new_p_vec(cur_range_vec_inds) = ...
+                new_p_vec(cur_range_vec_inds) + p_vec(k)  .* ...
                 binopdf(cur_range_vec-1, 2*N_vec(j+1), new_x_mean_vec(k)); % why take cur_range_vec - 1 ???
             if(compute_matrix)
                 M(k,:) = binopdf(0:2*N_vec(j+1), 2*N_vec(j+1), new_x_mean_vec(k)); % Why column here? % -1
             end
         case {'approx', 'approximate'} % Use Poisson approximation
             if(new_x_mean_vec(k) * 2*N_vec(j+1) < 50)  % use poisson approximation  to binomial on left tail
-                new_p_vec(cur_range_vec) = ...
-                    new_p_vec(cur_range_vec) + p_vec(k)  .* ...
+                new_p_vec(cur_range_vec_inds) = ...
+                    new_p_vec(cur_range_vec_inds) + p_vec(k)  .* ...
                     poisspdf(cur_range_vec-1, 2*N_vec(j+1) * new_x_mean_vec(k));  % Replace with poisson approximation for larger values!!!
                 if(compute_matrix)
                     M(k,:) = poisspdf(0:2*N_vec(j+1), 2*N_vec(j+1) * new_x_mean_vec(k)); % Poisson approximation
                 end
-            else % for larger values use poisson or Gaussian approximations
+            else % for larger values use Poisson or Gaussian approximations
                 if((1-new_x_mean_vec(k)) .* 2*N_vec(j+1) < 50) %  use poisson approximation to binomial on right tail,
-                    new_p_vec(cur_range_vec) = ...
-                        new_p_vec(cur_range_vec) + p_vec(k)  .* ...
+                    new_p_vec(cur_range_vec_inds) = ...
+                        new_p_vec(cur_range_vec_inds) + p_vec(k)  .* ...
                         poisspdf(2*N_vec(j+1) - (cur_range_vec-1), 2*N_vec(j+1) * (1-new_x_mean_vec(k)));  % This part is slowest. We replaced with poisson !!!
                     if(compute_matrix)
                         M(k,:) = poisspdf(2*N_vec(j+1):-1:0, 2*N_vec(j+1) * (1-new_x_mean_vec(k))); % Poisson approximation
                     end
                 else % use Gaussian approximation to binomial in the middle of distribution
-                    new_p_vec(cur_range_vec) = ...
-                        new_p_vec(cur_range_vec) + p_vec(k)  .* ...
-                        normpdf_vec( round(( 6+(cur_range_vec-1 - 2*N_vec(j+1) * new_x_mean_vec(k)) ./ std_vec(k) ) .* 10^5) ) ./ std_vec(k);
-                    %                 normpdf(cur_range_vec-1, 2*N_vec(j+1) * new_x_mean_vec(k), ...
-                    %                 sqrt(2*N_vec(j+1) * new_x_mean_vec(k) * (1-new_x_mean_vec(k))) );  % This part is slowest. We replace with poisson !!!
+                    if (~exist('num_bins', 'var') || isempty(num_bins))
+                        update_p_vec = normpdf_vec( round(( 6+(cur_range_vec-1 - 2*N_vec(j+1) * new_x_mean_vec(k)) ./ std_vec(k) ) .* 10^5) ) ./ std_vec(k);
+                    else
+                        update_p_vec = normpdf(cur_range_vec-1, 2*N_vec(j+1) * new_x_mean_vec(k), ...
+                            sqrt(2*N_vec(j+1) * new_x_mean_vec(k) * (1-new_x_mean_vec(k))) );  % This part is slowest. We replace with poisson !!!
+                    end
+                    new_p_vec(cur_range_vec_inds) = ...
+                        new_p_vec(cur_range_vec_inds) + p_vec(k)  .* update_p_vec; % ... %                        normpdf_vec( round(( 6+(cur_range_vec-1 - 2*N_vec(j+1) * new_x_mean_vec(k)) ./ std_vec(k) ) .* 10^5) ) ./ std_vec(k);
                     if(compute_matrix)
                         M(k,:) = normpdf(0:2*N_vec(j+1), 2*N_vec(j+1)*new_x_mean_vec(k), ...
                             sqrt(2*N_vec(j+1)*new_x_mean_vec(k)* (1-new_x_mean_vec(k))) ); % Why column here? % -1
                     end
                 end
             end % if: what probability propagating approximation to use
-            if (exist('num_bins', 'var') && ~isempty(num_bins))
-                new_p_vec(cur_range_vec) = new_p_vec(cur_range_vec) .* bin_sizes(cur_range_vec);
-            end
     end % switch approximate
 end % loop on k
+if (exist('num_bins', 'var') && ~isempty(num_bins)) % weight by bin size 
+    new_p_vec = new_p_vec .* bin_sizes;
+end
+
 new_p_vec(1) = 1-sum(new_p_vec(2:end-1)); new_p_vec(end) = 0; % combine zero and one frequencies
 new_p_vec(2) = new_p_vec(2) + (1*new_p_vec(1)+0) .* 2*N_vec(j+1)*mu*1; % add mutations. Try factor 2 !!
 new_p_vec(1) = new_p_vec(1) .* (1-2*N_vec(j+1)*mu*1); % reduce monomorphic zero alleles due to mutations . Try factor 2 !!!
