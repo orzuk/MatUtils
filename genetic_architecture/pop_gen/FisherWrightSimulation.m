@@ -650,7 +650,7 @@ if(~exist('num_bins', 'var') || isempty(num_bins))
     init_p_vec = allele_freq_spectrum_numeric(freq_struct.x_vec{1}, s, N, two_side_flag, 'linear') *N ; % TEMP! factor N.  get stationary distrubution at equilibrium (initial condition)
 else % new! set x_vec as center of bins 
     freq_struct.x_vec{1} = [(0:50) linspace(50, 2*N, num_bins-50)] ./ (2*N); % set bins 
-    bin_sizes = [1 diff(freq_struct.x_vec{1})*2*N]
+    bin_sizes = [1 diff(freq_struct.x_vec{1})*2*N];
     init_p_vec = exp( allele_freq_spectrum(freq_struct.x_vec{1}, s, N, two_side_flag, 'log') ) .* bin_sizes; % get stationary distrubution at equilibrium (initial condition)
     init_p_vec(1) = N; % correction for 0 frequency 
 end
@@ -678,7 +678,7 @@ end
 for j=1:num_generations % main loop on generations
     t_gen = cputime;
     [freq_struct.x_vec{j+1}, freq_struct.p_vec{j+1}, M, skip_run_frac, max_range] = ...
-        compute_numeric_forward_FisherWright_one_step(freq_struct.x_vec{j}, freq_struct.p_vec{j}, s, mu, N_vec, j, compute_matrix);
+        compute_numeric_forward_FisherWright_one_step(freq_struct.x_vec{j}, freq_struct.p_vec{j}, s, mu, N_vec, j, compute_matrix, num_bins);
     het_vec{j+1} = 2.* freq_struct.p_vec{j+1} .* vec2column(freq_struct.x_vec{j+1} .* (1-freq_struct.x_vec{j+1})); % update heterozygosity
     if(mod(j, ceil(50000/N)) == 0)
         fprintf('Comp. Markov-Chain, gen=%ld, skip=%.2f, range=%ld, gen-time=%.2f\n', j, skip_run_frac, max_range, cputime - t_gen)
@@ -779,7 +779,7 @@ if (~exist('num_bins', 'var') || isempty(num_bins))
     new_x_vec = (0:2*N_vec(j+1)) ./ (2*N_vec(j+1)); % new: include also 0 and 1 freqs. to get absolute values
 else
     new_x_vec = [(0:50) linspace(50, 2*N_vec(j+1), num_bins-50)] ./ (2*N_vec(j+1)); % set bins 
-    bin_sizes = [1 diff(freq_struct.x_vec{1})*2*N]
+    bin_sizes = [1 diff(x_vec*2*N_vec(j+1))];
 %    init_p_vec = exp( allele_freq_spectrum(freq_struct.x_vec{1}, s, N, two_side_flag, 'log') ) .* bin_sizes; % get stationary distrubution at equilibrium (initial condition)
 %    init_p_vec(1) = N; % correction for 0 frequency 
 end
@@ -794,6 +794,9 @@ skip_running_fraction_of_inds = (2*N_vec(j)+1-length(non_negligile_x_inds)) / (2
 max_range = max(right_range_vec - left_range_vec);
 for k=vec2row(non_negligile_x_inds) % 1:2*N_vec(j)+1 % -1 % loop on current allele frequency. This is the heaviest part
     cur_range_vec = left_range_vec(k):right_range_vec(k); % set output range vec    
+    if(max(cur_range_vec>=100))
+        TTTT = 14124; 
+    end
     switch prob_compute_method
         case 'exact'   % Exact binomial computation
             new_p_vec(cur_range_vec) = ...
@@ -831,7 +834,7 @@ for k=vec2row(non_negligile_x_inds) % 1:2*N_vec(j)+1 % -1 % loop on current alle
                 end
             end % if: what probability propagating approximation to use
             if (exist('num_bins', 'var') && ~isempty(num_bins))
-                new_p_vec(cur_range_vec) = new_p_vec(cur_range_vec) .* bin_sizes(cur_range_vec)
+                new_p_vec(cur_range_vec) = new_p_vec(cur_range_vec) .* bin_sizes(cur_range_vec);
             end
     end % switch approximate
 end % loop on k
