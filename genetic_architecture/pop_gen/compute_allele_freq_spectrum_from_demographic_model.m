@@ -5,7 +5,6 @@
 % compute_flag - 'simulation' (default) or 'moments' (computation based on moments)
 % n_sample - # of individuals in a SAMPLE (default: = population size at END)
 % mu - regional mutation rate (default: mu for one site)
-% num_bins - NEW! allow coarse-grained SFS 
 %
 % Output:
 % x_vec - vector of x values (allele frequencies) at each generation
@@ -19,7 +18,7 @@
 % allele_freq_vec - population allele frequencies 
 % 
 function [x_vec, p_vec, L_correction_factor, compute_time, k_vec, n_vec, weights_vec, allele_freq_vec] = ...
-    compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu, num_bins)
+    compute_allele_freq_spectrum_from_demographic_model(D, s, compute_flag, n_sample, mu)
 
 if(~isfield(D, 'save_flag'))
     D.save_flag = 0;
@@ -90,7 +89,9 @@ end
 if(~isfield(D, 'iters'))
     D.iters = 10000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
 end
-D.num_bins = 100; % used for binning in Fisher Right simulation. 100 is too little???
+if(~isfield(D, 'num_bins'))
+    D.num_bins = 100; % []; % 100; % used for binning in Fisher Right simulation. 100 is too little???
+end
 D.compute_absorb = 0; % no need for extra computation!!!
 N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
 if(~exist('n_sample', 'var') || isempty(n_sample))

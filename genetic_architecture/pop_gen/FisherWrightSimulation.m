@@ -649,9 +649,10 @@ if(~exist('num_bins', 'var') || isempty(num_bins))
     freq_struct.x_vec{1} = (0:2*N) ./ (2*N); % vector of allele frequencies (include monomorphic alleles)
     init_p_vec = allele_freq_spectrum_numeric(freq_struct.x_vec{1}, s, N, two_side_flag, 'linear') *N ; % TEMP! factor N.  get stationary distrubution at equilibrium (initial condition)
 else % new! set x_vec as center of bins 
-    freq_struct.x_vec{1} = [(0:50) linspace(50, 2*N, num_bins-50)] ./ (2*N); % set bins 
+    freq_struct.x_vec{1} = [(0:49) linspace(50, 2*N, num_bins-50)] ./ (2*N); % set bins 
     bin_sizes = [1 diff(freq_struct.x_vec{1})*2*N];
-    init_p_vec = exp( allele_freq_spectrum(freq_struct.x_vec{1}, s, N, two_side_flag, 'log') ) .* bin_sizes; % get stationary distrubution at equilibrium (initial condition)
+    x_vec_mid = 0.5 .* (freq_struct.x_vec{1} + [-1/(2*N) freq_struct.x_vec{1}(1:(end-1))] + 1/(2*N)); % center of each bin
+    init_p_vec = exp( allele_freq_spectrum(x_vec_mid, s, N, two_side_flag, 'log') ) .* bin_sizes; % get stationary distrubution at equilibrium (initial condition)
     init_p_vec(1) = N; % correction for 0 frequency. init_p_vec not normalized 
 end
     
@@ -665,16 +666,11 @@ end % switch init_str
 init_p_vec = init_p_vec .* 2.* max(10^(-10), mu); %  .* 2*N;  % multiply by theta. (If mu=0: no mutations, then we've got a problem ... set some mu>0)
 init_p_vec(1) = 1 - sum(init_p_vec(2:end-1)); % Normalize! set first value to complete distribution to sum to one. Also when using init?
 
-new_x_mean_vec = freq_struct.x_vec{1} .* (1+s); % first get the mean vector of new #offspring
-%std_vec = sqrt(2*N .* new_x_mean_vec .* (1-new_x_mean_vec)); % binomial standard deviation
 if(~exist('mu', 'var') || isempty(mu))
     mu = sum(vec2row(init_p_vec) .* binopdf(0, 2*N, freq_struct.x_vec) ./ (2*N)); % compute mutation rate per site (assuming T=1 target size)
 end
 freq_struct.p_vec{1} = vec2column(init_p_vec); het_vec{1} = 2.* freq_struct.p_vec{1} .* vec2column(freq_struct.x_vec{1} .* (1-freq_struct.x_vec{1}));
 
-if(compute_matrix)
-    p_vec_M = freq_struct.p_vec; p_vec_M{1} = p_vec_M{1}(1:end-1); % don't include alternative (fixed) allele
-end
 for j=1:num_generations % main loop on generations
     t_gen = cputime;
     [freq_struct.x_vec{j+1}, freq_struct.p_vec{j+1}, M, skip_run_frac, max_range] = ...
@@ -777,20 +773,20 @@ normpdf_vec = normpdf(-6:10^(-5):6); % Prepare in advance Gaussian density to sa
 prob_compute_method = 'approximate'; % 'approximate'; % 'exact'; % 'approximate'; %'exact'; % s'exact'; % ''; % 'exact';
 if (~exist('num_bins', 'var') || isempty(num_bins))
     new_x_vec = (0:2*N_vec(j+1)) ./ (2*N_vec(j+1)); % new: include also 0 and 1 freqs. to get absolute values
+    x_vec_mid = x_vec;
 else
-    new_x_vec = [(0:50) linspace(50, 2*N_vec(j+1), num_bins-50)] ./ (2*N_vec(j+1)); % set bins 
+    new_x_vec = [(0:49) linspace(50, 2*N_vec(j+1), num_bins-50)] ./ (2*N_vec(j+1)); % set bins 
     bin_sizes = [1 diff(x_vec*2*N_vec(j+1))];
-%    init_p_vec = exp( allele_freq_spectrum(freq_struct.x_vec{1}, s, N, two_side_flag, 'log') ) .* bin_sizes; % get stationary distrubution at equilibrium (initial condition)
-%    init_p_vec(1) = N; % correction for 0 frequency 
+    x_vec_mid = 0.5 .* (x_vec + [-1/(2*N_vec(j)) x_vec(1:(end-1))] + 1/(2*N_vec(j))); % center of each bin
 end
 
-new_x_mean_vec = x_vec .* (1+s); % first get the mean vector for next generation
+new_x_mean_vec = x_vec_mid .* (1+s); % first get the mean vector for next generation
 std_vec = sqrt(2*N_vec(j+1) .* new_x_mean_vec .* (1-new_x_mean_vec));
 new_p_vec  = zeros(1, length(new_x_vec)); %  2*N_vec(j+1)+1);
 if (~exist('num_bins', 'var') || isempty(num_bins))
     left_range_vec = max(2, round(new_x_mean_vec.*2*N_vec(j+1) - num_sigmas .* std_vec)); % NEW! start from 2, not 1 !!!! % calculate range to compute binomial distribution
     right_range_vec = 1+min(2*N_vec(j+1), round(new_x_mean_vec.*2*N_vec(j+1) + num_sigmas .* std_vec));
-else % use bins 
+else % use bins - range is everything
    left_range_vec = ones(1, length(x_vec)); right_range_vec = 2*N_vec(j+1) + ones(1, length(x_vec));
 end
     
@@ -853,9 +849,15 @@ if (exist('num_bins', 'var') && ~isempty(num_bins)) % weight by bin size
     new_p_vec = new_p_vec .* bin_sizes;
 end
 
+sum_p = sum(new_p_vec) 
+
+if(sum(new_p_vec(2:end-1))>1)
+   error_big_sum = 999 
+end
+
 new_p_vec(1) = 1-sum(new_p_vec(2:end-1)); new_p_vec(end) = 0; % combine zero and one frequencies
 new_p_vec(2) = new_p_vec(2) + (1*new_p_vec(1)+0) .* 2*N_vec(j+1)*mu*1; % add mutations. Try factor 2 !!
-new_p_vec(1) = new_p_vec(1) .* (1-2*N_vec(j+1)*mu*1); % reduce monomorphic zero alleles due to mutations . Try factor 2 !!!
+new_p_vec(1) = new_p_vec(1) * (1-2*N_vec(j+1)*mu*1); % reduce monomorphic zero alleles due to mutations . Try factor 2 !!!
 new_p_vec = vec2column(new_p_vec); %    p_vec{j+1} = vec2column(p_vec{j+1} ./ sum(p_vec{j+1})); % normalize to sum to one. Why not normalize at end???
 if(compute_matrix)
     M(:,1) = M(:,1) + M(:, 2*N_vec(j+1)+1);
