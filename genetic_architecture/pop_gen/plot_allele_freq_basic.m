@@ -7,15 +7,16 @@ my_symbol_vec = {'--', '-'}; % flip ordering (set integer powers as solid lines)
 y_lim = [0 0];
 
 if(plot_params.new_fig)
-    figure;  
+    figure; n0 = 0;
+else
+    n0 = length(findall(gca,'type','line'));
 end
 set(0, 'defaultFigureRenderer', 'painters'); % set render to show dots 
 
 num_curves = length(x_vec_cell); 
 for i = 1:num_curves
-    
     %    tmp_color_ind = mod_max(6-floor(mod(i_s, 10)/2), 5);
-    tmp_color_ind = mod_max(ceil(i/2), ceil(num_curves/2));
+    tmp_color_ind = mod_max(ceil((i+n0)/2), ceil((num_curves+n0)/2));
 %    [~, i_s2] = min(abs(abs(D.s_grid)-abs(s_vec(i_s)))); % find closest s to current s with SFS pre-computed 
     if(iscell(x_vec_cell))
         plot_x_vec = x_vec_cell{i} ./ x_vec_cell{i}(end);
@@ -23,9 +24,9 @@ for i = 1:num_curves
         plot_x_vec = x_vec_cell ./ x_vec_cell(end);
     end
     if(iscell(p_vec_cell))
-        plot_p_vec = p_vec_cell{i};
+        plot_p_vec = vec2row(p_vec_cell{i});
     else
-        plot_p_vec = p_vec_cell(i,:);
+        plot_p_vec = vec2row(p_vec_cell(i,:));
     end
     if(plot_params.weighted) % weight by allele frequency
         if(i == 1)
@@ -58,23 +59,25 @@ for i = 1:num_curves
     if(plot_params.log(1)) % log x
         if(plot_params.log(2)) % log y
             loglog(plot_x_vec, plot_p_vec, 'color', plot_params.color_vec{tmp_color_ind}, ...
-                'linestyle', my_symbol_vec{mod_max(i,2)}, 'linewidth', 2); hold on;
+                'linestyle', my_symbol_vec{mod_max(i+n0,2)}, 'linewidth', 2); hold on;
         else
             semilogx(plot_x_vec, plot_p_vec, 'color', plot_params.color_vec{tmp_color_ind}, ...
-                'linestyle', my_symbol_vec{mod_max(i,2)}, 'linewidth', 2); hold on;
+                'linestyle', my_symbol_vec{mod_max(i+n0,2)}, 'linewidth', 2); hold on;
         end
     else % no log on x
         if(plot_params.log(2)) % log y
             semilogy(plot_x_vec, plot_p_vec, 'color', plot_params.color_vec{tmp_color_ind}, ...
-                'linestyle', my_symbol_vec{mod_max(i,2)}, 'linewidth', 2); hold on;
+                'linestyle', my_symbol_vec{mod_max(i+n0,2)}, 'linewidth', 2); hold on;
         else
             plot(plot_x_vec, plot_p_vec, 'color', plot_params.color_vec{tmp_color_ind}, ...
-                'linestyle', my_symbol_vec{mod_max(i,2)}, 'linewidth', 2); hold on;
+                'linestyle', my_symbol_vec{mod_max(i+n0,2)}, 'linewidth', 2); hold on;
         end
     end % log x
 end % loop on i 
 
 add_faint_grid(0.5, 0);
-[h_leg, h_l] = legend(plot_params.legend, 'location', plot_params.legend_loc, 'fontsize', plot_params.font_size-4); legend('boxoff'); % just legend
+if(isfield(plot_params, 'legend'))
+    [h_leg, h_l] = legend(plot_params.legend, 'location', plot_params.legend_loc, 'fontsize', plot_params.font_size-4); legend('boxoff'); % just legend
+end
 xlabel('f (allele. freq.)'); ylabel(plot_params.ylabel_str); 
 

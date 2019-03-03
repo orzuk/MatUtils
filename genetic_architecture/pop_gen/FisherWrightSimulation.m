@@ -10,7 +10,6 @@
 % init_str - initialization of allele frequencies (equilibrium or newly-born alleles)
 % iters - how many times to perform simulation
 % compute_mode - how to compute (simulation/markov-chain numeric computation/analytic)
-% num_bins - # of bins in returend histograms (when N is large we want a coarse-grained version of allele frequencies) - NOT USED YET!!!
 % plot_flag - if plotting SFS
 %
 % Output:
@@ -47,7 +46,7 @@
 % simulation_time - how much did the time computation took
 %
 function [freq_struct, absorption_struct, simulation_struct, N_vec, simulation_time] = ... % New: separate output to different structures
-    FisherWrightSimulation(region_flag, D, mu, s, init_str, iters, compute_mode, num_bins, plot_flag)
+    FisherWrightSimulation(region_flag, D, mu, s, init_str, iters, compute_mode, plot_flag)
 
 absorption_time_given_init_freq_vec = []; q = [];
 simulation_time =  cputime;
@@ -92,7 +91,7 @@ switch compute_mode % how to compute
             num_absorptions_by_generation_vec, count_vec, ...
             num_losses, M] = ...
             compute_numeric_forward_FisherWright_internal( ...
-            s, mu, two_side_flag, N_vec, init_str, compute_matrix, num_bins);
+            s, mu, two_side_flag, N_vec, init_str, compute_matrix, D.num_bins);
 
 
     case 'simulation' % should be a sub-routine
@@ -270,8 +269,8 @@ q = zeros(iters, num_generations+1, 'single'); % NEW approach !! allocate in adv
 survive_prob = ones(size(q), 'single'); survive_prob_by_gen = zeros(num_generations, 1);  % ones(size(q(block_inds,:))); %[first_time_vec, last_time_vec] = deal(ones(1, iters)); % last_time_vec = ones(1, iters); % For each allele record the first and last polymorphic times
 sim_ind_vec = zeros(iters, 1); % indicators saying if each coordinate was already simulated
 while( (num_alleles_simulated < iters) && (num_simulated_polymorphic_alleles_vec(1) < max_num_alleles) ) % simulate blocks. Problem: No new alleles born here! (these can be simulated separatey?)
-    block_inds = find(sim_ind_vec==0, min(generation_num_alleles(1), min(block_size, iters-sum(sim_ind_vec)))); sim_ind_vec(block_inds)=1; % set block indices
-    %    weights = ones(block_size, num_generations, 'single');  % give later generations higher weights (why?)
+%    block_inds = find(sim_ind_vec==0, min(generation_num_alleles(1), min(block_size, iters-sum(sim_ind_vec)))); sim_ind_vec(block_inds)=1; % set block indices
+    block_inds = find(sim_ind_vec==0, min(generation_num_alleles(1), iters-sum(sim_ind_vec))); sim_ind_vec(block_inds)=1; % set block indices. NEW!do not restrict by block size
     switch init_str % determine starting allele frequencies
         case 'equilibrium'
             q(block_inds,1) = single(round(2*N.* vec2column(allele_freq_spectrum_rnd(s, N, two_side_flag, length(block_inds))))); % sample allele frequency from equilibrium distribution
@@ -610,6 +609,7 @@ total_het_by_gen_vec(1) = total_het_by_gen_vec(1) * N_vec(1)/log(2*N_vec(1)); %t
 % compute_matrix - flags saying if to comptue Markov Matrix M 
 % num_bins - NEW! allow approximate SFS. Do not compute x_vec and p_vec for
 % every count from 0 to 2*N, but divide to bins (logarithmically) 
+% num_bins - # of bins in returend histograms (when N is large we want a coarse-grained version of allele frequencies) - NOT USED YET!!!
 %
 % Output:
 % x_vec - vector of num. carriers at each generation
@@ -773,11 +773,12 @@ normpdf_vec = normpdf(-6:10^(-5):6); % Prepare in advance Gaussian density to sa
 prob_compute_method = 'approximate'; % 'approximate'; % 'exact'; % 'approximate'; %'exact'; % s'exact'; % ''; % 'exact';
 if (~exist('num_bins', 'var') || isempty(num_bins))
     new_x_vec = (0:2*N_vec(j+1)) ./ (2*N_vec(j+1)); % new: include also 0 and 1 freqs. to get absolute values
-    x_vec_mid = x_vec;
+    x_vec_mid = x_vec; new_x_vec_mid = new_x_vec; 
 else
     new_x_vec = [(0:49) linspace(50, 2*N_vec(j+1), num_bins-50)] ./ (2*N_vec(j+1)); % set bins 
-    bin_sizes = [1 diff(x_vec*2*N_vec(j+1))];
+    bin_sizes = [1 diff(x_vec*2*N_vec(j+1))]; % QU: do we need to update also bin sizes to reflect bin centers? 
     x_vec_mid = 0.5 .* (x_vec + [-1/(2*N_vec(j)) x_vec(1:(end-1))] + 1/(2*N_vec(j))); % center of each bin
+    new_x_vec_mid = 0.5 .* (new_x_vec + [-1/(2*N_vec(j+1)) x_vec(1:(end-1))] + 1/(2*N_vec(j+1))); % center of each bin next generation
 end
 
 new_x_mean_vec = x_vec_mid .* (1+s); % first get the mean vector for next generation
@@ -798,7 +799,7 @@ for k=vec2row(non_negligile_x_inds) % 1:2*N_vec(j)+1 % -1 % loop on current alle
         cur_range_vec = left_range_vec(k):right_range_vec(k); % set output range vec    
         cur_range_vec_inds = cur_range_vec;
     else % use bins
-       cur_range_vec = round(new_x_vec(2:(end-1)) .* (2*N_vec(j+1))) + 1; % values of bin centers  
+       cur_range_vec = round(new_x_vec_mid(2:(end-1)) .* (2*N_vec(j+1))) + 1; % values of bin centers  
        cur_range_vec_inds = 2:(length(new_x_vec)-1);
     end
 %    if(max(cur_range_vec>=100))
@@ -813,7 +814,7 @@ for k=vec2row(non_negligile_x_inds) % 1:2*N_vec(j)+1 % -1 % loop on current alle
                 M(k,:) = binopdf(0:2*N_vec(j+1), 2*N_vec(j+1), new_x_mean_vec(k)); % Why column here? % -1
             end
         case {'approx', 'approximate'} % Use Poisson approximation
-            if(new_x_mean_vec(k) * 2*N_vec(j+1) < 50)  % use poisson approximation  to binomial on left tail
+            if(new_x_mean_vec(k) * 2*N_vec(j+1) < 50)  % use poisson approximation to binomial on left tail
                 new_p_vec(cur_range_vec_inds) = ...
                     new_p_vec(cur_range_vec_inds) + p_vec(k)  .* ...
                     poisspdf(cur_range_vec-1, 2*N_vec(j+1) * new_x_mean_vec(k));  % Replace with poisson approximation for larger values!!!
@@ -849,8 +850,7 @@ if (exist('num_bins', 'var') && ~isempty(num_bins)) % weight by bin size
     new_p_vec = new_p_vec .* bin_sizes;
 end
 
-sum_p = sum(new_p_vec) 
-
+%sum_p = sum(new_p_vec);
 if(sum(new_p_vec(2:end-1))>1)
    error_big_sum = 999 
 end

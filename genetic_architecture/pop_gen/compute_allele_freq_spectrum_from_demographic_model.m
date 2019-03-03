@@ -90,7 +90,7 @@ if(~isfield(D, 'iters'))
     D.iters = 10000; % number of alleles to simulate (start low to save time. As we refine demography fitting we increase this number)
 end
 if(~isfield(D, 'num_bins'))
-    D.num_bins = 100; % []; % 100; % used for binning in Fisher Right simulation. 100 is too little???
+    D.num_bins = 250; % []; % 100; % used for binning in Fisher Right simulation. 100 is too little???
 end
 D.compute_absorb = 0; % no need for extra computation!!!
 N_vec = demographic_parameters_to_n_vec(D, D.index); % D.generations, D.expan_rate, D.init_pop_size); % compute population size at each generation
@@ -105,7 +105,7 @@ switch compute_flag
     case {'simulation', 'simulations', 'numeric'}
         max_num_alleles = 20000; % set maximum to save time
         [freq_struct, ~, simulation_struct, N_vec, simulation_time] = ... % New: separate output to different structures
-            FisherWrightSimulation([], D, mu, s, init_str, D.iters, compute_flag, D.num_bins);
+            FisherWrightSimulation([], D, mu, s, init_str, D.iters, compute_flag);
         fprintf('Fisher-Wright simulation time was %f\n', simulation_time);
         if(D.save_flag) % save input and output to file for debugging
             save(['debug_SFS_' D.name num2str(D.cond_on_polymorphic_flag) '.mat'], ...
@@ -114,6 +114,9 @@ switch compute_flag
         x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
         p_vec = freq_struct.p_vec{end-1};
         L_correction_factor = simulation_struct.L_correction_factor;
+        if(strcmp(compute_flag, 'numeric')) % temp ! change fitting for numeric curve !! 
+            smooth_params.fit_again = 0; 
+        end
         [x_vec, ~, p_vec] = fit_monotonic_surface(x_vec, abs(s), double(p_vec), smooth_params); p_vec = p_vec ./ sum(p_vec); % normalize    % constraints
         %        p_vec = freq_struct.p_vec{end-1} ./ sum(freq_struct.p_vec{end-1}); % take only last one
         
