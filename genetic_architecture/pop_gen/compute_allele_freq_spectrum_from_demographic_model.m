@@ -111,13 +111,21 @@ switch compute_flag
             save(['debug_SFS_' D.name num2str(D.cond_on_polymorphic_flag) '.mat'], ...
                 'D', 'mu', 's', 'init_str', 'compute_flag', 'freq_struct', 'simulation_struct', 'N_vec', 'simulation_time');
         end
-        x_vec = freq_struct.x_vec{end-1}; % why don't take last one?
+        x_vec = freq_struct.x_vec{end-1}; x_mid_vec = x_vec; % why don't take last one?
         p_vec = freq_struct.p_vec{end-1};
         L_correction_factor = simulation_struct.L_correction_factor;
         if(strcmp(compute_flag, 'numeric')) % temp ! change fitting for numeric curve !! 
-            smooth_params.fit_again = 0; 
+            smooth_params.fit_again = 1; 
+            if(isfield(D, 'num_bins'))
+                x_mid_vec = 0.5 .* (x_vec + [-1 x_vec(1:(end-1))] + 1); 
+                bin_sizes = [1 diff(x_vec)];
+                mid_bin_sizes = [1 diff(x_mid_vec)];
+                p_vec = p_vec .* mid_bin_sizes ./ bin_sizes;
+                smooth_params.x_fit = x_vec;
+            end    
         end
-        [x_vec, ~, p_vec] = fit_monotonic_surface(x_vec, abs(s), double(p_vec), smooth_params); p_vec = p_vec ./ sum(p_vec); % normalize    % constraints
+
+        [x_vec, ~, p_vec] = fit_monotonic_surface(x_mid_vec, abs(s), double(p_vec), smooth_params); p_vec = p_vec ./ sum(p_vec); % normalize    % constraints
         %        p_vec = freq_struct.p_vec{end-1} ./ sum(freq_struct.p_vec{end-1}); % take only last one
         
         if(nargout > 4) % output k_vec, n_vec, allele_freq, ... 

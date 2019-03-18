@@ -18,11 +18,12 @@ function [x_fit, y_fit, z_fit] = fit_monotonic_surface(x, y, z, params) % constr
 
 num_x = length(x); num_y = length(y); num_z = length(z);
 
-
 if(~isfield(params, 'plot'))
     params.plot = 0;
 end
-
+if(~isfield(params, 'fit_again'))
+    params.fit_again = 1;
+end
 if(~isfield(params, 'x_fit'))
     x_fit = x; params.x_fit = x_fit;
 else
@@ -56,24 +57,24 @@ else
     one_vec = 0;
 end
 
-
 %z_fit = zeros(length(y_fit), length(x_fit)); % z_fit(2,1)=-1; % create z grid for fitted data
 for i=1:num_y % First fit each y seperately monotonically
     params.cum = 0; params.fit_log = [1 0]; params.min = realmin; params.RightMinValue = realmin;  % should we give up direction constraint? params.direction = 'down'; % params.direction = 'up';
     if(one_vec) % here we're given vectors of x,y,z of the same size
         I = find(y == y_unique(i)); % get indices
-        fit_x_vec = x(I); fit_z_vec = z(I) .* double(max(1,x(I))); fit_z_vec_unweighted = z(I);
+        fit_x_vec = x(I); fit_z_vec = z(I) .* double(max(1,fit_x_vec)); fit_z_vec_unweighted = z(I);
     else
-        fit_x_vec = x; fit_z_vec = z(i,:) .* double(max(1,x)); fit_z_vec_unweighted = z(i,:);
+        fit_x_vec = x; fit_z_vec = z(i,:) .* double(max(1,fit_x_vec)); fit_z_vec_unweighted = z(i,:);
     end
+    bin_sizes = [1 diff(fit_x_vec)];
     %       [~, z_fit0(i,:)] = fit_monotonic_curve(x(I), z(I), params);
-    [~, z_fit0(i,:)] = fit_monotonic_curve(fit_x_vec, fit_z_vec, params);
+    [~, z_fit0(i,:)] = fit_monotonic_curve(fit_x_vec, double(fit_z_vec ./ bin_sizes), params);
+    z_fit0(i,:) = z_fit0(i,:) .* bin_sizes;
     z_fit0(i,:) = max(realmin,  z_fit0(i,:) ./ double(max(1,params.x_fit)));      % normalize
     max_ind = find(fit_z_vec_unweighted>0, 1, 'last'); max_val = fit_x_vec(max_ind); % x(I(max_ind)); % find last value
-    fit_again = 1;
-    if(fit_again)
+    if(params.fit_again)
         max_ind = min(find(params.x_fit > max_val, 1), size(z_fit0, 2)-1);
-        max_ind2 = find(diff(z_fit0(i,2:end))>0, 1);
+        max_ind2 = find(diff(z_fit0(i,2:end))>0, 1); % find first increase 
         if(~isempty(max_ind2))
             if(isempty(max_ind))
                 max_ind = max_ind2; 
@@ -85,7 +86,7 @@ for i=1:num_y % First fit each y seperately monotonically
             params.cum = 0; params.direction = 'down'; params.min = 0; params.fit_log = [1 1]; params.RightMinValue = 0; x_fit = params.x_fit; params.x_fit = params.x_fit(max_ind:end);
             %            [~, z_fit0(i,max_ind:end)] = fit_monotonic_curve(x_fit(2:end), z_fit0(i,2:end), params);  % fit again       % force z to be monotonic
             deg = 3;
-            ppp = polyfit(log(x_fit(2:max_ind)), log(z_fit0(i,2:max_ind)), deg); % fit quadratic
+            ppp = polyfit(log(x_fit(2:max_ind)), log(z_fit0(i,2:max_ind) ./ bin_sizes(2:max_ind)), deg); % fit quadratic
 %             figure;
 %             loglog(fit_x_vec ./ max(x), (fit_z_vec_unweighted)); hold on;
 %             loglog(x_fit ./ max(x_fit), z_fit0(i,:), 'r', 'linewidth', 2);
@@ -95,8 +96,8 @@ for i=1:num_y % First fit each y seperately monotonically
                 z_fit0(i,max_ind:end) = z_fit0(i,max_ind:end) + ppp(deg+1-jj) .* log(params.x_fit).^jj;
                 zz1 = zz1 + ppp(deg+1-jj) .* log(x_fit).^jj;
             end
-            z_fit0(i,max_ind:end) = exp(z_fit0(i,max_ind:end)); zz1 = exp(zz1); 
-            z_fit0(i,2:end) = cummin(z_fit0(i,2:end)); % force monotonic decreasing
+            z_fit0(i,max_ind:end) = exp(z_fit0(i,max_ind:end)); %  .* bin_sizes(max_ind:end); % zz1 = exp(zz1); 
+            z_fit0(i,2:end) = cummin(z_fit0(i,2:end)) .* bin_sizes(2:end); % force monotonic decreasing
 %                exp(ppp(3) + ppp(2) .* log(params.x_fit) + ppp(1) .* log(params.x_fit).^2 );
             
             % new fit 

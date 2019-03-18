@@ -93,7 +93,6 @@ switch compute_mode % how to compute
             compute_numeric_forward_FisherWright_internal( ...
             s, mu, two_side_flag, N_vec, init_str, compute_matrix, D.num_bins);
 
-
     case 'simulation' % should be a sub-routine
         [freq_struct, absorption_struct, simulation_struct, q, ...
             num_absorptions, num_fixations, num_losses, ...
@@ -104,15 +103,15 @@ switch compute_mode % how to compute
 end % switch compute mode
 
 % Fill additional statistics
-het_vec = freq_struct.p_vec; % initilize distributions
+freq_struct.het_vec = freq_struct.p_vec; % initilize distributions
 moments_mat = zeros(num_generations, num_moments); het_moments_mat = moments_mat;
 for j=1:num_generations % heterozygosity vector
-    het_vec{j} = 2 .* freq_struct.p_vec{j} .* vec2row(freq_struct.x_vec{j}./(2*N_vec(j)) .* (1-freq_struct.x_vec{j}./(2*N_vec(j))));
+    freq_struct.het_vec{j} = 2 .* freq_struct.p_vec{j} .* vec2row(freq_struct.x_vec{j}./(2*N_vec(j)) .* (1-freq_struct.x_vec{j}./(2*N_vec(j))));
     % NEW! compute moments!!!!
     central_flag = 0; % take non-central moments
     for k=1:num_moments
         moments_mat(j,k) = moment_hist(freq_struct.x_vec{j} ./ (2*N_vec(j)), freq_struct.p_vec{j}, k, central_flag); % compute moments of SFS distribution. Start from 1st moment!!
-        het_moments_mat(j,k) = moment_hist(freq_struct.x_vec{j} ./ (2*N_vec(j)), het_vec{j}, k-1, central_flag, 0); % compute (k-1)-th (UN-Normalized!!!) moments of heterozygosity distribution. Start from zero-th moment!!
+        het_moments_mat(j,k) = moment_hist(freq_struct.x_vec{j} ./ (2*N_vec(j)), freq_struct.het_vec{j}, k-1, central_flag, 0); % compute (k-1)-th (UN-Normalized!!!) moments of heterozygosity distribution. Start from zero-th moment!!
     end
 end
 final_x_vec = (1:2*N_vec(num_generations)-1) ./ (2*N_vec(num_generations)); % set new coordinates
@@ -134,7 +133,7 @@ switch init_str % unite distributions into one
         all_new_het_vec = [];
         all_old_x_vec = freq_struct.x_vec{num_generations} .* (2*N_vec(num_generations));
         all_old_p_vec = freq_struct.p_vec{num_generations};
-        all_old_het_vec = het_vec{num_generations};
+        all_old_het_vec = freq_struct.het_vec{num_generations};
 end
 absorption_struct.prob_fixation = num_fixations / num_absorptions;
 frac_old_alleles_survived_vec = [1 vec2row(cumprod(simulation_struct.frac_polymorphic_vec))]; % take total # of alleles left
@@ -649,7 +648,7 @@ if(~exist('num_bins', 'var') || isempty(num_bins))
     freq_struct.x_vec{1} = (0:2*N) ./ (2*N); % vector of allele frequencies (include monomorphic alleles)
     init_p_vec = allele_freq_spectrum_numeric(freq_struct.x_vec{1}, s, N, two_side_flag, 'linear') *N ; % TEMP! factor N.  get stationary distrubution at equilibrium (initial condition)
 else % new! set x_vec as center of bins 
-    freq_struct.x_vec{1} = [(0:49) linspace(50, 2*N, num_bins-50)] ./ (2*N); % set bins 
+    freq_struct.x_vec{1} = get_bins_internal(num_bins, N); % set bins 
     bin_sizes = [1 diff(freq_struct.x_vec{1})*2*N];
     x_vec_mid = 0.5 .* (freq_struct.x_vec{1} + [-1/(2*N) freq_struct.x_vec{1}(1:(end-1))] + 1/(2*N)); % center of each bin
     init_p_vec = exp( allele_freq_spectrum(x_vec_mid, s, N, two_side_flag, 'log') ) .* bin_sizes; % get stationary distrubution at equilibrium (initial condition)
@@ -669,13 +668,13 @@ init_p_vec(1) = 1 - sum(init_p_vec(2:end-1)); % Normalize! set first value to co
 if(~exist('mu', 'var') || isempty(mu))
     mu = sum(vec2row(init_p_vec) .* binopdf(0, 2*N, freq_struct.x_vec) ./ (2*N)); % compute mutation rate per site (assuming T=1 target size)
 end
-freq_struct.p_vec{1} = vec2column(init_p_vec); het_vec{1} = 2.* freq_struct.p_vec{1} .* vec2column(freq_struct.x_vec{1} .* (1-freq_struct.x_vec{1}));
+freq_struct.p_vec{1} = vec2column(init_p_vec); freq_struct.het_vec{1} = 2.* freq_struct.p_vec{1} .* vec2column(freq_struct.x_vec{1} .* (1-freq_struct.x_vec{1}));
 
 for j=1:num_generations % main loop on generations
     t_gen = cputime;
     [freq_struct.x_vec{j+1}, freq_struct.p_vec{j+1}, M, skip_run_frac, max_range] = ...
         compute_numeric_forward_FisherWright_one_step(freq_struct.x_vec{j}, freq_struct.p_vec{j}, s, mu, N_vec, j, compute_matrix, num_bins);
-    het_vec{j+1} = 2.* freq_struct.p_vec{j+1} .* vec2column(freq_struct.x_vec{j+1} .* (1-freq_struct.x_vec{j+1})); % update heterozygosity
+    freq_struct.het_vec{j+1} = 2.* freq_struct.p_vec{j+1} .* vec2column(freq_struct.x_vec{j+1} .* (1-freq_struct.x_vec{j+1})); % update heterozygosity
     if(mod(j, ceil(50000/N)) == 0)
         fprintf('Comp. Markov-Chain, gen=%ld, skip=%.2f, range=%ld, gen-time=%.2f\n', j, skip_run_frac, max_range, cputime - t_gen)
     end
@@ -684,7 +683,7 @@ end % loop on generations
 % p_vec_equilibrium_analytic = p_vec{1};
 
 % Compute summary statistics
-freq_struct.total_het_at_each_generation_vec  = sum_cell(het_vec); % freq_struct.total_het_at_each_generation_vec(j+1) = sum(het_vec{j+1});
+freq_struct.total_het_at_each_generation_vec  = sum_cell(freq_struct.het_vec); % freq_struct.total_het_at_each_generation_vec(j+1) = sum(het_vec{j+1});
 simulation_struct.frac_polymorphic_vec = zeros(num_generations,1);
 for j=1:num_generations
     simulation_struct.frac_polymorphic_vec(j) = sum(freq_struct.p_vec{j}(2:end)); % This should change if p_vec isn't normalized !!     %    frac_polymorphic_vec(j) = integral_hist(freq_struct.x_vec{j}(2:end)', p_vec{j}(2:end)); % This should change if p_vec isn't normalized !!
@@ -712,7 +711,17 @@ for j=1:num_generations+1  %change output format (convention)
 end
 save('numeric_file', 'new_vec', 'old_vec');
 for j=1:num_generations+1  %change output format (convention)
-    freq_struct.x_vec{j} = round(freq_struct.x_vec{j} .* (2*N_vec(j))); % get number of individual alleles (not fracion)
+    if(exist('num_bins', 'var') && ~isempty(num_bins)) % correct based on rounding
+%        bin_sizes = [1 diff(freq_struct.x_vec{j}*2*N_vec(j))]; % QU: do we need to update also bin sizes to reflect bin centers? 
+%        round_bin_sizes = [1 diff(round(freq_struct.x_vec{j} .* (2*N_vec(j))))]; 
+%        sum_p = sum(freq_struct.p_vec{j})
+%        freq_struct.p_vec{j} = freq_struct.p_vec{j} .* round_bin_sizes ./ bin_sizes; 
+        freq_struct.p_vec{j} = freq_struct.p_vec{j} ./ sum(freq_struct.p_vec{j}); 
+        freq_struct.x_vec{j} = (freq_struct.x_vec{j} .* (2*N_vec(j))); % get number of individual alleles (not fracion)
+    else
+        freq_struct.x_vec{j} = round(freq_struct.x_vec{j} .* (2*N_vec(j))); % get number of individual alleles (not fracion)
+    end
+
 end
 prob_site_polymorphic_at_end = simulation_struct.frac_polymorphic_vec; % (end-1); % NEED TO FILL !!!
 
@@ -775,7 +784,7 @@ if (~exist('num_bins', 'var') || isempty(num_bins))
     new_x_vec = (0:2*N_vec(j+1)) ./ (2*N_vec(j+1)); % new: include also 0 and 1 freqs. to get absolute values
     x_vec_mid = x_vec; new_x_vec_mid = new_x_vec; 
 else
-    new_x_vec = [(0:49) linspace(50, 2*N_vec(j+1), num_bins-50)] ./ (2*N_vec(j+1)); % set bins 
+    new_x_vec = get_bins_internal(num_bins, N_vec(j+1));  % set bins 
     bin_sizes = [1 diff(x_vec*2*N_vec(j+1))]; % QU: do we need to update also bin sizes to reflect bin centers? 
     x_vec_mid = 0.5 .* (x_vec + [-1/(2*N_vec(j)) x_vec(1:(end-1))] + 1/(2*N_vec(j))); % center of each bin
     new_x_vec_mid = 0.5 .* (new_x_vec + [-1/(2*N_vec(j+1)) x_vec(1:(end-1))] + 1/(2*N_vec(j+1))); % center of each bin next generation
@@ -854,7 +863,6 @@ end
 if(sum(new_p_vec(2:end-1))>1)
    error_big_sum = 999 
 end
-
 new_p_vec(1) = 1-sum(new_p_vec(2:end-1)); new_p_vec(end) = 0; % combine zero and one frequencies
 new_p_vec(2) = new_p_vec(2) + (1*new_p_vec(1)+0) .* 2*N_vec(j+1)*mu*1; % add mutations. Try factor 2 !!
 new_p_vec(1) = new_p_vec(1) * (1-2*N_vec(j+1)*mu*1); % reduce monomorphic zero alleles due to mutations . Try factor 2 !!!
@@ -1022,6 +1030,14 @@ title(['Density of alleles for each allele frequency. ' params_str ...
     ' iterations, ' num2str(num_effective_iters) ' effective iters)']);
 
 
+% New: Prepare vector of bins 
+function x_vec = get_bins_internal(num_bins, N)
+if(num_bins>50)
+    x_vec = [(0:49) linspace(50, 2*N, num_bins-50)] ./ (2*N); % set bins 
+else
+    x_vec = linspace(0, 2*N, num_bins) ./ (2*N); % set bins     
+end
+
 % Compute how much old vs. new heterozygosity exists in sample
 %
 % Input:
@@ -1042,3 +1058,5 @@ title(['Density of alleles for each allele frequency. ' params_str ...
 %H_old = prod_vec(end); % prod ( 1 - 1 ./ (2.*N_vec) ); % assuming total heterozgosity is 1
 %H_new = mu .* sum(prod_vec); % H_new_per_gen = mu;
 %
+
+
