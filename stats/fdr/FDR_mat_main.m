@@ -14,7 +14,7 @@
 %  R - matrix containing indices of hypotheses that passsed selected procedure
 %  V - the number of false positives for each test (only outupt if we know m0)
 %
-function [R V] = FDR_mat_main(P, q, str, u, m0, is_sorted, varargin)
+function [R, V] = FDR_mat_main(P, q, str, u, m0, is_sorted, varargin)
 
 if(~exist('u', 'var')) % here add auxillary i.i.d. uniform p-values
     u = [];
@@ -27,7 +27,7 @@ else
         is_sorted = 0;
     end
     if(~is_sorted)
-        [P ranks]= sort(P,2);
+        [P, ranks]= sort(P,2);
     else
         ranks = repmat(1:size(P,2), size(P,1), 1);
     end
@@ -36,6 +36,10 @@ else
             R = fdr_IBH_mat(P,q, 'up');
         case 'ibh_down'
             R = fdr_IBH_mat(P,q, 'down');
+        case 'ibh_log_up'
+            R = fdr_IBHlog_mat(P, q, 'up');
+        case 'ibh_log_down'
+            R = fdr_IBHlog_mat(P, q, 'down');            
         case 'bh95'
             R = fdr_BH_mat(P,q); % This one is always step-up
         case 'sth'
@@ -143,6 +147,18 @@ m0_hat=C*min(m*ones(n,1),max([s*ones(n,1),2*sum(P,2)],[],2));
 
 F=FDR_adaptive_mat(P, m0_hat, q, step_str);
 
+
+
+%FDR procedure for the log-IBH m0 estimator
+%input: P is a matrix of sortted p-values (each row is a vector), q is a scalar which
+%control the false discovery rate. step_str says if we perform a step-down or step-up procedure
+%output: F vector contain the number of hypotheses that pass the procedure. Improve Benjamini Hochberg 1995.
+function F=fdr_IBHlog_mat(P, q, step_str)
+
+m0_hat = m0_estimator(P, 'ibh_log');
+%m0_hat=C*min(m*ones(n,1),max([s*ones(n,1),2*sum(P,2)],[],2));
+
+F=FDR_adaptive_mat(P, m0_hat, q, step_str);
 
 %Classic BH FDR procedure for the case when the p values are based on statistically
 %independent tests. input: P is a matrix of sorted p-values, each row is a vector, q is a scalar which
