@@ -45,7 +45,7 @@ switch lower(proc_str) % choose estimator
     case 'bky' % here there's no meaning to the estimator
         m0 = 9999;
     case {'sum_log_pi', 'ibh_log'}
-        m0 = -sum(log(1-P));
+        m0 = 2*correction_factor-sum(log(1-P));
     otherwise
         disp('Unknown procedure.')
 end

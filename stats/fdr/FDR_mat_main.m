@@ -14,16 +14,20 @@
 %  R - matrix containing indices of hypotheses that passsed selected procedure
 %  V - the number of false positives for each test (only outupt if we know m0)
 %
-function [R, V] = FDR_mat_main(P, q, str, u, m0, is_sorted, varargin)
+function [R, V] = FDR_mat_main(P, q, str, u, m0, is_sorted, correction_factor, varargin)
 
 if(~exist('u', 'var')) % here add auxillary i.i.d. uniform p-values
     u = [];
 end
+if(~exist('correction_factor', 'var'))
+    correction_factor = 0;
+end
+
 if(~isempty(u)) % here add auxillary i.i.d. uniform p-values
     P(:,end+1:end+u) = rand(size(P,1), u); % add auxillary p-values
     R = FDR_mat_main(P, q, str);
 else
-    if(~exist('is_sorted', 'var'))
+    if(~exist('is_sorted', 'var') || isempty(is_sorted))
         is_sorted = 0;
     end
     if(~is_sorted)
@@ -37,9 +41,9 @@ else
         case 'ibh_down'
             R = fdr_IBH_mat(P,q, 'down');
         case 'ibh_log_up'
-            R = fdr_IBHlog_mat(P, q, 'up');
+            R = fdr_IBHlog_mat(P, q, 'up', correction_factor);
         case 'ibh_log_down'
-            R = fdr_IBHlog_mat(P, q, 'down');            
+            R = fdr_IBHlog_mat(P, q, 'down', correction_factor);            
         case 'bh95'
             R = fdr_BH_mat(P,q); % This one is always step-up
         case 'sth'
@@ -153,9 +157,13 @@ F=FDR_adaptive_mat(P, m0_hat, q, step_str);
 %input: P is a matrix of sortted p-values (each row is a vector), q is a scalar which
 %control the false discovery rate. step_str says if we perform a step-down or step-up procedure
 %output: F vector contain the number of hypotheses that pass the procedure. Improve Benjamini Hochberg 1995.
-function F=fdr_IBHlog_mat(P, q, step_str)
+function F=fdr_IBHlog_mat(P, q, step_str, correction_factor)
 
-m0_hat = m0_estimator(P, 'ibh_log');
+if(~exist('correction_factor', 'var'))
+    correction_factor = 0;
+end
+
+m0_hat = m0_estimator(P, 'ibh_log', [], correction_factor);
 %m0_hat=C*min(m*ones(n,1),max([s*ones(n,1),2*sum(P,2)],[],2));
 
 F=FDR_adaptive_mat(P, m0_hat, q, step_str);
